@@ -36,6 +36,19 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
 
+  get:
+  path_provider:
+  file_picker:
+  image:
+  video_player:
+  photo_view:
+  fluttertoast:
+  window_manager:
+    git:
+      url: https://github.com/leanflutter/window_manager.git
+      ref: main
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -88,3 +101,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+  assets:
+    - assets/videos/
+    - assets/images/
