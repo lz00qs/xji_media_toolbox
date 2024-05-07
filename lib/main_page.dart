@@ -3,21 +3,46 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
 
+import 'load_footage.dart';
+
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var appBarHeight = 30.0;
+    final openPressed = false.obs;
+    var appBarHeight = 40.0;
     if (GetPlatform.isWindows || GetPlatform.isMacOS) {
-      appBarHeight = 30.0;
+      appBarHeight = 40.0;
     }
     return Scaffold(
       appBar: PreferredSize(
         // windows 和 macos size 做区分
         preferredSize: Size.fromHeight(appBarHeight),
         child: AppBar(
-          title: const Text('Custom Height AppBar'),
+          leadingWidth: 200,
+          leading: IconButton(
+            onPressed: () async {
+              if (openPressed.value) {
+                return;
+              }
+              openPressed.value = true;
+              // 打开视频文件夹
+              await openFootageFolder();
+              openPressed.value = false;
+            },
+            icon: const Icon(Icons.folder_open),
+          ),
+          actions: [
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.settings),
+            ),
+            IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.help),
+            ),
+          ],
         ),
       ),
       body: ResiableLayout(),
