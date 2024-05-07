@@ -84,57 +84,132 @@ String _parseEvBias(Image image) {
 
 Future<void> _analyzeAebFootage() async {
   final controller = Get.find<GlobalController>();
-  if (controller.footageList.isEmpty) return;
-
-  for (var i = 0; i < controller.footageList.length;) {
-    final startIndex = i;
-    var image = await decodeJpgFile(controller.footageList[i].file.path);
-    if (image != null && _isAebImage(image)) {
-      final evBias = _parseEvBias(image);
-      if (evBias == '0/10') {
-        controller.footageList[startIndex].aebFiles
-            .add(controller.footageList[i].file);
-        i++;
-        for (var evBiasValue in [
-          '-7/10',
-          '7/10',
-          '-13/10',
-          '13/10',
-          '-20/10'
-        ]) {
-          if (i >= controller.footageList.length) break;
+  if (controller.footageList.isNotEmpty) {
+    for (var i = 0; i < controller.footageList.length;) {
+      final startIndex = i;
+      var image = await decodeJpgFile(controller.footageList[i].file.path);
+      if (image != null && _isAebImage(image)) {
+        if (_parseEvBias(image) == '0/10') {
+          controller.footageList[startIndex].aebFiles
+              .add(controller.footageList[i].file);
+          print('0/10 found');
+          i++;
+          if (i >= controller.footageList.length) {
+            break;
+          }
           image = await decodeJpgFile(controller.footageList[i].file.path);
           if (image != null &&
               _isAebImage(image) &&
-              _parseEvBias(image) == evBiasValue) {
+              _parseEvBias(image) == '-7/10') {
             controller.footageList[startIndex].aebFiles
                 .add(controller.footageList[i].file);
             controller.footageList[i].hide = true;
+            print('-7/10 found');
             i++;
-          } else {
-            break;
-          }
-        }
-        if (i < controller.footageList.length) {
-          image = await decodeJpgFile(controller.footageList[i].file.path);
-          if (image != null &&
-              _isAebImage(image) &&
-              _parseEvBias(image) == '20/10') {
-            i++;
+            if (i >= controller.footageList.length) {
+              break;
+            }
+            image = await decodeJpgFile(controller.footageList[i].file.path);
+            if (image != null &&
+                _isAebImage(image) &&
+                _parseEvBias(image) == '7/10') {
+              controller.footageList[startIndex].aebFiles
+                  .add(controller.footageList[i].file);
+              controller.footageList[i].hide = true;
+              print('7/10 found');
+              i++;
+              if (i >= controller.footageList.length) {
+                break;
+              }
+              image = await decodeJpgFile(controller.footageList[i].file.path);
+              if (image != null &&
+                  _isAebImage(image) &&
+                  _parseEvBias(image) == '-13/10') {
+                controller.footageList[startIndex].aebFiles
+                    .add(controller.footageList[i].file);
+                controller.footageList[i].hide = true;
+                print('-13/10 found');
+                i++;
+                if (i >= controller.footageList.length) {
+                  break;
+                }
+                image =
+                    await decodeJpgFile(controller.footageList[i].file.path);
+                if (image != null &&
+                    _isAebImage(image) &&
+                    _parseEvBias(image) == '13/10') {
+                  controller.footageList[startIndex].aebFiles
+                      .add(controller.footageList[i].file);
+                  controller.footageList[i].hide = true;
+                  print('13/10 found');
+                  i++;
+                  if (i >= controller.footageList.length) {
+                    break;
+                  }
+                  image =
+                      await decodeJpgFile(controller.footageList[i].file.path);
+                  if (image != null &&
+                      _isAebImage(image) &&
+                      _parseEvBias(image) == '-20/10') {
+                    controller.footageList[startIndex].aebFiles
+                        .add(controller.footageList[i].file);
+                    controller.footageList[i].hide = true;
+                    print('-20/10 found');
+                    i++;
+                    if (i >= controller.footageList.length) {
+                      break;
+                    }
+                    image = await decodeJpgFile(
+                        controller.footageList[i].file.path);
+                    if (image != null &&
+                        _isAebImage(image) &&
+                        _parseEvBias(image) == '20/10') {
+                      controller.footageList[startIndex].aebFiles
+                          .add(controller.footageList[i].file);
+                      controller.footageList[i].hide = true;
+                      print('20/10 found');
+                      i++;
+                      if (i >= controller.footageList.length) {
+                        break;
+                      }
+                      continue;
+                    } else {
+                      controller.footageList[startIndex]
+                          .errors[parseAebErrorCode] = [parseAebEndError];
+                      continue;
+                    }
+                  } else {
+                    continue;
+                  }
+                } else {
+                  controller.footageList[startIndex].errors[parseAebErrorCode] =
+                      [parseAebEndError];
+                  continue;
+                }
+              } else {
+                continue;
+              }
+            } else {
+              controller.footageList[startIndex].errors[parseAebErrorCode] = [
+                parseAebEndError
+              ];
+              continue;
+            }
           } else {
             controller.footageList[startIndex].errors[parseAebErrorCode] = [
               parseAebEndError
             ];
+            continue;
           }
         }
-      } else {
         controller.footageList[i].errors[parseAebErrorCode] = [
           parseAebStartError
         ];
       }
+      i++;
     }
-    i++;
   }
+  controller.footageList.removeWhere((element) => element.hide);
 }
 
 Future<void> _loadFootage() async {
