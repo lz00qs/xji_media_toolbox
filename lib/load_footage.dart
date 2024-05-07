@@ -86,6 +86,10 @@ Future<void> _analyzeAebFootage() async {
   final controller = Get.find<GlobalController>();
   if (controller.footageList.isNotEmpty) {
     for (var i = 0; i < controller.footageList.length;) {
+      if (controller.footageList[i].isVideo) {
+        i++;
+        continue;
+      }
       final startIndex = i;
       var image = await decodeJpgFile(controller.footageList[i].file.path);
       if (image != null && _isAebImage(image)) {
@@ -134,7 +138,7 @@ Future<void> _analyzeAebFootage() async {
                   break;
                 }
                 image =
-                    await decodeJpgFile(controller.footageList[i].file.path);
+                await decodeJpgFile(controller.footageList[i].file.path);
                 if (image != null &&
                     _isAebImage(image) &&
                     _parseEvBias(image) == '13/10') {
@@ -147,7 +151,7 @@ Future<void> _analyzeAebFootage() async {
                     break;
                   }
                   image =
-                      await decodeJpgFile(controller.footageList[i].file.path);
+                  await decodeJpgFile(controller.footageList[i].file.path);
                   if (image != null &&
                       _isAebImage(image) &&
                       _parseEvBias(image) == '-20/10') {
@@ -183,7 +187,7 @@ Future<void> _analyzeAebFootage() async {
                   }
                 } else {
                   controller.footageList[startIndex].errors[parseAebErrorCode] =
-                      [parseAebEndError];
+                  [parseAebEndError];
                   continue;
                 }
               } else {
