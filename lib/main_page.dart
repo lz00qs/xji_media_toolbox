@@ -45,12 +45,12 @@ class MainPage extends StatelessWidget {
           ],
         ),
       ),
-      body: ResiableLayout(),
+      body: ResizableLayout(),
     );
   }
 }
 
-class ResiableLayout extends StatelessWidget {
+class ResizableLayout extends StatelessWidget {
   final leftColumnMinWidth = 300.0;
   final rightColumnMinWidth = 400.0;
   final rowMinHeight = 300.0;
@@ -59,12 +59,18 @@ class ResiableLayout extends StatelessWidget {
   final topRowHeight = 400.0.obs;
   final dragIconSize = 20.0;
 
-  ResiableLayout({super.key});
+  ResizableLayout({super.key});
 
   @override
   Widget build(BuildContext context) {
     final parentWidth = MediaQuery.of(context).size.width;
     final parentHeight = MediaQuery.of(context).size.height;
+    if (topRowHeight.value + rowMinHeight >= parentHeight) {
+      topRowHeight.value = parentHeight - rowMinHeight;
+    }
+    if (leftColumnWidth.value + rightColumnMinWidth >= parentWidth) {
+      leftColumnWidth.value = parentWidth - rightColumnMinWidth;
+    }
     return Obx(() => Row(children: [
           Container(
               constraints: BoxConstraints(
