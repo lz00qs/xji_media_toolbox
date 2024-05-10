@@ -51,9 +51,9 @@ class MainPage extends StatelessWidget {
 }
 
 class ResiableLayout extends StatelessWidget {
-  final leftColumnMinWidth = 200.0;
+  final leftColumnMinWidth = 300.0;
   final rightColumnMinWidth = 400.0;
-  final rowMinHeight = 200.0;
+  final rowMinHeight = 300.0;
   final draggableAreaSize = 8.0;
   final leftColumnWidth = 300.0.obs;
   final topRowHeight = 400.0.obs;

@@ -43,6 +43,7 @@ dependencies:
   video_player:
   photo_view:
   fluttertoast:
+  scrollable_positioned_list:
   window_manager:
     git:
       url: https://github.com/leanflutter/window_manager.git

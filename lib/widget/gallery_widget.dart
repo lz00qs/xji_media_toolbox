@@ -1,8 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
-import 'package:xji_footage_toolbox/widget/gallery_grid_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_list_widget.dart';
 
 import '../load_footage.dart';
@@ -32,13 +30,12 @@ class GalleryWidget extends StatelessWidget {
           ),
         );
       } else {
-        return Obx(() {
-          if (controller.isFootageListView.value) {
-            return const GalleryListWidget();
-          } else {
-            return const GalleryGridWidget();
-          }
-        });
+        // if (controller.isFootageListView.value) {
+        //   return const GalleryListWidget();
+        // } else {
+        //   return const GalleryGridWidget();
+        // }
+        return const GalleryListWidget();
       }
     });
   }
