@@ -167,5 +167,3 @@ class ResizableLayout extends StatelessWidget {
         ]));
   }
 }
-
-// class
