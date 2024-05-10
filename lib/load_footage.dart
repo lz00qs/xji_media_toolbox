@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:image/image.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/utils.dart';
+import 'package:flutter/material.dart' as material;
 
 import 'constants.dart';
 import 'footage.dart';
@@ -138,7 +139,7 @@ Future<void> _analyzeAebFootage() async {
                   break;
                 }
                 image =
-                await decodeJpgFile(controller.footageList[i].file.path);
+                    await decodeJpgFile(controller.footageList[i].file.path);
                 if (image != null &&
                     _isAebImage(image) &&
                     _parseEvBias(image) == '13/10') {
@@ -151,7 +152,7 @@ Future<void> _analyzeAebFootage() async {
                     break;
                   }
                   image =
-                  await decodeJpgFile(controller.footageList[i].file.path);
+                      await decodeJpgFile(controller.footageList[i].file.path);
                   if (image != null &&
                       _isAebImage(image) &&
                       _parseEvBias(image) == '-20/10') {
@@ -187,7 +188,7 @@ Future<void> _analyzeAebFootage() async {
                   }
                 } else {
                   controller.footageList[startIndex].errors[parseAebErrorCode] =
-                  [parseAebEndError];
+                      [parseAebEndError];
                   continue;
                 }
               } else {
@@ -266,8 +267,30 @@ Future<void> openFootageFolder() async {
         if (kDebugMode) {
           print('Footage folder: $selectedDirectory');
         }
-        // 弹出加载圈
+        Get.dialog(
+          const material.Dialog(
+            child: material.SizedBox(
+              height: 100,
+              width: 100,
+              child: material.Center(
+                child: material.Column(
+                  mainAxisAlignment: material.MainAxisAlignment.center,
+                  children: [
+                    material.CircularProgressIndicator(),
+                    material.SizedBox(height: 10),
+                    material.Text(
+                      'Loading footage...',
+                      style: material.TextStyle(fontSize: 20),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          barrierDismissible: false,
+        );
         await _loadFootage();
+        Get.back();
         if (kDebugMode) {
           print('Footage list: ${controller.footageList.length}');
         }
