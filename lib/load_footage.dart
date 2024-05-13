@@ -267,34 +267,13 @@ Future<void> openFootageFolder() async {
         if (kDebugMode) {
           print('Footage folder: $selectedDirectory');
         }
-        Get.dialog(
-          const material.Dialog(
-            child: material.SizedBox(
-              height: 100,
-              width: 100,
-              child: material.Center(
-                child: material.Column(
-                  mainAxisAlignment: material.MainAxisAlignment.center,
-                  children: [
-                    material.CircularProgressIndicator(),
-                    material.SizedBox(height: 10),
-                    material.Text(
-                      'Loading footage...',
-                      style: material.TextStyle(fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          barrierDismissible: false,
-        );
+        controller.isLoadingFootage.value = true;
         await _loadFootage();
-        Get.back();
+        controller.resetIndex();
+        controller.isLoadingFootage.value = false;
         if (kDebugMode) {
           print('Footage list: ${controller.footageList.length}');
         }
-        // Get.to(() => MyGalleryScreen());
         break;
       }
     }
