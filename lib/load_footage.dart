@@ -285,7 +285,7 @@ Future<void> _loadFootage() async {
       } else {
         // is photo
         footage.thumbFile = footage.file;
-        final image = await decodeJpgFile(footage.file.path);
+        final image = await compute(decodeJpgFile, footage.file.path);
         if (image != null) {
           footage.isAeb = _isAebImage(image);
           footage.height = image.height;
