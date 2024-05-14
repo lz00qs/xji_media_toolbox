@@ -13,6 +13,13 @@ class Footage {
   late final int sequence;
   final Map<int, List<String>> errors = {};
   bool hide = false;
+  int height = 0;
+  int width = 0;
+  int sizeInBytes = 0;
+  double frameRate = 0.0; // fps
+  double duration = 0.0; // seconds
+  bool isHevc = false;
+  String evBias = '';
 
   Footage({required this.file})
       : name = file.uri.pathSegments.last,

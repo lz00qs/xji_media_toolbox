@@ -5,6 +5,7 @@ const String thumbnailFolderName = 'thumb';
 const int parseFootageErrorCode = 0;
 const String parseFootageTimeError = "Parse footage time error";
 const String parseFootageSequenceError = "Parse footage sequence error";
+const String parseFootageVideoInfoError = "Parse footage video info error";
 
 const int parseAebErrorCode = 1;
 const String parseAebStartError = "Parse AEB start error";

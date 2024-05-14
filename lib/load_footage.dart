@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -7,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:image/image.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/utils.dart';
-import 'package:flutter/material.dart' as material;
 
 import 'constants.dart';
 import 'footage.dart';
@@ -58,6 +58,27 @@ void _prepareThumbnailFolder() {
   }
 }
 
+Future<Map<String, dynamic>?> _ffprobeVideoInfo(Footage footage) async {
+  final result = await Process.run('ffprobe', [
+    '-v',
+    'error',
+    '-show_entries',
+    'format=size,duration',
+    '-show_entries',
+    'stream=width,height,codec_name,avg_frame_rate',
+    '-of',
+    'json',
+    footage.file.path,
+  ]);
+  if (result.exitCode != 0) {
+    Fluttertoast.showToast(msg: 'Failed to get video info for ${footage.name}');
+    return null;
+  } else {
+    final Map<String, dynamic> ffprobeOutput = json.decode(result.stdout);
+    return ffprobeOutput;
+  }
+}
+
 bool _isAebImage(Image image) {
   if (image.exif.imageIfd.containsKey(0x9C9E)) {
     final keyWords = image.exif.imageIfd[0x9C9E]?.toData();
@@ -92,87 +113,85 @@ Future<void> _analyzeAebFootage() async {
         continue;
       }
       final startIndex = i;
-      var image = await decodeJpgFile(controller.footageList[i].file.path);
-      if (image != null && _isAebImage(image)) {
-        if (_parseEvBias(image) == '0/10') {
+      if (controller.footageList[i].isAeb) {
+        if (controller.footageList[i].evBias == '0/10') {
           controller.footageList[startIndex].aebFiles
               .add(controller.footageList[i].file);
-          print('0/10 found');
+          if (kDebugMode) {
+            print('0/10 found');
+          }
           i++;
           if (i >= controller.footageList.length) {
             break;
           }
-          image = await decodeJpgFile(controller.footageList[i].file.path);
-          if (image != null &&
-              _isAebImage(image) &&
-              _parseEvBias(image) == '-7/10') {
+          if (controller.footageList[i].isAeb &&
+              controller.footageList[i].evBias == '-7/10') {
             controller.footageList[startIndex].aebFiles
                 .add(controller.footageList[i].file);
             controller.footageList[i].hide = true;
-            print('-7/10 found');
+            if (kDebugMode) {
+              print('-7/10 found');
+            }
             i++;
             if (i >= controller.footageList.length) {
               break;
             }
-            image = await decodeJpgFile(controller.footageList[i].file.path);
-            if (image != null &&
-                _isAebImage(image) &&
-                _parseEvBias(image) == '7/10') {
+            if (controller.footageList[i].isAeb &&
+                controller.footageList[i].evBias == '7/10') {
               controller.footageList[startIndex].aebFiles
                   .add(controller.footageList[i].file);
               controller.footageList[i].hide = true;
-              print('7/10 found');
+              if (kDebugMode) {
+                print('7/10 found');
+              }
               i++;
               if (i >= controller.footageList.length) {
                 break;
               }
-              image = await decodeJpgFile(controller.footageList[i].file.path);
-              if (image != null &&
-                  _isAebImage(image) &&
-                  _parseEvBias(image) == '-13/10') {
+              if (controller.footageList[i].isAeb &&
+                  controller.footageList[i].evBias == '-13/10') {
                 controller.footageList[startIndex].aebFiles
                     .add(controller.footageList[i].file);
                 controller.footageList[i].hide = true;
-                print('-13/10 found');
+                if (kDebugMode) {
+                  print('-13/10 found');
+                }
                 i++;
                 if (i >= controller.footageList.length) {
                   break;
                 }
-                image =
-                    await decodeJpgFile(controller.footageList[i].file.path);
-                if (image != null &&
-                    _isAebImage(image) &&
-                    _parseEvBias(image) == '13/10') {
+                if (controller.footageList[i].isAeb &&
+                    controller.footageList[i].evBias == '13/10') {
                   controller.footageList[startIndex].aebFiles
                       .add(controller.footageList[i].file);
                   controller.footageList[i].hide = true;
-                  print('13/10 found');
+                  if (kDebugMode) {
+                    print('13/10 found');
+                  }
                   i++;
                   if (i >= controller.footageList.length) {
                     break;
                   }
-                  image =
-                      await decodeJpgFile(controller.footageList[i].file.path);
-                  if (image != null &&
-                      _isAebImage(image) &&
-                      _parseEvBias(image) == '-20/10') {
+                  if (controller.footageList[i].isAeb &&
+                      controller.footageList[i].evBias == '-20/10') {
                     controller.footageList[startIndex].aebFiles
                         .add(controller.footageList[i].file);
                     controller.footageList[i].hide = true;
-                    print('-20/10 found');
+                    if (kDebugMode) {
+                      print('-20/10 found');
+                    }
                     i++;
                     if (i >= controller.footageList.length) {
                       break;
                     }
-                    image = await decodeJpgFile(
-                        controller.footageList[i].file.path);
-                    if (image != null &&
-                        _isAebImage(image) &&
-                        _parseEvBias(image) == '20/10') {
+                    if (controller.footageList[i].isAeb &&
+                        controller.footageList[i].evBias == '20/10') {
                       controller.footageList[startIndex].aebFiles
                           .add(controller.footageList[i].file);
                       controller.footageList[i].hide = true;
-                      print('20/10 found');
+                      if (kDebugMode) {
+                        print('20/10 found');
+                      }
                       i++;
                       if (i >= controller.footageList.length) {
                         break;
@@ -232,15 +251,48 @@ Future<void> _loadFootage() async {
     if (isMediaFile(file.uri)) {
       final footage = Footage(file: File(file.uri.toFilePath()));
       if (footage.isVideo) {
+        // is video
         footage.thumbFile = await _generateThumbnail(footage);
+        final ffprobeOutput = await _ffprobeVideoInfo(footage);
+        if (ffprobeOutput != null) {
+          try {
+            footage.height = ffprobeOutput['streams'][0]['height'];
+            footage.width = ffprobeOutput['streams'][0]['width'];
+            footage.sizeInBytes = int.parse(ffprobeOutput['format']['size']);
+            footage.frameRate = double.parse(ffprobeOutput['streams'][0]
+                        ['avg_frame_rate']
+                    .split('/')[0]) /
+                double.parse(ffprobeOutput['streams'][0]['avg_frame_rate']
+                    .split('/')[1]);
+            footage.duration =
+                double.parse(ffprobeOutput['format']['duration']);
+            footage.isHevc =
+                ffprobeOutput['streams'][0]['codec_name'] == 'hevc';
+          } catch (e) {
+            footage.errors[parseFootageErrorCode] = [
+              parseFootageVideoInfoError
+            ];
+            if (kDebugMode) {
+              print('Error: $e');
+            }
+          }
+          if (kDebugMode) {
+            print('Video: height: ${footage.height}, width: ${footage.width}, '
+                'size: ${footage.sizeInBytes}, frame rate: ${footage.frameRate}, '
+                'duration: ${footage.duration}, is hevc: ${footage.isHevc}');
+          }
+        }
       } else {
-        // final image = await decodeJpgFile(footage.file.path);
-        // if (image != null) {
-        //   // print("${footage.name}\n");
-        //   // print("${image.exif}\n");
-        //   // print("\n\n");
-        // }
+        // is photo
         footage.thumbFile = footage.file;
+        final image = await compute(decodeJpgFile, footage.file.path);
+        if (image != null) {
+          footage.isAeb = _isAebImage(image);
+          footage.height = image.height;
+          footage.width = image.width;
+          footage.sizeInBytes = image.lengthInBytes;
+          footage.evBias = _parseEvBias(image);
+        }
       }
       controller.footageList.add(footage);
     }
