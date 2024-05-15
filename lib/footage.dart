@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:xji_footage_toolbox/constants.dart';
 
 class Footage {
@@ -29,9 +30,13 @@ class Footage {
     Match? match = regex.firstMatch(name);
     if (match != null) {
       try {
-        time = DateTime.parse(match.group(1)!);
+        time = DateTime.parse(
+            ('${match.group(1)!.substring(0, 8)}T${match.group(1)!.substring(8)}'));
       } catch (e) {
         errors[parseFootageErrorCode] = [parseFootageTimeError];
+        if (kDebugMode) {
+          print('Parse footage time error: $e');
+        }
         time = file.lastModifiedSync();
       }
       try {
