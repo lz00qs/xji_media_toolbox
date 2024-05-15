@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
 
 import 'load_footage.dart';
@@ -124,7 +125,8 @@ class ResizableLayout extends StatelessWidget {
                     child: Container(
                       width: leftColumnWidth.value,
                       constraints: BoxConstraints(minHeight: rowMinHeight),
-                      color: Colors.yellow,
+                      // color: Colors.yellow,
+                      child: const FootageInfoWidget(),
                     ),
                   ),
                 ],
