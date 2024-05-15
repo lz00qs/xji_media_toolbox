@@ -14,18 +14,6 @@ class GalleryWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      if (controller.isLoadingFootage.value) {
-        return const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              CircularProgressIndicator(),
-              SizedBox(height: 20),
-              Text('Loading Footage...'),
-            ],
-          ),
-        );
-      }
       if (controller.footageList.isEmpty) {
         return Center(
           child: IconButton(
