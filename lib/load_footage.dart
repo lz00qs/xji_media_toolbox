@@ -321,7 +321,7 @@ Future<void> openFootageFolder() async {
         }
         controller.isLoadingFootage.value = true;
         await _loadFootage();
-        controller.resetIndex();
+        controller.resetGalleryData();
         controller.isLoadingFootage.value = false;
         if (kDebugMode) {
           print('Footage list: ${controller.footageList.length}');

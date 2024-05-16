@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/widget/aeb_photo_editor_widget.dart';
@@ -10,54 +11,116 @@ import 'package:xji_footage_toolbox/widget/normal_video_editor_widget.dart';
 
 import 'load_footage.dart';
 
+const scrollDuration = Duration(milliseconds: 100);
+
 class MainPage extends StatelessWidget {
-  const MainPage({super.key});
+  final focusNode = FocusNode();
+
+  MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
     final openPressed = false.obs;
     var appBarHeight = 40.0;
     if (GetPlatform.isWindows || GetPlatform.isMacOS) {
       appBarHeight = 40.0;
     }
-    return Scaffold(
-      appBar: PreferredSize(
-        // windows 和 macos size 做区分
-        preferredSize: Size.fromHeight(appBarHeight),
-        child: AppBar(
-          leadingWidth: 300,
-          leading: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(
-                width: 75,
+
+    FocusScope.of(context).requestFocus(focusNode);
+    return CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.arrowUp): () {
+            if (controller.currentFootageIndex.value > 0) {
+              controller.currentFootageIndex.value -= 1;
+              if (controller.currentFootageIndex.value <
+                  controller.galleryListScrollListener.itemPositions.value.first
+                      .index) {
+                controller.galleryListScrollController.scrollTo(
+                    index: controller.currentFootageIndex.value,
+                    duration: scrollDuration);
+              }
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowDown): () {
+            if (controller.currentFootageIndex.value <
+                controller.footageList.length - 1) {
+              controller.currentFootageIndex.value += 1;
+              final delta = controller.galleryListScrollListener.itemPositions
+                      .value.last.index -
+                  controller.galleryListScrollListener.itemPositions.value.first
+                      .index;
+              if (controller.currentFootageIndex.value >
+                  controller.galleryListScrollListener.itemPositions.value.last
+                          .index -
+                      1) {
+                controller.galleryListScrollController.scrollTo(
+                    index: controller.currentFootageIndex.value - delta + 1,
+                    duration: scrollDuration);
+              }
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () {},
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () {},
+          const SingleActivator(LogicalKeyboardKey.tab): () {
+            if (controller.currentFootageIndex.value <
+                controller.footageList.length - 1) {
+              controller.currentFootageIndex.value += 1;
+              final delta = controller.galleryListScrollListener.itemPositions
+                      .value.last.index -
+                  controller.galleryListScrollListener.itemPositions.value.first
+                      .index;
+              if (controller.currentFootageIndex.value >
+                  controller.galleryListScrollListener.itemPositions.value.last
+                          .index -
+                      1) {
+                controller.galleryListScrollController.scrollTo(
+                    index: controller.currentFootageIndex.value - delta + 1,
+                    duration: scrollDuration);
+              }
+            }
+          },
+        },
+        child: Focus(
+            focusNode: focusNode,
+            child: Scaffold(
+              appBar: PreferredSize(
+                // windows 和 macos size 做区分
+                preferredSize: Size.fromHeight(appBarHeight),
+                child: AppBar(
+                  leadingWidth: 300,
+                  leading: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        width: 75,
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          if (openPressed.value) {
+                            return;
+                          }
+                          openPressed.value = true;
+                          // 打开视频文件夹
+                          await openFootageFolder();
+                          openPressed.value = false;
+                        },
+                        icon: const Icon(Icons.folder_open),
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.settings),
+                      ),
+                      IconButton(
+                        onPressed: () {},
+                        icon: const Icon(Icons.help),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              IconButton(
-                onPressed: () async {
-                  if (openPressed.value) {
-                    return;
-                  }
-                  openPressed.value = true;
-                  // 打开视频文件夹
-                  await openFootageFolder();
-                  openPressed.value = false;
-                },
-                icon: const Icon(Icons.folder_open),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.settings),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.help),
-              ),
-            ],
-          ),
-        ),
-      ),
-      body: ResizableLayout(),
-    );
+              body: ResizableLayout(),
+            )));
   }
 }
 

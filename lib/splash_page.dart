@@ -23,7 +23,7 @@ class SplashPage extends StatelessWidget {
         if (controller.isLoadingFootage.value) {
           return const LoadingFootagePage();
         }
-        return const MainPage();
+        return MainPage();
       } else {
         return const InstallFFmpegIntroPage();
       }
