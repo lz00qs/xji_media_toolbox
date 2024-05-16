@@ -29,7 +29,9 @@ class MainPage extends StatelessWidget {
           leading: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(width: 75,),
+              const SizedBox(
+                width: 75,
+              ),
               IconButton(
                 onPressed: () async {
                   if (openPressed.value) {
@@ -175,6 +177,12 @@ class ResizableLayout extends StatelessWidget {
             ),
           ),
           Expanded(child: Obx(() {
+            if (controller.footageList.isEmpty) {
+              return const Center(
+                child: Text('No footage'),
+              );
+            }
+
             if (controller
                 .footageList[controller.currentFootageIndex.value].isVideo) {
               return const NormalVideoEditorWidget();
@@ -183,7 +191,9 @@ class ResizableLayout extends StatelessWidget {
                   .footageList[controller.currentFootageIndex.value].isAeb) {
                 return const AebPhotoEditorWidget();
               } else {
-                return const NormalPhotoEditorWidget();
+                return NormalPhotoEditorWidget(
+                    footage: controller
+                        .footageList[controller.currentFootageIndex.value]);
               }
             }
           })),

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:photo_view/photo_view.dart';
-
-import '../global_controller.dart';
+import 'package:xji_footage_toolbox/footage.dart';
 
 class NormalPhotoEditorWidget extends StatelessWidget {
-  const NormalPhotoEditorWidget({super.key});
+  const NormalPhotoEditorWidget({super.key, required this.footage});
+
+  final Footage footage;
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<GlobalController>();
     return Scaffold(
         appBar: PreferredSize(
           // windows 和 macos size 做区分
@@ -28,13 +27,16 @@ class NormalPhotoEditorWidget extends StatelessWidget {
           ),
         ),
         body: Center(
-          child: Obx(() => ClipRect(
-                child: PhotoView(
-                    backgroundDecoration: const BoxDecoration(color: Colors.transparent),
-                    imageProvider: FileImage(controller
-                        .footageList[controller.currentFootageIndex.value]
-                        .file)),
-              )),
-        ));
+          child: Container(margin: const EdgeInsets.all(20),
+            child: ClipRect(
+              child: PhotoView(
+                  initialScale: PhotoViewComputedScale.contained,
+                  controller: PhotoViewController(),
+                  backgroundDecoration:
+                  const BoxDecoration(color: Colors.transparent),
+                  imageProvider: FileImage(footage.file)),
+            ),
+          ),),
+        );
   }
 }
