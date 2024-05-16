@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/global_controller.dart';
+import 'package:xji_footage_toolbox/widget/aeb_photo_editor_widget.dart';
 import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
+import 'package:xji_footage_toolbox/widget/normal_photo_editor_widget.dart';
+import 'package:xji_footage_toolbox/widget/normal_video_editor_widget.dart';
 
 import 'load_footage.dart';
 
@@ -21,29 +25,33 @@ class MainPage extends StatelessWidget {
         // windows 和 macos size 做区分
         preferredSize: Size.fromHeight(appBarHeight),
         child: AppBar(
-          leadingWidth: 200,
-          leading: IconButton(
-            onPressed: () async {
-              if (openPressed.value) {
-                return;
-              }
-              openPressed.value = true;
-              // 打开视频文件夹
-              await openFootageFolder();
-              openPressed.value = false;
-            },
-            icon: const Icon(Icons.folder_open),
+          leadingWidth: 300,
+          leading: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const SizedBox(width: 75,),
+              IconButton(
+                onPressed: () async {
+                  if (openPressed.value) {
+                    return;
+                  }
+                  openPressed.value = true;
+                  // 打开视频文件夹
+                  await openFootageFolder();
+                  openPressed.value = false;
+                },
+                icon: const Icon(Icons.folder_open),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.settings),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.help),
+              ),
+            ],
           ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.settings),
-            ),
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.help),
-            ),
-          ],
         ),
       ),
       body: ResizableLayout(),
@@ -59,6 +67,7 @@ class ResizableLayout extends StatelessWidget {
   final leftColumnWidth = 300.0.obs;
   final topRowHeight = 400.0.obs;
   final dragIconSize = 20.0;
+  final GlobalController controller = Get.find();
 
   ResizableLayout({super.key});
 
@@ -165,7 +174,19 @@ class ResizableLayout extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(child: Container(color: Colors.red)),
+          Expanded(child: Obx(() {
+            if (controller
+                .footageList[controller.currentFootageIndex.value].isVideo) {
+              return const NormalVideoEditorWidget();
+            } else {
+              if (controller
+                  .footageList[controller.currentFootageIndex.value].isAeb) {
+                return const AebPhotoEditorWidget();
+              } else {
+                return const NormalPhotoEditorWidget();
+              }
+            }
+          })),
         ]));
   }
 }
