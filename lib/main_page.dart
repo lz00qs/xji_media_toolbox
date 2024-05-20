@@ -203,18 +203,7 @@ class _EditorActionsDeleteButton extends StatelessWidget {
         size: controller.topButtonSize.value,
       ),
       onPressed: () {
-        if (controller.footageList.length == 1) {
-          controller.resetData();
-          return;
-        }
-        if (controller.footageList.length ==
-            (controller.currentFootageIndex.value + 1)) {
-          controller.currentFootageIndex.value -= 1;
-          controller.footageList
-              .removeAt(controller.currentFootageIndex.value + 1);
-        } else {
-          controller.footageList.removeAt(controller.currentFootageIndex.value);
-        }
+        controller.deleteCurrentFootage();
       },
     );
   }

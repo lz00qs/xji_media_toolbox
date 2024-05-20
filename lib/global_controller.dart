@@ -28,4 +28,17 @@ class GlobalController extends GetxController {
   void resetGalleryData() {
     currentFootageIndex.value = 0;
   }
+
+  void deleteCurrentFootage() {
+    if (footageList.length == 1) {
+      resetData();
+      return;
+    }
+    if (footageList.length == (currentFootageIndex.value + 1)) {
+      currentFootageIndex.value -= 1;
+      footageList.removeAt(currentFootageIndex.value + 1);
+    } else {
+      footageList.removeAt(currentFootageIndex.value);
+    }
+  }
 }
