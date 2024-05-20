@@ -15,24 +15,27 @@ class NormalPhotoEditorWidget extends StatelessWidget {
           return SizedBox(
             height: constraints.maxHeight,
             width: constraints.maxWidth,
-            child: ClipRect(
-              child: ExtendedImage.file(
-                footage.file,
-                fit: BoxFit.contain,
-                mode: ExtendedImageMode.gesture,
-                initGestureConfigHandler: (state) {
-                  return GestureConfig(
-                    minScale: 1.0,
-                    animationMinScale: 0.7,
-                    maxScale: 10.0,
-                    animationMaxScale: 10.0,
-                    speed: 1.0,
-                    inertialSpeed: 100.0,
-                    initialScale: 1.0,
-                    inPageView: false,
-                    initialAlignment: InitialAlignment.center,
-                  );
-                },
+            child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ClipRect(
+                child: ExtendedImage.file(
+                  footage.file,
+                  fit: BoxFit.contain,
+                  mode: ExtendedImageMode.gesture,
+                  initGestureConfigHandler: (state) {
+                    return GestureConfig(
+                      minScale: 1.0,
+                      animationMinScale: 0.7,
+                      maxScale: 10.0,
+                      animationMaxScale: 10.0,
+                      speed: 1.0,
+                      inertialSpeed: 100.0,
+                      initialScale: 1.0,
+                      inPageView: false,
+                      initialAlignment: InitialAlignment.center,
+                    );
+                  },
+                ),
               ),
             ),
           );
