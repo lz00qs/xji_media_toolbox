@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -18,6 +19,8 @@ class GlobalController extends GetxController {
   final appBarHeight = 30.0.obs;
   final topButtonPadding = 5.0.obs;
   final topButtonSize = 20.0.obs;
+  final galleryFocusNode = FocusNode();
+  final deleteDialogFocusNode = FocusNode();
 
   void resetData() {
     footageDir = null;

@@ -15,9 +15,7 @@ import 'load_footage.dart';
 const scrollDuration = Duration(milliseconds: 100);
 
 class MainPage extends StatelessWidget {
-  final focusNode = FocusNode();
-
-  MainPage({super.key});
+  const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +28,7 @@ class MainPage extends StatelessWidget {
           macAppBarHeight - 2 * macTopButtonPadding;
     }
 
-    FocusScope.of(context).requestFocus(focusNode);
+    controller.galleryFocusNode.requestFocus();
     return CallbackShortcuts(
         bindings: {
           const SingleActivator(LogicalKeyboardKey.arrowUp): () {
@@ -85,7 +83,7 @@ class MainPage extends StatelessWidget {
           },
         },
         child: Focus(
-            focusNode: focusNode,
+            focusNode: controller.galleryFocusNode,
             child: Scaffold(
               appBar: PreferredSize(
                 // windows 和 macos size 做区分
@@ -203,7 +201,36 @@ class _EditorActionsDeleteButton extends StatelessWidget {
         size: controller.topButtonSize.value,
       ),
       onPressed: () {
-        controller.deleteCurrentFootage();
+        controller.galleryFocusNode.unfocus();
+        // FocusScope.of(context).requestFocus(controller.deleteDialogFocusNode);
+        controller.deleteDialogFocusNode.requestFocus();
+        print(
+            'delete dialog focus node: ${controller.deleteDialogFocusNode.hasFocus}');
+        Get.dialog(Focus(
+            focusNode: controller.deleteDialogFocusNode,
+            child: AlertDialog(
+              title: const Text('Delete footage'),
+              content:
+                  const Text('Are you sure you want to delete this footage?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    controller.deleteCurrentFootage();
+                    Get.back();
+                    FocusScope.of(context)
+                        .requestFocus(controller.galleryFocusNode);
+                  },
+                  child: const Text('Delete'),
+                ),
+              ],
+            )));
+        // controller.deleteCurrentFootage();
       },
     );
   }
