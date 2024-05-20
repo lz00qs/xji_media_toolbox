@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/constants.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/widget/aeb_photo_editor_widget.dart';
 import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
@@ -22,9 +23,11 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final GlobalController controller = Get.find();
     final openPressed = false.obs;
-    var appBarHeight = 40.0;
-    if (GetPlatform.isWindows || GetPlatform.isMacOS) {
-      appBarHeight = 40.0;
+    if (GetPlatform.isMacOS) {
+      controller.appBarHeight.value = macAppBarHeight;
+      controller.topButtonPadding.value = macTopButtonPadding;
+      controller.topButtonSize.value =
+          macAppBarHeight - 2 * macTopButtonPadding;
     }
 
     FocusScope.of(context).requestFocus(focusNode);
@@ -86,7 +89,7 @@ class MainPage extends StatelessWidget {
             child: Scaffold(
               appBar: PreferredSize(
                 // windows 和 macos size 做区分
-                preferredSize: Size.fromHeight(appBarHeight),
+                preferredSize: Size.fromHeight(controller.appBarHeight.value),
                 child: AppBar(
                   leadingWidth: 300,
                   leading: Row(
@@ -96,6 +99,8 @@ class MainPage extends StatelessWidget {
                         width: 75,
                       ),
                       IconButton(
+                        padding:
+                            EdgeInsets.all(controller.topButtonPadding.value),
                         onPressed: () async {
                           if (openPressed.value) {
                             return;
@@ -105,22 +110,113 @@ class MainPage extends StatelessWidget {
                           await openFootageFolder();
                           openPressed.value = false;
                         },
-                        icon: const Icon(Icons.folder_open),
+                        icon: Icon(
+                          Icons.folder_open,
+                          size: controller.topButtonSize.value,
+                        ),
                       ),
                       IconButton(
+                        padding:
+                            EdgeInsets.all(controller.topButtonPadding.value),
                         onPressed: () {},
-                        icon: const Icon(Icons.settings),
+                        icon: Icon(Icons.settings,
+                            size: controller.topButtonSize.value),
                       ),
                       IconButton(
+                        padding:
+                            EdgeInsets.all(controller.topButtonPadding.value),
                         onPressed: () {},
-                        icon: const Icon(Icons.help),
+                        icon: Icon(Icons.help,
+                            size: controller.topButtonSize.value),
                       ),
                     ],
                   ),
+                  // actions: controller.appBarActions,
+                  actions: [
+                    Obx(() {
+                      if (controller.footageList.isEmpty) {
+                        return const SizedBox();
+                      }
+                      if (controller
+                          .footageList[controller.currentFootageIndex.value]
+                          .isVideo) {
+                        return _NormalVideoEditorActions();
+                      } else {
+                        if (controller
+                            .footageList[controller.currentFootageIndex.value]
+                            .isAeb) {
+                          return _AebPhotoEditorActions();
+                        } else {
+                          return _NormalPhotoEditorActions();
+                        }
+                      }
+                    })
+                  ],
                 ),
               ),
               body: ResizableLayout(),
             )));
+  }
+}
+
+class _NormalPhotoEditorActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _EditorActionsDeleteButton(),
+      ],
+    );
+  }
+}
+
+class _AebPhotoEditorActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _EditorActionsDeleteButton(),
+      ],
+    );
+  }
+}
+
+class _NormalVideoEditorActions extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _EditorActionsDeleteButton(),
+      ],
+    );
+  }
+}
+
+class _EditorActionsDeleteButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
+    return IconButton(
+      padding: EdgeInsets.all(controller.topButtonPadding.value),
+      icon: Icon(
+        Icons.delete,
+        size: controller.topButtonSize.value,
+      ),
+      onPressed: () {
+        if (controller.footageList.length == 1) {
+          controller.resetData();
+          return;
+        }
+        if (controller.footageList.length ==
+            (controller.currentFootageIndex.value + 1)) {
+          controller.currentFootageIndex.value -= 1;
+          controller.footageList
+              .removeAt(controller.currentFootageIndex.value + 1);
+        } else {
+          controller.footageList.removeAt(controller.currentFootageIndex.value);
+        }
+      },
+    );
   }
 }
 

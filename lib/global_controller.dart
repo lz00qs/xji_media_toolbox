@@ -15,6 +15,9 @@ class GlobalController extends GetxController {
   final isLoadingFootage = false.obs;
   final galleryListScrollController = ItemScrollController();
   final galleryListScrollListener = ItemPositionsListener.create();
+  final appBarHeight = 30.0.obs;
+  final topButtonPadding = 5.0.obs;
+  final topButtonSize = 20.0.obs;
 
   void resetData() {
     footageDir = null;

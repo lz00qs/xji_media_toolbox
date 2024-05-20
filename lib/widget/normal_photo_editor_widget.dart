@@ -1,5 +1,5 @@
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:xji_footage_toolbox/footage.dart';
 
 class NormalPhotoEditorWidget extends StatelessWidget {
@@ -9,34 +9,35 @@ class NormalPhotoEditorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: PreferredSize(
-          // windows 和 macos size 做区分
-          preferredSize: const Size.fromHeight(40.0),
-          child: AppBar(
-            actions: [
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.settings),
-              ),
-              IconButton(
-                onPressed: () {},
-                icon: const Icon(Icons.help),
-              ),
-            ],
-          ),
-        ),
-        body: Center(
-          child: Container(margin: const EdgeInsets.all(20),
+    return Center(
+      child: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return SizedBox(
+            height: constraints.maxHeight,
+            width: constraints.maxWidth,
             child: ClipRect(
-              child: PhotoView(
-                  initialScale: PhotoViewComputedScale.contained,
-                  controller: PhotoViewController(),
-                  backgroundDecoration:
-                  const BoxDecoration(color: Colors.transparent),
-                  imageProvider: FileImage(footage.file)),
+              child: ExtendedImage.file(
+                footage.file,
+                fit: BoxFit.contain,
+                mode: ExtendedImageMode.gesture,
+                initGestureConfigHandler: (state) {
+                  return GestureConfig(
+                    minScale: 1.0,
+                    animationMinScale: 0.7,
+                    maxScale: 10.0,
+                    animationMaxScale: 10.0,
+                    speed: 1.0,
+                    inertialSpeed: 100.0,
+                    initialScale: 1.0,
+                    inPageView: false,
+                    initialAlignment: InitialAlignment.center,
+                  );
+                },
+              ),
             ),
-          ),),
-        );
+          );
+        },
+      ),
+    );
   }
 }

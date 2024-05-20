@@ -1,5 +1,9 @@
 // 托管常量
+
 const String thumbnailFolderName = 'thumb';
+
+const double macAppBarHeight = 30.0;
+const double macTopButtonPadding = 5.0;
 
 // Errors
 const int parseFootageErrorCode = 0;
