@@ -42,9 +42,6 @@ class PhotoInfoWidget extends StatelessWidget {
               'Size: ${_dynamicSizeText(controller.footageList[controller.currentFootageIndex.value].sizeInBytes)}',
               style: infoTextStyle,
             ),
-            Text(
-                'EV Bias: ${controller.footageList[controller.currentFootageIndex.value].evBias}',
-                style: infoTextStyle),
             controller.footageList[controller.currentFootageIndex.value]
                         .isAeb ==
                     true
