@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -38,15 +39,38 @@ class GlobalController extends GetxController {
   }
 
   void deleteCurrentFootage() {
+    final footage = footageList[currentFootageIndex.value];
     if (footageList.length == 1) {
       resetData();
+      _deleteFootage(footage);
       return;
     }
     if (footageList.length == (currentFootageIndex.value + 1)) {
       currentFootageIndex.value -= 1;
       footageList.removeAt(currentFootageIndex.value + 1);
+      _deleteFootage(footage);
     } else {
       footageList.removeAt(currentFootageIndex.value);
+      _deleteFootage(footage);
+    }
+  }
+
+  void _deleteFootage(Footage footage) {
+    if (footage.isAeb) {
+      for (var file in footage.aebFiles) {
+        try {
+          file.deleteSync();
+        } catch (e) {
+          Fluttertoast.showToast(msg: 'Error deleting file: ${file.path}');
+        }
+      }
+    } else {
+      try {
+        footage.file.deleteSync();
+      } catch (e) {
+        Fluttertoast.showToast(
+            msg: 'Error deleting file: ${footage.file.path}');
+      }
     }
   }
 }
