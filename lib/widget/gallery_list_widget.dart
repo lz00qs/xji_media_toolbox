@@ -106,11 +106,12 @@ class _ItemListWidget extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            footageList[index].name,
-                            style: const TextStyle(
-                                fontSize: 12, overflow: TextOverflow.ellipsis),
-                          ),
+                          child: Obx(() => Text(
+                                footageList[index].name.value,
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    overflow: TextOverflow.ellipsis),
+                              )),
                         ),
                       ],
                     ),

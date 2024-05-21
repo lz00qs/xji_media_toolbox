@@ -211,6 +211,7 @@ class _AebPhotoEditorActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        _RenameAebButton(),
         _EditorActionsDeleteButton(),
       ],
     );
@@ -252,6 +253,7 @@ class _EditorActionsDeleteButton extends StatelessWidget {
                 TextButton(
                   onPressed: () {
                     Get.back();
+                    controller.galleryFocusNode.requestFocus();
                   },
                   child: const Text('Cancel'),
                 ),
@@ -259,14 +261,55 @@ class _EditorActionsDeleteButton extends StatelessWidget {
                   onPressed: () {
                     controller.deleteCurrentFootage();
                     Get.back();
-                    FocusScope.of(context)
-                        .requestFocus(controller.galleryFocusNode);
+                    controller.galleryFocusNode.requestFocus();
                   },
                   child: const Text('Delete'),
                 ),
               ],
             )));
         // controller.deleteCurrentFootage();
+      },
+    );
+  }
+}
+
+class _RenameAebButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
+    return IconButton(
+      padding: EdgeInsets.all(controller.topButtonPadding.value),
+      icon: Icon(
+        Icons.drive_file_rename_outline_rounded,
+        size: controller.topButtonSize.value,
+      ),
+      onPressed: () {
+        controller.galleryFocusNode.unfocus();
+        controller.renameAebDialogFocusNode.requestFocus();
+        Get.dialog(Focus(
+            focusNode: controller.renameAebDialogFocusNode,
+            child: AlertDialog(
+              title: const Text('Rename AEB'),
+              content: const Text(
+                  'Are you sure you want to rename these AEB files?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Get.back();
+                    controller.galleryFocusNode.requestFocus();
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    controller.renameCurrentAebFiles();
+                    Get.back();
+                    controller.galleryFocusNode.requestFocus();
+                  },
+                  child: const Text('Yes'),
+                ),
+              ],
+            )));
       },
     );
   }

@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:get/get_rx/get_rx.dart';
 import 'package:xji_footage_toolbox/constants.dart';
 
 class Footage {
-  final String name;
-  final File file;
+  final RxString name = ''.obs;
+  File file;
   File? thumbFile;
   final bool isVideo;
   bool isAeb = false;
@@ -23,11 +24,11 @@ class Footage {
   String evBias = '';
 
   Footage({required this.file})
-      : name = file.uri.pathSegments.last,
-        isVideo = file.uri.pathSegments.last.endsWith('.MP4') {
-    RegExp regex = RegExp(r'DJI_(\d{14})_(\d{4})_D.JPG');
+      : isVideo = file.uri.pathSegments.last.endsWith('.MP4') {
+    name.value = file.uri.pathSegments.last;
+    RegExp regex = RegExp(r'DJI_(\d{14})_(\d{4})_D');
 
-    Match? match = regex.firstMatch(name);
+    Match? match = regex.firstMatch(name.value);
     if (match != null) {
       try {
         time = DateTime.parse(

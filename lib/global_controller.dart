@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'footage.dart';
@@ -24,6 +25,7 @@ class GlobalController extends GetxController {
   final topButtonSize = 20.0.obs;
   final galleryFocusNode = FocusNode();
   final deleteDialogFocusNode = FocusNode();
+  final renameAebDialogFocusNode = FocusNode();
   final currentAebIndex = 0.obs;
   final aebListScrollController = ItemScrollController();
   final aebListScrollListener = ItemPositionsListener.create();
@@ -52,6 +54,63 @@ class GlobalController extends GetxController {
     } else {
       footageList.removeAt(currentFootageIndex.value);
       _deleteFootage(footage);
+    }
+  }
+
+  void renameCurrentAebFiles() {
+    // final footage = footageList[currentFootageIndex.value];
+    for (var i = 0;
+        i < footageList[currentFootageIndex.value].aebFiles.length;
+        i++) {
+      var evBias = '';
+      switch (i) {
+        case 0:
+          evBias = '0.0';
+          break;
+        case 1:
+          evBias = '-0.7';
+          break;
+        case 2:
+          evBias = '+0.7';
+          break;
+        case 3:
+          evBias = '-1.3';
+          break;
+        case 4:
+          evBias = '+1.3';
+          break;
+        case 5:
+          evBias = '-2.0';
+          break;
+        case 6:
+          evBias = '+2.0';
+          break;
+        default:
+          evBias = '0.0';
+      }
+      final suffix =
+          '_AEB_${footageList[currentFootageIndex.value].sequence}_$evBias';
+      final oldFile = footageList[currentFootageIndex.value].aebFiles[i];
+      final formatter = DateFormat('yyyyMMddHHmmss');
+      final formatted =
+          formatter.format(footageList[currentFootageIndex.value].time);
+      final sequenceStr = (footageList[currentFootageIndex.value].sequence + i)
+          .toString()
+          .padLeft(4, '0');
+      final newPath =
+          '${footageDir?.path}/DJI_${formatted}_${sequenceStr}_D$suffix.JPG';
+      final newFile = File(newPath);
+      try {
+        oldFile.renameSync(newFile.path);
+        footageList[currentFootageIndex.value].aebFiles[i] = newFile;
+        if (i == 0) {
+          footageList[currentFootageIndex.value].file = newFile;
+          footageList[currentFootageIndex.value].name.value =
+              newFile.uri.pathSegments.last;
+        }
+      } catch (e) {
+        Fluttertoast.showToast(msg: 'Error renaming file: ${oldFile.path}');
+      }
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../footage.dart';
 
@@ -46,12 +47,12 @@ class ThumbnailWidget extends StatelessWidget {
               ),
               SizedBox(
                 width: width,
-                child: Text(footage.name,
+                child: Obx(() => Text(footage.name.value,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                         fontSize: 10,
-                        color: isSelected ? Colors.purple : Colors.black)),
+                        color: isSelected ? Colors.purple : Colors.black))),
               ),
             ]),
       ),
