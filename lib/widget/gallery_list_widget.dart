@@ -92,16 +92,18 @@ class _ItemListWidget extends StatelessWidget {
                         Flex(
                           direction: Axis.vertical,
                           children: [
-                            SizedBox(
-                              width: controller.thumbnailWidth.value,
-                              height: controller.thumbnailWidth.value * 0.618,
-                              child: footageList[index].thumbFile == null
-                                  ? Image.asset(
-                                      'assets/images/resource_not_found.jpeg',
-                                      fit: BoxFit.cover)
-                                  : Image.file(footageList[index].thumbFile!,
-                                      fit: BoxFit.contain),
-                            ),
+                            Obx(() => SizedBox(
+                                  width: controller.thumbnailWidth.value,
+                                  height:
+                                      controller.thumbnailWidth.value * 0.618,
+                                  child: footageList[index].thumbFile == null
+                                      ? Image.asset(
+                                          'assets/images/resource_not_found.jpeg',
+                                          fit: BoxFit.cover)
+                                      : Image.file(
+                                          footageList[index].thumbFile!,
+                                          fit: BoxFit.contain),
+                                )),
                           ],
                         ),
                         const SizedBox(width: 10),
