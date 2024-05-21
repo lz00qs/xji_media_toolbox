@@ -1,3 +1,5 @@
+// ignore: unused_import
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -21,6 +23,9 @@ class GlobalController extends GetxController {
   final topButtonSize = 20.0.obs;
   final galleryFocusNode = FocusNode();
   final deleteDialogFocusNode = FocusNode();
+  final currentAebIndex = 0.obs;
+  final aebListScrollController = ItemScrollController();
+  final aebListScrollListener = ItemPositionsListener.create();
 
   void resetData() {
     footageDir = null;

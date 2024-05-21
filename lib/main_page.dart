@@ -37,9 +37,8 @@ class MainPage extends StatelessWidget {
               if (controller.currentFootageIndex.value <
                   controller.galleryListScrollListener.itemPositions.value.first
                       .index) {
-                controller.galleryListScrollController.scrollTo(
-                    index: controller.currentFootageIndex.value,
-                    duration: scrollDuration);
+                controller.galleryListScrollController
+                    .jumpTo(index: controller.currentFootageIndex.value);
               }
             }
           },
@@ -55,14 +54,53 @@ class MainPage extends StatelessWidget {
                   controller.galleryListScrollListener.itemPositions.value.last
                           .index -
                       1) {
-                controller.galleryListScrollController.scrollTo(
-                    index: controller.currentFootageIndex.value - delta + 1,
-                    duration: scrollDuration);
+                controller.galleryListScrollController.jumpTo(
+                  index: controller.currentFootageIndex.value - delta + 1,
+                );
               }
             }
           },
-          const SingleActivator(LogicalKeyboardKey.arrowLeft): () {},
-          const SingleActivator(LogicalKeyboardKey.arrowRight): () {},
+          const SingleActivator(LogicalKeyboardKey.arrowLeft): () {
+            if (controller.footageList
+                .toList()[controller.currentFootageIndex.value]
+                .isAeb) {
+              if (controller.currentAebIndex.value > 0) {
+                controller.currentAebIndex.value -= 1;
+                // print(
+                //     'aebScrollListener: ${controller.aebListScrollListener.itemPositions.value}');
+                if (controller
+                        .aebListScrollListener.itemPositions.value.first.index >
+                    controller.currentAebIndex.value) {
+                  controller.aebListScrollController.scrollTo(
+                      index: controller.currentAebIndex.value,
+                      duration: scrollDuration);
+                }
+              }
+            }
+          },
+          const SingleActivator(LogicalKeyboardKey.arrowRight): () {
+            if (controller.footageList
+                .toList()[controller.currentFootageIndex.value]
+                .isAeb) {
+              if (controller.currentAebIndex.value <
+                  controller.footageList
+                          .toList()[controller.currentFootageIndex.value]
+                          .aebFiles
+                          .length -
+                      1) {
+                controller.currentAebIndex.value += 1;
+                // print(
+                //     'aebScrollListener: ${controller.aebListScrollListener.itemPositions.value}');
+                if (controller
+                        .aebListScrollListener.itemPositions.value.last.index <
+                    controller.currentAebIndex.value) {
+                  controller.aebListScrollController.scrollTo(
+                      index: controller.currentAebIndex.value,
+                      duration: scrollDuration);
+                }
+              }
+            }
+          },
           const SingleActivator(LogicalKeyboardKey.tab): () {
             if (controller.currentFootageIndex.value <
                 controller.footageList.length - 1) {
@@ -204,8 +242,6 @@ class _EditorActionsDeleteButton extends StatelessWidget {
         controller.galleryFocusNode.unfocus();
         // FocusScope.of(context).requestFocus(controller.deleteDialogFocusNode);
         controller.deleteDialogFocusNode.requestFocus();
-        print(
-            'delete dialog focus node: ${controller.deleteDialogFocusNode.hasFocus}');
         Get.dialog(Focus(
             focusNode: controller.deleteDialogFocusNode,
             child: AlertDialog(
@@ -364,7 +400,10 @@ class ResizableLayout extends StatelessWidget {
             } else {
               if (controller
                   .footageList[controller.currentFootageIndex.value].isAeb) {
-                return const AebPhotoEditorWidget();
+                return AebPhotoEditorWidget(
+                  footage: controller
+                      .footageList[controller.currentFootageIndex.value],
+                );
               } else {
                 return NormalPhotoEditorWidget(
                     footage: controller
