@@ -45,6 +45,7 @@ dependencies:
   scrollable_positioned_list:
   extended_image:
   intl:
+  chewie:
   window_manager:
     git:
       url: https://github.com/leanflutter/window_manager.git

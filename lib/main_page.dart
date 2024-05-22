@@ -439,7 +439,8 @@ class ResizableLayout extends StatelessWidget {
 
             if (controller
                 .footageList[controller.currentFootageIndex.value].isVideo) {
-              return const NormalVideoEditorWidget();
+              return NormalVideoEditorWidget(footage: controller
+                  .footageList[controller.currentFootageIndex.value],);
             } else {
               if (controller
                   .footageList[controller.currentFootageIndex.value].isAeb) {
