@@ -46,10 +46,16 @@ dependencies:
   extended_image:
   intl:
   chewie:
+  tdesign_flutter:
   window_manager:
     git:
       url: https://github.com/leanflutter/window_manager.git
       ref: main
+  percent_indicator:
+  path:
+  shared_preferences:
+  objectbox_flutter_libs:
+  objectbox:
 
 
 dev_dependencies:
@@ -62,6 +68,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+  build_runner: ^2.4.10
+  objectbox_generator:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

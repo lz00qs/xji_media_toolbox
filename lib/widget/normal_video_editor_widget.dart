@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:chewie/chewie.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/footage.dart';
+import 'package:xji_footage_toolbox/global_controller.dart';
 
-import '../video_test_page.dart';
+import 'normal_video_cutter_widget.dart';
 
 class NormalVideoEditorWidget extends StatelessWidget {
   final Footage footage;
@@ -15,43 +17,56 @@ class NormalVideoEditorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
     return Center(
-      child: GetBuilder<_VideoGetxController>(
-        init: _VideoGetxController(videoFile: footage.file),
-        builder: (controller) => Expanded(
-            child: controller.chewieController != null &&
-                    controller.chewieController!.videoPlayerController.value
-                        .isInitialized
-                ? Chewie(controller: controller.chewieController!,)
-                : Container()),
-      ),
+      child: Obx(() => controller.isEditingVideo.value
+          ? NormalVideoCutterWidget(videoFile: footage.file)
+          : _VideoPlayerWidget(videoFile: footage.file)),
     );
   }
 }
 
-class _VideoGetxController extends GetxController {
+class _VideoPlayerWidget extends StatelessWidget {
+  final File videoFile;
+
+  const _VideoPlayerWidget({required this.videoFile});
+
+  @override
+  Widget build(BuildContext context) {
+    return GetBuilder<_VideoPlayerGetxController>(
+      init: _VideoPlayerGetxController(videoFile: videoFile),
+      builder: (controller) => controller.chewieController != null &&
+              controller
+                  .chewieController!.videoPlayerController.value.isInitialized
+          ? Chewie(
+              controller: controller.chewieController!,
+            )
+          : Container(),
+    );
+  }
+}
+
+class _VideoPlayerGetxController extends GetxController {
   late VideoPlayerController videoPlayerController;
   ChewieController? chewieController;
   final File videoFile;
 
-  _VideoGetxController({required this.videoFile});
+  _VideoPlayerGetxController({required this.videoFile});
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
-    initializePlayer();
+    _initializePlayer();
   }
 
   @override
   void onClose() {
     videoPlayerController.dispose();
     chewieController?.dispose();
-    // TODO: implement onClose
     super.onClose();
   }
 
-  Future<void> initializePlayer() async {
+  Future<void> _initializePlayer() async {
     videoPlayerController = VideoPlayerController.file(videoFile);
     await videoPlayerController.initialize();
     chewieController = ChewieController(

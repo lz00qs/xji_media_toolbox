@@ -1,0 +1,64 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:7007811920086755803",
+      "lastPropertyId": "8:978776425195800060",
+      "name": "TransCodePreset",
+      "properties": [
+        {
+          "id": "1:5863088771646158795",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7974244988260680700",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:718407751114615983",
+          "name": "useInputResolution",
+          "type": 1
+        },
+        {
+          "id": "5:3016759936234006850",
+          "name": "useHevc",
+          "type": 1
+        },
+        {
+          "id": "6:3110242820525980398",
+          "name": "width",
+          "type": 6
+        },
+        {
+          "id": "7:5690649391399706568",
+          "name": "height",
+          "type": 6
+        },
+        {
+          "id": "8:978776425195800060",
+          "name": "crf",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:7007811920086755803",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [
+    6818907781724797816
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

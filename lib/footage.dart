@@ -24,7 +24,7 @@ class Footage {
   String evBias = '';
 
   Footage({required this.file})
-      : isVideo = file.uri.pathSegments.last.endsWith('.MP4') {
+      : isVideo = file.uri.pathSegments.last.toUpperCase().endsWith('.MP4') {
     name.value = file.uri.pathSegments.last;
     RegExp regex = RegExp(r'DJI_(\d{14})_(\d{4})_D');
 

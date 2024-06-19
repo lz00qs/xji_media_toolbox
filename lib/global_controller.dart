@@ -7,10 +7,17 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:xji_footage_toolbox/settings.dart';
+import 'package:xji_footage_toolbox/video_processing.dart';
 
 import 'footage.dart';
+import 'objectbox.dart';
+
+const String defaultTransCodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
 
 class GlobalController extends GetxController {
+  static const String settingsStoreKey = 'settings';
   final hasFFmpeg = false.obs;
   final isFootageListView = false.obs;
   Directory? footageDir;
@@ -29,6 +36,37 @@ class GlobalController extends GetxController {
   final currentAebIndex = 0.obs;
   final aebListScrollController = ItemScrollController();
   final aebListScrollListener = ItemPositionsListener.create();
+  final isEditingVideo = false.obs;
+  final videoProcessingTasks = <VideoProcess>[].obs;
+  final settings = Settings();
+  late final ObjectBox objectBox;
+
+  Future<void> loadSettings() async {
+    objectBox = await ObjectBox.create();
+    final transCodePresets = objectBox.transCodePresetBox.getAll();
+    if (transCodePresets.isEmpty) {
+      final defaultPreset = TransCodePreset()..name = 'Default';
+      objectBox.transCodePresetBox.put(defaultPreset);
+      transCodePresets.add(defaultPreset);
+    }
+    settings.transCodingPresets.addAll(transCodePresets);
+
+    final prefs = await SharedPreferences.getInstance();
+    settings.defaultTransCodePresetIndex.value =
+        prefs.getInt(defaultTransCodePresetIndexPrefKey) ?? 0;
+    if (settings.defaultTransCodePresetIndex.value >=
+        settings.transCodingPresets.length) {
+      settings.defaultTransCodePresetIndex.value = 0;
+    }
+  }
+
+  Future<void> saveSettings() async {
+    objectBox.transCodePresetBox.removeAll();
+    objectBox.transCodePresetBox.putMany(settings.transCodingPresets);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt(defaultTransCodePresetIndexPrefKey,
+        settings.defaultTransCodePresetIndex.value);
+  }
 
   void resetData() {
     footageDir = null;

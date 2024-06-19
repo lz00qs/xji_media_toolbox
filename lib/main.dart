@@ -12,6 +12,7 @@ Future<void> main() async {
   await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
 
   final controller = GlobalController();
+  await controller.loadSettings();
   // detect if FFmpeg is available
   controller.hasFFmpeg.value = await hasFFmpeg();
   Get.put(controller);

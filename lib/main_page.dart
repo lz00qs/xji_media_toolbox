@@ -1,9 +1,12 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/constants.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
+import 'package:xji_footage_toolbox/settings_page.dart';
+import 'package:xji_footage_toolbox/video_processing.dart';
 import 'package:xji_footage_toolbox/widget/aeb_photo_editor_widget.dart';
 import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
@@ -13,6 +16,8 @@ import 'package:xji_footage_toolbox/widget/normal_video_editor_widget.dart';
 import 'load_footage.dart';
 
 const scrollDuration = Duration(milliseconds: 100);
+
+final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -123,6 +128,7 @@ class MainPage extends StatelessWidget {
         child: Focus(
             focusNode: controller.galleryFocusNode,
             child: Scaffold(
+              key: scaffoldKey,
               appBar: PreferredSize(
                 // windows 和 macos size 做区分
                 preferredSize: Size.fromHeight(controller.appBarHeight.value),
@@ -154,7 +160,9 @@ class MainPage extends StatelessWidget {
                       IconButton(
                         padding:
                             EdgeInsets.all(controller.topButtonPadding.value),
-                        onPressed: () {},
+                        onPressed: () {
+                          Get.to(() => const SettingsPage());
+                        },
                         icon: Icon(Icons.settings,
                             size: controller.topButtonSize.value),
                       ),
@@ -191,6 +199,63 @@ class MainPage extends StatelessWidget {
                 ),
               ),
               body: ResizableLayout(),
+              endDrawer: Drawer(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        scaffoldKey.currentState?.closeEndDrawer();
+                      },
+                      icon: const Icon(Icons.arrow_forward)),
+                  Obx(() => Expanded(
+                      child: ListView.builder(
+                          itemCount: controller.videoProcessingTasks.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return ListTile(
+                                title: Text(controller
+                                    .videoProcessingTasks[index]
+                                    .getTypeString()),
+                                subtitle: Column(
+                                  children: [
+                                    Text(controller
+                                        .videoProcessingTasks[index].name),
+                                    Obx(() => controller
+                                                .videoProcessingTasks[index]
+                                                .status
+                                                .value ==
+                                            VideoProcessingStatus.processing
+                                        ? LinearProgressIndicator(
+                                            value: controller
+                                                .videoProcessingTasks[index]
+                                                .progress
+                                                .value,
+                                          )
+                                        : const SizedBox())
+                                  ],
+                                ),
+                                trailing: Obx(() {
+                                  switch (controller.videoProcessingTasks[index]
+                                      .status.value) {
+                                    case VideoProcessingStatus.processing:
+                                      return IconButton(
+                                          onPressed: () {
+                                            controller
+                                                .videoProcessingTasks[index]
+                                                .cancel();
+                                          },
+                                          icon: const Icon(Icons.cancel));
+                                    case VideoProcessingStatus.finished:
+                                      return const Icon(Icons.check);
+                                    case VideoProcessingStatus.canceled:
+                                      return const Icon(Icons.cancel_outlined);
+                                    case VideoProcessingStatus.failed:
+                                      return const Icon(Icons.error);
+                                  }
+                                }));
+                          })))
+                ],
+              )),
             )));
   }
 }
@@ -223,8 +288,26 @@ class _NormalVideoEditorActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
+        _ExportVideoButton(),
+        _EditVideoButton(),
         _EditorActionsDeleteButton(),
+        _OpenEndDrawerButton()
       ],
+    );
+  }
+}
+
+class _OpenEndDrawerButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
+    return IconButton(
+      padding: EdgeInsets.all(controller.topButtonPadding.value),
+      icon: Icon(Icons.task_alt, size: controller.topButtonSize.value),
+      onPressed: () {
+        scaffoldKey.currentState?.openEndDrawer();
+        // scaffoldKey.currentState?.closeEndDrawer();
+      },
     );
   }
 }
@@ -310,6 +393,99 @@ class _RenameAebButton extends StatelessWidget {
                 ),
               ],
             )));
+      },
+    );
+  }
+}
+
+class _EditVideoButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final GlobalController controller = Get.find();
+    return IconButton(
+      padding: EdgeInsets.all(controller.topButtonPadding.value),
+      icon: Obx(() => Icon(
+            controller.isEditingVideo.value ? Icons.edit_off : Icons.edit,
+            size: controller.topButtonSize.value,
+          )),
+      onPressed: () {
+        controller.isEditingVideo.value = !controller.isEditingVideo.value;
+      },
+    );
+  }
+}
+
+class _ExportVideoButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final RxString selectedDirectory = ''.obs;
+    final RxBool useSameDirectory = true.obs;
+    final GlobalController controller = Get.find();
+    return IconButton(
+      padding: EdgeInsets.all(controller.topButtonPadding.value),
+      icon: const Icon(Icons.upload),
+      onPressed: () async {
+        Get.dialog(AlertDialog(
+          title: const Text('Transcode video'),
+          content: Column(
+            children: [
+              Row(children: [
+                const Text('Use the same directory as the input file:'),
+                Obx(() => Checkbox(
+                    value: useSameDirectory.value,
+                    onChanged: (value) {
+                      useSameDirectory.value = value!;
+                    }))
+              ],),
+              Obx(()=> useSameDirectory.value ? const SizedBox() : Column(children: [
+                Row(
+                  children: [
+                    const Text('Select a output directory:'),
+                    IconButton(
+                      icon: const Icon(Icons.folder_open),
+                      onPressed: () async {
+                        final result =
+                        await FilePicker.platform.getDirectoryPath();
+                        if (result != null) {
+                          selectedDirectory.value = result;
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                Obx(() => Text(
+                  selectedDirectory.value,
+                  style: const TextStyle(overflow: TextOverflow.clip),
+                )),
+              ],)),
+              const TextField(
+                decoration: InputDecoration(
+                  labelText: 'Output file name',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Get.back();
+              },
+              child: const Text('Transcode'),
+            ),
+          ],
+        )).then((result) {
+          if (selectedDirectory.value.isNotEmpty) {
+
+            selectedDirectory.value = '';
+          }
+
+        });
       },
     );
   }
@@ -439,8 +615,10 @@ class ResizableLayout extends StatelessWidget {
 
             if (controller
                 .footageList[controller.currentFootageIndex.value].isVideo) {
-              return NormalVideoEditorWidget(footage: controller
-                  .footageList[controller.currentFootageIndex.value],);
+              return NormalVideoEditorWidget(
+                footage: controller
+                    .footageList[controller.currentFootageIndex.value],
+              );
             } else {
               if (controller
                   .footageList[controller.currentFootageIndex.value].isAeb) {
