@@ -4,6 +4,7 @@ import 'dart:isolate';
 
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/settings.dart';
+import 'package:xji_footage_toolbox/utils.dart';
 
 enum VideoProcessingType {
   transcode,
@@ -67,7 +68,9 @@ class VideoTranscodeProcess extends VideoProcess {
     }
     _isolate = null;
     try {
-      File(outputFilePath).deleteSync();
+      if (isFileExist(outputFilePath)) {
+        File(outputFilePath).deleteSync();
+      }
     } finally {}
     status.value = VideoProcessingStatus.canceled;
   }

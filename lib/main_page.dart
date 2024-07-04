@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +7,7 @@ import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/settings_page.dart';
 import 'package:xji_footage_toolbox/video_processing.dart';
 import 'package:xji_footage_toolbox/widget/aeb_photo_editor_widget.dart';
+import 'package:xji_footage_toolbox/widget/export_video_dialog.dart';
 import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
 import 'package:xji_footage_toolbox/widget/normal_photo_editor_widget.dart';
@@ -25,6 +25,7 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final GlobalController controller = Get.find();
+    Get.put(ExportVideoDialogController());
     final openPressed = false.obs;
     if (GetPlatform.isMacOS) {
       controller.appBarHeight.value = macAppBarHeight;
@@ -418,74 +419,12 @@ class _EditVideoButton extends StatelessWidget {
 class _ExportVideoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final RxString selectedDirectory = ''.obs;
-    final RxBool useSameDirectory = true.obs;
     final GlobalController controller = Get.find();
     return IconButton(
       padding: EdgeInsets.all(controller.topButtonPadding.value),
       icon: const Icon(Icons.upload),
       onPressed: () async {
-        Get.dialog(AlertDialog(
-          title: const Text('Transcode video'),
-          content: Column(
-            children: [
-              Row(children: [
-                const Text('Use the same directory as the input file:'),
-                Obx(() => Checkbox(
-                    value: useSameDirectory.value,
-                    onChanged: (value) {
-                      useSameDirectory.value = value!;
-                    }))
-              ],),
-              Obx(()=> useSameDirectory.value ? const SizedBox() : Column(children: [
-                Row(
-                  children: [
-                    const Text('Select a output directory:'),
-                    IconButton(
-                      icon: const Icon(Icons.folder_open),
-                      onPressed: () async {
-                        final result =
-                        await FilePicker.platform.getDirectoryPath();
-                        if (result != null) {
-                          selectedDirectory.value = result;
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                Obx(() => Text(
-                  selectedDirectory.value,
-                  style: const TextStyle(overflow: TextOverflow.clip),
-                )),
-              ],)),
-              const TextField(
-                decoration: InputDecoration(
-                  labelText: 'Output file name',
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Get.back();
-              },
-              child: const Text('Transcode'),
-            ),
-          ],
-        )).then((result) {
-          if (selectedDirectory.value.isNotEmpty) {
-
-            selectedDirectory.value = '';
-          }
-
-        });
+        Get.dialog(const ExportVideoDialog());
       },
     );
   }

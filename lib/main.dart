@@ -29,4 +29,11 @@ class MyApp extends StatelessWidget {
       home: SplashPage(),
     );
   }
+  // @override
+  // Widget build(BuildContext context) {
+  //   return const GetMaterialApp(
+  //     debugShowCheckedModeBanner: false,
+  //     home: TestPage(),
+  //   );
+  // }
 }
