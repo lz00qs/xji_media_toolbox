@@ -7,9 +7,19 @@ import 'package:xji_footage_toolbox/utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await windowManager.ensureInitialized();
-  await windowManager.setMinimumSize(const Size(1280, 720));
-  await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(1280, 720),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.hidden,
+  );
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
 
   final controller = GlobalController();
   await controller.loadSettings();
