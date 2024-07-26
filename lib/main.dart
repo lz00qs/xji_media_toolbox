@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 import 'package:xji_footage_toolbox/splash_page.dart';
+// import 'package:xji_footage_toolbox/test_page.dart';
 import 'package:xji_footage_toolbox/utils.dart';
 
 Future<void> main() async {
@@ -10,8 +11,9 @@ Future<void> main() async {
 
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = const WindowOptions(
+    minimumSize: Size(1280, 720),
     size: Size(1280, 720),
-    center: true,
+    center: false,
     backgroundColor: Colors.transparent,
     skipTaskbar: false,
     titleBarStyle: TitleBarStyle.hidden,
