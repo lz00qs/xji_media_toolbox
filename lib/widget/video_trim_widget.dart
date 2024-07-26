@@ -143,8 +143,6 @@ class VideoTrimWidget extends GetView<VideoTrimController> {
                 onPressed: () async {
                   controller.isPlaying.value = !controller.isPlaying.value;
                   if (controller.isPlaying.value) {
-                    // controller.videoPlayerController.seekTo(
-                    //     Duration(milliseconds: controller.startThumbPosition.toInt()));
                     if (controller.playerEnded == true) {
                       controller.playerEnded = false;
                       await controller.videoPlayerController.seekTo(Duration(
@@ -163,16 +161,6 @@ class VideoTrimWidget extends GetView<VideoTrimController> {
                   scrollToThumb(controller.endThumbPosition);
                 },
                 icon: const Icon(Icons.arrow_forward_ios)),
-            // Obx(
-            //       () => Text(
-            //       "Duration: ${_getFormattedTime(controller.endTime.value - controller.startTime.value)}"),
-            // )
-            // SizedBox(
-            //     width: 300,
-            //     child: Obx(
-            //       () => Text(
-            //           "Duration: ${_getFormattedTime(controller.endTime.value - controller.startTime.value)}"),
-            //     ))
           ]),
           SizedBox(
             child: Obx(() => Text(
@@ -237,7 +225,6 @@ class _VideoPlayerBar extends GetView<VideoTrimController> {
                           controller.playerPosition.value = value.toInt();
                           await controller.videoPlayerController
                               .seekTo(Duration(milliseconds: value.toInt()));
-                          // controller.startTime.value = Duration(milliseconds: value.toInt());
                         },
                       )),
                 )),
