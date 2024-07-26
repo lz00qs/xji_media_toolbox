@@ -10,17 +10,16 @@ import 'package:xji_footage_toolbox/global_controller.dart';
 
 import 'normal_video_cutter_widget.dart';
 
-class NormalVideoEditorWidget extends StatelessWidget {
+class NormalVideoEditorWidget extends GetView<GlobalController> {
   final Footage footage;
 
   const NormalVideoEditorWidget({super.key, required this.footage});
 
   @override
   Widget build(BuildContext context) {
-    final GlobalController controller = Get.find();
     return Center(
       child: Obx(() => controller.isEditingVideo.value
-          ? NormalVideoCutterWidget(videoFile: footage.file)
+          ? NormalVideoCutterWidget(footage: footage)
           : _VideoPlayerWidget(videoFile: footage.file)),
     );
   }
