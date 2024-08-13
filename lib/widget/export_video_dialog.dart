@@ -9,6 +9,7 @@ import '../video_processing.dart';
 
 class ExportVideoDialogController extends GetxController {
   final useSameDirectory = true.obs;
+  final useSameResolution = false.obs;
   final selectedDirectory = ''.obs;
   final outputFileName = ''.obs;
   final outputFileNameController = TextEditingController();
@@ -55,7 +56,7 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
     final dropdownFocusNode = FocusNode();
 
     return AlertDialog(
-      title: const Text('Transcode video'),
+      title: const Text('Export video'),
       content: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -116,54 +117,72 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                             '${controller.selectedDirectory.value}/${controller.outputFileName.value}'));
                   },
                 )),
-            Row(
-              children: [
-                const Text("Transcode preset:"),
-                const SizedBox(
-                  width: 5,
-                ),
-                Obx(() => DropdownButton<int>(
-                      focusNode: dropdownFocusNode,
-                      value: controller.transcodePreset.value,
-                      items: globalController.settings.transCodingPresets
-                          .map((e) => DropdownMenuItem<int>(
-                                value: e.id,
-                                child: Text(e.name),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.transcodePreset.value = value;
-                        }
-                        dropdownFocusNode.unfocus();
-                      },
-                    )),
-                const SizedBox(
-                  width: 5,
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings),
-                  onPressed: () {
-                    Get.to(() => const SettingsPage());
-                  },
-                )
-              ],
-            ),
+            Obx(() => globalController.isEditingVideo.value
+                ? Row(children: [
+                    const Text('Use the same resolution as the input file:'),
+                    Obx(() => Checkbox(
+                          value: controller.useSameResolution.value,
+                          onChanged: (value) {
+                            controller.useSameResolution.value = value!;
+                          },
+                        ))
+                  ])
+                : const SizedBox()),
+            Obx(() => globalController.isEditingVideo.value &&
+                    controller.useSameResolution.value
+                ? const SizedBox()
+                : Row(
+                    children: [
+                      const Text("Export preset:"),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      Obx(() => DropdownButton<int>(
+                            focusNode: dropdownFocusNode,
+                            value: controller.transcodePreset.value,
+                            items: globalController.settings.transCodingPresets
+                                .map((e) => DropdownMenuItem<int>(
+                                      value: e.id,
+                                      child: Text(e.name),
+                                    ))
+                                .toList(),
+                            onChanged: (value) {
+                              if (value != null) {
+                                controller.transcodePreset.value = value;
+                              }
+                              dropdownFocusNode.unfocus();
+                            },
+                          )),
+                      const SizedBox(
+                        width: 5,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.settings),
+                        onPressed: () {
+                          Get.to(() => const SettingsPage());
+                        },
+                      )
+                    ],
+                  )),
             Obx(() {
               final preset = globalController.settings.transCodingPresets
                   .firstWhere((element) =>
                       element.id == controller.transcodePreset.value);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  preset.useInputResolution
-                      ? const Text("Output resolution: Same as input")
-                      : Text(
-                          "Output resolution: ${preset.width}x${preset.height}"),
-                  Text("Output CRF: ${preset.crf}"),
-                  Text("Output codec: ${preset.useHevc ? 'HEVC' : 'H.264'}"),
-                ],
-              );
+              return globalController.isEditingVideo.value &&
+                      controller.useSameResolution.value
+                  ? const SizedBox()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        preset.useInputResolution
+                            ? const Text("Output resolution: Same as input")
+                            : Text(
+                                "Output resolution: ${preset.width}x${preset.height}"),
+                        Text("Output CRF: ${preset.crf}"),
+                        Text(
+                            "Output codec: ${preset.useHevc ? 'HEVC' : 'H.264'}"),
+                      ],
+                    );
             })
           ],
         ),
@@ -187,21 +206,33 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                 final preset = globalController.settings.transCodingPresets
                     .firstWhere((element) =>
                         element.id == controller.transcodePreset.value);
-                final process = VideoTranscodeProcess(
+                final inputFileName = inputFilePath.split('/').last;
+                final outputFileName = outputFilePath.split('/').last;
+                final process = VideoProcess(
+                    name: 'Transcode $inputFileName to $outputFileName',
                     type: VideoProcessingType.transcode,
-                    inputFilePath: inputFilePath,
-                    outputFilePath: outputFilePath,
-                    duration: footage.duration,
-                    preset: preset);
+                    duration: footage.duration,);
                 globalController.videoProcessingTasks.add(process);
-                process.start();
+                process.start([
+                  '-i',
+                  inputFilePath,
+                  '-c:v',
+                  preset.useHevc ? 'libx265' : 'libx264',
+                  '-crf',
+                  preset.crf.toString(),
+                  '-preset',
+                  'ultrafast',
+                  '-vf',
+                  'scale=${preset.width}:${preset.height}',
+                  outputFilePath,
+                ]);
                 Get.back();
               }
             },
             child: Obx(() => isOutputPathValid.value
-                ? const Text('Transcode')
+                ? const Text('Export')
                 : const Text(
-                    'Transcode',
+                    'Export',
                     style: TextStyle(color: Colors.grey),
                   ))),
       ],

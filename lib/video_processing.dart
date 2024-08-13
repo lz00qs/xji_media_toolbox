@@ -18,79 +18,38 @@ enum VideoProcessingStatus {
   failed,
 }
 
-abstract class VideoProcess {
+class VideoProcess {
+  final String name;
+  final VideoProcessingType type;
+  final double duration;
+  final List<String> outPutFiles = [];
+  Isolate? _isolate;
   final RxDouble progress = 0.0.obs;
   final Rx<VideoProcessingStatus> status = VideoProcessingStatus.processing.obs;
-  final VideoProcessingType type;
-  String name = '';
 
-  VideoProcess({required this.type});
-
-  Future<void> start();
+  VideoProcess(
+      {required this.name,
+      required this.type,
+      // required this.ffmpegArgs,
+      required this.duration});
 
   void cancel() {
-    status.value = VideoProcessingStatus.canceled;
-  }
-
-  String getTypeString() {
-    switch (type) {
-      case VideoProcessingType.transcode:
-        return 'Transcode';
-      case VideoProcessingType.cut:
-        return 'Cut';
-    }
-  }
-}
-
-class VideoTranscodeProcess extends VideoProcess {
-  final TransCodePreset preset;
-  final String inputFilePath;
-  final String outputFilePath;
-  final double duration;
-  Isolate? _isolate;
-
-  VideoTranscodeProcess(
-      {required super.type,
-      required this.inputFilePath,
-      required this.outputFilePath,
-      required this.duration,
-      required this.preset}) {
-    final inputFileName = inputFilePath.split('/').last;
-    final outputFileName = outputFilePath.split('/').last;
-    name = 'Transcode $inputFileName to $outputFileName';
-  }
-
-  @override
-  void cancel() {
-    super.cancel();
     if (_isolate != null) {
       _isolate!.kill(priority: Isolate.immediate);
     }
     _isolate = null;
     try {
-      if (isFileExist(outputFilePath)) {
-        File(outputFilePath).deleteSync();
+      for (final file in outPutFiles) {
+        if (isFileExist(file)) {
+          File(file).deleteSync();
+        }
       }
     } finally {}
     status.value = VideoProcessingStatus.canceled;
   }
 
-  @override
-  Future<void> start() async {
+  Future<void> start(List<String> ffmpegArgs) async {
     final receivePort = ReceivePort();
-    final List<String> args = [
-      '-i',
-      inputFilePath,
-      '-c:v',
-      preset.useHevc ? 'libx265' : 'libx264',
-      '-crf',
-      preset.crf.toString(),
-      '-preset',
-      'ultrafast',
-      '-vf',
-      'scale=${preset.width}:${preset.height}',
-      outputFilePath,
-    ];
     receivePort.listen((message) {
       if (message is String) {
         if (message.contains('failed')) {
@@ -109,11 +68,11 @@ class VideoTranscodeProcess extends VideoProcess {
       }
     });
     // await compute(_ffmpegTranscodeVideo, [args, receivePort.sendPort]);
-    _isolate = await Isolate.spawn(
-        _ffmpegTranscodeVideo, [args, receivePort.sendPort]);
+    _isolate =
+        await Isolate.spawn(_ffmpegProcess, [ffmpegArgs, receivePort.sendPort]);
   }
 
-  Future<void> _ffmpegTranscodeVideo(List<dynamic> args) async {
+  Future<void> _ffmpegProcess(List<dynamic> args) async {
     final process = await Process.start('ffmpeg', args[0] as List<String>);
     process.stdout.transform(utf8.decoder).listen((data) {
       (args[1] as SendPort).send(data);
@@ -162,6 +121,15 @@ class VideoTranscodeProcess extends VideoProcess {
       return totalSeconds;
     } else {
       return 0.0;
+    }
+  }
+
+  String getTypeString() {
+    switch (type) {
+      case VideoProcessingType.transcode:
+        return 'Transcode';
+      case VideoProcessingType.cut:
+        return 'Cut';
     }
   }
 }

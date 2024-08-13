@@ -12,15 +12,15 @@ class NormalVideoCutterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = VideoTrimController(footage: footage);
     return GetBuilder<VideoTrimController>(
-        init: VideoTrimController(footage: footage),
+        init: controller,
         builder: (controller) => Center(
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Flexible(
                     child: GetBuilder<VideoTrimController>(
-                  // init: _VideoPlayerGetxController(videoFile: videoFile),
                   builder: (controller) =>
                       controller.chewieController != null &&
                               controller.chewieController!.videoPlayerController

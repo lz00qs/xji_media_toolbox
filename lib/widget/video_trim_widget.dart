@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:xji_footage_toolbox/footage.dart';
+import 'package:xji_footage_toolbox/global_controller.dart';
 
 const scaleFactorList = [
   20,
@@ -83,6 +84,12 @@ class VideoTrimController extends GetxController {
     }
 
     endThumbPosition = sourceDuration.value.inMilliseconds.toDouble();
+
+    final GlobalController globalController = Get.find<GlobalController>();
+    globalController.cutVideoStartTime =
+        Duration(milliseconds: startTime.value.inMilliseconds);
+    globalController.cutVideoEndTime =
+        Duration(milliseconds: endTime.value.inMilliseconds);
   }
 
   @override
@@ -365,6 +372,9 @@ class _VideoTrimmerBar extends GetView<VideoTrimController> {
                                             controller.changeEnd = false;
                                           },
                                           onChangeEnd: (values) async {
+                                            final GlobalController
+                                                globalController =
+                                                Get.find<GlobalController>();
                                             controller.changeEnd = true;
                                             controller.playerStartPosition
                                                 .value = values.start.toInt();
@@ -377,6 +387,14 @@ class _VideoTrimmerBar extends GetView<VideoTrimController> {
                                                 .seekTo(Duration(
                                                     milliseconds:
                                                         values.start.toInt()));
+                                            globalController.cutVideoStartTime =
+                                                Duration(
+                                                    milliseconds:
+                                                        values.start.toInt());
+                                            globalController.cutVideoEndTime =
+                                                Duration(
+                                                    milliseconds:
+                                                        values.end.toInt());
                                           },
                                           onChanged:
                                               (RangeValues values) async {
