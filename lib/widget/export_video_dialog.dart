@@ -178,6 +178,7 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                             ? const Text("Output resolution: Same as input")
                             : Text(
                                 "Output resolution: ${preset.width}x${preset.height}"),
+                        Text("Output preset: ${preset.preset.toString().split('.').last}"),
                         Text("Output CRF: ${preset.crf}"),
                         Text(
                             "Output codec: ${preset.useHevc ? 'HEVC' : 'H.264'}"),
@@ -218,10 +219,12 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                   inputFilePath,
                   '-c:v',
                   preset.useHevc ? 'libx265' : 'libx264',
+                  preset.useHevc ? '-tag:v' : '',
+                  preset.useHevc ? 'hvc1' : '',
                   '-crf',
                   preset.crf.toString(),
                   '-preset',
-                  'ultrafast',
+                  preset.preset.toString().split('.').last,
                   '-vf',
                   'scale=${preset.width}:${preset.height}',
                   outputFilePath,
