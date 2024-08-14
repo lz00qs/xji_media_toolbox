@@ -10,38 +10,40 @@ import 'package:xji_footage_toolbox/global_controller.dart';
 
 import 'normal_video_cutter_widget.dart';
 
-class NormalVideoEditorWidget extends GetView<GlobalController> {
+class NormalVideoEditorWidget extends StatelessWidget {
   final Footage footage;
 
   const NormalVideoEditorWidget({super.key, required this.footage});
 
   @override
   Widget build(BuildContext context) {
+    final globalController = Get.find<GlobalController>();
+    Get.delete<_VideoPlayerGetxController>();
+    final controller =
+        Get.put(_VideoPlayerGetxController(videoFile: footage.file));
+    controller._initializePlayer();
     return Center(
-      child: Obx(() => controller.isEditingVideo.value
-          ? NormalVideoCutterWidget(footage: footage)
-          : _VideoPlayerWidget(videoFile: footage.file)),
+      child: Obx(() {
+        return globalController.isEditingVideo.value
+            ? NormalVideoCutterWidget(footage: footage)
+            : _VideoPlayerWidget(videoFile: footage.file);
+      }),
     );
   }
 }
 
-class _VideoPlayerWidget extends StatelessWidget {
+class _VideoPlayerWidget extends GetView<_VideoPlayerGetxController> {
   final File videoFile;
 
   const _VideoPlayerWidget({required this.videoFile});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<_VideoPlayerGetxController>(
-      init: _VideoPlayerGetxController(videoFile: videoFile),
-      builder: (controller) => controller.chewieController != null &&
-              controller
-                  .chewieController!.videoPlayerController.value.isInitialized
-          ? Chewie(
-              controller: controller.chewieController!,
-            )
-          : Container(),
-    );
+    return Obx(() => controller.footageInitialized.value
+        ? Chewie(
+            controller: controller.chewieController!,
+          )
+        : const CircularProgressIndicator());
   }
 }
 
@@ -49,6 +51,7 @@ class _VideoPlayerGetxController extends GetxController {
   late VideoPlayerController videoPlayerController;
   ChewieController? chewieController;
   final File videoFile;
+  final footageInitialized = false.obs;
 
   _VideoPlayerGetxController({required this.videoFile});
 
@@ -66,6 +69,7 @@ class _VideoPlayerGetxController extends GetxController {
   }
 
   Future<void> _initializePlayer() async {
+    footageInitialized.value = false;
     videoPlayerController = VideoPlayerController.file(videoFile);
     await videoPlayerController.initialize();
     chewieController = ChewieController(
@@ -74,6 +78,7 @@ class _VideoPlayerGetxController extends GetxController {
       looping: false,
       autoInitialize: true,
     );
+    footageInitialized.value = true;
     update();
   }
 }
