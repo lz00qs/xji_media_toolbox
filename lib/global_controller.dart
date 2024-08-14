@@ -10,6 +10,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xji_footage_toolbox/settings.dart';
 import 'package:xji_footage_toolbox/video_processing.dart';
+import 'package:xji_footage_toolbox/widget/video_trim_widget.dart';
 
 import 'footage.dart';
 import 'objectbox.dart';
@@ -39,6 +40,8 @@ class GlobalController extends GetxController {
   final isEditingVideo = false.obs;
   final videoProcessingTasks = <VideoProcess>[].obs;
   final settings = Settings();
+  var cutVideoStartTime = const Duration();
+  var cutVideoEndTime = const Duration();
   late final ObjectBox objectBox;
 
   Future<void> loadSettings() async {

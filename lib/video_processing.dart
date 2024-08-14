@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/settings.dart';
 import 'package:xji_footage_toolbox/utils.dart';
 
 enum VideoProcessingType {
@@ -30,7 +29,6 @@ class VideoProcess {
   VideoProcess(
       {required this.name,
       required this.type,
-      // required this.ffmpegArgs,
       required this.duration});
 
   void cancel() {
@@ -67,7 +65,6 @@ class VideoProcess {
         }
       }
     });
-    // await compute(_ffmpegTranscodeVideo, [args, receivePort.sendPort]);
     _isolate =
         await Isolate.spawn(_ffmpegProcess, [ffmpegArgs, receivePort.sendPort]);
   }
