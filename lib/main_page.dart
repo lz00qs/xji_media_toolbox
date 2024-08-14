@@ -214,9 +214,8 @@ class MainPage extends StatelessWidget {
                           itemCount: controller.videoProcessingTasks.length,
                           itemBuilder: (BuildContext context, int index) {
                             return ListTile(
-                                title: Text(controller
-                                    .videoProcessingTasks[index]
-                                    .getTypeString()),
+                                title: Obx(() => Text(
+                                    '${controller.videoProcessingTasks[index].getTypeString()} (${(controller.videoProcessingTasks[index].progress * 100).toInt()}%)')),
                                 subtitle: Column(
                                   children: [
                                     Text(controller
@@ -430,7 +429,7 @@ class _ExportVideoButton extends StatelessWidget {
   }
 }
 
-class ResizableLayout extends StatelessWidget {
+class ResizableLayout extends GetView<GlobalController> {
   final leftColumnMinWidth = 300.0;
   final rightColumnMinWidth = 400.0;
   final rowMinHeight = 300.0;
@@ -438,7 +437,7 @@ class ResizableLayout extends StatelessWidget {
   final leftColumnWidth = 300.0.obs;
   final topRowHeight = 400.0.obs;
   final dragIconSize = 20.0;
-  final GlobalController controller = Get.find();
+  // final GlobalController controller = Get.find();
 
   ResizableLayout({super.key});
 
