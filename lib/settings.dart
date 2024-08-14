@@ -1,8 +1,20 @@
 import 'package:get/get.dart';
 import 'package:objectbox/objectbox.dart';
 
+enum FFmpegPreset {
+  ultrafast,
+  superfast,
+  veryfast,
+  faster,
+  fast,
+  medium,
+  slow,
+  slower,
+  veryslow,
+}
+
 @Entity()
-class TransCodePreset {
+class ExportPreset {
   @Id()
   int id = 0;
   String name = 'Custom';
@@ -11,9 +23,10 @@ class TransCodePreset {
   int width = 3840;
   int height = 2160;
   int crf = 22;
+  FFmpegPreset preset = FFmpegPreset.medium;
 }
 
 class Settings {
-  final RxList<TransCodePreset> transCodingPresets = <TransCodePreset>[].obs;
+  final RxList<ExportPreset> transCodingPresets = <ExportPreset>[].obs;
   final defaultTransCodePresetIndex = 0.obs;
 }

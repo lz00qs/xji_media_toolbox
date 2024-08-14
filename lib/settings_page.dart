@@ -31,7 +31,7 @@ class SettingsPage extends GetView<GlobalController> {
               const SizedBox(
                 width: 10,
               ),
-              const Text('Transcode Preset'),
+              const Text('Export Preset'),
               const Spacer(),
               IconButton(
                   onPressed: () {

@@ -13,12 +13,13 @@ class EditTranscodePresetController extends GetxController {
   final crf = 22.obs;
   final useHevc = false.obs;
   final useInputResolution = false.obs;
+  final selectedFFmpegPreset = FFmpegPreset.medium.obs;
 
-  void initController(TransCodePreset? preset) {
+  void initController(ExportPreset? preset) {
     final isNew = preset == null;
-    late final TransCodePreset editingPreset;
+    late final ExportPreset editingPreset;
     if (isNew) {
-      editingPreset = TransCodePreset();
+      editingPreset = ExportPreset();
     } else {
       editingPreset = preset;
     }
@@ -31,16 +32,18 @@ class EditTranscodePresetController extends GetxController {
     crf.value = editingPreset.crf;
     useHevc.value = editingPreset.useHevc;
     useInputResolution.value = editingPreset.useInputResolution;
+    selectedFFmpegPreset.value = editingPreset.preset;
   }
 }
 
 class EditTranscodePresetDialog extends GetView<EditTranscodePresetController> {
-  final TransCodePreset? preset;
+  final ExportPreset? preset;
 
   const EditTranscodePresetDialog({super.key, this.preset});
 
   @override
   Widget build(BuildContext context) {
+    final dropdownFocusNode = FocusNode();
     controller.initController(preset);
     return AlertDialog(
       title: Text(preset == null ? 'Add Preset' : 'Edit Preset'),
@@ -148,25 +151,52 @@ class EditTranscodePresetDialog extends GetView<EditTranscodePresetController> {
               ],
             );
           }
-        })
+        }),
+        Row(
+          children: [
+            const Text("preset:"),
+            const SizedBox(
+              width: 5,
+            ),
+            Obx(() => DropdownButton<FFmpegPreset>(
+              focusNode: dropdownFocusNode,
+              value: controller.selectedFFmpegPreset.value,
+              items: FFmpegPreset.values
+                  .map((e) => DropdownMenuItem<FFmpegPreset>(
+                value: e,
+                child: Text(e.name),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  controller.selectedFFmpegPreset.value = value;
+                }
+                dropdownFocusNode.unfocus();
+              },
+            )),
+          ],
+        ),
       ]),
       actions: [
         TextButton(
           onPressed: () {
             Get.back();
+            // controller.dispose();
           },
           child: const Text('Cancel'),
         ),
         TextButton(
           onPressed: () {
-            final newPreset = TransCodePreset()
+            final newPreset = ExportPreset()
               ..name = controller.nameController.text
               ..width = controller.width.value
               ..height = controller.height.value
               ..crf = controller.crf.value
               ..useHevc = controller.useHevc.value
-              ..useInputResolution = controller.useInputResolution.value;
+              ..useInputResolution = controller.useInputResolution.value
+              ..preset = controller.selectedFFmpegPreset.value;
             Get.back(result: newPreset);
+            // controller.dispose();
           },
           child: Text(preset == null ? 'Add' : 'Save'),
         ),

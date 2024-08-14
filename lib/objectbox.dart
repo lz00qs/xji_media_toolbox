@@ -6,10 +6,10 @@ import 'objectbox.g.dart'; // created by `flutter pub run build_runner build`
 class ObjectBox {
   /// The Store of this app.
   late final Store store;
-  late final Box<TransCodePreset> transCodePresetBox;
+  late final Box<ExportPreset> transCodePresetBox;
 
   ObjectBox._create(this.store) {
-    transCodePresetBox = Box<TransCodePreset>(store);
+    transCodePresetBox = Box<ExportPreset>(store);
   }
 
   /// Create an instance of ObjectBox to use throughout the app.

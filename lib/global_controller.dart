@@ -45,7 +45,7 @@ class GlobalController extends GetxController {
     objectBox = await ObjectBox.create();
     final transCodePresets = objectBox.transCodePresetBox.getAll();
     if (transCodePresets.isEmpty) {
-      final defaultPreset = TransCodePreset()..name = 'Default';
+      final defaultPreset = ExportPreset()..name = 'Default';
       objectBox.transCodePresetBox.put(defaultPreset);
       transCodePresets.add(defaultPreset);
     }
