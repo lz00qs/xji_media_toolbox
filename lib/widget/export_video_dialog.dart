@@ -9,7 +9,7 @@ import '../video_processing.dart';
 
 class ExportVideoDialogController extends GetxController {
   final useSameDirectory = true.obs;
-  final useSameResolution = false.obs;
+  final useInputEncodeSettings = false.obs;
   final selectedDirectory = ''.obs;
   final outputFileName = ''.obs;
   final outputFileNameController = TextEditingController();
@@ -117,19 +117,16 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                             '${controller.selectedDirectory.value}/${controller.outputFileName.value}'));
                   },
                 )),
-            Obx(() => globalController.isEditingVideo.value
-                ? Row(children: [
-                    const Text('Use the same resolution as the input file:'),
-                    Obx(() => Checkbox(
-                          value: controller.useSameResolution.value,
-                          onChanged: (value) {
-                            controller.useSameResolution.value = value!;
-                          },
-                        ))
-                  ])
-                : const SizedBox()),
-            Obx(() => globalController.isEditingVideo.value &&
-                    controller.useSameResolution.value
+            Row(children: [
+              const Text('Use the same encode settings as the input file:'),
+              Obx(() => Checkbox(
+                    value: controller.useInputEncodeSettings.value,
+                    onChanged: (value) {
+                      controller.useInputEncodeSettings.value = value!;
+                    },
+                  ))
+            ]),
+            Obx(() => controller.useInputEncodeSettings.value
                 ? const SizedBox()
                 : Row(
                     children: [
@@ -168,22 +165,34 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
               final preset = globalController.settings.transCodingPresets
                   .firstWhere((element) =>
                       element.id == controller.transcodePreset.value);
-              return globalController.isEditingVideo.value &&
-                      controller.useSameResolution.value
-                  ? const SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        preset.useInputResolution
-                            ? const Text("Output resolution: Same as input")
-                            : Text(
-                                "Output resolution: ${preset.width}x${preset.height}"),
-                        Text("Output preset: ${preset.preset.toString().split('.').last}"),
-                        Text("Output CRF: ${preset.crf}"),
-                        Text(
-                            "Output codec: ${preset.useHevc ? 'HEVC' : 'H.264'}"),
-                      ],
-                    );
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  controller.useInputEncodeSettings.value
+                      ? const Text("Output resolution: Same as input")
+                      : preset.useInputResolution
+                          ? const Text("Output resolution: Same as input")
+                          : Text(
+                              "Output resolution: ${preset.width}x${preset.height}"),
+                  controller.useInputEncodeSettings.value
+                      ? const SizedBox()
+                      : Text(
+                          "Output preset: ${preset.preset.toString().split('.').last}"),
+                  controller.useInputEncodeSettings.value
+                      ? const SizedBox()
+                      : Text("Output CRF: ${preset.crf}"),
+                  controller.useInputEncodeSettings.value
+                      ? Text(
+                          "Output codec: ${globalController.footageList[globalController.currentFootageIndex.value].isHevc ? 'HEVC' : 'H.264'}")
+                      : Text(
+                          "Output codec: ${preset.useHevc ? 'HEVC' : 'H.264'}"),
+                  globalController.isEditingVideo.value
+                      ? Text(
+                          'Output Duration: ${getFormattedTime(globalController.cutVideoEndTime - globalController.cutVideoStartTime)}')
+                      : Text(
+                          'Output Duration: ${getFormattedTime(Duration(milliseconds: ((globalController.footageList[globalController.currentFootageIndex.value].duration * 1000).toInt())))}'),
+                ],
+              );
             })
           ],
         ),
@@ -210,25 +219,39 @@ class ExportVideoDialog extends GetView<ExportVideoDialogController> {
                 final inputFileName = inputFilePath.split('/').last;
                 final outputFileName = outputFilePath.split('/').last;
                 final process = VideoProcess(
-                    name: 'Transcode $inputFileName to $outputFileName',
-                    type: VideoProcessingType.transcode,
-                    duration: footage.duration,);
+                  name: 'Transcode $inputFileName to $outputFileName',
+                  type: VideoProcessingType.transcode,
+                  duration: footage.duration,
+                );
                 globalController.videoProcessingTasks.add(process);
-                process.start([
-                  '-i',
-                  inputFilePath,
-                  '-c:v',
-                  preset.useHevc ? 'libx265' : 'libx264',
-                  preset.useHevc ? '-tag:v' : '',
-                  preset.useHevc ? 'hvc1' : '',
-                  '-crf',
-                  preset.crf.toString(),
-                  '-preset',
-                  preset.preset.toString().split('.').last,
-                  '-vf',
-                  'scale=${preset.width}:${preset.height}',
-                  outputFilePath,
-                ]);
+                final List<String> ffmpegArgs = [];
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(inputFilePath);
+                ffmpegArgs.add('-c:v');
+                if (controller.useInputEncodeSettings.value == false) {
+                  ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
+                  if (preset.useHevc) {
+                    ffmpegArgs.add('-tag:v');
+                    ffmpegArgs.add('hvc1');
+                  }
+                  ffmpegArgs.add('-crf');
+                  ffmpegArgs.add(preset.crf.toString());
+                  ffmpegArgs.add('-preset');
+                  ffmpegArgs.add(preset.preset.toString().split('.').last);
+                  ffmpegArgs.add('-vf');
+                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                } else {
+                  ffmpegArgs.add('copy');
+                }
+
+                if (globalController.isEditingVideo.value == true) {
+                  ffmpegArgs.add('-ss');
+                  ffmpegArgs.add(globalController.cutVideoStartTime.toString());
+                  ffmpegArgs.add('-to');
+                  ffmpegArgs.add(globalController.cutVideoEndTime.toString());
+                }
+                ffmpegArgs.add(outputFilePath);
+                process.start(ffmpegArgs);
                 Get.back();
               }
             },

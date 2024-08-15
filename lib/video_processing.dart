@@ -27,9 +27,7 @@ class VideoProcess {
   final Rx<VideoProcessingStatus> status = VideoProcessingStatus.processing.obs;
 
   VideoProcess(
-      {required this.name,
-      required this.type,
-      required this.duration});
+      {required this.name, required this.type, required this.duration});
 
   void cancel() {
     if (_isolate != null) {
@@ -54,14 +52,14 @@ class VideoProcess {
           status.value = VideoProcessingStatus.failed;
           receivePort.close();
           _isolate = null;
+        } else if (message.contains('finished')) {
+          status.value = VideoProcessingStatus.finished;
+          progress.value = 1.0;
+          receivePort.close();
+          _isolate = null;
         } else {
           final time = _extractTimeInSeconds(message);
           progress.value = time / duration;
-          if (progress.value == 1.0) {
-            status.value = VideoProcessingStatus.finished;
-            receivePort.close();
-          }
-          // print(message);
         }
       }
     });
@@ -80,6 +78,8 @@ class VideoProcess {
     final exitCode = await process.exitCode;
     if (exitCode != 0) {
       (args[1] as SendPort).send('failed');
+    } else {
+      (args[1] as SendPort).send('finished');
     }
   }
 
