@@ -11,6 +11,7 @@ import 'package:xji_footage_toolbox/widget/export_video_dialog.dart';
 import 'package:xji_footage_toolbox/widget/footage_info_widget.dart';
 import 'package:xji_footage_toolbox/widget/gallery_widget.dart';
 import 'package:xji_footage_toolbox/widget/normal_photo_editor_widget.dart';
+import 'package:xji_footage_toolbox/widget/normal_video_cutter_widget.dart';
 import 'package:xji_footage_toolbox/widget/normal_video_editor_widget.dart';
 
 import 'load_footage.dart';
@@ -40,6 +41,7 @@ class MainPage extends StatelessWidget {
           const SingleActivator(LogicalKeyboardKey.arrowUp): () {
             if (controller.currentFootageIndex.value > 0) {
               controller.currentFootageIndex.value -= 1;
+              controller.isEditingVideo.value = false;
               if (controller.currentFootageIndex.value <
                   controller.galleryListScrollListener.itemPositions.value.first
                       .index) {
@@ -52,6 +54,7 @@ class MainPage extends StatelessWidget {
             if (controller.currentFootageIndex.value <
                 controller.footageList.length - 1) {
               controller.currentFootageIndex.value += 1;
+              controller.isEditingVideo.value = false;
               final delta = controller.galleryListScrollListener.itemPositions
                       .value.last.index -
                   controller.galleryListScrollListener.itemPositions.value.first
@@ -111,6 +114,7 @@ class MainPage extends StatelessWidget {
             if (controller.currentFootageIndex.value <
                 controller.footageList.length - 1) {
               controller.currentFootageIndex.value += 1;
+              controller.isEditingVideo.value = false;
               final delta = controller.galleryListScrollListener.itemPositions
                       .value.last.index -
                   controller.galleryListScrollListener.itemPositions.value.first
@@ -437,7 +441,6 @@ class ResizableLayout extends GetView<GlobalController> {
   final leftColumnWidth = 300.0.obs;
   final topRowHeight = 400.0.obs;
   final dragIconSize = 20.0;
-  // final GlobalController controller = Get.find();
 
   ResizableLayout({super.key});
 
@@ -553,10 +556,14 @@ class ResizableLayout extends GetView<GlobalController> {
 
             if (controller
                 .footageList[controller.currentFootageIndex.value].isVideo) {
-              return NormalVideoEditorWidget(
-                footage: controller
-                    .footageList[controller.currentFootageIndex.value],
-              );
+              return controller.isEditingVideo.value
+                  ? NormalVideoCutterWidget(
+                      footage: controller
+                          .footageList[controller.currentFootageIndex.value])
+                  : NormalVideoEditorWidget(
+                      footage: controller
+                          .footageList[controller.currentFootageIndex.value],
+                    );
             } else {
               if (controller
                   .footageList[controller.currentFootageIndex.value].isAeb) {

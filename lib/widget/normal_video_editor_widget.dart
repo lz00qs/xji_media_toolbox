@@ -22,13 +22,8 @@ class NormalVideoEditorWidget extends StatelessWidget {
     final controller =
         Get.put(_VideoPlayerGetxController(videoFile: footage.file));
     controller._initializePlayer();
-    return Center(
-      child: Obx(() {
-        return globalController.isEditingVideo.value
-            ? NormalVideoCutterWidget(footage: footage)
-            : _VideoPlayerWidget(videoFile: footage.file);
-      }),
-    );
+    globalController.isEditingVideo.value = false;
+    return Center(child: _VideoPlayerWidget(videoFile: footage.file));
   }
 }
 

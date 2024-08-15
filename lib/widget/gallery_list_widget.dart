@@ -78,6 +78,7 @@ class _ItemListWidget extends StatelessWidget {
           return GestureDetector(
             onTap: () {
               controller.currentFootageIndex.value = index;
+              controller.isEditingVideo.value = false;
             },
             child: Container(
               color: currentFootageIndex == index
