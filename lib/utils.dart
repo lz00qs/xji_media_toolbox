@@ -19,4 +19,9 @@ bool isFileExist(String path) {
   return file.existsSync();
 }
 
+String getFormattedTime(Duration duration) {
+  final origString = duration.toString();
+  return origString.substring(0, origString.length - 2);
+}
+
 

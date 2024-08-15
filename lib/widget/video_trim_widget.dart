@@ -9,6 +9,8 @@ import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/footage.dart';
 import 'package:xji_footage_toolbox/global_controller.dart';
 
+import '../utils.dart';
+
 const scaleFactorList = [
   20,
   100,
@@ -20,11 +22,6 @@ const scaleFactorList = [
   100000,
   200000
 ];
-
-String _getFormattedTime(Duration duration) {
-  final origString = duration.toString();
-  return origString.substring(0, origString.length - 2);
-}
 
 class VideoTrimController extends GetxController {
   final Rx<Duration> sourceDuration = const Duration(milliseconds: 0).obs;
@@ -171,7 +168,7 @@ class VideoTrimWidget extends GetView<VideoTrimController> {
           ]),
           SizedBox(
             child: Obx(() => Text(
-                "Start: ${_getFormattedTime(controller.startTime.value)} | End: ${_getFormattedTime(controller.endTime.value)} | Duration: ${_getFormattedTime(controller.endTime.value - controller.startTime.value)}")),
+                "Start: ${getFormattedTime(controller.startTime.value)} | End: ${getFormattedTime(controller.endTime.value)} | Duration: ${getFormattedTime(controller.endTime.value - controller.startTime.value)}")),
           ),
           _VideoPlayerBar(),
           _VideoTrimmerBar(),
@@ -214,7 +211,7 @@ class _VideoPlayerBar extends GetView<VideoTrimController> {
             child: Row(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Obx(() => Text(_getFormattedTime(controller.startTime.value))),
+                Obx(() => Text(getFormattedTime(controller.startTime.value))),
                 const SizedBox(
                   width: 10,
                 ),
@@ -238,7 +235,7 @@ class _VideoPlayerBar extends GetView<VideoTrimController> {
                 const SizedBox(
                   width: 10,
                 ),
-                Obx(() => Text(_getFormattedTime(
+                Obx(() => Text(getFormattedTime(
                     Duration(milliseconds: controller.playerPosition.value)))),
               ],
             )));
