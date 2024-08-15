@@ -6,9 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/footage.dart';
-import 'package:xji_footage_toolbox/global_controller.dart';
-
-import 'normal_video_cutter_widget.dart';
 
 class NormalVideoEditorWidget extends StatelessWidget {
   final Footage footage;
@@ -17,12 +14,10 @@ class NormalVideoEditorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final globalController = Get.find<GlobalController>();
     Get.delete<_VideoPlayerGetxController>();
     final controller =
         Get.put(_VideoPlayerGetxController(videoFile: footage.file));
     controller._initializePlayer();
-    globalController.isEditingVideo.value = false;
     return Center(child: _VideoPlayerWidget(videoFile: footage.file));
   }
 }

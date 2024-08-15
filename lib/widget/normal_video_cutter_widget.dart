@@ -12,7 +12,8 @@ class NormalVideoCutterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = VideoTrimController(footage: footage);
+    Get.delete<VideoTrimController>();
+    final controller = Get.put(VideoTrimController(footage: footage));
     return GetBuilder<VideoTrimController>(
         init: controller,
         builder: (controller) => Center(

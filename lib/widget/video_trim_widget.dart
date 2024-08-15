@@ -58,7 +58,7 @@ class VideoTrimController extends GetxController {
     sourceDuration.value =
         Duration(microseconds: footage.duration.toInt() * 1000 * 1000);
     // for dev
-    sourceDuration.value = const Duration(microseconds: 9209200);
+    // sourceDuration.value = const Duration(microseconds: 9209200);
     endTime.value = sourceDuration.value;
 
     if (sourceDuration.value.inMilliseconds / scaleFactorList.last > 50) {
