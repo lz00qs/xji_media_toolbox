@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+
+import '../../controllers/global_focus_nodes_controller.dart';
 
 class MediaResourcesListPanelController extends GetxController {
   static const _thumbnailMaxWidth = 200;
@@ -23,42 +26,97 @@ class MediaResourcesListPanelController extends GetxController {
   }
 }
 
+void _decreaseCurrentMediaIndex() {
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+  final mediaResourcesListPanelController =
+      Get.find<MediaResourcesListPanelController>();
+
+  if (globalMediaResourcesController.currentMediaIndex > 0) {
+    globalMediaResourcesController.currentMediaIndex.value--;
+
+    if (globalMediaResourcesController.currentMediaIndex.value <
+        mediaResourcesListPanelController
+            .mediaResourcesListScrollListener.itemPositions.value.first.index) {
+      mediaResourcesListPanelController.mediaResourcesListScrollController
+          .jumpTo(
+              index: globalMediaResourcesController.currentMediaIndex.value);
+    }
+  }
+}
+
+void _increaseCurrentMediaIndex() {
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+  final mediaResourcesListPanelController =
+      Get.find<MediaResourcesListPanelController>();
+
+  if (globalMediaResourcesController.currentMediaIndex <
+      globalMediaResourcesController.mediaResources.length - 1) {
+    globalMediaResourcesController.currentMediaIndex.value++;
+
+    if (globalMediaResourcesController.currentMediaIndex.value >
+        mediaResourcesListPanelController
+            .mediaResourcesListScrollListener.itemPositions.value.last.index) {
+      mediaResourcesListPanelController.mediaResourcesListScrollController
+          .jumpTo(
+              index: globalMediaResourcesController.currentMediaIndex.value);
+    }
+  }
+}
+
 class MediaResourcesListPanelWidget
     extends GetView<MediaResourcesListPanelController> {
   const MediaResourcesListPanelWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: 40,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              IconButton(
-                  onPressed: () {
-                    controller.zoomIn();
-                  },
-                  icon: const Icon(
-                    Icons.zoom_in,
-                    size: 20,
-                  )),
-              IconButton(
-                  onPressed: () {
-                    controller.zoomOut();
-                  },
-                  icon: const Icon(
-                    Icons.zoom_out,
-                    size: 20,
-                  )),
-            ],
-          ),
-        ),
-        const _MediaResourcesListWidget(),
-      ],
-    );
+    final globalFocusNodesController = Get.find<GlobalFocusNodesController>();
+    return KeyboardListener(
+        focusNode: globalFocusNodesController.mediaResourcesListPanelFocusNode,
+        autofocus: true,
+        onKeyEvent: (event) {
+          if (event is KeyDownEvent || event is KeyRepeatEvent) {
+            switch (event.logicalKey) {
+              case LogicalKeyboardKey.arrowUp:
+                _decreaseCurrentMediaIndex();
+                break;
+              case LogicalKeyboardKey.arrowDown:
+                _increaseCurrentMediaIndex();
+                break;
+            }
+          }
+        },
+        child: Column(
+          children: [
+            SizedBox(
+              height: 40,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                      onPressed: () {
+                        controller.zoomIn();
+                      },
+                      icon: const Icon(
+                        Icons.zoom_in,
+                        size: 20,
+                      )),
+                  IconButton(
+                      onPressed: () {
+                        controller.zoomOut();
+                      },
+                      icon: const Icon(
+                        Icons.zoom_out,
+                        size: 20,
+                      )),
+                ],
+              ),
+            ),
+            const _MediaResourcesListWidget(),
+          ],
+        ));
   }
 }
 
