@@ -11,7 +11,7 @@ class ResizableTriplePanelWidget extends StatelessWidget {
   static const _leftPanelMinHeight = 300.0;
   static const _draggableAreaSize = 8.0;
   static const _dragIconSize = 20.0;
-  static const _dragAreaColor = Colors.grey;
+  static const _dragAreaColor = Colors.black12;
 
   final _leftPanelWidth = 300.0.obs;
   final _topLeftPanelHeight = 400.0.obs;
@@ -36,7 +36,6 @@ class ResizableTriplePanelWidget extends StatelessWidget {
     return Obx(() => Row(
           children: [
             Container(
-              color: Colors.blue,
               width: _leftPanelWidth.value,
               constraints: const BoxConstraints(minWidth: _leftPanelMinWidth),
               child: Column(
