@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/ui/widgets/load_media_resources_icon_button_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
 import 'package:xji_footage_toolbox/ui/widgets/media_resources_list_panel_widget.dart';
 
 import '../../controllers/global_focus_nodes_controller.dart';
@@ -73,6 +74,7 @@ class MainPage extends StatelessWidget {
           }
         },
         child: Scaffold(
+          appBar: createMainPageAppBar(),
           body: ResizableTriplePanelWidget(
             topLeftPanel:
                 Obx(() => globalMediaResourcesController.mediaResources.isEmpty

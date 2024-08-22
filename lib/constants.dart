@@ -3,7 +3,9 @@
 const String thumbnailFolderName = 'thumb';
 
 const double macAppBarHeight = 30.0;
-const double macTopButtonPadding = 5.0;
+const double macAppBarButtonPadding = 5.0;
+const double macAppBarLeadingWidth = 300.0;
+const double macAppBarTitleTextSize = 15.0;
 
 // Errors
 const int parseMediaResourceErrorCode = 0;
