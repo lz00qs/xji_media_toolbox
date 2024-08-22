@@ -15,21 +15,22 @@ class MainPage extends StatelessWidget {
     final globalMediaResourcesController =
         Get.find<GlobalMediaResourcesController>();
     return Scaffold(
-      body: ResizableTriplePanelWidget(
-        topLeftPanel:
-            Obx(() => globalMediaResourcesController.mediaResources.isEmpty
+      body: Obx(() => ResizableTriplePanelWidget(
+            topLeftPanel: globalMediaResourcesController.mediaResources.isEmpty
                 ? const Center(
                     child: LoadMediaResourcesIconButtonWidget(),
                   )
-                : const MediaResourcesListPanelWidget()),
-        bottomLeftPanel: Obx(() => globalMediaResourcesController
-                .mediaResources.isEmpty
-            ? const SizedBox()
-            : MediaResourceInfoPanelWidget(
-                mediaResource: globalMediaResourcesController.mediaResources[
-                    globalMediaResourcesController.currentMediaIndex.value])),
-        rightPanel: Text('Right Panel'),
-      ),
+                : const MediaResourcesListPanelWidget(),
+            bottomLeftPanel:
+                globalMediaResourcesController.mediaResources.isEmpty
+                    ? const SizedBox()
+                    : MediaResourceInfoPanelWidget(
+                        mediaResource:
+                            globalMediaResourcesController.mediaResources[
+                                globalMediaResourcesController
+                                    .currentMediaIndex.value]),
+            rightPanel: Text('Right Panel'),
+          )),
     );
   }
 }

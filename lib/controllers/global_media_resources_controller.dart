@@ -16,6 +16,7 @@ class GlobalMediaResourcesController extends GetxController {
 
   set mediaResourceDir(Directory? value) {
     _mediaResourceDir = value;
+    mediaResources.clear();
     loadMediaResources();
   }
 

@@ -410,8 +410,11 @@ Future<void> openMediaResourcesFolder() async {
       globalMediaResourcesController.isLoadingMediaResources.value = true;
       globalMediaResourcesController.mediaResourceDir = mediaResourcesDir;
       await loadMediaResources(mediaResourcesDir);
-      globalMediaResourcesController.mediaResources.value = _mediaResources;
+      globalMediaResourcesController.mediaResources.addAll(_mediaResources);
       globalMediaResourcesController.isLoadingMediaResources.value = false;
+      if (kDebugMode) {
+        print('Media resources loaded');
+      }
     } else {
       Fluttertoast.showToast(msg: 'Invalid directory');
     }
