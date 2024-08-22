@@ -9,8 +9,7 @@ import '../ui/widgets/media_resources_list_panel_widget.dart';
 class GlobalMediaResourcesController extends GetxController {
   Directory? _mediaResourceDir;
   final RxList<MediaResource> mediaResources = <MediaResource>[].obs;
-  final _currentMediaIndex = 0.obs;
-  final Rx<MediaResource?> currentMediaResource = null.obs;
+  final currentMediaIndex = 0.obs;
   final isLoadingMediaResources = false.obs;
 
   Directory? get mediaResourceDir => _mediaResourceDir;
@@ -18,16 +17,6 @@ class GlobalMediaResourcesController extends GetxController {
   set mediaResourceDir(Directory? value) {
     _mediaResourceDir = value;
     loadMediaResources();
-  }
-
-  RxInt get currentMediaIndex => _currentMediaIndex;
-
-  void setCurrentMediaIndex(int index) {
-    if (index < 0 || index >= mediaResources.length) {
-      return;
-    }
-    _currentMediaIndex.value = index;
-    currentMediaResource.value = mediaResources[index];
   }
 
   @override

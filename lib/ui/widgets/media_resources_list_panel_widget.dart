@@ -33,7 +33,7 @@ void _decreaseCurrentMediaIndex() {
       Get.find<MediaResourcesListPanelController>();
 
   if (globalMediaResourcesController.currentMediaIndex > 0) {
-    globalMediaResourcesController.currentMediaIndex.value--;
+    globalMediaResourcesController.currentMediaIndex.value -= 1;
 
     if (globalMediaResourcesController.currentMediaIndex.value <
         mediaResourcesListPanelController
@@ -53,7 +53,7 @@ void _increaseCurrentMediaIndex() {
 
   if (globalMediaResourcesController.currentMediaIndex <
       globalMediaResourcesController.mediaResources.length - 1) {
-    globalMediaResourcesController.currentMediaIndex.value++;
+    globalMediaResourcesController.currentMediaIndex.value += 1;
 
     if (globalMediaResourcesController.currentMediaIndex.value >
         mediaResourcesListPanelController
