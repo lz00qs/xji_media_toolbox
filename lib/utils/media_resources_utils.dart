@@ -420,3 +420,31 @@ Future<void> openMediaResourcesFolder() async {
     }
   }
 }
+
+void deleteMediaResource(int index) {
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+  if (index > 0 &&
+      index < globalMediaResourcesController.mediaResources.length) {
+    if (index == globalMediaResourcesController.currentMediaIndex.value &&
+        index == globalMediaResourcesController.mediaResources.length - 1) {
+      globalMediaResourcesController.currentMediaIndex.value -= 1;
+    }
+    try {
+      globalMediaResourcesController.mediaResources[index].file.deleteSync();
+      if (globalMediaResourcesController.mediaResources[index].thumbFile !=
+              null &&
+          globalMediaResourcesController.mediaResources[index].thumbFile!
+              .existsSync()) {
+        globalMediaResourcesController.mediaResources[index].thumbFile!
+            .deleteSync();
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print(
+            'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
+      }
+    }
+    globalMediaResourcesController.mediaResources.removeAt(index);
+  }
+}

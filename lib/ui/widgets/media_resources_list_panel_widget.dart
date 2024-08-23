@@ -71,68 +71,71 @@ class _MediaResourcesListWidget
     final globalMediaResourcesController =
         Get.find<GlobalMediaResourcesController>();
     return Expanded(
-      child: ScrollablePositionedList.builder(
-        itemScrollController: controller.mediaResourcesListScrollController,
-        itemPositionsListener: controller.mediaResourcesListScrollListener,
-        itemCount: globalMediaResourcesController.mediaResources.length,
-        itemBuilder: (BuildContext context, int index) {
-          return GestureDetector(
-            onTap: () {
-              globalMediaResourcesController.currentMediaIndex.value = index;
-            },
-            child: Obx(() => Container(
-                  color:
-                      globalMediaResourcesController.currentMediaIndex.value ==
+      child: Obx(() => ScrollablePositionedList.builder(
+            itemScrollController: controller.mediaResourcesListScrollController,
+            itemPositionsListener: controller.mediaResourcesListScrollListener,
+            itemCount: globalMediaResourcesController.mediaResources.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  globalMediaResourcesController.currentMediaIndex.value =
+                      index;
+                },
+                child: Obx(() => Container(
+                      color: globalMediaResourcesController
+                                  .currentMediaIndex.value ==
                               index
                           ? Colors.grey
                           : Colors.transparent,
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: Row(
-                          children: [
-                            Flex(
-                              direction: Axis.vertical,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(5.0),
+                            child: Row(
                               children: [
-                                Obx(() => SizedBox(
-                                      width: controller.thumbnailWidth.value,
-                                      height: controller.thumbnailWidth.value *
-                                          0.618,
-                                      child: globalMediaResourcesController
-                                                  .mediaResources[index]
-                                                  .thumbFile ==
-                                              null
-                                          ? Image.asset(
-                                              'assets/images/resource_not_found.jpeg',
-                                              fit: BoxFit.cover)
-                                          : Image.file(
-                                              globalMediaResourcesController
-                                                  .mediaResources[index]
-                                                  .thumbFile!,
-                                              fit: BoxFit.contain),
-                                    )),
+                                Flex(
+                                  direction: Axis.vertical,
+                                  children: [
+                                    Obx(() => SizedBox(
+                                          width:
+                                              controller.thumbnailWidth.value,
+                                          height:
+                                              controller.thumbnailWidth.value *
+                                                  0.618,
+                                          child: globalMediaResourcesController
+                                                      .mediaResources[index]
+                                                      .thumbFile ==
+                                                  null
+                                              ? Image.asset(
+                                                  'assets/images/resource_not_found.jpeg',
+                                                  fit: BoxFit.cover)
+                                              : Image.file(
+                                                  globalMediaResourcesController
+                                                      .mediaResources[index]
+                                                      .thumbFile!,
+                                                  fit: BoxFit.contain),
+                                        )),
+                                  ],
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    globalMediaResourcesController
+                                        .mediaResources[index].name,
+                                    style: const TextStyle(
+                                        fontSize: 12,
+                                        overflow: TextOverflow.ellipsis),
+                                  ),
+                                ),
                               ],
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                globalMediaResourcesController
-                                    .mediaResources[index].name,
-                                style: const TextStyle(
-                                    fontSize: 12,
-                                    overflow: TextOverflow.ellipsis),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                )),
-          );
-        },
-      ),
+                    )),
+              );
+            },
+          )),
     );
   }
 }
