@@ -4,5 +4,5 @@ import 'package:get/get.dart';
 
 class GlobalFocusNodesController extends GetxController {
   final mediaResourcesListPanelFocusNode = FocusNode();
-  final mediaResourceDeleteDialogFocusNode = FocusNode();
+  final dialogFocusNode = FocusNode();
 }

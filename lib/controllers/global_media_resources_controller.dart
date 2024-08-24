@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.dart';
+import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
 
 import '../models/media_resource.dart';
 import '../ui/widgets/media_resources_list_panel_widget.dart';
@@ -25,6 +26,7 @@ class GlobalMediaResourcesController extends GetxController {
     super.onInit();
     Get.put(MediaResourcesListPanelController());
     Get.put(GlobalFocusNodesController());
+    Get.put(AebPhotoViewerController());
   }
 
   Future<void> loadMediaResources() async {

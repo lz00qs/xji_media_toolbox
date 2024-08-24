@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/constants.dart';
+import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar_button.dart';
 
 import '../../utils/media_resources_utils.dart';
 
@@ -10,7 +11,7 @@ class _MainPageMacLeftAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var onPressed = false;
-    var appBarButtonSize = macAppBarHeight - 2 * macAppBarButtonPadding;
+    // var appBarButtonSize = macAppBarHeight - 2 * macAppBarButtonPadding;
     return SizedBox(
       height: macAppBarHeight,
       child: Row(
@@ -19,31 +20,18 @@ class _MainPageMacLeftAppBar extends StatelessWidget {
           const SizedBox(
             width: 75,
           ),
-          IconButton(
-            padding: const EdgeInsets.all(macAppBarButtonPadding),
-            onPressed: () async {
-              if (onPressed) {
-                return;
-              }
-              onPressed = true;
-              await openMediaResourcesFolder();
-              onPressed = false;
-            },
-            icon: Icon(
-              Icons.folder_open,
-              size: appBarButtonSize,
-            ),
-          ),
-          IconButton(
-            padding: const EdgeInsets.all(macAppBarButtonPadding),
-            onPressed: () {},
-            icon: Icon(Icons.settings, size: appBarButtonSize),
-          ),
-          IconButton(
-            padding: const EdgeInsets.all(macAppBarButtonPadding),
-            onPressed: () {},
-            icon: Icon(Icons.help, size: appBarButtonSize),
-          ),
+          MainPageAppBarButton(
+              iconData: Icons.folder_open,
+              onPressed: () async {
+                if (onPressed) {
+                  return;
+                }
+                onPressed = true;
+                await openMediaResourcesFolder();
+                onPressed = false;
+              }),
+          MainPageAppBarButton(iconData: Icons.settings, onPressed: () {}),
+          MainPageAppBarButton(iconData: Icons.help, onPressed: () {}),
         ],
       ),
     );

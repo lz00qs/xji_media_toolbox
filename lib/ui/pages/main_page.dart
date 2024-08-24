@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/load_media_resources_icon_button_widget.dart';
 import 'package:xji_footage_toolbox/ui/widgets/media_resources_list_panel_widget.dart';
 
 import '../../controllers/global_focus_nodes_controller.dart';
 import '../../controllers/global_media_resources_controller.dart';
+import '../widgets/aeb_photo_viewer_widget.dart';
 import '../widgets/main_page_left_app_bar.dart';
 import '../widgets/media_resource_info_panel_widget.dart';
 import '../widgets/media_resource_main_panel_widget.dart';
@@ -50,6 +52,44 @@ void _increaseCurrentMediaIndex() {
   }
 }
 
+void _increaseCurrentAebIndex() {
+  final aebPhotoViewerController = Get.find<AebPhotoViewerController>();
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+
+  if (aebPhotoViewerController.currentAebIndex <
+      (globalMediaResourcesController.mediaResources[
+                      globalMediaResourcesController.currentMediaIndex.value]
+                  as AebPhotoResource)
+              .aebFiles
+              .length -
+          1) {
+    aebPhotoViewerController.currentAebIndex.value += 1;
+  }
+
+  if (aebPhotoViewerController
+          .aebListScrollListener.itemPositions.value.last.index <
+      aebPhotoViewerController.currentAebIndex.value) {
+    aebPhotoViewerController.aebListScrollController.jumpTo(
+        index: aebPhotoViewerController.currentAebIndex.value, alignment: 0.5);
+  }
+}
+
+void _decreaseCurrentAebIndex() {
+  final aebPhotoViewerController = Get.find<AebPhotoViewerController>();
+
+  if (aebPhotoViewerController.currentAebIndex > 0) {
+    aebPhotoViewerController.currentAebIndex.value -= 1;
+  }
+
+  if (aebPhotoViewerController
+          .aebListScrollListener.itemPositions.value.first.index >
+      aebPhotoViewerController.currentAebIndex.value) {
+    aebPhotoViewerController.aebListScrollController.jumpTo(
+        index: aebPhotoViewerController.currentAebIndex.value, alignment: 0.5);
+  }
+}
+
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
@@ -70,6 +110,24 @@ class MainPage extends StatelessWidget {
                 break;
               case LogicalKeyboardKey.arrowDown:
                 _increaseCurrentMediaIndex();
+                break;
+              case LogicalKeyboardKey.arrowLeft:
+                if (globalMediaResourcesController.mediaResources.isNotEmpty &&
+                    globalMediaResourcesController
+                        .mediaResources[globalMediaResourcesController
+                            .currentMediaIndex.value]
+                        .isAeb) {
+                  _decreaseCurrentAebIndex();
+                }
+                break;
+              case LogicalKeyboardKey.arrowRight:
+                if (globalMediaResourcesController.mediaResources.isNotEmpty &&
+                    globalMediaResourcesController
+                        .mediaResources[globalMediaResourcesController
+                            .currentMediaIndex.value]
+                        .isAeb) {
+                  _increaseCurrentAebIndex();
+                }
                 break;
             }
           }

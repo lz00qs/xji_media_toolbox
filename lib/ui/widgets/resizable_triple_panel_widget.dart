@@ -39,6 +39,7 @@ class ResizableTriplePanelWidget extends StatelessWidget {
               width: _leftPanelWidth.value,
               constraints: const BoxConstraints(minWidth: _leftPanelMinWidth),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     height: _topLeftPanelHeight.value,

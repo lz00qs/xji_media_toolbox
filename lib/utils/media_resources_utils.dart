@@ -448,3 +448,63 @@ void deleteMediaResource(int index) {
     globalMediaResourcesController.mediaResources.removeAt(index);
   }
 }
+
+void addSuffixToCurrentAebFilesName() {
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+  final currentMediaResource = globalMediaResourcesController.mediaResources[
+          globalMediaResourcesController.currentMediaIndex.value]
+      as AebPhotoResource;
+  for (var i = 0; i < currentMediaResource.aebFiles.length; i++) {
+    var evBias = '';
+    switch (i) {
+      case 0:
+        evBias = '0.0';
+        break;
+      case 1:
+        evBias = '-0.7';
+        break;
+      case 2:
+        evBias = '+0.7';
+        break;
+      case 3:
+        evBias = '-1.3';
+        break;
+      case 4:
+        evBias = '+1.3';
+        break;
+      case 5:
+        evBias = '-2.0';
+        break;
+      case 6:
+        evBias = '+2.0';
+        break;
+      default:
+        evBias = '0.0';
+    }
+    final suffix = '_AEB_${currentMediaResource.sequence}_$evBias';
+    final oldFile = currentMediaResource.aebFiles[i];
+    final newPath =
+        '${oldFile.parent.path}/${oldFile.uri.pathSegments.last.split('.').first}$suffix.${oldFile.uri.pathSegments.last.split('.').last}';
+    final newFile = File(newPath);
+    try {
+      oldFile.renameSync(newFile.path);
+      currentMediaResource.aebFiles[i] = newFile;
+    } catch (e) {
+      Fluttertoast.showToast(msg: 'Error renaming file: ${oldFile.path}');
+    }
+  }
+  final newAebPhotoResource = (AebPhotoResource(
+      name: currentMediaResource.aebFiles[0].uri.pathSegments.last,
+      file: currentMediaResource.aebFiles[0],
+      width: currentMediaResource.width,
+      height: currentMediaResource.height,
+      sizeInBytes: currentMediaResource.sizeInBytes,
+      creationTime: currentMediaResource.creationTime,
+      sequence: currentMediaResource.sequence,
+      evBias: currentMediaResource.evBias)
+    ..thumbFile = currentMediaResource.thumbFile);
+  newAebPhotoResource.aebFiles.addAll(currentMediaResource.aebFiles);
+  globalMediaResourcesController.mediaResources[globalMediaResourcesController
+      .currentMediaIndex.value] = newAebPhotoResource;
+}
