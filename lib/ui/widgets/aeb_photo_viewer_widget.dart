@@ -56,6 +56,8 @@ class AebPhotoViewerWidget extends GetView<AebPhotoViewerController> {
               photoFile:
                   photoResource.aebFiles[controller.currentAebIndex.value])),
         ),
+        Obx(() => Text(photoResource.aebFiles[controller.currentAebIndex.value]
+            .uri.pathSegments.last)),
         SizedBox(
           height: 150,
           child: ScrollConfiguration(

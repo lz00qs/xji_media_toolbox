@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 
-import 'aeb_photo_viewer_widget.dart';
 
 const _infoTextStyle = TextStyle(fontSize: 15, overflow: TextOverflow.ellipsis);
 
@@ -19,12 +17,11 @@ String _dynamicSizeText(int sizeInBytes) {
 }
 
 List<Widget> _genericMediaResourceInfo(MediaResource mediaResource) {
-  final AebPhotoViewerController aebPhotoViewerController = Get.find();
   return [
-    Obx(() => Text(
-      'FileName: ${mediaResource.isAeb ? (mediaResource as AebPhotoResource).aebFiles[aebPhotoViewerController.currentAebIndex.value].uri.pathSegments.last : mediaResource.name}',
+    mediaResource.isAeb ? const SizedBox() : Text(
+      'FileName: ${mediaResource.name}',
       style: _infoTextStyle,
-    )),
+    ),
     Text(
       'Resolution: ${mediaResource.width}x${mediaResource.height}',
       style: _infoTextStyle,
