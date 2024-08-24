@@ -3,6 +3,8 @@ import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
 import 'package:xji_footage_toolbox/ui/widgets/normal_photo_viewer_widget.dart';
 
+import 'normal_video_viewer_widget.dart';
+
 class MediaResourceMainPanelWidget extends StatelessWidget {
   final MediaResource mediaResource;
 
@@ -19,7 +21,8 @@ class MediaResourceMainPanelWidget extends StatelessWidget {
             photoResource: mediaResource as AebPhotoResource);
       }
     } else if (mediaResource.isVideo == true) {
-      return const SizedBox();
+      return NormalVideoViewerWidget(
+          videoResource: mediaResource as NormalVideoResource);
     }
     return const SizedBox();
   }
