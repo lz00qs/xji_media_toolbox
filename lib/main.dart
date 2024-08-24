@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
+import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
@@ -38,10 +39,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalMediaResourcesController globalMediaResourcesController =
+        Get.find<GlobalMediaResourcesController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home:
-          isFFmpegAvailable ? const MainPage() : const FFmpegNotAvailablePage(),
+          isFFmpegAvailable ? Obx(() => globalMediaResourcesController.isLoadingMediaResources.value ? const LoadingMediaResourcesPage() : const MainPage()) : const FFmpegNotAvailablePage(),
     );
   }
 }
