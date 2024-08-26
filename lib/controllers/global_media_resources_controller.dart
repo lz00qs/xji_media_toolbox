@@ -12,6 +12,7 @@ class GlobalMediaResourcesController extends GetxController {
   final RxList<MediaResource> mediaResources = <MediaResource>[].obs;
   final currentMediaIndex = 0.obs;
   final isLoadingMediaResources = false.obs;
+  final isEditingMediaResources = false.obs;
 
   Directory? get mediaResourceDir => _mediaResourceDir;
 
