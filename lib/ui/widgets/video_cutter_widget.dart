@@ -16,7 +16,11 @@ class VideoCutterWidget extends StatelessWidget {
     Get.put(VideoTrimmerController(videoResource: videoResource));
     return Column(
       children: [
-        Expanded(child: VideoPlayerWidget(videoResource: videoResource,)),
+        Expanded(
+            child: VideoPlayerWidget(
+          videoResource: videoResource,
+          showControls: false,
+        )),
         const VideoTrimmerWidget()
       ],
     );

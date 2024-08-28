@@ -12,8 +12,10 @@ class VideoPlayerGetxController extends GetxController {
   ChewieController? chewieController;
   final File videoFile;
   final footageInitialized = false.obs;
+  final bool showControls;
 
-  VideoPlayerGetxController({required this.videoFile});
+  VideoPlayerGetxController(
+      {required this.videoFile, required this.showControls});
 
   @override
   void onInit() {
@@ -37,6 +39,7 @@ class VideoPlayerGetxController extends GetxController {
       autoPlay: false,
       looping: false,
       autoInitialize: true,
+      showControls: showControls,
     );
     footageInitialized.value = true;
     update();
@@ -45,14 +48,16 @@ class VideoPlayerGetxController extends GetxController {
 
 class VideoPlayerWidget extends StatelessWidget {
   final NormalVideoResource videoResource;
+  final bool showControls;
 
-  const VideoPlayerWidget({super.key, required this.videoResource});
+  const VideoPlayerWidget(
+      {super.key, required this.videoResource, this.showControls = true});
 
   @override
   Widget build(BuildContext context) {
     Get.delete<VideoPlayerGetxController>();
-    final controller =
-        Get.put(VideoPlayerGetxController(videoFile: videoResource.file));
+    final controller = Get.put(VideoPlayerGetxController(
+        videoFile: videoResource.file, showControls: showControls));
     return Obx(() => controller.footageInitialized.value
         ? Chewie(
             controller: controller.chewieController!,
