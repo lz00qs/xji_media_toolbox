@@ -3,14 +3,19 @@
 const String thumbnailFolderName = 'thumb';
 
 const double macAppBarHeight = 30.0;
-const double macTopButtonPadding = 5.0;
+const double macAppBarButtonPadding = 5.0;
+const double macAppBarLeadingWidth = 300.0;
+const double macAppBarTitleTextSize = 15.0;
 
 // Errors
-const int parseFootageErrorCode = 0;
-const String parseFootageTimeError = "Parse footage time error";
-const String parseFootageSequenceError = "Parse footage sequence error";
-const String parseFootageVideoInfoError = "Parse footage video info error";
+const int parseMediaResourceErrorCode = 0;
+const String parseMediaResourceTimeError = "Parse media resource time error";
+const String parseMediaResourceSequenceError =
+    "Parse media resource sequence error";
+// const String parseMediaResourceVideoInfoError = "Parse media resource video info error";
 
 const int parseAebErrorCode = 1;
 const String parseAebStartError = "Parse AEB start error";
 const String parseAebEndError = "Parse AEB end error";
+
+const String defaultTransCodePresetIndexPrefKey = 'defaultTransCodePresetIndex';

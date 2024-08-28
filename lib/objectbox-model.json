@@ -4,70 +4,64 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "2:8408958098223209320",
-      "lastPropertyId": "7:8738677318077284768",
+      "id": "1:6542342576071718515",
+      "lastPropertyId": "8:6600177316668141755",
       "name": "ExportPreset",
       "properties": [
         {
-          "id": "1:4599139014512258200",
+          "id": "1:3441272698186930426",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:460668736769694360",
+          "id": "2:2633146971749489003",
           "name": "name",
           "type": 9
         },
         {
-          "id": "3:1531306747543090501",
+          "id": "3:5469937351195833193",
           "name": "useInputResolution",
           "type": 1
         },
         {
-          "id": "4:4035262890068992939",
+          "id": "4:6942609030270405673",
           "name": "useHevc",
           "type": 1
         },
         {
-          "id": "5:5820615012239834601",
+          "id": "5:2255326580324500820",
           "name": "width",
           "type": 6
         },
         {
-          "id": "6:6042016530039512085",
+          "id": "6:3004389153049693201",
           "name": "height",
           "type": 6
         },
         {
-          "id": "7:8738677318077284768",
+          "id": "7:3288320502769605509",
           "name": "crf",
+          "type": 6
+        },
+        {
+          "id": "8:6600177316668141755",
+          "name": "ffmpegPreset",
           "type": 6
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "2:8408958098223209320",
+  "lastEntityId": "1:6542342576071718515",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [
-    7007811920086755803
-  ],
+  "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [
-    6818907781724797816,
-    5863088771646158795,
-    7974244988260680700,
-    718407751114615983,
-    3016759936234006850,
-    3110242820525980398,
-    5690649391399706568,
-    978776425195800060
-  ],
+  "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1
 }

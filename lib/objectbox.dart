@@ -1,6 +1,7 @@
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:xji_footage_toolbox/settings.dart';
+
+import 'models/settings.dart';
 import 'objectbox.g.dart'; // created by `flutter pub run build_runner build`
 
 class ObjectBox {
@@ -16,7 +17,8 @@ class ObjectBox {
   static Future<ObjectBox> create() async {
     final docsDir = await getApplicationDocumentsDirectory();
     // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
-    final store = await openStore(directory: p.join(docsDir.path, "objectbox"));
+    final store =
+        await openStore(directory: p.join(docsDir.path, "objectbox-test"));
     return ObjectBox._create(store);
   }
 }

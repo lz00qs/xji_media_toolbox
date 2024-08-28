@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:xji_footage_toolbox/global_controller.dart';
-import 'package:xji_footage_toolbox/splash_page.dart';
-// import 'package:xji_footage_toolbox/test_page.dart';
-import 'package:xji_footage_toolbox/utils.dart';
+import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
+import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
+import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
+import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
+
+import 'controllers/global_settings_controller.dart';
 
 Future<void> main() async {
+  // 确保 WidgetsFlutterBinding 已经初始化
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 初始化 WindowManager
   await windowManager.ensureInitialized();
   WindowOptions windowOptions = const WindowOptions(
     minimumSize: Size(1280, 720),
@@ -23,29 +28,34 @@ Future<void> main() async {
     await windowManager.focus();
   });
 
-  final controller = GlobalController();
-  await controller.loadSettings();
-  // detect if FFmpeg is available
-  controller.hasFFmpeg.value = await hasFFmpeg();
-  Get.put(controller);
-  runApp(const MyApp());
+  final isFFmpegAvailable = await hasFFmpegAndFFprobe();
+
+  Get.put(GlobalMediaResourcesController());
+
+  final globalSettingsController = Get.put(GlobalSettingsController());
+
+  await globalSettingsController.loadSettings();
+
+  runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isFFmpegAvailable;
+
+  const MyApp({super.key, required this.isFFmpegAvailable});
 
   @override
   Widget build(BuildContext context) {
-    return const GetMaterialApp(
+    final GlobalMediaResourcesController globalMediaResourcesController =
+        Get.find<GlobalMediaResourcesController>();
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashPage(),
+      home: isFFmpegAvailable
+          ? Obx(() =>
+              globalMediaResourcesController.isLoadingMediaResources.value
+                  ? const LoadingMediaResourcesPage()
+                  : const MainPage())
+          : const FFmpegNotAvailablePage(),
     );
   }
-  // @override
-  // Widget build(BuildContext context) {
-  //   return const GetMaterialApp(
-  //     debugShowCheckedModeBanner: false,
-  //     home: TestPage(),
-  //   );
-  // }
 }

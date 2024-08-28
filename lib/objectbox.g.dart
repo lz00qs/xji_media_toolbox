@@ -14,50 +14,55 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
-import 'settings.dart';
+import 'models/settings.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(2, 8408958098223209320),
+      id: const obx_int.IdUid(1, 6542342576071718515),
       name: 'ExportPreset',
-      lastPropertyId: const obx_int.IdUid(7, 8738677318077284768),
+      lastPropertyId: const obx_int.IdUid(8, 6600177316668141755),
       flags: 0,
       properties: <obx_int.ModelProperty>[
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 4599139014512258200),
+            id: const obx_int.IdUid(1, 3441272698186930426),
             name: 'id',
             type: 6,
             flags: 1),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 460668736769694360),
+            id: const obx_int.IdUid(2, 2633146971749489003),
             name: 'name',
             type: 9,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 1531306747543090501),
+            id: const obx_int.IdUid(3, 5469937351195833193),
             name: 'useInputResolution',
             type: 1,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 4035262890068992939),
+            id: const obx_int.IdUid(4, 6942609030270405673),
             name: 'useHevc',
             type: 1,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 5820615012239834601),
+            id: const obx_int.IdUid(5, 2255326580324500820),
             name: 'width',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 6042016530039512085),
+            id: const obx_int.IdUid(6, 3004389153049693201),
             name: 'height',
             type: 6,
             flags: 0),
         obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 8738677318077284768),
+            id: const obx_int.IdUid(7, 3288320502769605509),
             name: 'crf',
+            type: 6,
+            flags: 0),
+        obx_int.ModelProperty(
+            id: const obx_int.IdUid(8, 6600177316668141755),
+            name: 'ffmpegPreset',
             type: 6,
             flags: 0)
       ],
@@ -100,22 +105,13 @@ Future<obx.Store> openStore(
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
       entities: _entities,
-      lastEntityId: const obx_int.IdUid(2, 8408958098223209320),
+      lastEntityId: const obx_int.IdUid(1, 6542342576071718515),
       lastIndexId: const obx_int.IdUid(0, 0),
       lastRelationId: const obx_int.IdUid(0, 0),
       lastSequenceId: const obx_int.IdUid(0, 0),
-      retiredEntityUids: const [7007811920086755803],
+      retiredEntityUids: const [],
       retiredIndexUids: const [],
-      retiredPropertyUids: const [
-        6818907781724797816,
-        5863088771646158795,
-        7974244988260680700,
-        718407751114615983,
-        3016759936234006850,
-        3110242820525980398,
-        5690649391399706568,
-        978776425195800060
-      ],
+      retiredPropertyUids: const [],
       retiredRelationUids: const [],
       modelVersion: 5,
       modelVersionParserMinimum: 5,
@@ -132,7 +128,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         },
         objectToFB: (ExportPreset object, fb.Builder fbb) {
           final nameOffset = fbb.writeString(object.name);
-          fbb.startTable(8);
+          fbb.startTable(9);
           fbb.addInt64(0, object.id);
           fbb.addOffset(1, nameOffset);
           fbb.addBool(2, object.useInputResolution);
@@ -140,6 +136,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
           fbb.addInt64(4, object.width);
           fbb.addInt64(5, object.height);
           fbb.addInt64(6, object.crf);
+          fbb.addInt64(7, object.ffmpegPreset);
           fbb.finish(fbb.endTable());
           return object.id;
         },
@@ -159,7 +156,9 @@ obx_int.ModelDefinition getObjectBoxModel() {
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)
             ..height =
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
-            ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0);
+            ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
+            ..ffmpegPreset =
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
 
           return object;
         })
@@ -197,4 +196,8 @@ class ExportPreset_ {
   /// See [ExportPreset.crf].
   static final crf =
       obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[6]);
+
+  /// See [ExportPreset.ffmpegPreset].
+  static final ffmpegPreset =
+      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[7]);
 }
