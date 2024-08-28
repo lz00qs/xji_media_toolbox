@@ -39,7 +39,7 @@ class VideoTrimmerController extends GetxController {
   }
 }
 
-String _getFormattedTime(Duration duration) {
+String getFormattedTime(Duration duration) {
   final origString = duration.toString();
   return origString.substring(0, origString.length - 2);
 }
@@ -95,7 +95,7 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
         ),
         Obx(() => Row(
               children: [
-                Text(_getFormattedTime(controller.playerPosition.value -
+                Text(getFormattedTime(controller.playerPosition.value -
                     controller.videoPlayerStartPosition.value)),
                 Expanded(
                     child: Slider(
@@ -111,7 +111,7 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
                           await videoPlayerGetxController.videoPlayerController
                               .seekTo(Duration(microseconds: value.toInt()));
                         })),
-                Text(_getFormattedTime(controller.videoPlayerEndPosition.value -
+                Text(getFormattedTime(controller.videoPlayerEndPosition.value -
                     controller.videoPlayerStartPosition.value)),
               ],
             ))
@@ -194,9 +194,9 @@ class _VideoTrimmerBar extends GetView<VideoTrimmerController> {
                     controller.videoTrimmerEndValue.value.inMicroseconds,
                     0,
                     controller.videoResource.duration.inMicroseconds));
-            return Text('Start: ${_getFormattedTime(start)} | '
-                'End: ${_getFormattedTime(end)} | '
-                'Duration: ${_getFormattedTime(end - start)}');
+            return Text('Start: ${getFormattedTime(start)} | '
+                'End: ${getFormattedTime(end)} | '
+                'Duration: ${getFormattedTime(end - start)}');
           }),
           MouseRegion(
             child: Listener(

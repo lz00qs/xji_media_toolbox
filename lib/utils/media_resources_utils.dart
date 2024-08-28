@@ -508,3 +508,8 @@ void addSuffixToCurrentAebFilesName() {
   globalMediaResourcesController.mediaResources[globalMediaResourcesController
       .currentMediaIndex.value] = newAebPhotoResource;
 }
+
+bool isFileExist(String path) {
+  final file = File(path);
+  return file.existsSync();
+}

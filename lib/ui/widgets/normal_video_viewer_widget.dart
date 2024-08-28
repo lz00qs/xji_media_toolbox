@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/normal_video_edit_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/right_app_bar_export_video_button.dart';
 import 'package:xji_footage_toolbox/ui/widgets/video_cutter_widget.dart';
 import 'package:xji_footage_toolbox/ui/widgets/video_player_widget.dart';
 
@@ -23,6 +24,7 @@ class NormalVideoViewerWidget extends StatelessWidget {
         const MainPageRightAppBar(
           children: [
             NormalVideoEditButton(),
+            RightAppBarExportVideoButton(),
           ],
         ),
         Expanded(

@@ -8,7 +8,7 @@ import '../objectbox.dart';
 class GlobalSettingsController extends GetxController {
   late final ObjectBox objectBox;
   final RxList<ExportPreset> transCodingPresets = <ExportPreset>[].obs;
-  final defaultTransCodePresetIndex = 0.obs;
+  final defaultTransCodePresetId = 0.obs;
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();
@@ -21,11 +21,12 @@ class GlobalSettingsController extends GetxController {
     transCodingPresets.addAll(transCodePresets);
 
     final prefs = await SharedPreferences.getInstance();
-    defaultTransCodePresetIndex.value =
-        prefs.getInt(defaultTransCodePresetIndexPrefKey) ?? 0;
-    if (defaultTransCodePresetIndex.value >= transCodingPresets.length) {
-      defaultTransCodePresetIndex.value = 0;
-    }
+    defaultTransCodePresetId.value =
+        prefs.getInt(defaultTransCodePresetIndexPrefKey) == null
+            ? 0
+            : transCodePresets.isEmpty
+                ? 0
+                : transCodePresets.first.id;
   }
 
   Future<void> saveSettings() async {
@@ -33,6 +34,6 @@ class GlobalSettingsController extends GetxController {
     objectBox.transCodePresetBox.putMany(transCodingPresets);
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt(
-        defaultTransCodePresetIndexPrefKey, defaultTransCodePresetIndex.value);
+        defaultTransCodePresetIndexPrefKey, defaultTransCodePresetId.value);
   }
 }

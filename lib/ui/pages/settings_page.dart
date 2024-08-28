@@ -51,12 +51,12 @@ class SettingsPage extends GetView<GlobalSettingsController> {
                   return ListTile(
                       leading: Obx(
                         () => Checkbox(
-                          value: index ==
-                              controller.defaultTransCodePresetIndex.value,
+                          value: controller.transCodingPresets[index].id ==
+                              controller.defaultTransCodePresetId.value,
                           onChanged: (value) async {
                             if (value != null && value) {
-                              controller.defaultTransCodePresetIndex.value =
-                                  index;
+                              controller.defaultTransCodePresetId.value =
+                                  controller.transCodingPresets[index].id;
                               await controller.saveSettings();
                             }
                           },

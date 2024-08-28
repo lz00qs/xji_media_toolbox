@@ -6,6 +6,7 @@ import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
 
 import '../models/media_resource.dart';
 import '../ui/widgets/media_resources_list_panel_widget.dart';
+import 'global_tasks_controller.dart';
 
 class GlobalMediaResourcesController extends GetxController {
   Directory? _mediaResourceDir;
@@ -28,6 +29,7 @@ class GlobalMediaResourcesController extends GetxController {
     Get.put(MediaResourcesListPanelController());
     Get.put(GlobalFocusNodesController());
     Get.put(AebPhotoViewerController());
+    Get.put(GlobalTasksController());
   }
 
   Future<void> loadMediaResources() async {
