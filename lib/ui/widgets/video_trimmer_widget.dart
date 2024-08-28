@@ -1,25 +1,41 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/video_player_widget.dart';
 
+// 1ms ~ 1s
+const _scaleValueList = [
+  // 1000, // 1ms
+  // 5000,
+  // 10000,
+  50000, // 50ms
+  100000,
+  500000,
+  1000000, // 1s
+  5000000,
+  10000000,
+];
+
+const _divisionWidth = 10.0;
+
 class VideoTrimmerController extends GetxController {
   final isPlaying = false.obs;
-  final startPosition = const Duration(seconds: 0).obs;
-  final endPosition = const Duration(seconds: 0).obs;
+  final videoPlayerStartPosition = const Duration(seconds: 0).obs;
+  final videoPlayerEndPosition = const Duration(seconds: 0).obs;
+  final videoTrimmerStartValue = const Duration(seconds: 0).obs;
+  final videoTrimmerEndValue = const Duration(seconds: 0).obs;
   final playerPosition = const Duration(seconds: 0).obs;
   final NormalVideoResource videoResource;
   var isRangeChanging = false;
+  final trimmerBarScrollController = ScrollController();
+  final scaleFactor = 0.obs;
+  final trimmerBarWidth = 0.0.obs;
 
   VideoTrimmerController({required this.videoResource}) {
-    startPosition.value = const Duration(seconds: 0);
-    endPosition.value = videoResource.duration;
-  }
-
-  @override
-  void onInit() {
-    // TODO: implement onInit
-    super.onInit();
+    videoPlayerStartPosition.value = const Duration(seconds: 0);
+    videoPlayerEndPosition.value = videoResource.duration;
   }
 }
 
@@ -53,7 +69,11 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
-                onPressed: () {}, icon: const Icon(Icons.arrow_back_ios)),
+                onPressed: () {
+                  _scrollToThumb(
+                      controller.videoPlayerStartPosition.value.inMicroseconds);
+                },
+                icon: const Icon(Icons.arrow_back_ios_new)),
             Obx(() => IconButton(
                 onPressed: () {
                   if (controller.isPlaying.value) {
@@ -66,31 +86,33 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
                     ? Icons.pause
                     : Icons.play_arrow))),
             IconButton(
-                onPressed: () {}, icon: const Icon(Icons.arrow_forward_ios)),
+                onPressed: () {
+                  _scrollToThumb(
+                      controller.videoPlayerEndPosition.value.inMicroseconds);
+                },
+                icon: const Icon(Icons.arrow_forward_ios)),
           ],
         ),
-        Obx(() => Text(
-            'Start: ${_getFormattedTime(controller.startPosition.value)} | '
-            'End: ${_getFormattedTime(controller.endPosition.value)} | '
-            'Duration: ${_getFormattedTime(controller.endPosition.value - controller.startPosition.value)}')),
         Obx(() => Row(
               children: [
                 Text(_getFormattedTime(controller.playerPosition.value -
-                    controller.startPosition.value)),
+                    controller.videoPlayerStartPosition.value)),
                 Expanded(
                     child: Slider(
                         value: controller.playerPosition.value.inMicroseconds
                             .toDouble(),
-                        min: controller.startPosition.value.inMicroseconds
+                        min: controller
+                            .videoPlayerStartPosition.value.inMicroseconds
                             .toDouble(),
-                        max: controller.endPosition.value.inMicroseconds
+                        max: controller
+                            .videoPlayerEndPosition.value.inMicroseconds
                             .toDouble(),
-                        onChanged: (value) {
-                          videoPlayerGetxController.videoPlayerController
+                        onChanged: (value) async {
+                          await videoPlayerGetxController.videoPlayerController
                               .seekTo(Duration(microseconds: value.toInt()));
                         })),
-                Text(_getFormattedTime(controller.endPosition.value -
-                    controller.startPosition.value)),
+                Text(_getFormattedTime(controller.videoPlayerEndPosition.value -
+                    controller.videoPlayerStartPosition.value)),
               ],
             ))
       ],
@@ -98,44 +120,229 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
   }
 }
 
+int _getDefaultScale(Duration duration) {
+  for (var i = 0; i < _scaleValueList.length; i++) {
+    if (duration.inMicroseconds / _scaleValueList[i] < 100) {
+      return i;
+    }
+  }
+  return _scaleValueList.length - 1;
+}
+
+int _getDivisionCount(Duration duration, int scaleFactor) {
+  return (duration.inMicroseconds / _scaleValueList[scaleFactor]).ceil();
+}
+
+double _getRangeSliderMax(Duration duration, int scaleFactor) =>
+    (((duration.inMicroseconds + _scaleValueList[scaleFactor] - 1) ~/
+                _scaleValueList[scaleFactor]) *
+            _scaleValueList[scaleFactor])
+        .toDouble();
+
+int _getSafeValue(int value, int min, int max) {
+  if (value < min) {
+    return min;
+  }
+  if (value > max) {
+    return max;
+  }
+  return value;
+}
+
+int _getRoundedInt(double value) {
+  return (value * 100).round() ~/ 100;
+}
+
+void _scrollToThumb(int thumbPosition) {
+  final controller = Get.find<VideoTrimmerController>();
+  final thumbPositionPixel = thumbPosition /
+      _scaleValueList[controller.scaleFactor.value] *
+      _divisionWidth;
+  if (thumbPositionPixel < (controller.trimmerBarWidth.value / 2)) {
+    controller.trimmerBarScrollController.animateTo(0,
+        duration: const Duration(milliseconds: 1), curve: Curves.linear);
+  } else {
+    controller.trimmerBarScrollController.animateTo(
+        thumbPositionPixel - (controller.trimmerBarWidth.value / 2),
+        duration: const Duration(milliseconds: 1),
+        curve: Curves.linear);
+  }
+}
+
 class _VideoTrimmerBar extends GetView<VideoTrimmerController> {
   @override
   Widget build(BuildContext context) {
     final videoPlayerGetxController = Get.find<VideoPlayerGetxController>();
-    final startValue = 0.0.obs;
-    final endValue =
-        controller.videoResource.duration.inMilliseconds.toDouble().obs;
-    return Obx(() => RangeSlider(
-          values: RangeValues(startValue.value, endValue.value),
-          min: 0,
-          max: controller.videoResource.duration.inMilliseconds.toDouble(),
-          onChanged: (values) {
-            if (values.end != endValue.value) {
-              videoPlayerGetxController.videoPlayerController
-                  .seekTo(Duration(milliseconds: values.end.toInt()));
-            }
-            if (values.start != startValue.value) {
-              videoPlayerGetxController.videoPlayerController
-                  .seekTo(Duration(milliseconds: values.start.toInt()));
-            }
-            startValue.value = values.start;
-            endValue.value = values.end;
-          },
-          onChangeStart: (values) {
-            controller.isRangeChanging = true;
-          },
-          onChangeEnd: (values) {
-            controller.playerPosition.value =
-                Duration(milliseconds: values.start.toInt());
-            controller.startPosition.value =
-                Duration(milliseconds: values.start.toInt());
-            controller.endPosition.value =
-                Duration(milliseconds: values.end.toInt());
-            videoPlayerGetxController.videoPlayerController
-                .seekTo(controller.startPosition.value);
-            controller.isRangeChanging = false;
-          },
-        ));
+    controller.scaleFactor.value =
+        _getDefaultScale(controller.videoResource.duration);
+    controller.videoTrimmerEndValue.value = Duration(
+        microseconds: _getRangeSliderMax(
+                controller.videoResource.duration, controller.scaleFactor.value)
+            .toInt());
+    return LayoutBuilder(builder: (context, constrains) {
+      controller.trimmerBarWidth.value = constrains.maxWidth;
+      return Column(
+        children: [
+          Obx(() {
+            final start = Duration(
+                microseconds: _getSafeValue(
+                    controller.videoTrimmerStartValue.value.inMicroseconds,
+                    0,
+                    controller.videoResource.duration.inMicroseconds));
+            final end = Duration(
+                microseconds: _getSafeValue(
+                    controller.videoTrimmerEndValue.value.inMicroseconds,
+                    0,
+                    controller.videoResource.duration.inMicroseconds));
+            return Text('Start: ${_getFormattedTime(start)} | '
+                'End: ${_getFormattedTime(end)} | '
+                'Duration: ${_getFormattedTime(end - start)}');
+          }),
+          MouseRegion(
+            child: Listener(
+              onPointerSignal: (event) {
+                if (event is PointerScrollEvent) {
+                  if (HardwareKeyboard.instance.isMetaPressed ||
+                      HardwareKeyboard.instance.isControlPressed) {
+                    var isEndValueMax = false;
+                    if (controller.videoTrimmerEndValue.value.inMicroseconds >
+                        controller.videoResource.duration.inMicroseconds) {
+                      isEndValueMax = true;
+                    }
+
+                    controller.scaleFactor.value = _getSafeValue(
+                        controller.scaleFactor.value +
+                            event.scrollDelta.dy.sign.toInt(),
+                        0,
+                        _getDefaultScale(controller.videoResource.duration));
+
+                    if (isEndValueMax) {
+                      controller.videoTrimmerEndValue.value = Duration(
+                          microseconds: _getRangeSliderMax(
+                                  controller.videoResource.duration,
+                                  controller.scaleFactor.value)
+                              .toInt());
+                    }
+                  }
+                }
+              },
+              child: Obx(() => Container(
+                    color: Colors.black12,
+                    width: double.infinity,
+                    child: Center(
+                        child: RawScrollbar(
+                            thumbVisibility: true,
+                            thumbColor: Colors.black54,
+                            thickness: 10,
+                            radius: const Radius.circular(10),
+                            controller: controller.trimmerBarScrollController,
+                            child: SingleChildScrollView(
+                                controller:
+                                    controller.trimmerBarScrollController,
+                                scrollDirection: Axis.horizontal,
+                                child: SizedBox(
+                                    height: 60,
+                                    width: _getDivisionCount(
+                                            controller.videoResource.duration,
+                                            controller.scaleFactor.value) *
+                                        _divisionWidth,
+                                    child: RangeSlider(
+                                      values: RangeValues(
+                                          controller.videoTrimmerStartValue
+                                              .value.inMicroseconds
+                                              .toDouble(),
+                                          controller.videoTrimmerEndValue.value
+                                              .inMicroseconds
+                                              .toDouble()),
+                                      min: 0,
+                                      max: _getRangeSliderMax(
+                                          controller.videoResource.duration,
+                                          controller.scaleFactor.value),
+                                      divisions: _getDivisionCount(
+                                          controller.videoResource.duration,
+                                          controller.scaleFactor.value),
+                                      onChanged: (values) async {
+                                        final start =
+                                            _getRoundedInt(values.start);
+                                        final end = _getRoundedInt(values.end);
+                                        if (end !=
+                                            controller.videoTrimmerEndValue
+                                                .value.inMicroseconds) {
+                                          await videoPlayerGetxController
+                                              .videoPlayerController
+                                              .seekTo(Duration(
+                                                  microseconds: _getSafeValue(
+                                                      end,
+                                                      0,
+                                                      controller
+                                                          .videoResource
+                                                          .duration
+                                                          .inMicroseconds)));
+                                        }
+                                        if (start !=
+                                            controller.videoTrimmerStartValue
+                                                .value.inMicroseconds) {
+                                          await videoPlayerGetxController
+                                              .videoPlayerController
+                                              .seekTo(Duration(
+                                                  microseconds: _getSafeValue(
+                                                      start,
+                                                      0,
+                                                      controller
+                                                          .videoResource
+                                                          .duration
+                                                          .inMicroseconds)));
+                                        }
+
+                                        controller
+                                                .videoTrimmerStartValue.value =
+                                            Duration(microseconds: start);
+                                        controller.videoTrimmerEndValue.value =
+                                            Duration(microseconds: end);
+                                      },
+                                      onChangeStart: (values) {
+                                        controller.isRangeChanging = true;
+                                      },
+                                      onChangeEnd: (values) async {
+                                        final start =
+                                            _getRoundedInt(values.start);
+                                        final end = _getRoundedInt(values.end);
+                                        controller.playerPosition.value =
+                                            Duration(
+                                                microseconds: _getSafeValue(
+                                                    start,
+                                                    0,
+                                                    controller
+                                                        .videoResource
+                                                        .duration
+                                                        .inMicroseconds));
+                                        controller.videoPlayerStartPosition
+                                                .value =
+                                            controller.playerPosition.value;
+                                        controller
+                                                .videoPlayerEndPosition.value =
+                                            Duration(
+                                                microseconds: _getSafeValue(
+                                                    end,
+                                                    0,
+                                                    controller
+                                                        .videoResource
+                                                        .duration
+                                                        .inMicroseconds));
+                                        await videoPlayerGetxController
+                                            .videoPlayerController
+                                            .seekTo(controller
+                                                .videoPlayerStartPosition
+                                                .value);
+                                        controller.isRangeChanging = false;
+                                      },
+                                    ))))),
+                  )),
+            ),
+          ),
+        ],
+      );
+    });
   }
 }
 
