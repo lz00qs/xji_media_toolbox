@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/photo_viewer_widget.dart';
-import 'package:xji_footage_toolbox/ui/widgets/right_app_bar_media_delete_button.dart';
 
 import 'main_page_right_app_bar.dart';
 
@@ -15,9 +14,7 @@ class NormalPhotoViewerWidget extends StatelessWidget {
     return Column(
       children: [
         const MainPageRightAppBar(
-          children: [
-            RightAppBarMediaDeleteButton(),
-          ],
+          children: [],
         ),
         Expanded(
           child: Center(

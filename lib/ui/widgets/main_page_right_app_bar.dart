@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/constants.dart';
+import 'package:xji_footage_toolbox/ui/widgets/right_app_bar_media_delete_button.dart';
 
 class MainPageRightAppBar extends StatelessWidget {
   final List<Widget> children;
@@ -19,7 +20,7 @@ class MainPageRightAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
-        children: children,
+        children: [...children, const RightAppBarMediaDeleteButton()],
       ),
     );
   }
