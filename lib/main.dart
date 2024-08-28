@@ -7,6 +7,8 @@ import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
+import 'controllers/global_settings_controller.dart';
+
 Future<void> main() async {
   // 确保 WidgetsFlutterBinding 已经初始化
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +31,11 @@ Future<void> main() async {
   final isFFmpegAvailable = await hasFFmpegAndFFprobe();
 
   Get.put(GlobalMediaResourcesController());
+
+  final globalSettingsController = Get.put(GlobalSettingsController());
+
+  await globalSettingsController.loadSettings();
+
   runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
 }
 
@@ -43,8 +50,12 @@ class MyApp extends StatelessWidget {
         Get.find<GlobalMediaResourcesController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home:
-          isFFmpegAvailable ? Obx(() => globalMediaResourcesController.isLoadingMediaResources.value ? const LoadingMediaResourcesPage() : const MainPage()) : const FFmpegNotAvailablePage(),
+      home: isFFmpegAvailable
+          ? Obx(() =>
+              globalMediaResourcesController.isLoadingMediaResources.value
+                  ? const LoadingMediaResourcesPage()
+                  : const MainPage())
+          : const FFmpegNotAvailablePage(),
     );
   }
 }

@@ -1,0 +1,67 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:6542342576071718515",
+      "lastPropertyId": "8:6600177316668141755",
+      "name": "ExportPreset",
+      "properties": [
+        {
+          "id": "1:3441272698186930426",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2633146971749489003",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:5469937351195833193",
+          "name": "useInputResolution",
+          "type": 1
+        },
+        {
+          "id": "4:6942609030270405673",
+          "name": "useHevc",
+          "type": 1
+        },
+        {
+          "id": "5:2255326580324500820",
+          "name": "width",
+          "type": 6
+        },
+        {
+          "id": "6:3004389153049693201",
+          "name": "height",
+          "type": 6
+        },
+        {
+          "id": "7:3288320502769605509",
+          "name": "crf",
+          "type": 6
+        },
+        {
+          "id": "8:6600177316668141755",
+          "name": "ffmpegPreset",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "1:6542342576071718515",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

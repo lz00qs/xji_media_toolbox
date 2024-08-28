@@ -4,6 +4,7 @@ import 'package:xji_footage_toolbox/constants.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar_button.dart';
 
 import '../../utils/media_resources_utils.dart';
+import '../pages/settings_page.dart';
 
 class _MainPageMacLeftAppBar extends StatelessWidget {
   const _MainPageMacLeftAppBar();
@@ -11,7 +12,6 @@ class _MainPageMacLeftAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var onPressed = false;
-    // var appBarButtonSize = macAppBarHeight - 2 * macAppBarButtonPadding;
     return SizedBox(
       height: macAppBarHeight,
       child: Row(
@@ -30,7 +30,11 @@ class _MainPageMacLeftAppBar extends StatelessWidget {
                 await openMediaResourcesFolder();
                 onPressed = false;
               }),
-          MainPageAppBarButton(iconData: Icons.settings, onPressed: () {}),
+          MainPageAppBarButton(
+              iconData: Icons.settings,
+              onPressed: () {
+                Get.to(() => const SettingsPage());
+              }),
           MainPageAppBarButton(iconData: Icons.help, onPressed: () {}),
         ],
       ),

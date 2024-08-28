@@ -17,3 +17,5 @@ const String parseMediaResourceSequenceError =
 const int parseAebErrorCode = 1;
 const String parseAebStartError = "Parse AEB start error";
 const String parseAebEndError = "Parse AEB end error";
+
+const String defaultTransCodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
