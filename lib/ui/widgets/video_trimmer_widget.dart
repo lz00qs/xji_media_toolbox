@@ -32,6 +32,7 @@ class VideoTrimmerController extends GetxController {
   final trimmerBarScrollController = ScrollController();
   final scaleFactor = 0.obs;
   final trimmerBarWidth = 0.0.obs;
+  var isPlayEnd = false;
 
   VideoTrimmerController({required this.videoResource}) {
     videoPlayerStartPosition.value = const Duration(seconds: 0);
@@ -55,6 +56,14 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
         controller.isPlaying.value = false;
       }
       if (!controller.isRangeChanging) {
+        if (videoPlayerGetxController.videoPlayerController.value.position >=
+            controller.videoPlayerEndPosition.value) {
+          await videoPlayerGetxController.videoPlayerController
+              .seekTo(controller.videoPlayerEndPosition.value);
+          videoPlayerGetxController.videoPlayerController.pause();
+          controller.isPlaying.value = false;
+          controller.isPlayEnd = true;
+        }
         controller.playerPosition.value =
             videoPlayerGetxController.videoPlayerController.value.position;
       }
@@ -75,10 +84,15 @@ class _VideoPlayerControlBar extends GetView<VideoTrimmerController> {
                 },
                 icon: const Icon(Icons.arrow_back_ios_new)),
             Obx(() => IconButton(
-                onPressed: () {
+                onPressed: () async {
                   if (controller.isPlaying.value) {
                     videoPlayerGetxController.videoPlayerController.pause();
                   } else {
+                    if (controller.isPlayEnd) {
+                      await videoPlayerGetxController.videoPlayerController
+                          .seekTo(controller.videoPlayerStartPosition.value);
+                      controller.isPlayEnd = false;
+                    }
                     videoPlayerGetxController.videoPlayerController.play();
                   }
                 },
