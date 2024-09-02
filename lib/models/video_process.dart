@@ -9,6 +9,7 @@ import '../utils/media_resources_utils.dart';
 enum VideoProcessType {
   transcode,
   trim,
+  merge,
 }
 
 enum VideoProcessStatus {
@@ -45,7 +46,8 @@ class VideoProcess {
     status.value = VideoProcessStatus.canceled;
   }
 
-  Future<void> start(List<String> ffmpegArgs) async {
+  Future<void> start(List<String> ffmpegArgs,
+      {List<String> needDeleteFilePaths = const []}) async {
     final receivePort = ReceivePort();
     receivePort.listen((message) {
       if (message is String) {
@@ -64,12 +66,17 @@ class VideoProcess {
         }
       }
     });
-    _isolate =
-        await Isolate.spawn(_ffmpegProcess, [ffmpegArgs, receivePort.sendPort]);
+
+    _isolate = await Isolate.spawn(_ffmpegProcess, [
+      [ffmpegArgs, needDeleteFilePaths],
+      receivePort.sendPort
+    ]);
   }
 
   Future<void> _ffmpegProcess(List<dynamic> args) async {
-    final process = await Process.start('ffmpeg', args[0] as List<String>);
+    final argsList = args[0] as List<List<String>>;
+    final process = await Process.start('ffmpeg', argsList[0]);
+    final needDeleteFilePaths = argsList[1];
     process.stdout.transform(utf8.decoder).listen((data) {
       (args[1] as SendPort).send(data);
     });
@@ -81,6 +88,11 @@ class VideoProcess {
       (args[1] as SendPort).send('failed');
     } else {
       (args[1] as SendPort).send('finished');
+    }
+    for (final filePath in needDeleteFilePaths) {
+      if (isFileExist(filePath)) {
+        File(filePath).deleteSync();
+      }
     }
   }
 
@@ -128,6 +140,8 @@ class VideoProcess {
         return 'Transcode';
       case VideoProcessType.trim:
         return 'Trim';
+      case VideoProcessType.merge:
+        return 'Merge';
     }
   }
 }

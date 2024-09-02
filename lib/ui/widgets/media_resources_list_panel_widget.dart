@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 
+import 'multi_select_panel.dart';
+
 class MediaResourcesListPanelController extends GetxController {
   static const _thumbnailMaxWidth = 200;
   static const _thumbnailMinWidth = 100;
@@ -23,12 +25,15 @@ class MediaResourcesListPanelController extends GetxController {
   }
 }
 
-class MediaResourcesListPanelWidget
-    extends GetView<MediaResourcesListPanelController> {
+class MediaResourcesListPanelWidget extends StatelessWidget {
   const MediaResourcesListPanelWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final globalMediaResourcesController =
+        Get.find<GlobalMediaResourcesController>();
+    // globalMediaResourcesController.selectedIndexList.clear();
+    final controller = Get.put(MediaResourcesListPanelController());
     return Column(
       children: [
         SizedBox(
@@ -37,6 +42,19 @@ class MediaResourcesListPanelWidget
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              IconButton(
+                  onPressed: () {
+                    globalMediaResourcesController.selectedIndexList.clear();
+                    globalMediaResourcesController.isMultipleSelection.value =
+                        !globalMediaResourcesController
+                            .isMultipleSelection.value;
+                  },
+                  icon: Obx(() => Icon(
+                        globalMediaResourcesController.isMultipleSelection.value
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
+                        size: 20,
+                      ))),
               IconButton(
                   onPressed: () {
                     controller.zoomIn();
@@ -70,6 +88,7 @@ class _MediaResourcesListWidget
   Widget build(BuildContext context) {
     final globalMediaResourcesController =
         Get.find<GlobalMediaResourcesController>();
+    final MultiSelectPanelController multiSelectPanelController = Get.find();
     return Expanded(
       child: Obx(() => ScrollablePositionedList.builder(
             itemScrollController: controller.mediaResourcesListScrollController,
@@ -78,13 +97,18 @@ class _MediaResourcesListWidget
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
                 onTap: () {
-                  globalMediaResourcesController.currentMediaIndex.value =
-                      index;
+                  if (!globalMediaResourcesController
+                      .isMultipleSelection.value) {
+                    globalMediaResourcesController.currentMediaIndex.value =
+                        index;
+                  }
                 },
                 child: Obx(() => Container(
-                      color: globalMediaResourcesController
-                                  .currentMediaIndex.value ==
-                              index
+                      color: !globalMediaResourcesController
+                                  .isMultipleSelection.value &&
+                              globalMediaResourcesController
+                                      .currentMediaIndex.value ==
+                                  index
                           ? Colors.grey
                           : Colors.transparent,
                       child: Column(
@@ -93,6 +117,29 @@ class _MediaResourcesListWidget
                             padding: const EdgeInsets.all(5.0),
                             child: Row(
                               children: [
+                                globalMediaResourcesController
+                                        .isMultipleSelection.value
+                                    ? Checkbox(
+                                        value: globalMediaResourcesController
+                                            .selectedIndexList
+                                            .contains(index),
+                                        onChanged: (value) {
+                                          if (multiSelectPanelController
+                                                  .isMerging.value ==
+                                              false) {
+                                            if (value!) {
+                                              globalMediaResourcesController
+                                                  .selectedIndexList
+                                                  .add(index);
+                                            } else {
+                                              globalMediaResourcesController
+                                                  .selectedIndexList
+                                                  .remove(index);
+                                            }
+                                          }
+                                        },
+                                      )
+                                    : const SizedBox(),
                                 Flex(
                                   direction: Axis.vertical,
                                   children: [

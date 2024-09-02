@@ -6,8 +6,10 @@ import 'package:xji_footage_toolbox/ui/widgets/show_transcode_tasks_drawer_butto
 
 class MainPageRightAppBar extends StatelessWidget {
   final List<Widget> children;
+  final bool disableDeleteButton;
 
-  const MainPageRightAppBar({super.key, required this.children});
+  const MainPageRightAppBar(
+      {super.key, required this.children, this.disableDeleteButton = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +25,7 @@ class MainPageRightAppBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ...children,
-          const RightAppBarMediaDeleteButton(),
+          if (!disableDeleteButton) const RightAppBarMediaDeleteButton(),
           const ShowTranscodeTasksDrawerButton()
         ],
       ),

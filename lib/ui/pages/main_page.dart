@@ -5,6 +5,7 @@ import 'package:xji_footage_toolbox/controllers/global_tasks_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/load_media_resources_icon_button_widget.dart';
 import 'package:xji_footage_toolbox/ui/widgets/media_resources_list_panel_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/multi_select_panel.dart';
 
 import '../../controllers/global_focus_nodes_controller.dart';
 import '../../controllers/global_media_resources_controller.dart';
@@ -102,6 +103,7 @@ class MainPage extends StatelessWidget {
     final globalFocusNodesController = Get.find<GlobalFocusNodesController>();
     final GlobalTasksController globalTasksController =
         Get.find<GlobalTasksController>();
+    Get.find<MediaResourcesListPanelController>();
 
     return KeyboardListener(
         focusNode: globalFocusNodesController.mediaResourcesListPanelFocusNode,
@@ -139,60 +141,61 @@ class MainPage extends StatelessWidget {
         child: Scaffold(
           endDrawer: Drawer(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  IconButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      icon: const Icon(Icons.arrow_forward)),
-                  Obx(() => Expanded(
-                      child: ListView.builder(
-                          itemCount: globalTasksController.videoProcessingTasks.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return ListTile(
-                                title: Obx(() => Text(
-                                    '${globalTasksController.videoProcessingTasks[index].getTypeString()} (${(globalTasksController.videoProcessingTasks[index].progress * 100).toInt()}%)')),
-                                subtitle: Column(
-                                  children: [
-                                    Text(globalTasksController
-                                        .videoProcessingTasks[index].name),
-                                    Obx(() => globalTasksController
-                                        .videoProcessingTasks[index]
-                                        .status
-                                        .value ==
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              IconButton(
+                  onPressed: () {
+                    Get.back();
+                  },
+                  icon: const Icon(Icons.arrow_forward)),
+              Obx(() => Expanded(
+                  child: ListView.builder(
+                      itemCount:
+                          globalTasksController.videoProcessingTasks.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ListTile(
+                            title: Obx(() => Text(
+                                '${globalTasksController.videoProcessingTasks[index].getTypeString()} (${(globalTasksController.videoProcessingTasks[index].progress * 100).toInt()}%)')),
+                            subtitle: Column(
+                              children: [
+                                Text(globalTasksController
+                                    .videoProcessingTasks[index].name),
+                                Obx(() => globalTasksController
+                                            .videoProcessingTasks[index]
+                                            .status
+                                            .value ==
                                         VideoProcessStatus.processing
-                                        ? LinearProgressIndicator(
-                                      value: globalTasksController
-                                          .videoProcessingTasks[index]
-                                          .progress
-                                          .value,
-                                    )
-                                        : const SizedBox())
-                                  ],
-                                ),
-                                trailing: Obx(() {
-                                  switch (globalTasksController.videoProcessingTasks[index]
-                                      .status.value) {
-                                    case VideoProcessStatus.processing:
-                                      return IconButton(
-                                          onPressed: () {
-                                            globalTasksController
-                                                .videoProcessingTasks[index]
-                                                .cancel();
-                                          },
-                                          icon: const Icon(Icons.cancel));
-                                    case VideoProcessStatus.finished:
-                                      return const Icon(Icons.check);
-                                    case VideoProcessStatus.canceled:
-                                      return const Icon(Icons.cancel_outlined);
-                                    case VideoProcessStatus.failed:
-                                      return const Icon(Icons.error);
-                                  }
-                                }));
-                          })))
-                ],
-              )),
+                                    ? LinearProgressIndicator(
+                                        value: globalTasksController
+                                            .videoProcessingTasks[index]
+                                            .progress
+                                            .value,
+                                      )
+                                    : const SizedBox())
+                              ],
+                            ),
+                            trailing: Obx(() {
+                              switch (globalTasksController
+                                  .videoProcessingTasks[index].status.value) {
+                                case VideoProcessStatus.processing:
+                                  return IconButton(
+                                      onPressed: () {
+                                        globalTasksController
+                                            .videoProcessingTasks[index]
+                                            .cancel();
+                                      },
+                                      icon: const Icon(Icons.cancel));
+                                case VideoProcessStatus.finished:
+                                  return const Icon(Icons.check);
+                                case VideoProcessStatus.canceled:
+                                  return const Icon(Icons.cancel_outlined);
+                                case VideoProcessStatus.failed:
+                                  return const Icon(Icons.error);
+                              }
+                            }));
+                      })))
+            ],
+          )),
           body: ResizableTriplePanelWidget(
             topLeftPanel:
                 Column(mainAxisAlignment: MainAxisAlignment.start, children: [
@@ -215,11 +218,13 @@ class MainPage extends StatelessWidget {
             rightPanel: Obx(() =>
                 globalMediaResourcesController.mediaResources.isEmpty
                     ? const SizedBox()
-                    : MediaResourceMainPanelWidget(
-                        mediaResource:
-                            globalMediaResourcesController.mediaResources[
-                                globalMediaResourcesController
-                                    .currentMediaIndex.value])),
+                    : globalMediaResourcesController.isMultipleSelection.value
+                        ? const MultiSelectPanel()
+                        : MediaResourceMainPanelWidget(
+                            mediaResource:
+                                globalMediaResourcesController.mediaResources[
+                                    globalMediaResourcesController
+                                        .currentMediaIndex.value])),
           ),
         ));
   }

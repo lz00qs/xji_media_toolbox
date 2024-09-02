@@ -11,7 +11,9 @@ class RightAppBarMediaDeleteButton extends StatelessWidget {
     return MainPageAppBarButton(
         iconData: Icons.delete,
         onPressed: () {
-          Get.dialog(const MediaResourceDeleteDialog());
+          Get.dialog(const MediaResourceDeleteDialog(
+            isDeleteMultipleMediaResources: false,
+          ));
         });
   }
 }

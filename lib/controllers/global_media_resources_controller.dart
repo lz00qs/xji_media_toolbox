@@ -6,6 +6,8 @@ import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
 
 import '../models/media_resource.dart';
 import '../ui/widgets/media_resources_list_panel_widget.dart';
+import '../ui/widgets/multi_select_panel.dart';
+import '../ui/widgets/video_merger_widget.dart';
 import 'global_tasks_controller.dart';
 
 class GlobalMediaResourcesController extends GetxController {
@@ -16,6 +18,9 @@ class GlobalMediaResourcesController extends GetxController {
   final isEditingMediaResources = false.obs;
 
   Directory? get mediaResourceDir => _mediaResourceDir;
+
+  final isMultipleSelection = false.obs;
+  final selectedIndexList = <int>[].obs;
 
   set mediaResourceDir(Directory? value) {
     _mediaResourceDir = value;
@@ -30,6 +35,8 @@ class GlobalMediaResourcesController extends GetxController {
     Get.put(GlobalFocusNodesController());
     Get.put(AebPhotoViewerController());
     Get.put(GlobalTasksController());
+    Get.lazyPut(() => VideoMergerController());
+    Get.lazyPut(() => MultiSelectPanelController());
   }
 
   Future<void> loadMediaResources() async {
