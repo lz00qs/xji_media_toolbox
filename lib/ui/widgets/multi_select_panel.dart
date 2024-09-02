@@ -4,6 +4,7 @@ import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/video_merger_widget.dart';
 
 import '../../controllers/global_media_resources_controller.dart';
+import 'main_page_right_app_bar.dart';
 import 'media_resource_delete_dialog.dart';
 import 'media_resources_list_panel_widget.dart';
 
@@ -41,13 +42,29 @@ class MultiSelectPanel extends StatelessWidget {
                               .map((e) => globalMediaResourcesController
                                   .mediaResources[e] as NormalVideoResource)
                               .toList())
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _DeleteButton(),
-                            _MergeButton(),
-                          ],
-                        ));
+                      : Column(children: [
+                          const MainPageRightAppBar(
+                            disableDeleteButton: true,
+                            children: [],
+                          ),
+                          Expanded(
+                              child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                  'Selected ${globalMediaResourcesController.selectedIndexList.length} video resources'),
+                              const SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _DeleteButton(),
+                                  _MergeButton(),
+                                ],
+                              )
+                            ],
+                          ))
+                        ]));
         }
       }),
     );
