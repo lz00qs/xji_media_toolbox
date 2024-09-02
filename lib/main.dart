@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
@@ -33,7 +35,7 @@ Future<void> main() async {
   Get.put(GlobalMediaResourcesController());
 
   final globalSettingsController = Get.put(GlobalSettingsController());
-
+  globalSettingsController.cpuThreads = Platform.numberOfProcessors;
   await globalSettingsController.loadSettings();
 
   runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));

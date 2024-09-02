@@ -9,6 +9,7 @@ class GlobalSettingsController extends GetxController {
   late final ObjectBox objectBox;
   final RxList<ExportPreset> transCodingPresets = <ExportPreset>[].obs;
   final defaultTransCodePresetId = 0.obs;
+  var cpuThreads = 1;
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();
