@@ -208,7 +208,8 @@ class MainPage extends StatelessWidget {
                       : const MediaResourcesListPanelWidget())),
             ]),
             bottomLeftPanel: Obx(() =>
-                globalMediaResourcesController.mediaResources.isEmpty
+                globalMediaResourcesController.mediaResources.isEmpty ||
+                        globalMediaResourcesController.isMultipleSelection.value
                     ? const SizedBox()
                     : MediaResourceInfoPanelWidget(
                         mediaResource:
