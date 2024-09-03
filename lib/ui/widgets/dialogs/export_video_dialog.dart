@@ -226,6 +226,7 @@ class ExportVideoDialog extends StatelessWidget {
                         .firstWhere((element) =>
                             element.id == transCodePresetIndex.value);
                     final process = VideoProcess(
+                      ffmpegParentDir: globalSettingsController.ffmpegParentDir,
                       name: globalMediaResourcesController
                               .isEditingMediaResources.value
                           ? 'Trim $outputFileName.MP4'

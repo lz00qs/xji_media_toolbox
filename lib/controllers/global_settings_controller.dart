@@ -11,6 +11,7 @@ class GlobalSettingsController extends GetxController {
   final defaultTransCodePresetId = 0.obs;
   var cpuThreads = 1;
   var appVersion = '0.0.0';
+  var ffmpegParentDir = '';
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();

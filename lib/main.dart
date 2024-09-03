@@ -31,8 +31,6 @@ Future<void> main() async {
     await windowManager.focus();
   });
 
-  final isFFmpegAvailable = await hasFFmpegAndFFprobe();
-
   Get.put(GlobalMediaResourcesController());
 
   final packageInfo = await PackageInfo.fromPlatform();
@@ -41,6 +39,8 @@ Future<void> main() async {
   globalSettingsController.cpuThreads = Platform.numberOfProcessors;
   globalSettingsController.appVersion = packageInfo.version;
   await globalSettingsController.loadSettings();
+
+  final isFFmpegAvailable = await hasFFmpegAndFFprobe();
 
   runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
 }

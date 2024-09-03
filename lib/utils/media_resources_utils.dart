@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:image/image.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
 
@@ -39,6 +38,11 @@ bool _isAebImage(Image image) {
     }
   }
   return false;
+}
+
+void _debugLogging(String message, String logDir) {
+  // final logFile = File('$logDir/log.txt');
+  // logFile.writeAsStringSync('$message\n', mode: FileMode.append);
 }
 
 DateTime _getMediaCreationTime(File file) {
@@ -85,7 +89,10 @@ String _parseEvBias(Image image) {
 }
 
 Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
-  final result = await Process.run('ffprobe', [
+  final GlobalSettingsController globalSettingsController =
+      Get.find<GlobalSettingsController>();
+  final result =
+      await Process.run('${globalSettingsController.ffmpegParentDir}/ffprobe', [
     '-v',
     'error',
     '-show_entries',
@@ -97,8 +104,9 @@ Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
     file.path,
   ]);
   if (result.exitCode != 0) {
-    Fluttertoast.showToast(
-        msg: 'Failed to get video info for ${file.uri.pathSegments.last}');
+    _debugLogging(
+        'FFprobe error: ${result.stderr} for ${file.uri.pathSegments.last}',
+        file.parent.path);
     return null;
   } else {
     final Map<String, dynamic> ffprobeOutput = json.decode(result.stdout);
@@ -124,12 +132,14 @@ void _prepareThumbnailFolder(String mediaResourcesPath) {
   }
 }
 
-Future<File?> _generateThumbnail(File file) async {
+Future<File?> _generateThumbnail(List<String> args) async {
+  final file = File(args[0]);
+  final ffmpegParentDir = args[1];
   final mediaResourcesPath = file.parent.path;
   final videoResourceName = file.uri.pathSegments.last;
   final thumbFileName =
       '$mediaResourcesPath/$thumbnailFolderName/${videoResourceName.replaceAll('MP4', 'thumb')}.JPG';
-  final result = await Process.run('ffmpeg', [
+  final result = await Process.run('$ffmpegParentDir/ffmpeg', [
     '-i',
     '$mediaResourcesPath/$videoResourceName',
     '-ss',
@@ -139,8 +149,8 @@ Future<File?> _generateThumbnail(File file) async {
     thumbFileName,
   ]);
   if (result.exitCode != 0) {
-    Fluttertoast.showToast(
-        msg: 'Failed to generate thumbnail for $videoResourceName');
+    _debugLogging('FFmpeg error: ${result.stderr} for $videoResourceName',
+        mediaResourcesPath);
     return null;
   } else {
     if (kDebugMode) {
@@ -383,6 +393,7 @@ Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
 
 Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
   final mediaResources = <MediaResource>[];
+  final globalSettingsController = Get.find<GlobalSettingsController>();
   for (final file in videos) {
     final Map<String, dynamic> info = _getGenericMediaResourceInfo(file);
     final creationTime = info['creationTime'];
@@ -403,7 +414,8 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
               ffprobeOutput['streams'][0]['avg_frame_rate'].split('/')[1]);
       final duration = double.parse(ffprobeOutput['format']['duration']);
       final isHevc = ffprobeOutput['streams'][0]['codec_name'] == 'hevc';
-      final thumbFile = await compute(_generateThumbnail, file);
+      final thumbFile = await compute(_generateThumbnail,
+          [file.path, globalSettingsController.ffmpegParentDir]);
       final resource = NormalVideoResource(
         name: file.uri.pathSegments.last,
         file: file,
@@ -419,8 +431,8 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
       resource.errors.addAll(errors);
       mediaResources.add(resource);
     } catch (e) {
-      Fluttertoast.showToast(
-          msg: 'Failed to parse video info for ${file.uri.pathSegments.last}');
+      _debugLogging('FFprobe error: $e for ${file.uri.pathSegments.last}',
+          file.parent.path);
       if (kDebugMode) {
         print('Parse video info error: $e');
       }
@@ -521,7 +533,7 @@ Future<void> openMediaResourcesFolder() async {
         print('Media resources loaded');
       }
     } else {
-      Fluttertoast.showToast(msg: 'Invalid directory');
+      _debugLogging('Invalid directory: $selectedDirectory', selectedDirectory);
     }
   }
 }
@@ -596,7 +608,8 @@ void addSuffixToCurrentAebFilesName() {
       oldFile.renameSync(newFile.path);
       currentMediaResource.aebFiles[i] = newFile;
     } catch (e) {
-      Fluttertoast.showToast(msg: 'Error renaming file: ${oldFile.path}');
+      _debugLogging(
+          'Error renaming file: ${oldFile.path}', oldFile.parent.path);
     }
   }
   final newAebPhotoResource = (AebPhotoResource(

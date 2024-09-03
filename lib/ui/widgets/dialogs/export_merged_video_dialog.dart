@@ -260,6 +260,8 @@ class ExportMergedVideoDialog extends StatelessWidget {
                             .firstWhere((element) =>
                                 element.id == transCodePresetIndex.value);
                         final process = VideoProcess(
+                          ffmpegParentDir:
+                              globalSettingsController.ffmpegParentDir,
                           name: 'Merge $outputFileName.MP4',
                           type: VideoProcessType.merge,
                           duration: totalDuration.inSeconds.toDouble(),

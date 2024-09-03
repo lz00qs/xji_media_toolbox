@@ -27,9 +27,13 @@ class VideoProcess {
   Isolate? _isolate;
   final RxDouble progress = 0.0.obs;
   final Rx<VideoProcessStatus> status = VideoProcessStatus.processing.obs;
+  final String ffmpegParentDir;
 
   VideoProcess(
-      {required this.name, required this.type, required this.duration});
+      {required this.name,
+      required this.type,
+      required this.duration,
+      required this.ffmpegParentDir});
 
   void cancel() {
     if (_isolate != null) {
@@ -66,17 +70,23 @@ class VideoProcess {
         }
       }
     });
-
     _isolate = await Isolate.spawn(_ffmpegProcess, [
-      [ffmpegArgs, needDeleteFilePaths],
+      [
+        ffmpegArgs,
+        needDeleteFilePaths,
+        [ffmpegParentDir]
+      ],
       receivePort.sendPort
     ]);
   }
 
   Future<void> _ffmpegProcess(List<dynamic> args) async {
     final argsList = args[0] as List<List<String>>;
-    final process = await Process.start('ffmpeg', argsList[0]);
     final needDeleteFilePaths = argsList[1];
+    final ffmpegParentDirIsolate = argsList[2][0];
+    final process =
+        await Process.start('$ffmpegParentDirIsolate/ffmpeg', argsList[0]);
+
     process.stdout.transform(utf8.decoder).listen((data) {
       (args[1] as SendPort).send(data);
     });
