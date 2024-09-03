@@ -518,8 +518,8 @@ Future<List<MediaResource>> loadMediaResources(
 
   processedPhotos =
       await _multiThreadsProcessResources(photos, _photoResourcesProcess);
+  processedPhotos.sort((a, b) => a.sequence.compareTo(b.sequence));
   processedPhotos = await _analyzeAebFootage(processedPhotos);
-
   processedVideos =
       await _multiThreadsProcessResources(videos, _videoResourcesProcess);
 
