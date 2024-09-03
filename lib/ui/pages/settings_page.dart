@@ -91,6 +91,9 @@ class SettingsPage extends GetView<GlobalSettingsController> {
                       ));
                 },
               )),
+          const Spacer(),
+          Text('Version: ${controller.appVersion}'),
+          const SizedBox(height: 20),
         ],
       ),
     );

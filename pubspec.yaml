@@ -57,6 +57,7 @@ dependencies:
   objectbox_flutter_libs:
   objectbox: any
   flat_buffers: any
+  package_info_plus:
 
 
 dev_dependencies:

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
@@ -34,8 +35,11 @@ Future<void> main() async {
 
   Get.put(GlobalMediaResourcesController());
 
+  final packageInfo = await PackageInfo.fromPlatform();
+
   final globalSettingsController = Get.put(GlobalSettingsController());
   globalSettingsController.cpuThreads = Platform.numberOfProcessors;
+  globalSettingsController.appVersion = packageInfo.version;
   await globalSettingsController.loadSettings();
 
   runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
