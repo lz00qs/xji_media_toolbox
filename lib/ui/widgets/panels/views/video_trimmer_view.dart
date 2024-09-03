@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/video_player_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/video_player_view.dart';
 
 // 1ms ~ 1s
 const _scaleValueList = [
@@ -360,8 +360,8 @@ class _VideoTrimmerBar extends GetView<VideoTrimmerController> {
   }
 }
 
-class VideoTrimmerWidget extends StatelessWidget {
-  const VideoTrimmerWidget({super.key});
+class VideoTrimmerView extends StatelessWidget {
+  const VideoTrimmerView({super.key});
 
   @override
   Widget build(BuildContext context) {

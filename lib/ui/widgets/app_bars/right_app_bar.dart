@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/constants.dart';
-import 'package:xji_footage_toolbox/ui/widgets/right_app_bar_media_delete_button.dart';
-import 'package:xji_footage_toolbox/ui/widgets/show_transcode_tasks_drawer_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/app_bar_media_delete_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/app_bar_show_task_list_drawer_button.dart';
 
-class MainPageRightAppBar extends StatelessWidget {
+class RightAppBar extends StatelessWidget {
   final List<Widget> children;
   final bool disableDeleteButton;
 
-  const MainPageRightAppBar(
+  const RightAppBar(
       {super.key, required this.children, this.disableDeleteButton = false});
 
   @override
@@ -25,8 +25,8 @@ class MainPageRightAppBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           ...children,
-          if (!disableDeleteButton) const RightAppBarMediaDeleteButton(),
-          const ShowTranscodeTasksDrawerButton()
+          if (!disableDeleteButton) const AppBarMediaDeleteButton(),
+          const AppBarShowTaskListDrawerButton()
         ],
       ),
     );

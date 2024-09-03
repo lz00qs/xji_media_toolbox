@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
-import 'package:xji_footage_toolbox/ui/widgets/normal_photo_viewer_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/aeb_photo_view.dart';
 
-import 'normal_video_viewer_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/normal_photo_view.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/normal_video_view.dart';
 
-class MediaResourceMainPanelWidget extends StatelessWidget {
+class MediaResourceMainPanel extends StatelessWidget {
   final MediaResource mediaResource;
 
-  const MediaResourceMainPanelWidget({super.key, required this.mediaResource});
+  const MediaResourceMainPanel({super.key, required this.mediaResource});
 
   @override
   Widget build(BuildContext context) {
     if (mediaResource.isVideo == false) {
       if (mediaResource.isAeb == false) {
-        return NormalPhotoViewerWidget(
+        return NormalPhotoView(
             photoResource: mediaResource as NormalPhotoResource);
       } else {
-        return AebPhotoViewerWidget(
-            photoResource: mediaResource as AebPhotoResource);
+        return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
       }
     } else if (mediaResource.isVideo == true) {
-      return NormalVideoViewerWidget(
+      return NormalVideoView(
           videoResource: mediaResource as NormalVideoResource);
     }
     return const SizedBox();

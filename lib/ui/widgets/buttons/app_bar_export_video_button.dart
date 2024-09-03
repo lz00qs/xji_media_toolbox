@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/global_media_resources_controller.dart';
-import '../../models/media_resource.dart';
-import 'export_video_dialog.dart';
-import 'main_page_app_bar_button.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../models/media_resource.dart';
+import '../dialogs/export_video_dialog.dart';
+import 'app_bar_button.dart';
 
-class RightAppBarExportVideoButton extends StatelessWidget {
-  const RightAppBarExportVideoButton({super.key});
+class AppBarExportVideoButton extends StatelessWidget {
+  const AppBarExportVideoButton({super.key});
 
   @override
   Widget build(BuildContext context) {
     final globalMediaResourcesController =
         Get.find<GlobalMediaResourcesController>();
-    return MainPageAppBarButton(
+    return AppBarButton(
         iconData: Icons.upload,
         onPressed: () {
           Get.dialog(ExportVideoDialog(

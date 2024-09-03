@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
 
-import '../../models/media_resource.dart';
+import '../../../../models/media_resource.dart';
 
 class VideoPlayerGetxController extends GetxController {
   late VideoPlayerController videoPlayerController;
@@ -46,11 +46,11 @@ class VideoPlayerGetxController extends GetxController {
   }
 }
 
-class VideoPlayerWidget extends StatelessWidget {
+class VideoPlayerView extends StatelessWidget {
   final NormalVideoResource videoResource;
   final bool showControls;
 
-  const VideoPlayerWidget(
+  const VideoPlayerView(
       {super.key, required this.videoResource, this.showControls = true});
 
   @override

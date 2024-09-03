@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
-import 'package:xji_footage_toolbox/ui/widgets/edit_transcode_preset_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/edit_transcode_preset_dialog.dart';
 
 class SettingsPage extends GetView<GlobalSettingsController> {
   const SettingsPage({super.key});

@@ -7,11 +7,11 @@ import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
 import 'package:xji_footage_toolbox/models/video_process.dart';
 import 'package:xji_footage_toolbox/ui/pages/settings_page.dart';
-import 'package:xji_footage_toolbox/ui/widgets/video_trimmer_widget.dart';
 import 'package:xji_footage_toolbox/utils/media_resources_utils.dart';
 
-import '../../controllers/global_focus_nodes_controller.dart';
-import '../../controllers/global_tasks_controller.dart';
+import '../../../controllers/global_focus_nodes_controller.dart';
+import '../../../controllers/global_tasks_controller.dart';
+import '../panels/views/video_trimmer_view.dart';
 
 String _getDefaultOutputFileName(String originalFileName) {
   final lastDotIndex = originalFileName.lastIndexOf('.');

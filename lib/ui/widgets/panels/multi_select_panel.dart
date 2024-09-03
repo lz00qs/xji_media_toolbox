@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/video_merger_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/video_merger_view.dart';
 
-import '../../controllers/global_media_resources_controller.dart';
-import 'main_page_right_app_bar.dart';
-import 'media_resource_delete_dialog.dart';
-import 'media_resources_list_panel_widget.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../app_bars/right_app_bar.dart';
+import '../dialogs/media_resource_delete_dialog.dart';
+import 'media_resources_list_panel.dart';
 
 class MultiSelectPanelController extends GetxController {
   final isMerging = false.obs;
@@ -36,14 +36,14 @@ class MultiSelectPanel extends StatelessWidget {
               globalMediaResourcesController.selectedIndexList.isEmpty
                   ? const Text('Select some resources first!')
                   : multiSelectPanelController.isMerging.value
-                      ? VideoMergerWidget(
+                      ? VideoMergerView(
                           videoResources: globalMediaResourcesController
                               .selectedIndexList
                               .map((e) => globalMediaResourcesController
                                   .mediaResources[e] as NormalVideoResource)
                               .toList())
                       : Column(children: [
-                          const MainPageRightAppBar(
+                          const RightAppBar(
                             disableDeleteButton: true,
                             children: [],
                           ),

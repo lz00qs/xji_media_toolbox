@@ -6,16 +6,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/video_trimmer_widget.dart';
 
-import '../../controllers/global_focus_nodes_controller.dart';
-import '../../controllers/global_media_resources_controller.dart';
-import '../../controllers/global_settings_controller.dart';
-import '../../controllers/global_tasks_controller.dart';
-import '../../models/settings.dart';
-import '../../models/video_process.dart';
-import '../../utils/media_resources_utils.dart';
-import '../pages/settings_page.dart';
+import '../../../controllers/global_focus_nodes_controller.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../controllers/global_settings_controller.dart';
+import '../../../controllers/global_tasks_controller.dart';
+import '../../../models/settings.dart';
+import '../../../models/video_process.dart';
+import '../../../utils/media_resources_utils.dart';
+import '../../pages/settings_page.dart';
+import '../panels/views/video_trimmer_view.dart';
 
 String _getDefaultOutputFileName(List<NormalVideoResource> videoResources) {
   final firstLastDotIndex = videoResources.first.name.lastIndexOf('.');

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 
-
 const _infoTextStyle = TextStyle(fontSize: 15, overflow: TextOverflow.ellipsis);
 
 String _dynamicSizeText(int sizeInBytes) {
@@ -18,10 +17,12 @@ String _dynamicSizeText(int sizeInBytes) {
 
 List<Widget> _genericMediaResourceInfo(MediaResource mediaResource) {
   return [
-    mediaResource.isAeb ? const SizedBox() : Text(
-      'FileName: ${mediaResource.name}',
-      style: _infoTextStyle,
-    ),
+    mediaResource.isAeb
+        ? const SizedBox()
+        : Text(
+            'FileName: ${mediaResource.name}',
+            style: _infoTextStyle,
+          ),
     Text(
       'Resolution: ${mediaResource.width}x${mediaResource.height}',
       style: _infoTextStyle,
@@ -51,10 +52,10 @@ Widget _genericMediaResourceError(MediaResource mediaResource) {
       : const SizedBox();
 }
 
-class PhotoInfoWidget extends StatelessWidget {
+class _PhotoInfoPanel extends StatelessWidget {
   final MediaResource mediaResource;
 
-  const PhotoInfoWidget({super.key, required this.mediaResource});
+  const _PhotoInfoPanel({required this.mediaResource});
 
   @override
   Widget build(BuildContext context) {
@@ -75,10 +76,10 @@ class PhotoInfoWidget extends StatelessWidget {
   }
 }
 
-class VideoInfoWidget extends StatelessWidget {
+class _VideoInfoPanel extends StatelessWidget {
   final MediaResource mediaResource;
 
-  const VideoInfoWidget({super.key, required this.mediaResource});
+  const _VideoInfoPanel({required this.mediaResource});
 
   @override
   Widget build(BuildContext context) {
@@ -105,17 +106,17 @@ class VideoInfoWidget extends StatelessWidget {
   }
 }
 
-class MediaResourceInfoPanelWidget extends StatelessWidget {
+class MediaResourceInfoPanel extends StatelessWidget {
   final MediaResource mediaResource;
 
-  const MediaResourceInfoPanelWidget({super.key, required this.mediaResource});
+  const MediaResourceInfoPanel({super.key, required this.mediaResource});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: const EdgeInsets.all(10),
         child: mediaResource.isVideo
-            ? VideoInfoWidget(mediaResource: mediaResource)
-            : PhotoInfoWidget(mediaResource: mediaResource));
+            ? _VideoInfoPanel(mediaResource: mediaResource)
+            : _PhotoInfoPanel(mediaResource: mediaResource));
   }
 }

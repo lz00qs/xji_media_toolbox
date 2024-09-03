@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/utils/media_resources_utils.dart';
 
-import '../../controllers/global_focus_nodes_controller.dart';
-import '../../controllers/global_media_resources_controller.dart';
-import 'media_resources_list_panel_widget.dart';
+import '../../../controllers/global_focus_nodes_controller.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../panels/media_resources_list_panel.dart';
 
 class MediaResourceDeleteDialog extends StatelessWidget {
   final bool isDeleteMultipleMediaResources;

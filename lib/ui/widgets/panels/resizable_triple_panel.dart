@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class ResizableTriplePanelWidget extends StatelessWidget {
+class ResizableTriplePanel extends StatelessWidget {
   final Widget topLeftPanel;
   final Widget bottomLeftPanel;
   final Widget rightPanel;
@@ -16,7 +16,7 @@ class ResizableTriplePanelWidget extends StatelessWidget {
   final _leftPanelWidth = 300.0.obs;
   final _topLeftPanelHeight = 400.0.obs;
 
-  ResizableTriplePanelWidget(
+  ResizableTriplePanel(
       {super.key,
       required this.topLeftPanel,
       required this.bottomLeftPanel,
