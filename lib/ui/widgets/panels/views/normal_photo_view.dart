@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/photo_viewer_widget.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/photo_view.dart';
 
-import 'main_page_right_app_bar.dart';
+import '../../app_bars/right_app_bar.dart';
 
-class NormalPhotoViewerWidget extends StatelessWidget {
+class NormalPhotoView extends StatelessWidget {
   final NormalPhotoResource photoResource;
 
-  const NormalPhotoViewerWidget({super.key, required this.photoResource});
+  const NormalPhotoView({super.key, required this.photoResource});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const MainPageRightAppBar(
+        const RightAppBar(
           children: [],
         ),
         Expanded(
           child: Center(
-            child: PhotoViewerWidget(photoFile: photoResource.file),
+            child: PhotoView(photoFile: photoResource.file),
           ),
         ),
       ],

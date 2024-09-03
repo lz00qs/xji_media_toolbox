@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../utils/media_resources_utils.dart';
+import '../../../utils/media_resources_utils.dart';
 
-class LoadMediaResourcesIconButtonWidget extends StatelessWidget {
-  const LoadMediaResourcesIconButtonWidget({super.key});
+class LoadMediaResourcesButton extends StatelessWidget {
+  const LoadMediaResourcesButton({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.dart';
-import 'package:xji_footage_toolbox/ui/widgets/aeb_photo_viewer_widget.dart';
 
 import '../models/media_resource.dart';
-import '../ui/widgets/media_resources_list_panel_widget.dart';
-import '../ui/widgets/multi_select_panel.dart';
-import '../ui/widgets/video_merger_widget.dart';
+import '../ui/widgets/panels/media_resources_list_panel.dart';
+import '../ui/widgets/panels/multi_select_panel.dart';
+import '../ui/widgets/panels/views/aeb_photo_view.dart';
+import '../ui/widgets/panels/views/video_merger_view.dart';
 import 'global_tasks_controller.dart';
 
 class GlobalMediaResourcesController extends GetxController {
@@ -33,7 +33,7 @@ class GlobalMediaResourcesController extends GetxController {
     super.onInit();
     Get.lazyPut(() => MediaResourcesListPanelController());
     Get.lazyPut(() => GlobalFocusNodesController());
-    Get.lazyPut(() => AebPhotoViewerController());
+    Get.lazyPut(() => AebPhotoViewController());
     Get.lazyPut(() => GlobalTasksController());
     Get.lazyPut(() => VideoMergerController());
     Get.lazyPut(() => MultiSelectPanelController());

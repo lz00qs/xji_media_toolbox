@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../constants.dart';
+import '../../../constants.dart';
 
-class MainPageAppBarButton extends StatelessWidget {
+class AppBarButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final IconData iconData;
 
-  const MainPageAppBarButton(
+  const AppBarButton(
       {super.key, this.onPressed, required this.iconData});
 
   @override

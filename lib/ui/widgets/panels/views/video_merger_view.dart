@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/export_merged_video_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/export_merged_video_dialog.dart';
 
-import '../../controllers/global_media_resources_controller.dart';
-import 'main_page_app_bar_button.dart';
-import 'main_page_right_app_bar.dart';
-import 'multi_select_panel.dart';
+import '../../../../controllers/global_media_resources_controller.dart';
+import '../../app_bars/right_app_bar.dart';
+import '../../buttons/app_bar_button.dart';
+import '../multi_select_panel.dart';
 
 class VideoMergerController extends GetxController {
   final reorderableListScrollController = ScrollController();
 }
 
-class VideoMergerWidget extends GetView<VideoMergerController> {
+class VideoMergerView extends GetView<VideoMergerController> {
   final List<NormalVideoResource> videoResources;
 
-  const VideoMergerWidget({super.key, required this.videoResources});
+  const VideoMergerView({super.key, required this.videoResources});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class VideoMergerWidget extends GetView<VideoMergerController> {
     Get.find<GlobalMediaResourcesController>();
     return Column(
       children: [
-        MainPageRightAppBar(
+        RightAppBar(
           disableDeleteButton: true,
           children: [
             const _RightAppBarGoBackButton(),
@@ -98,7 +98,7 @@ class _RightAppBarGoBackButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final MultiSelectPanelController multiSelectPanelController =
         Get.find<MultiSelectPanelController>();
-    return MainPageAppBarButton(
+    return AppBarButton(
         iconData: Icons.arrow_back_ios_new,
         onPressed: () {
           multiSelectPanelController.isMerging.value = false;
@@ -114,7 +114,7 @@ class _RightAppBarExportMergedVideoButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.find<GlobalMediaResourcesController>();
-    return MainPageAppBarButton(
+    return AppBarButton(
         iconData: Icons.upload,
         onPressed: () {
           Get.dialog(ExportMergedVideoDialog(videoResources: videoResources));

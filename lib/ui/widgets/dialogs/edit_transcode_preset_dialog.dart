@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/global_focus_nodes_controller.dart';
-import '../../models/settings.dart';
+import '../../../controllers/global_focus_nodes_controller.dart';
+import '../../../models/settings.dart';
 
 class EditTranscodePresetDialog extends StatelessWidget {
   final nameController = TextEditingController();

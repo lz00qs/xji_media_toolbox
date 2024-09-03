@@ -3,18 +3,19 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_tasks_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/ui/widgets/load_media_resources_icon_button_widget.dart';
-import 'package:xji_footage_toolbox/ui/widgets/media_resources_list_panel_widget.dart';
-import 'package:xji_footage_toolbox/ui/widgets/multi_select_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/load_media_resources_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/media_resources_list_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/multi_select_panel.dart';
 
 import '../../controllers/global_focus_nodes_controller.dart';
 import '../../controllers/global_media_resources_controller.dart';
 import '../../models/video_process.dart';
-import '../widgets/aeb_photo_viewer_widget.dart';
-import '../widgets/main_page_left_app_bar.dart';
-import '../widgets/media_resource_info_panel_widget.dart';
-import '../widgets/media_resource_main_panel_widget.dart';
-import '../widgets/resizable_triple_panel_widget.dart';
+import '../widgets/app_bars/left_app_bar.dart';
+
+import '../widgets/panels/media_resource_info_panel.dart';
+import '../widgets/panels/media_resource_main_panel.dart';
+import '../widgets/panels/resizable_triple_panel.dart';
+import '../widgets/panels/views/aeb_photo_view.dart';
 
 void _decreaseCurrentMediaIndex() {
   final globalMediaResourcesController =
@@ -56,7 +57,7 @@ void _increaseCurrentMediaIndex() {
 }
 
 void _increaseCurrentAebIndex() {
-  final aebPhotoViewerController = Get.find<AebPhotoViewerController>();
+  final aebPhotoViewerController = Get.find<AebPhotoViewController>();
   final globalMediaResourcesController =
       Get.find<GlobalMediaResourcesController>();
 
@@ -79,7 +80,7 @@ void _increaseCurrentAebIndex() {
 }
 
 void _decreaseCurrentAebIndex() {
-  final aebPhotoViewerController = Get.find<AebPhotoViewerController>();
+  final aebPhotoViewerController = Get.find<AebPhotoViewController>();
 
   if (aebPhotoViewerController.currentAebIndex > 0) {
     aebPhotoViewerController.currentAebIndex.value -= 1;
@@ -196,22 +197,22 @@ class MainPage extends StatelessWidget {
                       })))
             ],
           )),
-          body: ResizableTriplePanelWidget(
+          body: ResizableTriplePanel(
             topLeftPanel:
                 Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-              const MainPageLeftAppBar(),
+              const LeftAppBar(),
               Obx(() => Expanded(
                   child: globalMediaResourcesController.mediaResources.isEmpty
                       ? const Center(
-                          child: LoadMediaResourcesIconButtonWidget(),
+                          child: LoadMediaResourcesButton(),
                         )
-                      : const MediaResourcesListPanelWidget())),
+                      : const MediaResourcesListPanel())),
             ]),
             bottomLeftPanel: Obx(() =>
                 globalMediaResourcesController.mediaResources.isEmpty ||
                         globalMediaResourcesController.isMultipleSelection.value
                     ? const SizedBox()
-                    : MediaResourceInfoPanelWidget(
+                    : MediaResourceInfoPanel(
                         mediaResource:
                             globalMediaResourcesController.mediaResources[
                                 globalMediaResourcesController
@@ -221,7 +222,7 @@ class MainPage extends StatelessWidget {
                     ? const SizedBox()
                     : globalMediaResourcesController.isMultipleSelection.value
                         ? const MultiSelectPanel()
-                        : MediaResourceMainPanelWidget(
+                        : MediaResourceMainPanel(
                             mediaResource:
                                 globalMediaResourcesController.mediaResources[
                                     globalMediaResourcesController

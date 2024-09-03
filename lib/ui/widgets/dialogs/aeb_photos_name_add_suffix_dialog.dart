@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/global_focus_nodes_controller.dart';
-import '../../controllers/global_media_resources_controller.dart';
-import '../../utils/media_resources_utils.dart';
+import '../../../controllers/global_focus_nodes_controller.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../utils/media_resources_utils.dart';
 
 class AebPhotosNameAddSuffixDialog extends StatelessWidget {
   const AebPhotosNameAddSuffixDialog({super.key});

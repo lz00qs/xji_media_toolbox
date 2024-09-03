@@ -3,15 +3,18 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:xji_footage_toolbox/ui/widgets/photo_viewer_widget.dart';
-import 'package:xji_footage_toolbox/ui/widgets/right_app_bar_media_delete_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/panels/views/photo_view.dart';
 
-import '../../constants.dart';
-import '../../models/media_resource.dart';
-import 'aeb_photos_name_add_suffix_button.dart';
+import '../../../../constants.dart';
+import '../../../../models/media_resource.dart';
+import '../../buttons/app_bar_aeb_photos_name_add_suffix_button.dart';
+import '../../buttons/app_bar_media_delete_button.dart';
 
-class _AebPhotoViewerAppBarWidget extends StatelessWidget {
-  const _AebPhotoViewerAppBarWidget();
+
+
+
+class _AebPhotoViewAppBarWidget extends StatelessWidget {
+  const _AebPhotoViewAppBarWidget();
 
   @override
   Widget build(BuildContext context) {
@@ -26,33 +29,33 @@ class _AebPhotoViewerAppBarWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          AebPhotosNameAddSuffixButton(),
-          RightAppBarMediaDeleteButton(),
+          AppBarAebPhotosNameAddSuffixButton(),
+          AppBarMediaDeleteButton(),
         ],
       ),
     );
   }
 }
 
-class AebPhotoViewerController extends GetxController {
+class AebPhotoViewController extends GetxController {
   final currentAebIndex = 0.obs;
   final aebListScrollController = ItemScrollController();
   final aebListScrollListener = ItemPositionsListener.create();
 }
 
-class AebPhotoViewerWidget extends GetView<AebPhotoViewerController> {
+class AebPhotoView extends GetView<AebPhotoViewController> {
   final AebPhotoResource photoResource;
 
-  const AebPhotoViewerWidget({super.key, required this.photoResource});
+  const AebPhotoView({super.key, required this.photoResource});
 
   @override
   Widget build(BuildContext context) {
     controller.currentAebIndex.value = 0;
     return Column(
       children: [
-        const _AebPhotoViewerAppBarWidget(),
+        const _AebPhotoViewAppBarWidget(),
         Expanded(
-          child: Obx(() => PhotoViewerWidget(
+          child: Obx(() => PhotoView(
               photoFile:
                   photoResource.aebFiles[controller.currentAebIndex.value])),
         ),
@@ -97,7 +100,7 @@ class AebPhotoViewerWidget extends GetView<AebPhotoViewerController> {
                       evBias = '0.0';
                   }
                   return Column(children: [
-                    Expanded(child: Obx(() => _AebThumbnailWidget(
+                    Expanded(child: Obx(() => _AebThumbnail(
                         file: photoResource.aebFiles[index],
                         evBias: evBias,
                         width: 150,
@@ -124,7 +127,7 @@ class _ScrollbarBehavior extends ScrollBehavior {
   }
 }
 
-class _AebThumbnailWidget extends StatelessWidget {
+class _AebThumbnail extends StatelessWidget {
   final File file;
   final double width;
   final double height;
@@ -132,7 +135,7 @@ class _AebThumbnailWidget extends StatelessWidget {
   final String evBias;
   final void Function() onTap;
 
-  const _AebThumbnailWidget({
+  const _AebThumbnail({
     required this.file,
     required this.evBias,
     required this.width,

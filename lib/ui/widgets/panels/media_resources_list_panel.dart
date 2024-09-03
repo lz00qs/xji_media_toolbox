@@ -25,8 +25,8 @@ class MediaResourcesListPanelController extends GetxController {
   }
 }
 
-class MediaResourcesListPanelWidget extends StatelessWidget {
-  const MediaResourcesListPanelWidget({super.key});
+class MediaResourcesListPanel extends StatelessWidget {
+  const MediaResourcesListPanel({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,15 +74,15 @@ class MediaResourcesListPanelWidget extends StatelessWidget {
             ],
           ),
         ),
-        const _MediaResourcesListWidget(),
+        const _MediaResourcesListView(),
       ],
     );
   }
 }
 
-class _MediaResourcesListWidget
+class _MediaResourcesListView
     extends GetView<MediaResourcesListPanelController> {
-  const _MediaResourcesListWidget();
+  const _MediaResourcesListView();
 
   @override
   Widget build(BuildContext context) {
