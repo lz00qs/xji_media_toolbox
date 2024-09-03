@@ -52,13 +52,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalMediaResourcesController globalMediaResourcesController =
-        Get.find<GlobalMediaResourcesController>();
+    final LoadingMediaResourcesController loadingMediaResourcesController =
+        Get.find<LoadingMediaResourcesController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: isFFmpegAvailable
           ? Obx(() =>
-              globalMediaResourcesController.isLoadingMediaResources.value
+              loadingMediaResourcesController.isLoadingMediaResources.value
                   ? const LoadingMediaResourcesPage()
                   : const MainPage())
           : const FFmpegNotAvailablePage(),

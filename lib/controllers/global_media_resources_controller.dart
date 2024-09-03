@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.dart';
 
 import '../models/media_resource.dart';
+import '../ui/pages/loading_media_resources_page.dart';
 import '../ui/widgets/panels/media_resources_list_panel.dart';
 import '../ui/widgets/panels/multi_select_panel.dart';
 import '../ui/widgets/panels/views/aeb_photo_view.dart';
@@ -14,7 +15,6 @@ class GlobalMediaResourcesController extends GetxController {
   Directory? _mediaResourceDir;
   final RxList<MediaResource> mediaResources = <MediaResource>[].obs;
   final currentMediaIndex = 0.obs;
-  final isLoadingMediaResources = false.obs;
   final isEditingMediaResources = false.obs;
 
   Directory? get mediaResourceDir => _mediaResourceDir;
@@ -37,6 +37,7 @@ class GlobalMediaResourcesController extends GetxController {
     Get.lazyPut(() => GlobalTasksController());
     Get.lazyPut(() => VideoMergerController());
     Get.lazyPut(() => MultiSelectPanelController());
+    Get.lazyPut(() => LoadingMediaResourcesController());
   }
 
   Future<void> loadMediaResources() async {

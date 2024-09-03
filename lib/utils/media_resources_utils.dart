@@ -6,12 +6,15 @@ import 'package:get/get.dart';
 import 'package:image/image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
+import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 
 import '../constants.dart';
 import '../controllers/global_media_resources_controller.dart';
 import '../models/media_resource.dart';
 
 final _mediaResources = <MediaResource>[];
+var _mediaResourcesCount = 0;
+var _processedMediaResourcesCount = 0;
 
 bool _isPhoto(Uri uri) {
   final ext = uri.path.split('.').last.toUpperCase();
@@ -305,12 +308,15 @@ Future<List<MediaResource>> _analyzeAebFootage(
 List<List<File>> _classifyMediaResources(List<FileSystemEntity> files) {
   final List<File> photos = [];
   final List<File> videos = [];
+  _mediaResourcesCount = 0;
   for (final file in files) {
     if (file is File) {
       if (_isPhoto(file.uri)) {
         photos.add(file);
+        _mediaResourcesCount++;
       } else if (_isVideo(file.uri)) {
         videos.add(file);
+        _mediaResourcesCount++;
       }
     }
   }
@@ -448,6 +454,8 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
   final GlobalSettingsController globalSettingsController =
       Get.find<GlobalSettingsController>();
   final mediaResources = <MediaResource>[];
+  final LoadingMediaResourcesController loadingMediaResourcesController =
+      Get.find<LoadingMediaResourcesController>();
   if (mediaResourceFiles.length > 1) {
     if (mediaResourceFiles.length > globalSettingsController.cpuThreads) {
       final chunkSize =
@@ -465,22 +473,34 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
       for (final chunk in chunks) {
         futures.add(compute(processFunction, chunk));
       }
-      final results = await Future.wait(futures);
-      for (final result in results) {
-        mediaResources.addAll(result);
-      }
+      // final results = await Future.wait(futures);
+      await Future.wait(futures).asStream().listen((results) {
+        for (final result in results) {
+          mediaResources.addAll(result);
+          _processedMediaResourcesCount += result.length;
+          loadingMediaResourcesController.progress.value =
+              _processedMediaResourcesCount / _mediaResourcesCount;
+        }
+      }).asFuture();
     } else {
       final futures = <Future<List<MediaResource>>>[];
       for (final mediaResourceFile in mediaResourceFiles) {
         futures.add(processFunction([mediaResourceFile]));
       }
-      final results = await Future.wait(futures);
-      for (final result in results) {
-        mediaResources.addAll(result);
-      }
+      await Future.wait(futures).asStream().listen((results) {
+        for (final result in results) {
+          mediaResources.addAll(result);
+          _processedMediaResourcesCount += result.length;
+          loadingMediaResourcesController.progress.value =
+              _processedMediaResourcesCount / _mediaResourcesCount;
+        }
+      }).asFuture();
     }
   } else {
     mediaResources.addAll(await processFunction(mediaResourceFiles));
+    _processedMediaResourcesCount += 1;
+    loadingMediaResourcesController.progress.value =
+        _processedMediaResourcesCount / _mediaResourcesCount;
   }
   return mediaResources;
 }
@@ -489,7 +509,7 @@ Future<List<MediaResource>> loadMediaResources(
     Directory mediaResourcesDir) async {
   _mediaResources.clear();
   _prepareThumbnailFolder(mediaResourcesDir.path);
-
+  _processedMediaResourcesCount = 0;
   final classifyResult = _classifyMediaResources(mediaResourcesDir.listSync());
   final List<File> photos = classifyResult[0];
   var processedPhotos = <MediaResource>[];
@@ -515,10 +535,13 @@ Future<void> openMediaResourcesFolder() async {
   final selectedDirectory = await FilePicker.platform.getDirectoryPath();
   final globalMediaResourcesController =
       Get.find<GlobalMediaResourcesController>();
+  final LoadingMediaResourcesController loadingMediaResourcesController =
+      Get.find<LoadingMediaResourcesController>();
   if (selectedDirectory != null) {
     final mediaResourcesDir = Directory(selectedDirectory);
     if (mediaResourcesDir.existsSync()) {
-      globalMediaResourcesController.isLoadingMediaResources.value = true;
+      loadingMediaResourcesController.progress.value = 0.0;
+      loadingMediaResourcesController.isLoadingMediaResources.value = true;
       globalMediaResourcesController.mediaResourceDir = mediaResourcesDir;
       final stopwatch = Stopwatch()..start();
       await loadMediaResources(mediaResourcesDir);
@@ -528,7 +551,7 @@ Future<void> openMediaResourcesFolder() async {
       }
       globalMediaResourcesController.mediaResources.addAll(_mediaResources);
       globalMediaResourcesController.currentMediaIndex.value = 0;
-      globalMediaResourcesController.isLoadingMediaResources.value = false;
+      loadingMediaResourcesController.isLoadingMediaResources.value = false;
       if (kDebugMode) {
         print('Media resources loaded');
       }
