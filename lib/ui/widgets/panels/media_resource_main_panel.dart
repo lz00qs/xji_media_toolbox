@@ -13,11 +13,12 @@ class MediaResourceMainPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (mediaResource.isVideo == false) {
-      if (mediaResource.isAeb == false) {
+      if (mediaResource.isAeb == true &&
+          ((mediaResource as AebPhotoResource).aebFiles.length > 1)) {
+        return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
+      } else {
         return NormalPhotoView(
             photoResource: mediaResource as NormalPhotoResource);
-      } else {
-        return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
       }
     } else if (mediaResource.isVideo == true) {
       return NormalVideoView(
