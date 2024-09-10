@@ -26,7 +26,6 @@ abstract class MediaResource {
 }
 
 class NormalPhotoResource extends MediaResource {
-
   NormalPhotoResource(
       {required super.name,
       required super.file,
@@ -40,7 +39,7 @@ class NormalPhotoResource extends MediaResource {
 
 class AebPhotoResource extends NormalPhotoResource {
   final String evBias;
-  final List<File> aebFiles = [];
+  final List<MediaResource> aebResources = [];
 
   @override
   get isAeb => true;

@@ -85,6 +85,10 @@ class _AebPhotoInfo extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              _MediaResourceInfoKeyText(keyText: 'Name:'),
+              _MediaResourceInfoKeyText(keyText: 'Size:'),
+              _MediaResourceInfoKeyText(keyText: 'Date:'),
+              _MediaResourceInfoKeyText(keyText: 'Resolution:'),
               _MediaResourceInfoKeyText(keyText: 'AEB Count:'),
               _MediaResourceInfoKeyText(keyText: 'EV Bias:'),
             ],
@@ -94,8 +98,26 @@ class _AebPhotoInfo extends StatelessWidget {
             child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Obx(() => _MediaResourceInfoValueText(
+                valueText: mediaResource
+                    .aebResources[aebPhotoViewController.currentAebIndex.value]
+                    .name)),
+            Obx(() => _MediaResourceInfoValueText(
+                valueText: formatSize(mediaResource
+                    .aebResources[aebPhotoViewController.currentAebIndex.value]
+                    .sizeInBytes))),
+            Obx(() => _MediaResourceInfoValueText(
+                valueText: mediaResource
+                    .aebResources[aebPhotoViewController.currentAebIndex.value]
+                    .creationTime
+                    .toString()
+                    .substring(0, 19))),
+            Obx(() => _MediaResourceInfoValueText(
+                valueText:
+                    '${mediaResource.aebResources[aebPhotoViewController.currentAebIndex.value].width}x'
+                    '${mediaResource.aebResources[aebPhotoViewController.currentAebIndex.value].height}')),
             _MediaResourceInfoValueText(
-                valueText: mediaResource.aebFiles.length.toString()),
+                valueText: mediaResource.aebResources.length.toString()),
             Obx(() => _MediaResourceInfoValueText(
                 valueText: parseAebEvBias(
                     aebPhotoViewController.currentAebIndex.value))),
@@ -113,52 +135,47 @@ class MediaResourceInfoPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AebPhotoViewController aebPhotoViewController =
-    AebPhotoViewController();
     return Padding(
       padding: EdgeInsets.all(DesignValues.smallPadding),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const SizedBox(
-                width: 100,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _MediaResourceInfoKeyText(keyText: 'Name:'),
-                    _MediaResourceInfoKeyText(keyText: 'Size:'),
-                    _MediaResourceInfoKeyText(keyText: 'Date:'),
-                    _MediaResourceInfoKeyText(keyText: 'Resolution:'),
-                  ],
-                ),
-              ),
-              Expanded(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  mediaResource.isAeb == true
-                      ? Obx(() => _MediaResourceInfoValueText(
-                          valueText: (mediaResource as AebPhotoResource).aebFiles[aebPhotoViewController.currentAebIndex.value].uri.pathSegments.last))
-                      : _MediaResourceInfoValueText(valueText: mediaResource.name),
-                  _MediaResourceInfoValueText(
-                      valueText: formatSize(mediaResource.sizeInBytes)),
-                  _MediaResourceInfoValueText(
-                      valueText: mediaResource.creationTime
-                          .toString()
-                          .substring(0, 19)),
-                  _MediaResourceInfoValueText(
-                      valueText:
-                          '${mediaResource.width}x${mediaResource.height}'),
-                ],
-              ))
-            ],
-          ),
           mediaResource.isAeb
               ? _AebPhotoInfo(mediaResource: mediaResource as AebPhotoResource)
-              : const SizedBox(),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    const SizedBox(
+                      width: 100,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _MediaResourceInfoKeyText(keyText: 'Name:'),
+                          _MediaResourceInfoKeyText(keyText: 'Size:'),
+                          _MediaResourceInfoKeyText(keyText: 'Date:'),
+                          _MediaResourceInfoKeyText(keyText: 'Resolution:'),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                        child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _MediaResourceInfoValueText(
+                            valueText: mediaResource.name),
+                        _MediaResourceInfoValueText(
+                            valueText: formatSize(mediaResource.sizeInBytes)),
+                        _MediaResourceInfoValueText(
+                            valueText: mediaResource.creationTime
+                                .toString()
+                                .substring(0, 19)),
+                        _MediaResourceInfoValueText(
+                            valueText:
+                                '${mediaResource.width}x${mediaResource.height}'),
+                      ],
+                    ))
+                  ],
+                ),
           mediaResource.isVideo
               ? _NormalVideoInfo(
                   mediaResource: mediaResource as NormalVideoResource)
