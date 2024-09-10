@@ -237,6 +237,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
 
 import '../../new_ui/main_page_app_bar.dart';
+import '../../new_ui/main_panel_button.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
@@ -244,14 +245,17 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Get.put(ResizableTriplePanelController());
-    return const Column(
+    return Column(
       children: [
         MainPageAppBar(),
         Expanded(
             child: ResizableTriplePanel(
                 topLeftPanel: SizedBox(),
                 bottomLeftPanel: SizedBox(),
-                rightPanel: SizedBox()))
+                rightPanel: Center(
+                  child: MainPanelButton(
+                      iconData: Icons.folder_open, onPressed: () async {}),
+                )))
       ],
     );
   }
