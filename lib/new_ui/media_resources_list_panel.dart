@@ -5,6 +5,7 @@ import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
 
 import '../controllers/global_media_resources_controller.dart';
 import 'design_tokens.dart';
+import 'format.dart';
 
 class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();
@@ -95,24 +96,6 @@ class _MediaResourceListWidget extends StatelessWidget {
       required this.mediaResource,
       this.isSelected = false,
       this.isMultipleSelection = false});
-
-  String _formatDuration(Duration duration) {
-    return '${duration.inHours}:'
-        '${duration.inMinutes.remainder(60).toString().padLeft(2, '0')}:'
-        '${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
-  }
-
-  String _formatSize(int sizeInBytes) {
-    if (sizeInBytes < 1024) {
-      return '$sizeInBytes B';
-    } else if (sizeInBytes < 1024 * 1024) {
-      return '${(sizeInBytes / 1024).toStringAsFixed(2)} KB';
-    } else if (sizeInBytes < 1024 * 1024 * 1024) {
-      return '${(sizeInBytes / 1024 / 1024).toStringAsFixed(2)} MB';
-    } else {
-      return '${(sizeInBytes / 1024 / 1024 / 1024).toStringAsFixed(2)} GB';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -262,6 +245,9 @@ class _MediaResourceListWidget extends StatelessWidget {
                                             focusColor: ColorDark.defaultActive,
                                             iconColor: ColorDark.text1)
                                         : const SizedBox(),
+                                    SizedBox(
+                                      width: DesignValues.mediumPadding,
+                                    )
                                   ],
                                 ),
                               ),
@@ -276,10 +262,10 @@ class _MediaResourceListWidget extends StatelessWidget {
                                 const Spacer(),
                                 Text(
                                   mediaResource.isVideo
-                                      ? _formatDuration(
+                                      ? formatDuration(
                                           (mediaResource as NormalVideoResource)
                                               .duration)
-                                      : _formatSize(mediaResource.sizeInBytes),
+                                      : formatSize(mediaResource.sizeInBytes),
                                   style: SemiTextStyles.smallENRegular
                                       .copyWith(color: ColorDark.text2),
                                 ),
@@ -290,6 +276,9 @@ class _MediaResourceListWidget extends StatelessWidget {
                             )
                           ],
                         )),
+                        SizedBox(
+                          width: DesignValues.smallPadding,
+                        )
                       ],
                     ),
                   ),
@@ -303,9 +292,6 @@ class _MediaResourceListWidget extends StatelessWidget {
             ),
           ),
         )),
-        SizedBox(
-          width: DesignValues.smallPadding,
-        )
       ],
     );
   }
@@ -328,34 +314,40 @@ class MediaResourcesListPanel extends StatelessWidget {
         Expanded(
             child: RawScrollbar(
                 thickness: DesignValues.smallPadding,
-                trackColor: ColorDark.bg0,
                 trackVisibility: false,
                 thumbVisibility: true,
                 radius: Radius.circular(DesignValues.smallBorderRadius),
                 controller: mediaResourcesListPanelController
                     .mediaResourcesListScrollController,
-                child: Obx(() => ListView.builder(
-                    scrollDirection: Axis.vertical,
-                    controller: mediaResourcesListPanelController
-                        .mediaResourcesListScrollController,
-                    itemCount:
-                        globalMediaResourcesController.mediaResources.length,
-                    itemBuilder: (context, index) {
-                      final mediaResource =
-                          globalMediaResourcesController.mediaResources[index];
-                      return Obx(() => _MediaResourceListWidget(
-                            index: index,
-                            mediaResource: mediaResource,
-                            isSelected: globalMediaResourcesController
-                                    .selectedIndexList
-                                    .contains(index) ||
-                                globalMediaResourcesController
-                                        .currentMediaIndex.value ==
-                                    index,
-                            isMultipleSelection: globalMediaResourcesController
-                                .isMultipleSelection.value,
-                          ));
-                    }))))
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Obx(() => ListView.builder(
+                            scrollDirection: Axis.vertical,
+                            controller: mediaResourcesListPanelController
+                                .mediaResourcesListScrollController,
+                            itemCount: globalMediaResourcesController
+                                .mediaResources.length,
+                            itemBuilder: (context, index) {
+                              final mediaResource =
+                                  globalMediaResourcesController
+                                      .mediaResources[index];
+                              return Obx(() => _MediaResourceListWidget(
+                                    index: index,
+                                    mediaResource: mediaResource,
+                                    isSelected: globalMediaResourcesController
+                                            .selectedIndexList
+                                            .contains(index) ||
+                                        globalMediaResourcesController
+                                                .currentMediaIndex.value ==
+                                            index,
+                                    isMultipleSelection:
+                                        globalMediaResourcesController
+                                            .isMultipleSelection.value,
+                                  ));
+                            }))),
+                  ],
+                )))
       ],
     );
   }

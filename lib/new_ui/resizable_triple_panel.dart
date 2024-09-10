@@ -5,7 +5,7 @@ import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 class ResizableTriplePanelController extends GetxController {
   static const leftPanelMinWidth = 324.0;
   static const rightWidgetMinWidth = 600.0;
-  static const leftPanelMinHeight = 300.0;
+  static const leftPanelMinHeight = 200.0;
   static const draggableAreaSize = 8.0;
   static const dragIdentifierWidth = 2.0;
   static const dragAreaColor = ColorDark.primaryLightActive;

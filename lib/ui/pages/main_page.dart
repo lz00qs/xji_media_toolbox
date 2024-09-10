@@ -235,6 +235,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+import 'package:xji_footage_toolbox/new_ui/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
 
 import '../../new_ui/main_page_app_bar.dart';
@@ -260,7 +261,13 @@ class MainPage extends StatelessWidget {
                   globalMediaResourcesController.mediaResources.isEmpty
                       ? const SizedBox()
                       : const MediaResourcesListPanel()),
-              bottomLeftPanel: const SizedBox(),
+              bottomLeftPanel: Obx(() => globalMediaResourcesController
+                      .mediaResources.isEmpty
+                  ? const SizedBox()
+                  : MediaResourceInfoPanel(
+                      mediaResource: globalMediaResourcesController
+                          .mediaResources[globalMediaResourcesController
+                              .currentMediaIndex.value])),
               rightPanel: Obx(
                   () => globalMediaResourcesController.mediaResources.isEmpty
                       ? Center(
