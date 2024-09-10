@@ -335,6 +335,9 @@ class MediaResourcesListPanel extends StatelessWidget {
                 controller: mediaResourcesListPanelController
                     .mediaResourcesListScrollController,
                 child: Obx(() => ListView.builder(
+                    scrollDirection: Axis.vertical,
+                    controller: mediaResourcesListPanelController
+                        .mediaResourcesListScrollController,
                     itemCount:
                         globalMediaResourcesController.mediaResources.length,
                     itemBuilder: (context, index) {
