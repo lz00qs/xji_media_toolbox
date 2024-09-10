@@ -234,28 +234,49 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
 
 import '../../new_ui/main_page_app_bar.dart';
 import '../../new_ui/main_panel_button.dart';
+import '../../new_ui/media_resources_list_panel.dart';
+import '../../utils/media_resources_utils.dart';
 
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    var onPressed = false;
     Get.put(ResizableTriplePanelController());
+    final GlobalMediaResourcesController globalMediaResourcesController =
+        Get.find();
     return Column(
       children: [
-        MainPageAppBar(),
+        const MainPageAppBar(),
         Expanded(
-            child: ResizableTriplePanel(
-                topLeftPanel: SizedBox(),
-                bottomLeftPanel: SizedBox(),
-                rightPanel: Center(
-                  child: MainPanelButton(
-                      iconData: Icons.folder_open, onPressed: () async {}),
-                )))
+          child: ResizableTriplePanel(
+              topLeftPanel: Obx(() =>
+                  globalMediaResourcesController.mediaResources.isEmpty
+                      ? const SizedBox()
+                      : const MediaResourcesListPanel()),
+              bottomLeftPanel: const SizedBox(),
+              rightPanel: Obx(
+                  () => globalMediaResourcesController.mediaResources.isEmpty
+                      ? Center(
+                          child: MainPanelButton(
+                              iconData: Icons.folder_open,
+                              onPressed: () async {
+                                if (onPressed) {
+                                  return;
+                                }
+                                onPressed = true;
+                                await openMediaResourcesFolder();
+                                onPressed = false;
+                              }),
+                        )
+                      : const SizedBox())),
+        )
       ],
     );
   }

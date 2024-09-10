@@ -56,12 +56,12 @@ class MyApp extends StatelessWidget {
         Get.find<LoadingMediaResourcesController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isFFmpegAvailable
+      home: Scaffold(body: isFFmpegAvailable
           ? Obx(() =>
-              loadingMediaResourcesController.isLoadingMediaResources.value
-                  ? const LoadingMediaResourcesPage()
-                  : const MainPage())
-          : const FFmpegNotAvailablePage(),
+      loadingMediaResourcesController.isLoadingMediaResources.value
+          ? const LoadingMediaResourcesPage()
+          : const MainPage())
+          : const FFmpegNotAvailablePage(),),
     );
   }
 }
