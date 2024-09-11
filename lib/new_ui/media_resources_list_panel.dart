@@ -123,7 +123,7 @@ class _MediaResourceListWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final fileName = mediaResource.name.split('.').first;
-    final extension = mediaResource.name.split('.').last;
+    final extension = mediaResource.name.split('.').last.toUpperCase();
     final GlobalMediaResourcesController globalMediaResourcesController =
         Get.find();
     return Row(

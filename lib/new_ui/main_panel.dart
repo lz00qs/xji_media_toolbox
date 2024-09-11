@@ -7,6 +7,7 @@ import 'package:xji_footage_toolbox/new_ui/normal_video_view.dart';
 
 import 'aeb_photo_view.dart';
 import 'custom_icon_button.dart';
+import 'media_resource_delete_dialog.dart';
 import 'normal_photo_view.dart';
 
 class MainPanelSideBarControlButtons extends StatelessWidget {
@@ -22,7 +23,9 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
       children: [
         CustomIconButton(
           iconData: Icons.delete,
-          onPressed: () {},
+          onPressed: () async {
+            await Get.dialog(const MediaResourceDeleteDialog());
+          },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.macAppBarHeight,
           hoverColor: ColorDark.defaultHover,

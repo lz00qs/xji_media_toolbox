@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 
 import '../utils/media_resources_utils.dart';
+import 'custom_dual_option_dialog.dart';
 import 'custom_icon_button.dart';
+import 'media_resource_delete_dialog.dart';
 
 class _MacAppBarIconButton extends StatelessWidget {
   static const double _buttonSize = 32.0;
@@ -41,18 +43,27 @@ class _MacMainPageAppBar extends StatelessWidget {
             width: 84,
           ),
           _MacAppBarIconButton(
-              iconData: Icons.folder_open, onPressed: () async {
-            if (onPressed) {
-              return;
-            }
-            onPressed = true;
-            await openMediaResourcesFolder();
-            onPressed = false;
-          }),
+              iconData: Icons.folder_open,
+              onPressed: () async {
+                if (onPressed) {
+                  return;
+                }
+                onPressed = true;
+                await openMediaResourcesFolder();
+                onPressed = false;
+              }),
           SizedBox(
             width: DesignValues.mediumPadding,
           ),
-          _MacAppBarIconButton(iconData: Icons.settings, onPressed: () {}),
+          _MacAppBarIconButton(
+              iconData: Icons.settings,
+              onPressed: () async {
+                if (onPressed) {
+                  return;
+                }
+                onPressed = true;
+                onPressed = false;
+              }),
         ],
       ),
     );

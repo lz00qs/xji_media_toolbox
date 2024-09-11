@@ -5,6 +5,7 @@ import '../controllers/global_media_resources_controller.dart';
 import '../models/media_resource.dart';
 import 'design_tokens.dart';
 import 'main_panel_button.dart';
+import 'media_resource_delete_dialog.dart';
 import 'video_merger_view.dart';
 
 class MultiSelectPanelController extends GetxController {
@@ -82,7 +83,9 @@ class MultiSelectPanel extends StatelessWidget {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _DeleteButton(onPressed: () {}),
+              _DeleteButton(onPressed: () async {
+                await Get.dialog(const MediaResourceDeleteDialog());
+              }),
               const SizedBox(
                 width: 64,
               ),
@@ -93,11 +96,11 @@ class MultiSelectPanel extends StatelessWidget {
           );
         }
         return VideoMergerView(
-              videoResources: globalMediaResourcesController.selectedIndexList
-                  .map((e) => globalMediaResourcesController.mediaResources[e]
-                      as NormalVideoResource)
-                  .toList(),
-            );
+          videoResources: globalMediaResourcesController.selectedIndexList
+              .map((e) => globalMediaResourcesController.mediaResources[e]
+                  as NormalVideoResource)
+              .toList(),
+        );
       }),
     );
   }
