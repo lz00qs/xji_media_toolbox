@@ -77,7 +77,9 @@ class MultiSelectPanel extends StatelessWidget {
                   .copyWith(color: ColorDark.text0));
         }
         if (containPhotos) {
-          return _DeleteButton(onPressed: () {});
+          return _DeleteButton(onPressed: () async {
+            await Get.dialog(const MediaResourceDeleteDialog());
+          });
         }
         if (!multiSelectPanelController.isMerging.value) {
           return Row(
