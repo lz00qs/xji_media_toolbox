@@ -20,7 +20,7 @@ class GlobalMediaResourcesController extends GetxController {
   Directory? get mediaResourceDir => _mediaResourceDir;
 
   final isMultipleSelection = false.obs;
-  final RxSet<int> selectedIndexList = <int>{}.obs;
+  final RxList<int> selectedIndexList = <int>[].obs;
 
   set mediaResourceDir(Directory? value) {
     _mediaResourceDir = value;

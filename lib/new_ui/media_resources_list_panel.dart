@@ -6,6 +6,7 @@ import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
 import '../controllers/global_media_resources_controller.dart';
 import 'design_tokens.dart';
 import 'format.dart';
+import 'multi_select_panel.dart';
 
 class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();
@@ -316,7 +317,6 @@ class MediaResourcesListPanel extends StatelessWidget {
         Get.find();
     final globalMediaResourcesController =
         Get.find<GlobalMediaResourcesController>();
-    globalMediaResourcesController.selectedIndexList.clear();
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [

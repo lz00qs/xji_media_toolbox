@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/global_media_resources_controller.dart';
+import '../models/media_resource.dart';
 import 'design_tokens.dart';
 import 'main_panel_button.dart';
+import 'video_merger_view.dart';
 
 class MultiSelectPanelController extends GetxController {
   final isMerging = false.obs;
@@ -79,9 +81,23 @@ class MultiSelectPanel extends StatelessWidget {
         if (!multiSelectPanelController.isMerging.value) {
           return Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [_DeleteButton(onPressed: () {}), const SizedBox(width: 64,),_MergeVideoButton(onPressed: () {})],);
+            children: [
+              _DeleteButton(onPressed: () {}),
+              const SizedBox(
+                width: 64,
+              ),
+              _MergeVideoButton(onPressed: () {
+                multiSelectPanelController.isMerging.value = true;
+              })
+            ],
+          );
         }
-        return SizedBox();
+        return VideoMergerView(
+              videoResources: globalMediaResourcesController.selectedIndexList
+                  .map((e) => globalMediaResourcesController.mediaResources[e]
+                      as NormalVideoResource)
+                  .toList(),
+            );
       }),
     );
   }
