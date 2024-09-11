@@ -239,6 +239,7 @@ import 'package:xji_footage_toolbox/new_ui/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
 
 import '../../new_ui/main_page_app_bar.dart';
+import '../../new_ui/main_panel.dart';
 import '../../new_ui/main_panel_button.dart';
 import '../../new_ui/media_resources_list_panel.dart';
 import '../../utils/media_resources_utils.dart';
@@ -282,7 +283,10 @@ class MainPage extends StatelessWidget {
                                 onPressed = false;
                               }),
                         )
-                      : const SizedBox())),
+                      : MainPanel(
+                          mediaResource: globalMediaResourcesController
+                              .mediaResources[globalMediaResourcesController
+                                  .currentMediaIndex.value]))),
         )
       ],
     );
