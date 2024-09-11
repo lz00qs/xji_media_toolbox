@@ -4,7 +4,7 @@ import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/new_ui/format.dart';
 
-import '../ui/widgets/panels/views/aeb_photo_view.dart';
+import 'aeb_photo_view.dart';
 
 class _MediaResourceInfoKeyText extends StatelessWidget {
   final String keyText;
@@ -68,6 +68,34 @@ class _NormalVideoInfo extends StatelessWidget {
   }
 }
 
+class _AebPhotoInfoValueColumn extends StatelessWidget {
+  final MediaResource mediaResource;
+  final int aebCount;
+
+  const _AebPhotoInfoValueColumn(
+      {required this.mediaResource, required this.aebCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _MediaResourceInfoValueText(valueText: mediaResource.name),
+        _MediaResourceInfoValueText(
+            valueText: formatSize(mediaResource.sizeInBytes)),
+        _MediaResourceInfoValueText(
+            valueText: mediaResource.creationTime.toString().substring(0, 19)),
+        _MediaResourceInfoValueText(
+            valueText: '${mediaResource.width}x'
+                '${mediaResource.height}'),
+        _MediaResourceInfoValueText(valueText: aebCount.toString()),
+        _MediaResourceInfoValueText(valueText: (mediaResource as AebPhotoResource).evBias),
+        SizedBox()
+      ],
+    );
+  }
+}
+
 class _AebPhotoInfo extends StatelessWidget {
   final AebPhotoResource mediaResource;
 
@@ -75,8 +103,7 @@ class _AebPhotoInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AebPhotoViewController aebPhotoViewController =
-        AebPhotoViewController();
+    final AebPhotoViewController aebPhotoViewController = Get.find();
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -94,35 +121,12 @@ class _AebPhotoInfo extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Obx(() => _MediaResourceInfoValueText(
-                valueText: mediaResource
-                    .aebResources[aebPhotoViewController.currentAebIndex.value]
-                    .name)),
-            Obx(() => _MediaResourceInfoValueText(
-                valueText: formatSize(mediaResource
-                    .aebResources[aebPhotoViewController.currentAebIndex.value]
-                    .sizeInBytes))),
-            Obx(() => _MediaResourceInfoValueText(
-                valueText: mediaResource
-                    .aebResources[aebPhotoViewController.currentAebIndex.value]
-                    .creationTime
-                    .toString()
-                    .substring(0, 19))),
-            Obx(() => _MediaResourceInfoValueText(
-                valueText:
-                    '${mediaResource.aebResources[aebPhotoViewController.currentAebIndex.value].width}x'
-                    '${mediaResource.aebResources[aebPhotoViewController.currentAebIndex.value].height}')),
-            _MediaResourceInfoValueText(
-                valueText: mediaResource.aebResources.length.toString()),
-            Obx(() => _MediaResourceInfoValueText(
-                valueText: parseAebEvBias(
-                    aebPhotoViewController.currentAebIndex.value))),
-          ],
-        ))
+        Expanded(child: Obx(() {
+          return _AebPhotoInfoValueColumn(
+              mediaResource: mediaResource
+                  .aebResources[aebPhotoViewController.currentAebIndex.value],
+              aebCount: mediaResource.aebResources.length);
+        })),
       ],
     );
   }

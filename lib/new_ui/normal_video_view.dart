@@ -30,7 +30,7 @@ class NormalVideoView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.cut,
                 onPressed: () {},
-                iconSize: DesignValues.smallIconSize,
+                iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,

@@ -11,6 +11,32 @@ class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();
 }
 
+class MediaResourceThumbnail extends StatelessWidget {
+  final MediaResource mediaResource;
+
+  const MediaResourceThumbnail({super.key, required this.mediaResource});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 100,
+      height: 56,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(
+            DesignValues.smallBorderRadius),
+        child: mediaResource.thumbFile == null
+            ? Image.asset(
+            'assets/images/resource_not_found.jpeg')
+            : Image.file(
+          mediaResource.thumbFile!,
+          fit: BoxFit.fill,
+        ),
+      ),
+    );
+  }
+
+}
+
 class _MediaResourcesListTopBar
     extends GetView<GlobalMediaResourcesController> {
   const _MediaResourcesListTopBar();
@@ -136,20 +162,7 @@ class _MediaResourceListWidget extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        SizedBox(
-                          width: 100,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                                DesignValues.smallBorderRadius),
-                            child: mediaResource.thumbFile == null
-                                ? Image.asset(
-                                    'assets/images/resource_not_found.jpeg')
-                                : Image.file(
-                                    mediaResource.thumbFile!,
-                                    fit: BoxFit.fill,
-                                  ),
-                          ),
-                        ),
+                        MediaResourceThumbnail(mediaResource: mediaResource),
                         SizedBox(
                           width: DesignValues.ultraSmallPadding,
                         ),

@@ -235,21 +235,65 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/new_ui/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
 
+import '../../new_ui/aeb_photo_view.dart';
 import '../../new_ui/main_page_app_bar.dart';
 import '../../new_ui/main_panel.dart';
 import '../../new_ui/main_panel_button.dart';
 import '../../new_ui/media_resources_list_panel.dart';
 import '../../utils/media_resources_utils.dart';
 
+class _MainPageEmpty extends StatelessWidget {
+  const _MainPageEmpty();
+
+  @override
+  Widget build(BuildContext context) {
+    var onPressed = false;
+    return Container(
+      height: double.infinity,
+      width: double.infinity,
+      color: ColorDark.bg0,
+      child: Center(
+        child: MainPanelButton(
+            iconData: Icons.folder_open,
+            onPressed: () async {
+              if (onPressed) {
+                return;
+              }
+              onPressed = true;
+              await openMediaResourcesFolder();
+              onPressed = false;
+            }),
+      ),
+    );
+  }
+}
+
+class _MainPageNotEmpty extends StatelessWidget {
+  final MediaResource mediaResource;
+
+  const _MainPageNotEmpty({required this.mediaResource});
+
+  @override
+  Widget build(BuildContext context) {
+    final AebPhotoViewController aebPhotoViewController = Get.find();
+    aebPhotoViewController.currentAebIndex.value = 0;
+    return ResizableTriplePanel(
+        topLeftPanel: const MediaResourcesListPanel(),
+        bottomLeftPanel: MediaResourceInfoPanel(mediaResource: mediaResource),
+        rightPanel: MainPanel(mediaResource: mediaResource));
+  }
+}
+
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    var onPressed = false;
     Get.put(ResizableTriplePanelController());
     final GlobalMediaResourcesController globalMediaResourcesController =
         Get.find();
@@ -257,37 +301,14 @@ class MainPage extends StatelessWidget {
       children: [
         const MainPageAppBar(),
         Expanded(
-          child: ResizableTriplePanel(
-              topLeftPanel: Obx(() =>
-                  globalMediaResourcesController.mediaResources.isEmpty
-                      ? const SizedBox()
-                      : const MediaResourcesListPanel()),
-              bottomLeftPanel: Obx(() => globalMediaResourcesController
-                      .mediaResources.isEmpty
-                  ? const SizedBox()
-                  : MediaResourceInfoPanel(
-                      mediaResource: globalMediaResourcesController
-                          .mediaResources[globalMediaResourcesController
-                              .currentMediaIndex.value])),
-              rightPanel: Obx(
-                  () => globalMediaResourcesController.mediaResources.isEmpty
-                      ? Center(
-                          child: MainPanelButton(
-                              iconData: Icons.folder_open,
-                              onPressed: () async {
-                                if (onPressed) {
-                                  return;
-                                }
-                                onPressed = true;
-                                await openMediaResourcesFolder();
-                                onPressed = false;
-                              }),
-                        )
-                      : MainPanel(
-                          mediaResource: globalMediaResourcesController
-                              .mediaResources[globalMediaResourcesController
-                                  .currentMediaIndex.value]))),
-        )
+            child: Obx(() =>
+                globalMediaResourcesController.mediaResources.isEmpty
+                    ? const _MainPageEmpty()
+                    : Obx(() => _MainPageNotEmpty(
+                        mediaResource:
+                            globalMediaResourcesController.mediaResources[
+                                globalMediaResourcesController
+                                    .currentMediaIndex.value])))),
       ],
     );
   }

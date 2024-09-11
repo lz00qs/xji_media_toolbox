@@ -5,6 +5,7 @@ import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/new_ui/normal_video_view.dart';
 
+import 'aeb_photo_view.dart';
 import 'custom_icon_button.dart';
 import 'normal_photo_view.dart';
 
@@ -95,7 +96,7 @@ class MainPanel extends StatelessWidget {
       return NormalVideoView(
           videoResource: mediaResource as NormalVideoResource);
     } else if (mediaResource.isAeb) {
-      return const SizedBox();
+      return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
     } else {
       return NormalPhotoView(
           photoResource: mediaResource as NormalPhotoResource);
