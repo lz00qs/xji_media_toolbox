@@ -34,7 +34,11 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
         ),
         CustomIconButton(
           iconData: Icons.arrow_upward,
-          onPressed: () {},
+          onPressed: () {
+            if (globalMediaResourcesController.currentMediaIndex.value > 0) {
+              globalMediaResourcesController.currentMediaIndex.value--;
+            }
+          },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.macAppBarHeight,
           hoverColor: ColorDark.defaultHover,
@@ -46,7 +50,12 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
         ),
         CustomIconButton(
           iconData: Icons.arrow_downward,
-          onPressed: () {},
+          onPressed: () {
+            if (globalMediaResourcesController.currentMediaIndex.value <
+                globalMediaResourcesController.mediaResources.length - 1) {
+              globalMediaResourcesController.currentMediaIndex.value++;
+            }
+          },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.macAppBarHeight,
           hoverColor: ColorDark.defaultHover,
