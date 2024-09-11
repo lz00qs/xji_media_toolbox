@@ -90,7 +90,6 @@ class _AebPhotoInfoValueColumn extends StatelessWidget {
                 '${mediaResource.height}'),
         _MediaResourceInfoValueText(valueText: aebCount.toString()),
         _MediaResourceInfoValueText(valueText: (mediaResource as AebPhotoResource).evBias),
-        SizedBox()
       ],
     );
   }

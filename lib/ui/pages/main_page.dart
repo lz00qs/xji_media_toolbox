@@ -274,15 +274,6 @@ class _MainPageEmpty extends StatelessWidget {
   }
 }
 
-class _MultiSelectPanel extends StatelessWidget {
-  const _MultiSelectPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox();
-  }
-}
-
 class _MainPageNotEmpty extends StatelessWidget {
   final MediaResource mediaResource;
   final bool isMultipleSelection;
