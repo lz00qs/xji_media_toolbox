@@ -6,8 +6,8 @@ import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.da
 import '../models/media_resource.dart';
 import '../new_ui/aeb_photo_view.dart';
 import '../new_ui/media_resources_list_panel.dart';
+import '../new_ui/multi_select_panel.dart';
 import '../ui/pages/loading_media_resources_page.dart';
-import '../ui/widgets/panels/multi_select_panel.dart';
 import '../ui/widgets/panels/views/video_merger_view.dart';
 import 'global_tasks_controller.dart';
 

@@ -22,19 +22,16 @@ class MediaResourceThumbnail extends StatelessWidget {
       width: 100,
       height: 56,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(
-            DesignValues.smallBorderRadius),
+        borderRadius: BorderRadius.circular(DesignValues.smallBorderRadius),
         child: mediaResource.thumbFile == null
-            ? Image.asset(
-            'assets/images/resource_not_found.jpeg')
+            ? Image.asset('assets/images/resource_not_found.jpeg')
             : Image.file(
-          mediaResource.thumbFile!,
-          fit: BoxFit.fill,
-        ),
+                mediaResource.thumbFile!,
+                fit: BoxFit.fill,
+              ),
       ),
     );
   }
-
 }
 
 class _MediaResourcesListTopBar
@@ -351,9 +348,11 @@ class MediaResourcesListPanel extends StatelessWidget {
                                     isSelected: globalMediaResourcesController
                                             .selectedIndexList
                                             .contains(index) ||
-                                        globalMediaResourcesController
-                                                .currentMediaIndex.value ==
-                                            index,
+                                        (!globalMediaResourcesController
+                                                .isMultipleSelection.value &&
+                                            globalMediaResourcesController
+                                                    .currentMediaIndex.value ==
+                                                index),
                                     isMultipleSelection:
                                         globalMediaResourcesController
                                             .isMultipleSelection.value,

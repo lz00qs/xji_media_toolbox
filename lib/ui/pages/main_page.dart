@@ -245,6 +245,7 @@ import '../../new_ui/main_page_app_bar.dart';
 import '../../new_ui/main_panel.dart';
 import '../../new_ui/main_panel_button.dart';
 import '../../new_ui/media_resources_list_panel.dart';
+import '../../new_ui/multi_select_panel.dart';
 import '../../utils/media_resources_utils.dart';
 
 class _MainPageEmpty extends StatelessWidget {
@@ -273,10 +274,21 @@ class _MainPageEmpty extends StatelessWidget {
   }
 }
 
+class _MultiSelectPanel extends StatelessWidget {
+  const _MultiSelectPanel();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox();
+  }
+}
+
 class _MainPageNotEmpty extends StatelessWidget {
   final MediaResource mediaResource;
+  final bool isMultipleSelection;
 
-  const _MainPageNotEmpty({required this.mediaResource});
+  const _MainPageNotEmpty(
+      {required this.mediaResource, required this.isMultipleSelection});
 
   @override
   Widget build(BuildContext context) {
@@ -285,7 +297,9 @@ class _MainPageNotEmpty extends StatelessWidget {
     return ResizableTriplePanel(
         topLeftPanel: const MediaResourcesListPanel(),
         bottomLeftPanel: MediaResourceInfoPanel(mediaResource: mediaResource),
-        rightPanel: MainPanel(mediaResource: mediaResource));
+        rightPanel: isMultipleSelection
+            ? const MultiSelectPanel()
+            : MainPanel(mediaResource: mediaResource));
   }
 }
 
@@ -301,14 +315,15 @@ class MainPage extends StatelessWidget {
       children: [
         const MainPageAppBar(),
         Expanded(
-            child: Obx(() =>
-                globalMediaResourcesController.mediaResources.isEmpty
-                    ? const _MainPageEmpty()
-                    : Obx(() => _MainPageNotEmpty(
-                        mediaResource:
-                            globalMediaResourcesController.mediaResources[
-                                globalMediaResourcesController
-                                    .currentMediaIndex.value])))),
+            child: Obx(() => globalMediaResourcesController
+                    .mediaResources.isEmpty
+                ? const _MainPageEmpty()
+                : Obx(() => _MainPageNotEmpty(
+                    mediaResource: globalMediaResourcesController
+                            .mediaResources[
+                        globalMediaResourcesController.currentMediaIndex.value],
+                    isMultipleSelection: globalMediaResourcesController
+                        .isMultipleSelection.value)))),
       ],
     );
   }
