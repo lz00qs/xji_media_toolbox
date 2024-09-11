@@ -6,6 +6,7 @@ import '../utils/media_resources_utils.dart';
 import 'custom_dual_option_dialog.dart';
 import 'custom_icon_button.dart';
 import 'media_resource_delete_dialog.dart';
+import 'settings_dialog.dart';
 
 class _MacAppBarIconButton extends StatelessWidget {
   static const double _buttonSize = 32.0;
@@ -62,6 +63,7 @@ class _MacMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
+                await Get.dialog(SettingsDialog());
                 onPressed = false;
               }),
         ],

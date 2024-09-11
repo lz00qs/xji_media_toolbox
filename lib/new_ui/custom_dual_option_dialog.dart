@@ -34,6 +34,8 @@ class CustomDualOptionDialog extends StatelessWidget {
   final String option2;
   final VoidCallback onOption1Pressed;
   final VoidCallback onOption2Pressed;
+  final bool disableOption1;
+  final bool disableOption2;
 
   const CustomDualOptionDialog(
       {super.key,
@@ -44,7 +46,9 @@ class CustomDualOptionDialog extends StatelessWidget {
       required this.option1,
       required this.option2,
       required this.onOption1Pressed,
-      required this.onOption2Pressed});
+      required this.onOption2Pressed,
+      this.disableOption1 = false,
+      this.disableOption2 = false});
 
   @override
   Widget build(BuildContext context) {
@@ -74,13 +78,13 @@ class CustomDualOptionDialog extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          _OptionButton(
+                          disableOption1 ? const SizedBox() : _OptionButton(
                             onPressed: onOption1Pressed,
                             text: option1,
                             isOption1: true,
                           ),
                           SizedBox(width: DesignValues.mediumPadding),
-                          _OptionButton(
+                          disableOption2 ? const SizedBox() : _OptionButton(
                             onPressed: onOption2Pressed,
                             text: option2,
                             isOption1: false,
