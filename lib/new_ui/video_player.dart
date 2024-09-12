@@ -66,7 +66,11 @@ class VideoPlayer extends StatelessWidget {
           ? Chewie(
               controller: controller.chewieController!,
             )
-          : const CircularProgressIndicator()),
+          : const Center(
+              child: CircularProgressIndicator(
+                color: ColorDark.primary,
+              ),
+            )),
     );
   }
 }

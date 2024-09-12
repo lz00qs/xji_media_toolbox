@@ -1,5 +1,20 @@
 import 'package:flutter/material.dart';
 
+final dialogInputDecoration = InputDecoration(
+  enabledBorder: OutlineInputBorder(
+    borderSide: const BorderSide(color: ColorDark.text2),
+    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
+  ),
+  focusedBorder: OutlineInputBorder(
+    borderSide: const BorderSide(color: ColorDark.text1),
+    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
+  ),
+  border: OutlineInputBorder(
+    borderSide: const BorderSide(color: ColorDark.text3),
+    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
+  ),
+);
+
 /// values
 class DesignValues {
   static double macAppBarHeight = 32.0;

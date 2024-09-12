@@ -1,25 +1,89 @@
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 
+import 'custom_icon_button.dart';
+
+class CustomDialogCheckBoxWithText extends StatelessWidget {
+  final String text;
+  final bool value;
+  final VoidCallback onPressed;
+
+  const CustomDialogCheckBoxWithText(
+      {super.key,
+      required this.text,
+      required this.value,
+      required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomDialogIconButtonWithText(
+        iconData: value ? Icons.check_box : Icons.check_box_outline_blank,
+        text: text,
+        onPressed: onPressed);
+  }
+}
+
+class CustomDialogIconButtonWithText extends StatelessWidget {
+  final IconData iconData;
+  final String text;
+  final VoidCallback onPressed;
+
+  const CustomDialogIconButtonWithText(
+      {super.key,
+      required this.iconData,
+      required this.text,
+      required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style:
+              SemiTextStyles.header5ENRegular.copyWith(color: ColorDark.text1),
+        ),
+        const Spacer(),
+        CustomIconButton(
+            iconData: iconData,
+            onPressed: onPressed,
+            iconSize: DesignValues.mediumIconSize,
+            buttonSize: 24,
+            hoverColor: ColorDark.defaultHover,
+            focusColor: ColorDark.defaultActive,
+            iconColor: ColorDark.text0)
+      ],
+    );
+  }
+}
+
 class _OptionButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final bool isOption1;
+  final bool disabled;
 
   const _OptionButton(
-      {required this.text, required this.onPressed, required this.isOption1});
+      {required this.text,
+      required this.onPressed,
+      required this.isOption1,
+      this.disabled = false});
 
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: onPressed,
+      onPressed: disabled ? null : onPressed,
       style: ButtonStyle(
         overlayColor: WidgetStateProperty.all(ColorDark.defaultHover),
       ),
       child: Text(
         text,
-        style: SemiTextStyles.header5ENRegular
-            .copyWith(color: isOption1 ? ColorDark.danger : ColorDark.info),
+        style: SemiTextStyles.header5ENRegular.copyWith(
+            color: disabled
+                ? ColorDark.disabledText
+                : isOption1
+                    ? ColorDark.danger
+                    : ColorDark.info),
       ),
     );
   }
@@ -78,16 +142,18 @@ class CustomDualOptionDialog extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          disableOption1 ? const SizedBox() : _OptionButton(
+                          _OptionButton(
                             onPressed: onOption1Pressed,
                             text: option1,
                             isOption1: true,
+                            disabled: disableOption1,
                           ),
                           SizedBox(width: DesignValues.mediumPadding),
-                          disableOption2 ? const SizedBox() : _OptionButton(
+                          _OptionButton(
                             onPressed: onOption2Pressed,
                             text: option2,
                             isOption1: false,
+                            disabled: disableOption2,
                           ),
                         ],
                       ),

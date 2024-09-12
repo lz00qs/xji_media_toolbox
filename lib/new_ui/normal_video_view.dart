@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
 import 'package:xji_footage_toolbox/new_ui/video_player.dart';
 
 import '../models/media_resource.dart';
@@ -29,7 +31,20 @@ class NormalVideoView extends StatelessWidget {
             ),
             CustomIconButton(
                 iconData: Icons.cut,
-                onPressed: () {},
+                onPressed: () async {},
+                iconSize: DesignValues.mediumIconSize,
+                buttonSize: DesignValues.macAppBarHeight,
+                hoverColor: ColorDark.defaultHover,
+                focusColor: ColorDark.defaultActive,
+                iconColor: ColorDark.text0),
+            SizedBox(
+              height: DesignValues.mediumPadding,
+            ),
+            CustomIconButton(
+                iconData: Icons.upload,
+                onPressed: () async {
+                  await Get.dialog(const VideoExportDialog());
+                },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,

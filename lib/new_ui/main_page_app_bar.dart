@@ -3,9 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 
 import '../utils/media_resources_utils.dart';
-import 'custom_dual_option_dialog.dart';
 import 'custom_icon_button.dart';
-import 'media_resource_delete_dialog.dart';
 import 'settings_dialog.dart';
 
 class _MacAppBarIconButton extends StatelessWidget {
@@ -63,7 +61,7 @@ class _MacMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
-                await Get.dialog(SettingsDialog());
+                await Get.dialog(const SettingsDialog());
                 onPressed = false;
               }),
         ],

@@ -129,21 +129,6 @@ class _PresetDeleteDialog extends StatelessWidget {
   }
 }
 
-final _inputDecoration = InputDecoration(
-  enabledBorder: OutlineInputBorder(
-    borderSide: const BorderSide(color: ColorDark.text2),
-    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
-  ),
-  focusedBorder: OutlineInputBorder(
-    borderSide: const BorderSide(color: ColorDark.text1),
-    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
-  ),
-  border: OutlineInputBorder(
-    borderSide: const BorderSide(color: ColorDark.text3),
-    borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
-  ),
-);
-
 bool _isPresetParametersValid(String name, int width, int height, int crf) {
   return name.isNotEmpty && width > 0 && height > 0 && crf > 0 && crf < 52;
 }
@@ -198,6 +183,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
         },
         onOption2Pressed: () {
           final newPreset = ExportPreset()
+            ..id = preset?.id ?? 0
             ..name = nameController.text
             ..width = width.value
             ..height = height.value
@@ -218,45 +204,33 @@ class _EditTranscodePresetDialog extends StatelessWidget {
             ),
             SizedBox(
               height: 72,
-              child: Obx(() => TextField(
+              child: Theme(
+                  data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                          selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                  child: Obx(() => TextField(
                     cursorColor: ColorDark.text1,
                     controller: nameController,
                     style: SemiTextStyles.header5ENRegular
                         .copyWith(color: ColorDark.text0),
-                    decoration: _inputDecoration.copyWith(
+                    decoration: dialogInputDecoration.copyWith(
                         errorText:
                             name.value.isEmpty ? 'Name is required' : null),
                     onChanged: (value) {
                       nameController.text = value;
                       name.value = value;
                     },
-                  )),
+                  ))),
             ),
             SizedBox(
               height: DesignValues.smallPadding,
             ),
-            Row(
-              children: [
-                Text(
-                  'Use Input Resolution',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text1),
-                ),
-                const Spacer(),
-                Obx(() => CustomIconButton(
-                    iconData: useInputResolution.value
-                        ? Icons.check_box_outlined
-                        : Icons.check_box_outline_blank,
-                    onPressed: () {
-                      useInputResolution.value = !useInputResolution.value;
-                    },
-                    iconSize: DesignValues.mediumIconSize,
-                    buttonSize: 24,
-                    hoverColor: ColorDark.defaultHover,
-                    focusColor: ColorDark.defaultActive,
-                    iconColor: ColorDark.text1))
-              ],
-            ),
+            Obx(() => CustomDialogCheckBoxWithText(
+                text: 'Use Input Resolution',
+                value: useInputResolution.value,
+                onPressed: () {
+                  useInputResolution.value = !useInputResolution.value;
+                })),
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
@@ -274,7 +248,11 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                     ),
                     SizedBox(
                       height: 72,
-                      child: Obx(() => TextField(
+                      child: Theme(
+                          data: Theme.of(context).copyWith(
+                              textSelectionTheme: TextSelectionThemeData(
+                                  selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                          child: Obx(() => TextField(
                             cursorColor: ColorDark.text1,
                             keyboardType: TextInputType.number,
                             inputFormatters: <TextInputFormatter>[
@@ -283,7 +261,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                             controller: widthController,
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text0),
-                            decoration: _inputDecoration.copyWith(
+                            decoration: dialogInputDecoration.copyWith(
                                 errorText: width.value == 0
                                     ? 'Width cannot be 0'
                                     : null),
@@ -295,7 +273,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                               }
                               widthController.text = width.value.toString();
                             },
-                          )),
+                          ))),
                     ),
                     Text(
                       'Height',
@@ -304,7 +282,11 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                     ),
                     SizedBox(
                       height: 72,
-                      child: Obx(() => TextField(
+                      child: Theme(
+                          data: Theme.of(context).copyWith(
+                              textSelectionTheme: TextSelectionThemeData(
+                                  selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                          child: Obx(() => TextField(
                             cursorColor: ColorDark.text1,
                             keyboardType: TextInputType.number,
                             inputFormatters: <TextInputFormatter>[
@@ -313,7 +295,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                             controller: heightController,
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text0),
-                            decoration: _inputDecoration.copyWith(
+                            decoration: dialogInputDecoration.copyWith(
                                 errorText: height.value == 0
                                     ? 'Height cannot be 0'
                                     : null),
@@ -325,7 +307,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                               }
                               heightController.text = height.value.toString();
                             },
-                          )),
+                          ))),
                     ),
                   ],
                 );
@@ -341,7 +323,11 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                 ),
                 SizedBox(
                   height: 72,
-                  child: Obx(() => TextField(
+                  child: Theme(
+                      data: Theme.of(context).copyWith(
+                          textSelectionTheme: TextSelectionThemeData(
+                              selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                      child: Obx(() => TextField(
                         cursorColor: ColorDark.text1,
                         keyboardType: TextInputType.number,
                         inputFormatters: <TextInputFormatter>[
@@ -350,7 +336,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                         controller: crfController,
                         style: SemiTextStyles.header5ENRegular
                             .copyWith(color: ColorDark.text0),
-                        decoration: _inputDecoration.copyWith(
+                        decoration: dialogInputDecoration.copyWith(
                             errorText: (crf.value > 0 && crf.value < 52)
                                 ? null
                                 : 'CRF must be between 0 and 51, higher is lower quality.',
@@ -363,35 +349,19 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                           }
                           crfController.text = crf.value.toString();
                         },
-                      )),
+                      ))),
                 ),
               ],
             ),
             SizedBox(
               width: DesignValues.smallPadding,
             ),
-            Row(
-              children: [
-                Text(
-                  'Use H.265',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text1),
-                ),
-                const Spacer(),
-                Obx(() => CustomIconButton(
-                    iconData: useHevc.value
-                        ? Icons.check_box_outlined
-                        : Icons.check_box_outline_blank,
-                    onPressed: () {
-                      useHevc.value = !useHevc.value;
-                    },
-                    iconSize: DesignValues.mediumIconSize,
-                    buttonSize: 24,
-                    hoverColor: ColorDark.defaultHover,
-                    focusColor: ColorDark.defaultActive,
-                    iconColor: ColorDark.text1))
-              ],
-            ),
+            Obx(() => CustomDialogCheckBoxWithText(
+                text: 'Use H.265',
+                value: useHevc.value,
+                onPressed: () {
+                  useHevc.value = !useHevc.value;
+                })),
             SizedBox(
               height: DesignValues.smallPadding,
             ),

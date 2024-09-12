@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/new_ui/multi_select_panel.dart';
+import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
 
 import 'custom_icon_button.dart';
 import 'main_panel.dart';
@@ -125,7 +126,11 @@ class VideoMergerView extends StatelessWidget {
             ),
             CustomIconButton(
                 iconData: Icons.save,
-                onPressed: () {},
+                onPressed: () async {
+                  await Get.dialog(VideoExportDialog(
+                    videoResources: rxVideoResources,
+                  ));
+                },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,

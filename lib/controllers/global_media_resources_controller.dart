@@ -31,13 +31,13 @@ class GlobalMediaResourcesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    Get.lazyPut(() => MediaResourcesListPanelController());
-    Get.lazyPut(() => GlobalFocusNodesController());
-    Get.lazyPut(() => AebPhotoViewController());
-    Get.lazyPut(() => GlobalTasksController());
-    Get.lazyPut(() => VideoMergerController());
-    Get.lazyPut(() => MultiSelectPanelController());
-    Get.lazyPut(() => LoadingMediaResourcesController());
+    Get.put(MediaResourcesListPanelController());
+    Get.put(GlobalFocusNodesController());
+    Get.put(AebPhotoViewController());
+    Get.put(GlobalTasksController());
+    Get.put(VideoMergerController());
+    Get.put(MultiSelectPanelController());
+    Get.put(LoadingMediaResourcesController());
   }
 
   Future<void> loadMediaResources() async {
