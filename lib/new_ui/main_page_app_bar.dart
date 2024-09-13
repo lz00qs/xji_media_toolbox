@@ -64,6 +64,13 @@ class _MacMainPageAppBar extends StatelessWidget {
                 await Get.dialog(const SettingsDialog());
                 onPressed = false;
               }),
+          const Spacer(),
+          _MacAppBarIconButton(
+              iconData: Icons.playlist_add_check_outlined,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              }),
+          SizedBox(width: DesignValues.ultraSmallPadding,)
         ],
       ),
     );

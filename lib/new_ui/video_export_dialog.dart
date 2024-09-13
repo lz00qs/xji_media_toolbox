@@ -174,7 +174,7 @@ class VideoExportDialog extends StatelessWidget {
             if (multiSelectPanelController.isMerging.value) {
               final process = VideoProcess(
                 ffmpegParentDir: globalSettingsController.ffmpegParentDir,
-                name: 'Merge $outputFileName.MP4',
+                name: '$outputFileName.MP4',
                 type: VideoProcessType.merge,
                 duration: _getOutputDuration().inSeconds.toDouble(),
               );
@@ -227,10 +227,7 @@ class VideoExportDialog extends StatelessWidget {
             } else {
               final process = VideoProcess(
                 ffmpegParentDir: globalSettingsController.ffmpegParentDir,
-                name:
-                    globalMediaResourcesController.isEditingMediaResources.value
-                        ? 'Trim $outputFileName.MP4'
-                        : 'Transcode $outputFileName.MP4',
+                name: '$outputFileName.MP4',
                 type:
                     globalMediaResourcesController.isEditingMediaResources.value
                         ? VideoProcessType.trim
