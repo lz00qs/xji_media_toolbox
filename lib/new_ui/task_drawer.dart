@@ -109,14 +109,7 @@ class TaskItem extends StatelessWidget {
                                           color: ColorDark.danger,
                                           overflow: TextOverflow.ellipsis));
                           }
-                        }
-                            // => Text(
-                            //     '${(videoProcess.progress.value * 100).toInt()}%',
-                            //     style: SemiTextStyles.regularENSemiBold.copyWith(
-                            //         color: ColorDark.text1,
-                            //         overflow: TextOverflow.ellipsis))
-
-                            ),
+                        }),
                       ],
                     ),
                   ),
