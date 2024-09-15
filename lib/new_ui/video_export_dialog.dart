@@ -172,13 +172,6 @@ class VideoExportDialog extends StatelessWidget {
                     (element) => element.id == transCodePresetIndex.value);
 
             if (multiSelectPanelController.isMerging.value) {
-              final process = VideoProcess(
-                ffmpegParentDir: globalSettingsController.ffmpegParentDir,
-                name: '$outputFileName.MP4',
-                type: VideoProcessType.merge,
-                duration: _getOutputDuration().inSeconds.toDouble(),
-              );
-              globalTasksController.videoProcessingTasks.add(process);
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
                   '${videoResource.file.parent.path}/.${outputFileName.value}_'
@@ -221,20 +214,17 @@ class VideoExportDialog extends StatelessWidget {
                   print(arg);
                 }
               }
-              await process.start(ffmpegArgs, needDeleteFilePaths: [
-                inputFilesTxtPath,
-              ]);
-            } else {
               final process = VideoProcess(
                 ffmpegParentDir: globalSettingsController.ffmpegParentDir,
                 name: '$outputFileName.MP4',
-                type:
-                    globalMediaResourcesController.isEditingMediaResources.value
-                        ? VideoProcessType.trim
-                        : VideoProcessType.transcode,
-                duration: _getOutputDuration().inSeconds.toDouble(),
+                type: VideoProcessType.merge,
+                duration: _getOutputDuration(),
+                ffmpegArgs: ffmpegArgs,
+                outputFilePath: outputFilePath,
               );
               globalTasksController.videoProcessingTasks.add(process);
+              await process.start();
+            } else {
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
               ffmpegArgs.add(videoResource.file.path);
@@ -257,17 +247,20 @@ class VideoExportDialog extends StatelessWidget {
               } else {
                 ffmpegArgs.add('copy');
               }
-
-              // if (globalMediaResourcesController
-              //     .isEditingMediaResources.value ==
-              //     true) {
-              //   ffmpegArgs.add('-ss');
-              //   ffmpegArgs.add(videoTrimStart.value.toString());
-              //   ffmpegArgs.add('-to');
-              //   ffmpegArgs.add(videoTrimEnd.value.toString());
-              // }
               ffmpegArgs.add(outputFilePath);
-              await process.start(ffmpegArgs);
+              final process = VideoProcess(
+                ffmpegParentDir: globalSettingsController.ffmpegParentDir,
+                name: '$outputFileName.MP4',
+                type:
+                    globalMediaResourcesController.isEditingMediaResources.value
+                        ? VideoProcessType.trim
+                        : VideoProcessType.transcode,
+                duration: _getOutputDuration(),
+                ffmpegArgs: ffmpegArgs,
+                outputFilePath: outputFilePath,
+              );
+              globalTasksController.videoProcessingTasks.add(process);
+              await process.start();
             }
             Get.back();
           }
