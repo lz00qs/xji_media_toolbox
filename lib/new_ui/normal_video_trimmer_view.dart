@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
 import 'package:xji_footage_toolbox/new_ui/video_trimmer.dart';
 
 import '../controllers/global_media_resources_controller.dart';
@@ -47,7 +48,9 @@ class NormalVideoTrimmerView extends StatelessWidget {
             ),
             CustomIconButton(
                 iconData: Icons.upload,
-                onPressed: () async {},
+                onPressed: () async {
+                  await Get.dialog(const VideoExportDialog());
+                },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,

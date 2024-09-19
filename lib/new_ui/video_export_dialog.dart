@@ -14,11 +14,11 @@ import '../controllers/global_tasks_controller.dart';
 import '../models/media_resource.dart';
 import '../models/settings.dart';
 import '../models/video_process.dart';
-import '../ui/widgets/panels/views/video_trimmer_view.dart';
 import '../utils/media_resources_utils.dart';
 import 'custom_dual_option_dialog.dart';
 import 'custom_icon_button.dart';
 import 'design_tokens.dart';
+import 'video_trimmer.dart';
 
 String _getDefaultOutputFileName(String originalFileName) {
   final lastDotIndex = originalFileName.lastIndexOf('.');
@@ -45,8 +45,8 @@ Duration _getOutputDuration() {
   } else {
     if (globalMediaResourcesController.isEditingMediaResources.value) {
       final videoTrimmerController = Get.find<VideoTrimmerController>();
-      duration = videoTrimmerController.videoPlayerEndPosition.value -
-          videoTrimmerController.videoPlayerStartPosition.value;
+      duration = videoTrimmerController.savedEnd.value -
+          videoTrimmerController.savedStart.value;
     } else {
       final videoResource = globalMediaResourcesController.mediaResources[
               globalMediaResourcesController.currentMediaIndex.value]
@@ -131,10 +131,14 @@ class VideoExportDialog extends StatelessWidget {
           as NormalVideoResource;
     } else {
       if (globalMediaResourcesController.isEditingMediaResources.value) {
-      } else {}
-      videoResource = globalMediaResourcesController.mediaResources[
-              globalMediaResourcesController.currentMediaIndex.value]
-          as NormalVideoResource;
+        videoResource = globalMediaResourcesController.mediaResources[
+                globalMediaResourcesController.currentMediaIndex.value]
+            as NormalVideoResource;
+      } else {
+        videoResource = globalMediaResourcesController.mediaResources[
+                globalMediaResourcesController.currentMediaIndex.value]
+            as NormalVideoResource;
+      }
     }
 
     final useSameDirectory = true.obs;
@@ -246,6 +250,18 @@ class VideoExportDialog extends StatelessWidget {
                 ffmpegArgs.add('scale=${preset.width}:${preset.height}');
               } else {
                 ffmpegArgs.add('copy');
+              }
+
+              if (globalMediaResourcesController
+                  .isEditingMediaResources.value) {
+                final videoTrimmerController =
+                    Get.find<VideoTrimmerController>();
+                ffmpegArgs.add('-ss');
+                ffmpegArgs
+                    .add(videoTrimmerController.savedStart.value.toString());
+                ffmpegArgs.add('-to');
+                ffmpegArgs
+                    .add(videoTrimmerController.savedEnd.value.toString());
               }
               ffmpegArgs.add(outputFilePath);
               final process = VideoProcess(
