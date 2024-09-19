@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
-import 'package:xji_footage_toolbox/new_ui/video_player_getx.dart';
+import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:xji_footage_toolbox/new_ui/video_trimmer.dart';
 
 import '../controllers/global_media_resources_controller.dart';
-import '../models/media_resource.dart';
+import 'custom_icon_button.dart';
 import 'design_tokens.dart';
 import 'main_panel.dart';
 
-class NormalVideoView extends StatelessWidget {
+class NormalVideoTrimmerView extends StatelessWidget {
   final NormalVideoResource videoResource;
 
-  const NormalVideoView({super.key, required this.videoResource});
+  const NormalVideoTrimmerView({super.key, required this.videoResource});
 
   @override
   Widget build(BuildContext context) {
@@ -22,22 +21,21 @@ class NormalVideoView extends StatelessWidget {
         Expanded(
           child: Padding(
               padding: EdgeInsets.all(DesignValues.smallPadding),
-              child: VideoPlayerGetx(videoResource: videoResource)),
+              child: VideoTrimmer(videoResource: videoResource)),
         ),
         MainPanelSideBar(
           children: [
-            const MainPanelSideBarControlButtons(),
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
             CustomIconButton(
-                iconData: Icons.cut,
+                iconData: Icons.arrow_back_ios_new,
                 onPressed: () async {
                   final GlobalMediaResourcesController
                       globalMediaResourcesController =
                       Get.find<GlobalMediaResourcesController>();
                   globalMediaResourcesController.isEditingMediaResources.value =
-                      true;
+                      false;
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
@@ -49,9 +47,7 @@ class NormalVideoView extends StatelessWidget {
             ),
             CustomIconButton(
                 iconData: Icons.upload,
-                onPressed: () async {
-                  await Get.dialog(const VideoExportDialog());
-                },
+                onPressed: () async {},
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,

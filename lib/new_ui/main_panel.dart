@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/new_ui/normal_video_trimmer_view.dart';
 import 'package:xji_footage_toolbox/new_ui/normal_video_view.dart';
 
 import 'aeb_photo_view.dart';
@@ -104,9 +105,15 @@ class MainPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final GlobalMediaResourcesController globalMediaResourcesController =
+        Get.find<GlobalMediaResourcesController>();
+    globalMediaResourcesController.isEditingMediaResources.value = false;
     if (mediaResource.isVideo) {
-      return NormalVideoView(
-          videoResource: mediaResource as NormalVideoResource);
+      return Obx(() => globalMediaResourcesController.isEditingMediaResources.value
+          ? NormalVideoTrimmerView(
+          videoResource: mediaResource as NormalVideoResource)
+          : NormalVideoView(
+          videoResource: mediaResource as NormalVideoResource));
     } else if (mediaResource.isAeb) {
       return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
     } else {

@@ -47,11 +47,11 @@ class VideoPlayerGetxController extends GetxController {
   }
 }
 
-class VideoPlayer extends StatelessWidget {
+class VideoPlayerGetx extends StatelessWidget {
   final NormalVideoResource videoResource;
   final bool showControls;
 
-  const VideoPlayer(
+  const VideoPlayerGetx(
       {super.key, required this.videoResource, this.showControls = true});
 
   @override
