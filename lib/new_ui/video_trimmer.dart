@@ -484,7 +484,6 @@ class VideoTrimmer extends GetView<VideoTrimmerController> {
             LayoutBuilder(builder: (context, constraints) {
               controller.trimmerWidth =
                   constraints.maxWidth - 2 * DesignValues.smallPadding;
-              print('trimmerWidth: ${controller.trimmerWidth}');
               return MouseRegion(
                 child: Listener(
                   onPointerSignal: (event) {
