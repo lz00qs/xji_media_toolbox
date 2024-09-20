@@ -1,13 +1,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/new_ui/media_resources_list_panel.dart';
-import 'package:xji_footage_toolbox/new_ui/photo_viewer.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer.dart';
 
-import '../models/media_resource.dart';
-import 'custom_icon_button.dart';
-import 'design_tokens.dart';
-import 'main_panel.dart';
+import '../../../models/media_resource.dart';
+import '../buttons/custom_icon_button.dart';
+import '../../design_tokens.dart';
+import '../../main_panel.dart';
+import 'media_resources_list_panel.dart';
 
 class AebPhotoViewController extends GetxController {
   final currentAebIndex = 0.obs;

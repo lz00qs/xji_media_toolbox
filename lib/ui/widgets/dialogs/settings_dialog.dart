@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
-import 'package:xji_footage_toolbox/new_ui/custom_dual_option_dialog.dart';
-import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/custom_dual_option_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 class _PresetItemButton extends StatelessWidget {
   final IconData iconData;

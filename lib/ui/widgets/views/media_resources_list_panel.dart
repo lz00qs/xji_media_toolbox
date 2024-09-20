@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
 
-import '../controllers/global_media_resources_controller.dart';
-import 'design_tokens.dart';
-import 'format.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../utils/format.dart';
+import '../../design_tokens.dart';
+
+
 
 class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/new_ui/multi_select_panel.dart';
-import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
 
-import 'custom_icon_button.dart';
-import 'main_panel.dart';
+import '../buttons/custom_icon_button.dart';
+import '../../main_panel.dart';
 
 class _VideoThumbnail extends StatelessWidget {
   final NormalVideoResource videoResource;

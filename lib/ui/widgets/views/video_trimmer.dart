@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
-import 'package:xji_footage_toolbox/new_ui/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
 
-import '../models/media_resource.dart';
-import 'design_tokens.dart';
+import '../../../models/media_resource.dart';
+import '../../design_tokens.dart';
 
 const _scaleValueList = [
   50000, // 50ms

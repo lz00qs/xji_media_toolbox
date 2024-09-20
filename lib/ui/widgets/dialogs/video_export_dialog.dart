@@ -5,20 +5,20 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/new_ui/multi_select_panel.dart';
-import 'package:xji_footage_toolbox/new_ui/settings_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/settings_dialog.dart';
 
-import '../controllers/global_media_resources_controller.dart';
-import '../controllers/global_settings_controller.dart';
-import '../controllers/global_tasks_controller.dart';
-import '../models/media_resource.dart';
-import '../models/settings.dart';
-import '../models/video_process.dart';
-import '../utils/media_resources_utils.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../controllers/global_settings_controller.dart';
+import '../../../controllers/global_tasks_controller.dart';
+import '../../../models/media_resource.dart';
+import '../../../models/settings.dart';
+import '../../../models/video_process.dart';
+import '../../../utils/media_resources_utils.dart';
 import 'custom_dual_option_dialog.dart';
-import 'custom_icon_button.dart';
-import 'design_tokens.dart';
-import 'video_trimmer.dart';
+import '../buttons/custom_icon_button.dart';
+import '../../design_tokens.dart';
+import '../views/video_trimmer.dart';
 
 String _getDefaultOutputFileName(String originalFileName) {
   final lastDotIndex = originalFileName.lastIndexOf('.');

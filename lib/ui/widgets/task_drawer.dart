@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/video_process.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import '../controllers/global_tasks_controller.dart';
+import '../../controllers/global_tasks_controller.dart';
 
 class TaskItem extends StatelessWidget {
   final VideoProcess videoProcess;

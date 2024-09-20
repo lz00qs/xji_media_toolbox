@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 class MainPanelButton extends StatelessWidget {
   static const double _buttonSize = 64.0;

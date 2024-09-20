@@ -1,10 +1,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/photo_viewer.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer.dart';
 
-import 'design_tokens.dart';
-import 'main_panel.dart';
+import '../../design_tokens.dart';
+import '../../main_panel.dart';
 
 class NormalPhotoView extends StatelessWidget {
   final NormalPhotoResource photoResource;

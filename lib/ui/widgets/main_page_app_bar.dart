@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import '../utils/media_resources_utils.dart';
-import 'custom_icon_button.dart';
-import 'settings_dialog.dart';
+import '../../utils/media_resources_utils.dart';
+import 'buttons/custom_icon_button.dart';
+import 'dialogs/settings_dialog.dart';
 
 class _MacAppBarIconButton extends StatelessWidget {
   static const double _buttonSize = 32.0;

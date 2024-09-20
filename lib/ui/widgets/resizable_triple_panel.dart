@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 class ResizableTriplePanelController extends GetxController {
   static const leftPanelMinWidth = 324.0;

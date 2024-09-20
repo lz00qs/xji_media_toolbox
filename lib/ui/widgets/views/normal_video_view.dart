@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/video_export_dialog.dart';
-import 'package:xji_footage_toolbox/new_ui/video_trimmer.dart';
+import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/video_player_getx.dart';
 
-import '../controllers/global_media_resources_controller.dart';
-import 'custom_icon_button.dart';
-import 'design_tokens.dart';
-import 'main_panel.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../models/media_resource.dart';
+import '../../design_tokens.dart';
+import '../../main_panel.dart';
 
-class NormalVideoTrimmerView extends StatelessWidget {
+class NormalVideoView extends StatelessWidget {
   final NormalVideoResource videoResource;
 
-  const NormalVideoTrimmerView({super.key, required this.videoResource});
+  const NormalVideoView({super.key, required this.videoResource});
 
   @override
   Widget build(BuildContext context) {
@@ -22,21 +22,22 @@ class NormalVideoTrimmerView extends StatelessWidget {
         Expanded(
           child: Padding(
               padding: EdgeInsets.all(DesignValues.smallPadding),
-              child: VideoTrimmer(videoResource: videoResource)),
+              child: VideoPlayerGetx(videoResource: videoResource)),
         ),
         MainPanelSideBar(
           children: [
+            const MainPanelSideBarControlButtons(),
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
             CustomIconButton(
-                iconData: Icons.arrow_back_ios_new,
+                iconData: Icons.cut,
                 onPressed: () async {
                   final GlobalMediaResourcesController
                       globalMediaResourcesController =
                       Get.find<GlobalMediaResourcesController>();
                   globalMediaResourcesController.isEditingMediaResources.value =
-                      false;
+                      true;
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,

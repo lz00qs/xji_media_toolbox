@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../controllers/global_media_resources_controller.dart';
-import '../models/media_resource.dart';
-import 'design_tokens.dart';
-import 'main_panel_button.dart';
-import 'media_resource_delete_dialog.dart';
+import '../../../controllers/global_media_resources_controller.dart';
+import '../../../models/media_resource.dart';
+import '../../design_tokens.dart';
+import '../buttons/main_panel_button.dart';
+import '../dialogs/media_resource_delete_dialog.dart';
 import 'video_merger_view.dart';
 
 class MultiSelectPanelController extends GetxController {

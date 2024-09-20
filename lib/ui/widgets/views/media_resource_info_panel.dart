@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/new_ui/format.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/utils/format.dart';
 
 import 'aeb_photo_view.dart';
 

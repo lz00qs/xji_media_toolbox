@@ -4,17 +4,17 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/new_ui/media_resource_info_panel.dart';
-import 'package:xji_footage_toolbox/new_ui/resizable_triple_panel.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/resizable_triple_panel.dart';
 
-import '../../new_ui/aeb_photo_view.dart';
-import '../../new_ui/main_page_app_bar.dart';
-import '../../new_ui/main_panel.dart';
-import '../../new_ui/main_panel_button.dart';
-import '../../new_ui/media_resources_list_panel.dart';
-import '../../new_ui/multi_select_panel.dart';
+import '../widgets/views/aeb_photo_view.dart';
+import '../widgets/main_page_app_bar.dart';
+import '../main_panel.dart';
+import '../widgets/buttons/main_panel_button.dart';
+import '../widgets/views/multi_select_panel.dart';
 import '../../utils/media_resources_utils.dart';
+import '../widgets/views/media_resources_list_panel.dart';
 
 class _MainPageEmpty extends StatelessWidget {
   const _MainPageEmpty();

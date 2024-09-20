@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import 'custom_icon_button.dart';
+import '../buttons/custom_icon_button.dart';
 
 class CustomDialogCheckBoxWithText extends StatelessWidget {
   final String text;

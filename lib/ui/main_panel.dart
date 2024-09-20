@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
-import 'package:xji_footage_toolbox/new_ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/new_ui/normal_video_trimmer_view.dart';
-import 'package:xji_footage_toolbox/new_ui/normal_video_view.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_trimmer_view.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_view.dart';
 
-import 'aeb_photo_view.dart';
-import 'custom_icon_button.dart';
-import 'media_resource_delete_dialog.dart';
-import 'normal_photo_view.dart';
+import 'widgets/views/aeb_photo_view.dart';
+import 'widgets/buttons/custom_icon_button.dart';
+import 'widgets/dialogs/media_resource_delete_dialog.dart';
+import 'widgets/views/normal_photo_view.dart';
 
 class MainPanelSideBarControlButtons extends StatelessWidget {
   const MainPanelSideBarControlButtons({super.key});
