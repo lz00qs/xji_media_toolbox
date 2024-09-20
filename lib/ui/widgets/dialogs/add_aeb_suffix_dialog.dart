@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/utils/media_resources_utils.dart';
 
-import '../../../controllers/global_media_resources_controller.dart';
 import '../../design_tokens.dart';
 import 'custom_dual_option_dialog.dart';
 
