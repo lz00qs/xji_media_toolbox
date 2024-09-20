@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 class FFmpegNotAvailablePage extends StatelessWidget {
   const FFmpegNotAvailablePage({super.key});
@@ -6,24 +7,40 @@ class FFmpegNotAvailablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('FFmpeg or FFprobe is not available'),
-      ),
-      body: const Center(
+      backgroundColor: ColorDark.bg0,
+      body: Center(
           child: SelectionArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
-            Text('For MacOS: brew install ffmpeg'),
-            SizedBox(height: 10),
-            Text('For Linux: sudo apt install ffmpeg'),
-            SizedBox(height: 10),
-            Text('For Windows: https://ffmpeg.org/download.html'),
-            SizedBox(height: 20),
+            Text(
+              'FFmpeg or FFprobe is not available!',
+              style: SemiTextStyles.header2ENRegular
+                  .copyWith(color: ColorDark.text0),
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
+            Text(
+              'For MacOS: brew install ffmpeg',
+              style: SemiTextStyles.header4ENRegular
+                  .copyWith(color: ColorDark.text1),
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
+            Text(
+              'For Linux: sudo apt install ffmpeg',
+              style: SemiTextStyles.header4ENRegular
+                  .copyWith(color: ColorDark.text1),
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
+            Text(
+              'For Windows: https://ffmpeg.org/download.html',
+              style: SemiTextStyles.header4ENRegular
+                  .copyWith(color: ColorDark.text1),
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
             Text(
               'After installation, restart this APP!',
-              style: TextStyle(fontSize: 24),
+              style: SemiTextStyles.header4ENRegular
+                  .copyWith(color: ColorDark.warning),
             ),
           ],
         ),
