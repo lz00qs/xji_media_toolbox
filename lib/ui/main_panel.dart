@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_trimmer_view.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_view.dart';
 
@@ -40,7 +41,12 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
           iconData: Icons.arrow_upward,
           onPressed: () {
             if (globalMediaResourcesController.currentMediaIndex.value > 0) {
+              final MediaResourcesListPanelController
+                  mediaResourcesListPanelController = Get.find();
               globalMediaResourcesController.currentMediaIndex.value--;
+              mediaResourcesListPanelController.scrollToIndex(
+                  globalMediaResourcesController.currentMediaIndex.value,
+                  false);
             }
           },
           iconSize: DesignValues.mediumIconSize,
@@ -57,7 +63,12 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
           onPressed: () {
             if (globalMediaResourcesController.currentMediaIndex.value <
                 globalMediaResourcesController.mediaResources.length - 1) {
+              final MediaResourcesListPanelController
+                  mediaResourcesListPanelController = Get.find();
+              globalMediaResourcesController.currentMediaIndex.value--;
               globalMediaResourcesController.currentMediaIndex.value++;
+              mediaResourcesListPanelController.scrollToIndex(
+                  globalMediaResourcesController.currentMediaIndex.value, true);
             }
           },
           iconSize: DesignValues.mediumIconSize,
@@ -109,11 +120,12 @@ class MainPanel extends StatelessWidget {
         Get.find<GlobalMediaResourcesController>();
     globalMediaResourcesController.isEditingMediaResources.value = false;
     if (mediaResource.isVideo) {
-      return Obx(() => globalMediaResourcesController.isEditingMediaResources.value
-          ? NormalVideoTrimmerView(
-          videoResource: mediaResource as NormalVideoResource)
-          : NormalVideoView(
-          videoResource: mediaResource as NormalVideoResource));
+      return Obx(() =>
+          globalMediaResourcesController.isEditingMediaResources.value
+              ? NormalVideoTrimmerView(
+                  videoResource: mediaResource as NormalVideoResource)
+              : NormalVideoView(
+                  videoResource: mediaResource as NormalVideoResource));
     } else if (mediaResource.isAeb) {
       return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
     } else {

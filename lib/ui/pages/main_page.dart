@@ -68,17 +68,25 @@ class MainPage extends StatelessWidget {
   void _increaseCurrentMediaIndex() {
     final GlobalMediaResourcesController globalMediaResourcesController =
         Get.find();
+    final MediaResourcesListPanelController mediaResourcesListPanelController =
+        Get.find();
     if (globalMediaResourcesController.currentMediaIndex <
         globalMediaResourcesController.mediaResources.length - 1) {
       globalMediaResourcesController.currentMediaIndex.value += 1;
+      mediaResourcesListPanelController.scrollToIndex(
+          globalMediaResourcesController.currentMediaIndex.value, true);
     }
   }
 
   void _decreaseCurrentMediaIndex() {
     final GlobalMediaResourcesController globalMediaResourcesController =
         Get.find();
+    final MediaResourcesListPanelController mediaResourcesListPanelController =
+        Get.find();
     if (globalMediaResourcesController.currentMediaIndex > 0) {
       globalMediaResourcesController.currentMediaIndex.value -= 1;
+      mediaResourcesListPanelController.scrollToIndex(
+          globalMediaResourcesController.currentMediaIndex.value, false);
     }
   }
 

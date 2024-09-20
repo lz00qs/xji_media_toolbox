@@ -629,14 +629,15 @@ void addSuffixToCurrentAebFilesName() {
     final newFile = File(newPath);
     try {
       oldFile.renameSync(newFile.path);
-      currentMediaResource.aebResources[i] = (NormalPhotoResource(
+      currentMediaResource.aebResources[i] = (AebPhotoResource(
           name: newFile.uri.pathSegments.last,
           file: newFile,
           width: currentMediaResource.width,
           height: currentMediaResource.height,
           sizeInBytes: currentMediaResource.sizeInBytes,
           creationTime: currentMediaResource.creationTime,
-          sequence: currentMediaResource.sequence)
+          sequence: currentMediaResource.sequence,
+          evBias: evBias)
         ..thumbFile = currentMediaResource.thumbFile);
     } catch (e) {
       _debugLogging(
