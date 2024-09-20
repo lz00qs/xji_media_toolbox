@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
@@ -22,39 +23,46 @@ enum VideoProcessStatus {
 class VideoProcess {
   final String name;
   final VideoProcessType type;
-  final double duration;
-  final List<String> outPutFiles = [];
-  Isolate? _isolate;
+  final List<String> ffmpegArgs;
+  final Duration duration;
   final RxDouble progress = 0.0.obs;
   final Rx<VideoProcessStatus> status = VideoProcessStatus.processing.obs;
   final String ffmpegParentDir;
+  final String outputFilePath;
+  final List<String> tempFilePaths;
+  Isolate? _isolate;
+  Timer? _heartbeatTimer;
 
   VideoProcess(
       {required this.name,
       required this.type,
+      required this.ffmpegArgs,
       required this.duration,
-      required this.ffmpegParentDir});
+      required this.ffmpegParentDir,
+      required this.outputFilePath,
+      this.tempFilePaths = const []});
 
   void cancel() {
     if (_isolate != null) {
       _isolate!.kill(priority: Isolate.immediate);
     }
     _isolate = null;
-    try {
-      for (final file in outPutFiles) {
-        if (isFileExist(file)) {
-          File(file).deleteSync();
-        }
-      }
-    } finally {}
     status.value = VideoProcessStatus.canceled;
   }
 
-  Future<void> start(List<String> ffmpegArgs,
-      {List<String> needDeleteFilePaths = const []}) async {
+  void _startWatchDog() {
+    _heartbeatTimer = Timer(const Duration(seconds: 15), () {
+      _isolate?.kill(priority: Isolate.immediate);
+      status.value = VideoProcessStatus.failed;
+    });
+  }
+
+  Future<void> start() async {
     final receivePort = ReceivePort();
+
     receivePort.listen((message) {
       if (message is String) {
+        _heartbeatTimer?.cancel();
         if (message.contains('failed')) {
           status.value = VideoProcessStatus.failed;
           receivePort.close();
@@ -66,26 +74,29 @@ class VideoProcess {
           _isolate = null;
         } else {
           final time = _extractTimeInSeconds(message);
-          progress.value = time / duration;
+          progress.value = time / duration.inSeconds;
         }
+      }
+      if (_isolate != null) {
+        _startWatchDog();
       }
     });
     _isolate = await Isolate.spawn(_ffmpegProcess, [
       [
+        [ffmpegParentDir],
         ffmpegArgs,
-        needDeleteFilePaths,
-        [ffmpegParentDir]
+        tempFilePaths,
       ],
       receivePort.sendPort
     ]);
   }
 
   Future<void> _ffmpegProcess(List<dynamic> args) async {
-    final argsList = args[0] as List<List<String>>;
-    final needDeleteFilePaths = argsList[1];
-    final ffmpegParentDirIsolate = argsList[2][0];
+    final pathList = args[0] as List<List<String>>;
+    final needDeleteFilePaths = pathList[2];
+    final ffmpegParentDirIsolate = pathList[0][0];
     final process =
-        await Process.start('$ffmpegParentDirIsolate/ffmpeg', argsList[0]);
+        await Process.start('$ffmpegParentDirIsolate/ffmpeg', pathList[1]);
 
     process.stdout.transform(utf8.decoder).listen((data) {
       (args[1] as SendPort).send(data);
@@ -108,7 +119,7 @@ class VideoProcess {
 
   double _extractTimeInSeconds(String logLine) {
     if (logLine.contains('encoded')) {
-      return duration;
+      return duration.inSeconds.toDouble();
     }
     // 正则表达式匹配时间字段
     RegExp regex = RegExp(r'time=([-+\d:]+.\d+)');
@@ -141,17 +152,6 @@ class VideoProcess {
       return totalSeconds;
     } else {
       return 0.0;
-    }
-  }
-
-  String getTypeString() {
-    switch (type) {
-      case VideoProcessType.transcode:
-        return 'Transcode';
-      case VideoProcessType.trim:
-        return 'Trim';
-      case VideoProcessType.merge:
-        return 'Merge';
     }
   }
 }

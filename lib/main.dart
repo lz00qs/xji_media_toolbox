@@ -11,6 +11,7 @@ import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
 import 'controllers/global_settings_controller.dart';
+import 'ui/widgets/task_drawer.dart';
 
 Future<void> main() async {
   // 确保 WidgetsFlutterBinding 已经初始化
@@ -56,12 +57,15 @@ class MyApp extends StatelessWidget {
         Get.find<LoadingMediaResourcesController>();
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: isFFmpegAvailable
-          ? Obx(() =>
-              loadingMediaResourcesController.isLoadingMediaResources.value
-                  ? const LoadingMediaResourcesPage()
-                  : const MainPage())
-          : const FFmpegNotAvailablePage(),
+      home: Scaffold(
+        endDrawer: const TaskDrawer(),
+        body: isFFmpegAvailable
+            ? Obx(() =>
+                loadingMediaResourcesController.isLoadingMediaResources.value
+                    ? const LoadingMediaResourcesPage()
+                    : const MainPage())
+            : const FFmpegNotAvailablePage(),
+      ),
     );
   }
 }

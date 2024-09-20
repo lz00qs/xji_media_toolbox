@@ -4,11 +4,10 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_focus_nodes_controller.dart';
 
 import '../models/media_resource.dart';
+import '../ui/widgets/views/aeb_photo_view.dart';
+import '../ui/widgets/views/multi_select_panel.dart';
 import '../ui/pages/loading_media_resources_page.dart';
-import '../ui/widgets/panels/media_resources_list_panel.dart';
-import '../ui/widgets/panels/multi_select_panel.dart';
-import '../ui/widgets/panels/views/aeb_photo_view.dart';
-import '../ui/widgets/panels/views/video_merger_view.dart';
+import '../ui/widgets/views/media_resources_list_panel.dart';
 import 'global_tasks_controller.dart';
 
 class GlobalMediaResourcesController extends GetxController {
@@ -20,7 +19,7 @@ class GlobalMediaResourcesController extends GetxController {
   Directory? get mediaResourceDir => _mediaResourceDir;
 
   final isMultipleSelection = false.obs;
-  final selectedIndexList = <int>[].obs;
+  final RxList<int> selectedIndexList = <int>[].obs;
 
   set mediaResourceDir(Directory? value) {
     _mediaResourceDir = value;
@@ -31,13 +30,12 @@ class GlobalMediaResourcesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    Get.lazyPut(() => MediaResourcesListPanelController());
-    Get.lazyPut(() => GlobalFocusNodesController());
-    Get.lazyPut(() => AebPhotoViewController());
-    Get.lazyPut(() => GlobalTasksController());
-    Get.lazyPut(() => VideoMergerController());
-    Get.lazyPut(() => MultiSelectPanelController());
-    Get.lazyPut(() => LoadingMediaResourcesController());
+    Get.put(MediaResourcesListPanelController());
+    Get.put(GlobalFocusNodesController());
+    Get.put(AebPhotoViewController());
+    Get.put(GlobalTasksController());
+    Get.put(MultiSelectPanelController());
+    Get.put(LoadingMediaResourcesController());
   }
 
   Future<void> loadMediaResources() async {

@@ -4,8 +4,9 @@ import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
+import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import '../../../../models/media_resource.dart';
+import '../../../models/media_resource.dart';
 
 class VideoPlayerGetxController extends GetxController {
   late VideoPlayerController videoPlayerController;
@@ -46,11 +47,11 @@ class VideoPlayerGetxController extends GetxController {
   }
 }
 
-class VideoPlayerView extends StatelessWidget {
+class VideoPlayerGetx extends StatelessWidget {
   final NormalVideoResource videoResource;
   final bool showControls;
 
-  const VideoPlayerView(
+  const VideoPlayerGetx(
       {super.key, required this.videoResource, this.showControls = true});
 
   @override
@@ -58,10 +59,18 @@ class VideoPlayerView extends StatelessWidget {
     Get.delete<VideoPlayerGetxController>();
     final controller = Get.put(VideoPlayerGetxController(
         videoFile: videoResource.file, showControls: showControls));
-    return Obx(() => controller.footageInitialized.value
-        ? Chewie(
-            controller: controller.chewieController!,
-          )
-        : const CircularProgressIndicator());
+    return ClipRRect(
+      borderRadius:
+          BorderRadius.all(Radius.circular(DesignValues.smallBorderRadius)),
+      child: Obx(() => controller.footageInitialized.value
+          ? Chewie(
+              controller: controller.chewieController!,
+            )
+          : const Center(
+              child: CircularProgressIndicator(
+                color: ColorDark.primary,
+              ),
+            )),
+    );
   }
 }

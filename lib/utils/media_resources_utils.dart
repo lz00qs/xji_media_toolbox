@@ -175,8 +175,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
       if (mediaResources[i] is AebPhotoResource) {
         if ((mediaResources[i] as AebPhotoResource).evBias == '0/10') {
           (mediaResources[i] as AebPhotoResource)
-              .aebFiles
-              .add(mediaResources[i].file);
+              .aebResources
+              .add(mediaResources[i]);
           if (kDebugMode) {
             print('0/10 found');
           }
@@ -187,8 +187,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
           if (mediaResources[i].isAeb &&
               (mediaResources[i] as AebPhotoResource).evBias == '-7/10') {
             (mediaResources[startIndex] as AebPhotoResource)
-                .aebFiles
-                .add(mediaResources[i].file);
+                .aebResources
+                .add(mediaResources[i]);
             mediaResources[i].hide = true;
             if (kDebugMode) {
               print('-7/10 found');
@@ -200,8 +200,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
             if (mediaResources[i].isAeb &&
                 (mediaResources[i] as AebPhotoResource).evBias == '7/10') {
               (mediaResources[startIndex] as AebPhotoResource)
-                  .aebFiles
-                  .add(mediaResources[i].file);
+                  .aebResources
+                  .add(mediaResources[i]);
               mediaResources[i].hide = true;
               if (kDebugMode) {
                 print('7/10 found');
@@ -213,8 +213,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
               if (mediaResources[i].isAeb &&
                   (mediaResources[i] as AebPhotoResource).evBias == '-13/10') {
                 (mediaResources[startIndex] as AebPhotoResource)
-                    .aebFiles
-                    .add(mediaResources[i].file);
+                    .aebResources
+                    .add(mediaResources[i]);
                 mediaResources[i].hide = true;
                 if (kDebugMode) {
                   print('-13/10 found');
@@ -226,8 +226,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
                 if (mediaResources[i].isAeb &&
                     (mediaResources[i] as AebPhotoResource).evBias == '13/10') {
                   (mediaResources[startIndex] as AebPhotoResource)
-                      .aebFiles
-                      .add(mediaResources[i].file);
+                      .aebResources
+                      .add(mediaResources[i]);
                   mediaResources[i].hide = true;
                   if (kDebugMode) {
                     print('13/10 found');
@@ -240,8 +240,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
                       (mediaResources[i] as AebPhotoResource).evBias ==
                           '-20/10') {
                     (mediaResources[startIndex] as AebPhotoResource)
-                        .aebFiles
-                        .add(mediaResources[i].file);
+                        .aebResources
+                        .add(mediaResources[i]);
                     mediaResources[i].hide = true;
                     if (kDebugMode) {
                       print('-20/10 found');
@@ -254,8 +254,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
                         (mediaResources[i] as AebPhotoResource).evBias ==
                             '20/10') {
                       (mediaResources[startIndex] as AebPhotoResource)
-                          .aebFiles
-                          .add(mediaResources[i].file);
+                          .aebResources
+                          .add(mediaResources[i]);
                       mediaResources[i].hide = true;
                       if (kDebugMode) {
                         print('20/10 found');
@@ -595,7 +595,7 @@ void addSuffixToCurrentAebFilesName() {
   final currentMediaResource = globalMediaResourcesController.mediaResources[
           globalMediaResourcesController.currentMediaIndex.value]
       as AebPhotoResource;
-  for (var i = 0; i < currentMediaResource.aebFiles.length; i++) {
+  for (var i = 0; i < currentMediaResource.aebResources.length; i++) {
     var evBias = '';
     switch (i) {
       case 0:
@@ -623,21 +623,29 @@ void addSuffixToCurrentAebFilesName() {
         evBias = '0.0';
     }
     final suffix = '_AEB_${currentMediaResource.sequence}_$evBias';
-    final oldFile = currentMediaResource.aebFiles[i];
+    final oldFile = currentMediaResource.aebResources[i].file;
     final newPath =
         '${oldFile.parent.path}/${oldFile.uri.pathSegments.last.split('.').first}$suffix.${oldFile.uri.pathSegments.last.split('.').last}';
     final newFile = File(newPath);
     try {
       oldFile.renameSync(newFile.path);
-      currentMediaResource.aebFiles[i] = newFile;
+      currentMediaResource.aebResources[i] = (NormalPhotoResource(
+          name: newFile.uri.pathSegments.last,
+          file: newFile,
+          width: currentMediaResource.width,
+          height: currentMediaResource.height,
+          sizeInBytes: currentMediaResource.sizeInBytes,
+          creationTime: currentMediaResource.creationTime,
+          sequence: currentMediaResource.sequence)
+        ..thumbFile = currentMediaResource.thumbFile);
     } catch (e) {
       _debugLogging(
           'Error renaming file: ${oldFile.path}', oldFile.parent.path);
     }
   }
   final newAebPhotoResource = (AebPhotoResource(
-      name: currentMediaResource.aebFiles[0].uri.pathSegments.last,
-      file: currentMediaResource.aebFiles[0],
+      name: currentMediaResource.aebResources[0].file.uri.pathSegments.last,
+      file: currentMediaResource.aebResources[0].file,
       width: currentMediaResource.width,
       height: currentMediaResource.height,
       sizeInBytes: currentMediaResource.sizeInBytes,
@@ -645,7 +653,7 @@ void addSuffixToCurrentAebFilesName() {
       sequence: currentMediaResource.sequence,
       evBias: currentMediaResource.evBias)
     ..thumbFile = currentMediaResource.thumbFile);
-  newAebPhotoResource.aebFiles.addAll(currentMediaResource.aebFiles);
+  newAebPhotoResource.aebResources.addAll(currentMediaResource.aebResources);
   globalMediaResourcesController.mediaResources[globalMediaResourcesController
       .currentMediaIndex.value] = newAebPhotoResource;
 }
