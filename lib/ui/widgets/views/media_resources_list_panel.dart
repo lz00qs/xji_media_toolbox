@@ -7,10 +7,28 @@ import '../../../controllers/global_media_resources_controller.dart';
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
 
-
+const _listWidgetHeight = 72.0;
 
 class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();
+  var panelHeight = 0.0;
+
+  void scrollToIndex(int index, bool isIncrement) {
+    if (isIncrement) {
+      if (index * _listWidgetHeight >
+          panelHeight +
+              mediaResourcesListScrollController.position.pixels -
+              _listWidgetHeight) {
+        mediaResourcesListScrollController.jumpTo(
+            index * _listWidgetHeight - panelHeight + _listWidgetHeight);
+      }
+    } else {
+      if (index * _listWidgetHeight <
+          mediaResourcesListScrollController.position.pixels) {
+        mediaResourcesListScrollController.jumpTo(index * _listWidgetHeight);
+      }
+    }
+  }
 }
 
 class MediaResourceThumbnail extends StatelessWidget {
@@ -148,7 +166,7 @@ class _MediaResourceListWidget extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  height: 72,
+                  height: _listWidgetHeight,
                   width: double.infinity,
                   color: isSelected
                       ? ColorDark.blue0.withOpacity(0.8)
@@ -322,45 +340,46 @@ class MediaResourcesListPanel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const _MediaResourcesListTopBar(),
-        Expanded(
-            child: RawScrollbar(
-                thickness: DesignValues.smallPadding,
-                trackVisibility: false,
-                thumbVisibility: true,
-                radius: Radius.circular(DesignValues.smallBorderRadius),
-                controller: mediaResourcesListPanelController
-                    .mediaResourcesListScrollController,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Obx(() => ListView.builder(
-                            scrollDirection: Axis.vertical,
-                            controller: mediaResourcesListPanelController
-                                .mediaResourcesListScrollController,
-                            itemCount: globalMediaResourcesController
-                                .mediaResources.length,
-                            itemBuilder: (context, index) {
-                              final mediaResource =
-                                  globalMediaResourcesController
-                                      .mediaResources[index];
-                              return Obx(() => _MediaResourceListWidget(
-                                    index: index,
-                                    mediaResource: mediaResource,
-                                    isSelected: globalMediaResourcesController
-                                            .selectedIndexList
-                                            .contains(index) ||
-                                        (!globalMediaResourcesController
-                                                .isMultipleSelection.value &&
-                                            globalMediaResourcesController
-                                                    .currentMediaIndex.value ==
-                                                index),
-                                    isMultipleSelection:
-                                        globalMediaResourcesController
-                                            .isMultipleSelection.value,
-                                  ));
-                            }))),
-                  ],
-                )))
+        Expanded(child: LayoutBuilder(builder: (context, constraints) {
+          mediaResourcesListPanelController.panelHeight = constraints.maxHeight;
+          return RawScrollbar(
+              thickness: DesignValues.smallPadding,
+              trackVisibility: false,
+              thumbVisibility: true,
+              radius: Radius.circular(DesignValues.smallBorderRadius),
+              controller: mediaResourcesListPanelController
+                  .mediaResourcesListScrollController,
+              child: Row(
+                children: [
+                  Expanded(
+                      child: Obx(() => ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          controller: mediaResourcesListPanelController
+                              .mediaResourcesListScrollController,
+                          itemCount: globalMediaResourcesController
+                              .mediaResources.length,
+                          itemBuilder: (context, index) {
+                            final mediaResource = globalMediaResourcesController
+                                .mediaResources[index];
+                            return Obx(() => _MediaResourceListWidget(
+                                  index: index,
+                                  mediaResource: mediaResource,
+                                  isSelected: globalMediaResourcesController
+                                          .selectedIndexList
+                                          .contains(index) ||
+                                      (!globalMediaResourcesController
+                                              .isMultipleSelection.value &&
+                                          globalMediaResourcesController
+                                                  .currentMediaIndex.value ==
+                                              index),
+                                  isMultipleSelection:
+                                      globalMediaResourcesController
+                                          .isMultipleSelection.value,
+                                ));
+                          }))),
+                ],
+              ));
+        }))
       ],
     );
   }
