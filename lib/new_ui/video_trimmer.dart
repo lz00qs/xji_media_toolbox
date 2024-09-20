@@ -118,8 +118,8 @@ class VideoTrimmerController extends GetxController {
     _initSize();
     scrollController.addListener(() {
       if (kDebugMode) {
-        print(
-            'scroll position: ${scrollController.position.pixels}, width: $videoResourceWidth, trimmerWidth: $trimmerWidth');
+        // print(
+        //     'scroll position: ${scrollController.position.pixels}, width: $videoResourceWidth, trimmerWidth: $trimmerWidth');
       }
     });
     videoPlayerController.addListener(() async {
@@ -244,6 +244,39 @@ class VideoTrimmerController extends GetxController {
     }
   }
 
+  void _edgeScroll(double position, bool increase, bool isLeft) {
+    if (increase) {
+      if (kDebugMode) {
+        print(
+            'scroll to right, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
+      }
+      var offset = 0.0;
+      if (isLeft) {
+        offset = -10;
+      }
+      if (position >
+          trimmerWidth +
+              scrollController.position.pixels -
+              DesignValues.mediumPadding +
+              offset) {
+        scrollController.jumpTo(
+            position - trimmerWidth + DesignValues.mediumPadding - offset);
+      }
+    } else {
+      if (kDebugMode) {
+        print(
+            'scroll to left, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
+      }
+      var offset = 0.0;
+      if (!isLeft) {
+        offset = -10;
+      }
+      if (position < scrollController.position.pixels - offset) {
+        scrollController.jumpTo(position + offset);
+      }
+    }
+  }
+
   Future<void> _onDragLeft(DragUpdateDetails details) async {
     actualStartPosition = (actualStartPosition + details.delta.dx)
         .clamp(0.0, endPosition.value - _thumbBetweenDistance);
@@ -255,6 +288,7 @@ class VideoTrimmerController extends GetxController {
                 _scaleValueList[stepValueIndex.value])
             .round());
     await videoPlayerController.seekTo(start.value);
+    _edgeScroll(startPosition.value, details.delta.dx > 0, true);
   }
 
   Future<void> _onDragRight(DragUpdateDetails details) async {
@@ -270,7 +304,7 @@ class VideoTrimmerController extends GetxController {
       end.value = videoResource.duration;
     }
     await videoPlayerController.seekTo(end.value);
-    // print('end: ${end.value}');
+    _edgeScroll(endPosition.value, details.delta.dx > 0, false);
   }
 
   void _onDragStart(DragStartDetails details) {
@@ -310,8 +344,8 @@ class VideoTrimmer extends GetView<VideoTrimmerController> {
     return GetBuilder<VideoTrimmerController>(
       init: VideoTrimmerController(videoResource: videoResource),
       builder: (controller) {
-        final size = MediaQuery.of(context).size;
-        controller.trimmerWidth = size.width - 2 * DesignValues.smallPadding;
+        // final size = MediaQuery.of(context).size;
+        // controller.trimmerWidth = size.width - 2 * DesignValues.smallPadding;
         return Column(
           children: [
             Expanded(
@@ -447,104 +481,124 @@ class VideoTrimmer extends GetView<VideoTrimmerController> {
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
-            MouseRegion(
-              child: Listener(
-                onPointerSignal: (event) {
-                  if (event is PointerScrollEvent) {
-                    if (HardwareKeyboard.instance.isMetaPressed ||
-                        HardwareKeyboard.instance.isControlPressed) {
-                      if (event.scrollDelta.dy > 0) {
-                        controller.zoomOut();
-                      } else {
-                        controller.zoomIn();
+            LayoutBuilder(builder: (context, constraints) {
+              controller.trimmerWidth =
+                  constraints.maxWidth - 2 * DesignValues.smallPadding;
+              print('trimmerWidth: ${controller.trimmerWidth}');
+              return MouseRegion(
+                child: Listener(
+                  onPointerSignal: (event) {
+                    if (event is PointerScrollEvent) {
+                      if (HardwareKeyboard.instance.isMetaPressed ||
+                          HardwareKeyboard.instance.isControlPressed) {
+                        if (event.scrollDelta.dy > 0) {
+                          controller.zoomOut();
+                        } else {
+                          controller.zoomIn();
+                        }
                       }
                     }
-                  }
-                },
-                child: ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(DesignValues.mediumBorderRadius),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          height: 80,
-                          color: ColorDark.bg2,
-                          child: RawScrollbar(
-                            controller: controller.scrollController,
-                            thumbVisibility: true,
-                            child: Padding(
-                              padding:
-                                  EdgeInsets.all(DesignValues.smallPadding),
-                              child: SingleChildScrollView(
-                                controller: controller.scrollController,
-                                scrollDirection: Axis.horizontal,
-                                child: Obx(
-                                  () => SizedBox(
-                                    width: controller.videoResourceWidth.value,
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(
-                                              DesignValues.smallBorderRadius),
-                                          child: Container(
-                                            color: ColorDark.primary,
-                                            width: controller
-                                                .videoResourceWidth.value,
-                                          ),
-                                        ),
-                                        Positioned(
-                                          left: controller.startPosition.value,
-                                          right: controller
-                                                  .videoResourceWidth.value -
-                                              controller.endPosition.value,
-                                          child: ClipRRect(
+                  },
+                  child: ClipRRect(
+                    borderRadius:
+                        BorderRadius.circular(DesignValues.mediumBorderRadius),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Container(
+                            height: 80,
+                            color: ColorDark.bg2,
+                            child: RawScrollbar(
+                              controller: controller.scrollController,
+                              thumbVisibility: true,
+                              thickness: 8,
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.all(DesignValues.mediumPadding),
+                                child: SingleChildScrollView(
+                                  controller: controller.scrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  child: Obx(
+                                    () => SizedBox(
+                                      width:
+                                          controller.videoResourceWidth.value,
+                                      child: Stack(
+                                        children: [
+                                          ClipRRect(
                                             borderRadius: BorderRadius.circular(
                                                 DesignValues.smallBorderRadius),
                                             child: Container(
-                                              decoration: const BoxDecoration(
-                                                border: Border(
-                                                  top: BorderSide(
-                                                      color: ColorDark.yellow5,
-                                                      width: 4),
-                                                  bottom: BorderSide(
-                                                      color: ColorDark.yellow5,
-                                                      width: 4),
+                                              color: ColorDark.primary,
+                                              width: controller
+                                                  .videoResourceWidth.value,
+                                            ),
+                                          ),
+                                          Positioned(
+                                            left:
+                                                controller.startPosition.value,
+                                            right: controller
+                                                    .videoResourceWidth.value -
+                                                controller.endPosition.value,
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(
+                                                      DesignValues
+                                                          .smallBorderRadius),
+                                              child: Container(
+                                                decoration: const BoxDecoration(
+                                                  border: Border(
+                                                    top: BorderSide(
+                                                        color:
+                                                            ColorDark.yellow5,
+                                                        width: 4),
+                                                    bottom: BorderSide(
+                                                        color:
+                                                            ColorDark.yellow5,
+                                                        width: 4),
+                                                  ),
+                                                  color:
+                                                      ColorDark.primaryActive,
                                                 ),
-                                                color: ColorDark.primaryActive,
-                                              ),
-                                              height: 64,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  GestureDetector(
-                                                    onHorizontalDragUpdate:
-                                                        controller._onDragLeft,
-                                                    onHorizontalDragStart:
-                                                        controller._onDragStart,
-                                                    onHorizontalDragEnd:
-                                                        controller._onDragEnd,
-                                                    child:
-                                                        _TrimmerDragHandler(),
-                                                  ),
-                                                  GestureDetector(
-                                                    onHorizontalDragUpdate:
-                                                        controller._onDragRight,
-                                                    onHorizontalDragStart:
-                                                        controller._onDragStart,
-                                                    onHorizontalDragEnd:
-                                                        controller._onDragEnd,
-                                                    child:
-                                                        _TrimmerDragHandler(),
-                                                  ),
-                                                ],
+                                                height: 80 -
+                                                    2 *
+                                                        DesignValues
+                                                            .mediumPadding,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onHorizontalDragUpdate:
+                                                          controller
+                                                              ._onDragLeft,
+                                                      onHorizontalDragStart:
+                                                          controller
+                                                              ._onDragStart,
+                                                      onHorizontalDragEnd:
+                                                          controller._onDragEnd,
+                                                      child:
+                                                          _TrimmerDragHandler(),
+                                                    ),
+                                                    GestureDetector(
+                                                      onHorizontalDragUpdate:
+                                                          controller
+                                                              ._onDragRight,
+                                                      onHorizontalDragStart:
+                                                          controller
+                                                              ._onDragStart,
+                                                      onHorizontalDragEnd:
+                                                          controller._onDragEnd,
+                                                      child:
+                                                          _TrimmerDragHandler(),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -552,12 +606,12 @@ class VideoTrimmer extends GetView<VideoTrimmerController> {
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            )
+              );
+            })
           ],
         );
       },
