@@ -1,1 +1,1 @@
-# xji_footage_toolbox
+# xji_media_toolbox
