@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/add_aeb_suffix_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer.dart';
 
 import '../../../models/media_resource.dart';
@@ -56,9 +56,8 @@ class _AebPhotoThumbnail extends StatelessWidget {
                       child: Center(
                     child: Text(photoResource.evBias,
                         style: SemiTextStyles.regularENRegular.copyWith(
-                            color: isSelected
-                                ? ColorDark.text0
-                                : ColorDark.text1,
+                            color:
+                                isSelected ? ColorDark.text0 : ColorDark.text1,
                             overflow: TextOverflow.ellipsis)),
                   )),
                 ],
@@ -112,8 +111,7 @@ class AebPhotoView extends GetView<AebPhotoViewController> {
       children: [
         Expanded(
           child: Padding(
-              padding: EdgeInsets.all(
-                  DesignValues.smallPadding),
+              padding: EdgeInsets.all(DesignValues.smallPadding),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -170,13 +168,13 @@ class AebPhotoView extends GetView<AebPhotoViewController> {
                         children: [
                           Expanded(
                               child: Padding(
-                                padding: EdgeInsets.only(
-                                    left: DesignValues.ultraSmallPadding,
-                                    right: DesignValues.ultraSmallPadding,
-                                    top: DesignValues.ultraSmallPadding),
-                                child: _AebPhotoThumbnailList(
-                                    resources: photoResource.aebResources),
-                              )),
+                            padding: EdgeInsets.only(
+                                left: DesignValues.ultraSmallPadding,
+                                right: DesignValues.ultraSmallPadding,
+                                top: DesignValues.ultraSmallPadding),
+                            child: _AebPhotoThumbnailList(
+                                resources: photoResource.aebResources),
+                          )),
                         ],
                       ),
                     ),
@@ -192,7 +190,9 @@ class AebPhotoView extends GetView<AebPhotoViewController> {
             ),
             CustomIconButton(
                 iconData: Icons.drive_file_rename_outline_rounded,
-                onPressed: () {},
+                onPressed: () async {
+                  await Get.dialog(const AddAebSuffixDialog());
+                },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.macAppBarHeight,
                 hoverColor: ColorDark.defaultHover,
