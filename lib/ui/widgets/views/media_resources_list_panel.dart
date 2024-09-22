@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/media_resources_sort_dialog.dart';
 
 import '../../../controllers/global_media_resources_controller.dart';
 import '../../../utils/format.dart';
@@ -80,6 +81,19 @@ class _MediaResourcesListTopBar
                     .copyWith(color: ColorDark.text2),
               ),
               const Spacer(),
+              CustomIconButton(
+                  iconData: Icons.sort,
+                  onPressed: () async {
+                    await Get.dialog(const MediaResourcesSortDialog());
+                  },
+                  iconSize: DesignValues.mediumIconSize,
+                  buttonSize: 32.0,
+                  hoverColor: ColorDark.defaultHover,
+                  focusColor: ColorDark.defaultActive,
+                  iconColor: ColorDark.text2),
+              SizedBox(
+                width: DesignValues.smallPadding,
+              ),
               Obx(() => CustomIconButton(
                   iconData: controller.isMultipleSelection.value
                       ? Icons.keyboard_return

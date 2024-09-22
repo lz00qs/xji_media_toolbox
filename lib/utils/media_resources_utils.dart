@@ -526,7 +526,30 @@ Future<List<MediaResource>> loadMediaResources(
   _mediaResources.addAll(processedPhotos);
   _mediaResources.addAll(processedVideos);
 
-  _mediaResources.sort((a, b) => a.sequence.compareTo(b.sequence));
+  final GlobalSettingsController globalSettingsController =
+      Get.find<GlobalSettingsController>();
+  switch (globalSettingsController.sortType.value) {
+    case SortType.name:
+      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+          ? a.name.compareTo(b.name)
+          : b.name.compareTo(a.name));
+      break;
+    case SortType.date:
+      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+          ? a.creationTime.compareTo(b.creationTime)
+          : b.creationTime.compareTo(a.creationTime));
+      break;
+    case SortType.size:
+      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+          ? a.sizeInBytes.compareTo(b.sizeInBytes)
+          : b.sizeInBytes.compareTo(a.sizeInBytes));
+      break;
+    case SortType.sequence:
+      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+          ? a.sequence.compareTo(b.sequence)
+          : b.sequence.compareTo(a.sequence));
+      break;
+  }
 
   return _mediaResources;
 }

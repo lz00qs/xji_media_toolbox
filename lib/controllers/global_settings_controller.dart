@@ -5,6 +5,8 @@ import '../constants.dart';
 import '../models/settings.dart';
 import '../objectbox.dart';
 
+enum SortType { name, date, size, sequence }
+
 class GlobalSettingsController extends GetxController {
   late final ObjectBox objectBox;
   final RxList<ExportPreset> transCodingPresets = <ExportPreset>[].obs;
@@ -12,6 +14,8 @@ class GlobalSettingsController extends GetxController {
   var cpuThreads = 1;
   var appVersion = '0.0.0';
   var ffmpegParentDir = '';
+  final sortType = SortType.name.obs;
+  final sortAsc = true.obs;
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();
@@ -30,6 +34,8 @@ class GlobalSettingsController extends GetxController {
             : transCodePresets.isEmpty
                 ? 0
                 : transCodePresets.first.id;
+    sortType.value = SortType.values[prefs.getInt(sortTypePrefKey) ?? 0];
+    sortAsc.value = prefs.getBool(sortOderPrefKey) ?? true;
   }
 
   Future<void> saveSettings() async {
