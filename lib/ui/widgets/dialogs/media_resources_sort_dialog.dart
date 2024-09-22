@@ -22,7 +22,7 @@ class MediaResourcesSortDialog extends StatelessWidget {
         disableOption1: true,
         option2: 'OK',
         onOption1Pressed: () {},
-        onOption2Pressed: () {
+        onOption2Pressed: () async {
           switch (globalSettingsController.sortType.value) {
             case SortType.name:
               globalMediaResourcesController.mediaResources.sort((a, b) =>
@@ -49,6 +49,7 @@ class MediaResourcesSortDialog extends StatelessWidget {
                       : b.sequence.compareTo(a.sequence));
               break;
           }
+          await globalSettingsController.saveSettings();
           Get.back();
         },
         child: Column(

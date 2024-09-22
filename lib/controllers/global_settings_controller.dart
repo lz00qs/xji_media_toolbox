@@ -44,5 +44,7 @@ class GlobalSettingsController extends GetxController {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt(
         defaultTransCodePresetIndexPrefKey, defaultTransCodePresetId.value);
+    prefs.setInt(sortTypePrefKey, sortType.value.index);
+    prefs.setBool(sortOderPrefKey, sortAsc.value);
   }
 }
