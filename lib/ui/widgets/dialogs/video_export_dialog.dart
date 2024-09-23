@@ -374,23 +374,28 @@ class VideoExportDialog extends StatelessWidget {
                         Text('Transcode Preset:',
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text1)),
-                        const Spacer(),
-                        Obx(() => DropdownButton<int>(
-                              value: transCodePresetIndex.value,
-                              focusColor: ColorDark.defaultActive,
-                              dropdownColor: ColorDark.bg2,
-                              style: SemiTextStyles.header5ENRegular
-                                  .copyWith(color: ColorDark.text0),
-                              items: globalSettingsController.transCodingPresets
-                                  .map((e) => DropdownMenuItem<int>(
-                                      value: e.id, child: Text(e.name)))
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  transCodePresetIndex.value = value;
-                                }
-                              },
-                            )),
+                        SizedBox(
+                          width: DesignValues.mediumPadding,
+                        ),
+                        Expanded(
+                            child: Obx(() => DropdownButton<int>(
+                                  isExpanded: true,
+                                  value: transCodePresetIndex.value,
+                                  focusColor: ColorDark.defaultActive,
+                                  dropdownColor: ColorDark.bg2,
+                                  style: SemiTextStyles.header5ENRegular
+                                      .copyWith(color: ColorDark.text0),
+                                  items: globalSettingsController
+                                      .transCodingPresets
+                                      .map((e) => DropdownMenuItem<int>(
+                                          value: e.id, child: Text(e.name)))
+                                      .toList(),
+                                  onChanged: (value) {
+                                    if (value != null) {
+                                      transCodePresetIndex.value = value;
+                                    }
+                                  },
+                                ))),
                         SizedBox(
                           width: DesignValues.largePadding,
                         ),
