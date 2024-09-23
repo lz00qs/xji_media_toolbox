@@ -471,7 +471,7 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
       }
       final futures = <Future<List<MediaResource>>>[];
       for (final chunk in chunks) {
-        futures.add(compute(processFunction, chunk));
+        futures.add(processFunction(chunk));
       }
       // final results = await Future.wait(futures);
       await Future.wait(futures).asStream().listen((results) {
