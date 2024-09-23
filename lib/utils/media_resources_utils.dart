@@ -587,7 +587,7 @@ Future<void> openMediaResourcesFolder() async {
 void deleteMediaResource(int index) {
   final globalMediaResourcesController =
       Get.find<GlobalMediaResourcesController>();
-  if (index > 0 &&
+  if (index >= 0 &&
       index < globalMediaResourcesController.mediaResources.length) {
     if (index == globalMediaResourcesController.currentMediaIndex.value &&
         index == globalMediaResourcesController.mediaResources.length - 1) {
