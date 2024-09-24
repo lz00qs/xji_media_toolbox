@@ -32,6 +32,9 @@ class VideoProcess {
   final List<String> tempFilePaths;
   Isolate? _isolate;
   Timer? _heartbeatTimer;
+  late File _outputFile;
+  late List<File> _tempFiles;
+  late SendPort _sendPort;
 
   VideoProcess(
       {required this.name,
@@ -40,19 +43,45 @@ class VideoProcess {
       required this.duration,
       required this.ffmpegParentDir,
       required this.outputFilePath,
-      this.tempFilePaths = const []});
+      this.tempFilePaths = const []}) {
+    _outputFile = File(outputFilePath);
+    _tempFiles = tempFilePaths.map((path) => File(path)).toList();
+  }
+
+  void _deleteOutputFile() {
+    if (_outputFile.existsSync()) {
+      _outputFile.deleteSync();
+    }
+  }
+
+  void _deleteTempFiles() {
+    for (var file in _tempFiles) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    }
+  }
+
+  void _cleanUp() {
+    _deleteTempFiles();
+    _deleteOutputFile();
+  }
+
+  void _killProcess() {
+    _sendPort.send('kill');
+    _isolate = null;
+  }
 
   void cancel() {
-    if (_isolate != null) {
-      _isolate!.kill(priority: Isolate.immediate);
-    }
-    _isolate = null;
     status.value = VideoProcessStatus.canceled;
+    _killProcess();
+    _heartbeatTimer?.cancel();
+    _cleanUp();
   }
 
   void _startWatchDog() {
     _heartbeatTimer = Timer(const Duration(seconds: 15), () {
-      _isolate?.kill(priority: Isolate.immediate);
+      _killProcess();
       status.value = VideoProcessStatus.failed;
     });
   }
@@ -61,24 +90,31 @@ class VideoProcess {
     final receivePort = ReceivePort();
 
     receivePort.listen((message) {
-      if (message is String) {
-        _heartbeatTimer?.cancel();
-        if (message.contains('failed')) {
-          status.value = VideoProcessStatus.failed;
-          receivePort.close();
-          _isolate = null;
-        } else if (message.contains('finished')) {
-          status.value = VideoProcessStatus.finished;
-          progress.value = 1.0;
-          receivePort.close();
-          _isolate = null;
-        } else {
-          final time = _extractTimeInSeconds(message);
-          progress.value = time / duration.inSeconds;
+      if (status.value == VideoProcessStatus.processing) {
+        if (message is String) {
+          _heartbeatTimer?.cancel();
+          if (message.contains('failed')) {
+            status.value = VideoProcessStatus.failed;
+            receivePort.close();
+            _isolate = null;
+            _cleanUp();
+          } else if (message.contains('finished')) {
+            status.value = VideoProcessStatus.finished;
+            progress.value = 1.0;
+            receivePort.close();
+            _isolate = null;
+          } else {
+            final time = _extractTimeInSeconds(message);
+            progress.value = time / duration.inSeconds;
+          }
+        } else if (message is SendPort) {
+          _sendPort = message;
         }
-      }
-      if (_isolate != null) {
-        _startWatchDog();
+        if (_isolate != null) {
+          _startWatchDog();
+        }
+      } else {
+        receivePort.close();
       }
     });
     _isolate = await Isolate.spawn(_ffmpegProcess, [
@@ -95,20 +131,33 @@ class VideoProcess {
     final pathList = args[0] as List<List<String>>;
     final needDeleteFilePaths = pathList[2];
     final ffmpegParentDirIsolate = pathList[0][0];
-    final process =
+    late Process process;
+    final sendPort = args[1] as SendPort;
+    final receivePort = ReceivePort();
+
+    sendPort.send(receivePort.sendPort);
+
+    receivePort.listen((message) {
+      if (message == 'kill') {
+        process.kill();
+        receivePort.close();
+      }
+    });
+
+    process =
         await Process.start('$ffmpegParentDirIsolate/ffmpeg', pathList[1]);
 
     process.stdout.transform(utf8.decoder).listen((data) {
-      (args[1] as SendPort).send(data);
+      sendPort.send(data);
     });
     process.stderr.transform(utf8.decoder).listen((data) {
-      (args[1] as SendPort).send(data);
+      sendPort.send(data);
     });
     final exitCode = await process.exitCode;
     if (exitCode != 0) {
-      (args[1] as SendPort).send('failed');
+      sendPort.send('failed');
     } else {
-      (args[1] as SendPort).send('finished');
+      sendPort.send('finished');
     }
     for (final filePath in needDeleteFilePaths) {
       if (isFileExist(filePath)) {
