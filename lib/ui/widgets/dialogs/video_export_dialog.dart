@@ -226,8 +226,7 @@ class VideoExportDialog extends StatelessWidget {
                 ffmpegArgs: ffmpegArgs,
                 outputFilePath: outputFilePath,
               );
-              globalTasksController.videoProcessingTasks.add(process);
-              await process.start();
+              globalTasksController.addTask(process);
             } else {
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
@@ -275,8 +274,7 @@ class VideoExportDialog extends StatelessWidget {
                 ffmpegArgs: ffmpegArgs,
                 outputFilePath: outputFilePath,
               );
-              globalTasksController.videoProcessingTasks.add(process);
-              await process.start();
+              globalTasksController.addTask(process);
             }
             Get.back();
           }

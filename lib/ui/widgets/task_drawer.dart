@@ -79,6 +79,9 @@ class TaskItem extends StatelessWidget {
                             case VideoProcessStatus.failed:
                               return const Icon(Icons.error,
                                   color: ColorDark.danger);
+                            case VideoProcessStatus.waiting:
+                              return const Icon(Icons.timer,
+                                  color: ColorDark.text1);
                           }
                         }),
                         Obx(() {
@@ -107,6 +110,12 @@ class TaskItem extends StatelessWidget {
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
                                           color: ColorDark.danger,
+                                          overflow: TextOverflow.ellipsis));
+                            case VideoProcessStatus.waiting:
+                              return Text('waiting',
+                                  style: SemiTextStyles.regularENSemiBold
+                                      .copyWith(
+                                          color: ColorDark.text1,
                                           overflow: TextOverflow.ellipsis));
                           }
                         }),

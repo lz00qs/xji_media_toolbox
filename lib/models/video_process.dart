@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-
-import '../utils/media_resources_utils.dart';
 
 enum VideoProcessType {
   transcode,
@@ -14,6 +12,7 @@ enum VideoProcessType {
 }
 
 enum VideoProcessStatus {
+  waiting,
   processing,
   finished,
   canceled,
@@ -26,15 +25,15 @@ class VideoProcess {
   final List<String> ffmpegArgs;
   final Duration duration;
   final RxDouble progress = 0.0.obs;
-  final Rx<VideoProcessStatus> status = VideoProcessStatus.processing.obs;
+  final Rx<VideoProcessStatus> status = VideoProcessStatus.waiting.obs;
   final String ffmpegParentDir;
   final String outputFilePath;
   final List<String> tempFilePaths;
-  Isolate? _isolate;
+  final completer = Completer<void>();
   Timer? _heartbeatTimer;
   late File _outputFile;
   late List<File> _tempFiles;
-  late SendPort _sendPort;
+  Process? _process;
 
   VideoProcess(
       {required this.name,
@@ -67,103 +66,72 @@ class VideoProcess {
     _deleteOutputFile();
   }
 
-  void _killProcess() {
-    _sendPort.send('kill');
-    _isolate = null;
-  }
-
   void cancel() {
     status.value = VideoProcessStatus.canceled;
-    _killProcess();
-    _heartbeatTimer?.cancel();
+    _cancelWatchDog();
+    _process?.kill();
+    completer.complete();
     _cleanUp();
+  }
+
+  Future<void> process() async {
+    status.value = VideoProcessStatus.processing;
+    _process = await Process.start(
+      '$ffmpegParentDir/ffmpeg',
+      ffmpegArgs,
+    );
+    _process?.stdout.transform(utf8.decoder).listen((data) {
+      _processStdoutData(data);
+    });
+    _process?.stderr.transform(utf8.decoder).listen((data) {
+      _processStdoutData(data);
+    });
+    _process?.exitCode.then((exitCode) {
+      _cancelWatchDog();
+      if (status.value == VideoProcessStatus.canceled) {
+        _cleanUp();
+      } else if (exitCode == 0) {
+        status.value = VideoProcessStatus.finished;
+      } else {
+        status.value = VideoProcessStatus.failed;
+        _cleanUp();
+      }
+      if (kDebugMode) {
+        print('exit code: $exitCode');
+      }
+      if (!completer.isCompleted) {
+        completer.complete();
+      }
+      _cleanUp();
+    });
+    return completer.future;
+  }
+
+  void _processStdoutData(String data) {
+    _resetWatchDog();
+    if (kDebugMode) {
+      print(data);
+    }
+    final time = _extractTimeInSeconds(data);
+    if (time > 0) {
+      progress.value = time / duration.inSeconds;
+    }
   }
 
   void _startWatchDog() {
     _heartbeatTimer = Timer(const Duration(seconds: 15), () {
-      _killProcess();
+      _process?.kill();
       status.value = VideoProcessStatus.failed;
     });
   }
 
-  Future<void> start() async {
-    final receivePort = ReceivePort();
-
-    receivePort.listen((message) {
-      if (status.value == VideoProcessStatus.processing) {
-        if (message is String) {
-          _heartbeatTimer?.cancel();
-          if (message.contains('failed')) {
-            status.value = VideoProcessStatus.failed;
-            receivePort.close();
-            _isolate = null;
-            _cleanUp();
-          } else if (message.contains('finished')) {
-            status.value = VideoProcessStatus.finished;
-            progress.value = 1.0;
-            receivePort.close();
-            _isolate = null;
-          } else {
-            final time = _extractTimeInSeconds(message);
-            progress.value = time / duration.inSeconds;
-          }
-        } else if (message is SendPort) {
-          _sendPort = message;
-        }
-        if (_isolate != null) {
-          _startWatchDog();
-        }
-      } else {
-        receivePort.close();
-      }
-    });
-    _isolate = await Isolate.spawn(_ffmpegProcess, [
-      [
-        [ffmpegParentDir],
-        ffmpegArgs,
-        tempFilePaths,
-      ],
-      receivePort.sendPort
-    ]);
+  void _resetWatchDog() {
+    _cancelWatchDog();
+    _startWatchDog();
   }
 
-  Future<void> _ffmpegProcess(List<dynamic> args) async {
-    final pathList = args[0] as List<List<String>>;
-    final needDeleteFilePaths = pathList[2];
-    final ffmpegParentDirIsolate = pathList[0][0];
-    late Process process;
-    final sendPort = args[1] as SendPort;
-    final receivePort = ReceivePort();
-
-    sendPort.send(receivePort.sendPort);
-
-    receivePort.listen((message) {
-      if (message == 'kill') {
-        process.kill();
-        receivePort.close();
-      }
-    });
-
-    process =
-        await Process.start('$ffmpegParentDirIsolate/ffmpeg', pathList[1]);
-
-    process.stdout.transform(utf8.decoder).listen((data) {
-      sendPort.send(data);
-    });
-    process.stderr.transform(utf8.decoder).listen((data) {
-      sendPort.send(data);
-    });
-    final exitCode = await process.exitCode;
-    if (exitCode != 0) {
-      sendPort.send('failed');
-    } else {
-      sendPort.send('finished');
-    }
-    for (final filePath in needDeleteFilePaths) {
-      if (isFileExist(filePath)) {
-        File(filePath).deleteSync();
-      }
-    }
+  void _cancelWatchDog() {
+    _heartbeatTimer?.cancel();
   }
 
   double _extractTimeInSeconds(String logLine) {
