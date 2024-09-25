@@ -189,7 +189,7 @@ class AebPhotoView extends GetView<AebPhotoViewController> {
               height: DesignValues.mediumPadding,
             ),
             CustomIconButton(
-                iconData: Icons.drive_file_rename_outline_rounded,
+                iconData: Icons.upload,
                 onPressed: () async {
                   await Get.dialog(const AddAebSuffixDialog());
                 },

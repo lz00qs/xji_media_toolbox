@@ -7,6 +7,7 @@ import 'package:image/image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
 
 import '../constants.dart';
 import '../controllers/global_media_resources_controller.dart';
@@ -609,6 +610,95 @@ void deleteMediaResource(int index) {
       }
     }
     globalMediaResourcesController.mediaResources.removeAt(index);
+  }
+}
+
+void renameMediaResource(int index, String newName) {
+  final globalMediaResourcesController =
+      Get.find<GlobalMediaResourcesController>();
+  final AebPhotoViewController aebPhotoViewController =
+      Get.find<AebPhotoViewController>();
+  final mediaResource = globalMediaResourcesController.mediaResources[index];
+  final oldFile = mediaResource.isAeb
+      ? (mediaResource as AebPhotoResource)
+          .aebResources[aebPhotoViewController.currentAebIndex.value]
+          .file
+      : mediaResource.file;
+  final oldThumbFile = mediaResource.thumbFile;
+  final newPath = '${oldFile.parent.path}/$newName';
+  final newFile = File(newPath);
+  try {
+    oldFile.renameSync(newFile.path);
+    if (mediaResource.isAeb) {
+      final oldAebPhotoResource = mediaResource as AebPhotoResource;
+      final oldAebPhotoResourceSub = oldAebPhotoResource
+              .aebResources[aebPhotoViewController.currentAebIndex.value]
+          as AebPhotoResource;
+      final newAebPhotoResourceSub = (AebPhotoResource(
+          name: newFile.uri.pathSegments.last,
+          file: newFile,
+          width: oldAebPhotoResourceSub.width,
+          height: oldAebPhotoResourceSub.height,
+          sizeInBytes: oldAebPhotoResourceSub.sizeInBytes,
+          creationTime: oldAebPhotoResourceSub.creationTime,
+          sequence: oldAebPhotoResourceSub.sequence,
+          evBias: oldAebPhotoResourceSub.evBias)
+        ..thumbFile = oldThumbFile);
+      if (aebPhotoViewController.currentAebIndex.value == 0) {
+        final newAebPhotoResource = (AebPhotoResource(
+            name: newFile.uri.pathSegments.last,
+            file: newFile,
+            width: oldAebPhotoResource.width,
+            height: oldAebPhotoResource.height,
+            sizeInBytes: oldAebPhotoResource.sizeInBytes,
+            creationTime: oldAebPhotoResource.creationTime,
+            sequence: oldAebPhotoResource.sequence,
+            evBias: oldAebPhotoResource.evBias)
+          ..thumbFile = oldThumbFile);
+        newAebPhotoResource.aebResources.add(newAebPhotoResourceSub);
+        oldAebPhotoResource.aebResources.removeAt(0);
+        newAebPhotoResource.aebResources
+            .addAll(oldAebPhotoResource.aebResources);
+        globalMediaResourcesController.mediaResources[index] =
+            newAebPhotoResource;
+      } else {
+        oldAebPhotoResource
+                .aebResources[aebPhotoViewController.currentAebIndex.value] =
+            newAebPhotoResourceSub;
+      }
+    } else if (mediaResource.isVideo) {
+      final oldVideoResource = mediaResource as NormalVideoResource;
+      final newVideoResource = (NormalVideoResource(
+          name: newFile.uri.pathSegments.last,
+          file: newFile,
+          width: oldVideoResource.width,
+          height: oldVideoResource.height,
+          sizeInBytes: oldVideoResource.sizeInBytes,
+          creationTime: oldVideoResource.creationTime,
+          sequence: oldVideoResource.sequence,
+          frameRate: oldVideoResource.frameRate,
+          duration: oldVideoResource.duration,
+          isHevc: oldVideoResource.isHevc)
+        ..thumbFile = oldThumbFile);
+      globalMediaResourcesController.mediaResources[index] = newVideoResource;
+    } else {
+      final oldNormalPhotoResource = mediaResource as NormalPhotoResource;
+      final newNormalPhotoResource = (NormalPhotoResource(
+          name: newFile.uri.pathSegments.last,
+          file: newFile,
+          width: oldNormalPhotoResource.width,
+          height: oldNormalPhotoResource.height,
+          sizeInBytes: oldNormalPhotoResource.sizeInBytes,
+          creationTime: oldNormalPhotoResource.creationTime,
+          sequence: oldNormalPhotoResource.sequence)
+        ..thumbFile = oldThumbFile);
+      globalMediaResourcesController.mediaResources[index] =
+          newNormalPhotoResource;
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('Error renaming file: ${oldFile.path}');
+    }
   }
 }
 

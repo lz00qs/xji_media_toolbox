@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/media_resource_rename_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_trimmer_view.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/normal_video_view.dart';
@@ -27,6 +28,20 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
           iconData: Icons.delete,
           onPressed: () async {
             await Get.dialog(const MediaResourceDeleteDialog());
+          },
+          iconSize: DesignValues.mediumIconSize,
+          buttonSize: DesignValues.macAppBarHeight,
+          hoverColor: ColorDark.defaultHover,
+          focusColor: ColorDark.defaultActive,
+          iconColor: ColorDark.text0,
+        ),
+        SizedBox(
+          height: DesignValues.mediumPadding,
+        ),
+        CustomIconButton(
+          iconData: Icons.drive_file_rename_outline_rounded,
+          onPressed: () async {
+            await Get.dialog(const MediaResourceRenameDialog());
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.macAppBarHeight,
