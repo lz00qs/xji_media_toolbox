@@ -751,7 +751,7 @@ void addSuffixToCurrentAebFilesName() {
           creationTime: currentMediaResource.creationTime,
           sequence: currentMediaResource.sequence,
           evBias: evBias)
-        ..thumbFile = currentMediaResource.thumbFile);
+        ..thumbFile = currentMediaResource.aebResources[i].thumbFile);
     } catch (e) {
       _debugLogging(
           'Error renaming file: ${oldFile.path}', oldFile.parent.path);
