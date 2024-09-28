@@ -8,7 +8,7 @@ import '../../../controllers/global_media_resources_controller.dart';
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
 
-const _listWidgetHeight = 72.0;
+const _listWidgetHeight = 73.0;
 
 class MediaResourcesListPanelController extends GetxController {
   final mediaResourcesListScrollController = ScrollController();
@@ -180,7 +180,7 @@ class _MediaResourceListWidget extends StatelessWidget {
             child: Column(
               children: [
                 Container(
-                  height: _listWidgetHeight,
+                  height: _listWidgetHeight - 1,
                   width: double.infinity,
                   color: isSelected
                       ? ColorDark.blue0.withOpacity(0.8)
