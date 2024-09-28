@@ -76,6 +76,9 @@ class VideoProcess {
 
   Future<void> process() async {
     status.value = VideoProcessStatus.processing;
+    if (kDebugMode) {
+      print('ffmpegArgs: $ffmpegArgs');
+    }
     _process = await Process.start(
       '$ffmpegParentDir/ffmpeg',
       ffmpegArgs,

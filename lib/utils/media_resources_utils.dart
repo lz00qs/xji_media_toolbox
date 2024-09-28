@@ -100,9 +100,9 @@ Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
     '-v',
     'error',
     '-show_entries',
-    'format=size,duration',
+    'format',
     '-show_entries',
-    'stream=width,height,codec_name,avg_frame_rate',
+    'stream',
     '-of',
     'json',
     file.path,
@@ -412,8 +412,6 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
       continue;
     }
     try {
-      final width = (ffprobeOutput['streams'][0]['width']);
-      final height = (ffprobeOutput['streams'][0]['height']);
       final sizeInBytes = int.parse(ffprobeOutput['format']['size']);
       final frameRate = double.parse(
               ffprobeOutput['streams'][0]['avg_frame_rate'].split('/')[0]) /
@@ -421,6 +419,22 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
               ffprobeOutput['streams'][0]['avg_frame_rate'].split('/')[1]);
       final duration = double.parse(ffprobeOutput['format']['duration']);
       final isHevc = ffprobeOutput['streams'][0]['codec_name'] == 'hevc';
+      late int rotation;
+      try {
+        rotation =
+            ffprobeOutput['streams'][0]['side_data_list'][0]['rotation'] ?? 0;
+      } catch (e) {
+        rotation = 0;
+      }
+      late int width;
+      late int height;
+      if (rotation == 90 || rotation == 270) {
+        width = ffprobeOutput['streams'][0]['height'];
+        height = ffprobeOutput['streams'][0]['width'];
+      } else {
+        width = ffprobeOutput['streams'][0]['width'];
+        height = ffprobeOutput['streams'][0]['height'];
+      }
       final thumbFile = await compute(_generateThumbnail,
           [file.path, globalSettingsController.ffmpegParentDir]);
       final resource = NormalVideoResource(

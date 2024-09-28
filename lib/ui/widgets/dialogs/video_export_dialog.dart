@@ -207,8 +207,10 @@ class VideoExportDialog extends StatelessWidget {
                     .toString()
                     .split('.')
                     .last);
-                ffmpegArgs.add('-vf');
-                ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                if (preset.useInputResolution == false) {
+                  ffmpegArgs.add('-vf');
+                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                }
               } else {
                 ffmpegArgs.add('copy');
               }
@@ -245,8 +247,10 @@ class VideoExportDialog extends StatelessWidget {
                     .toString()
                     .split('.')
                     .last);
-                ffmpegArgs.add('-vf');
-                ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                if (preset.useInputResolution == false) {
+                  ffmpegArgs.add('-vf');
+                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                }
               } else {
                 ffmpegArgs.add('copy');
               }
@@ -427,8 +431,13 @@ class VideoExportDialog extends StatelessWidget {
                   keyText: 'Output resolution:',
                   valueText: useInputEncodeSettings.value
                       ? '${videoResource.width}x${videoResource.height}'
-                      : '${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).width}x'
-                          '${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).height}')),
+                      : globalSettingsController.transCodingPresets
+                              .firstWhere((element) =>
+                                  element.id == transCodePresetIndex.value)
+                              .useInputResolution
+                          ? '${videoResource.width}x${videoResource.height}'
+                          : '${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).width}'
+                              'x${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).height}')),
               Obx(() => _OutputInfoItem(
                   keyText: 'Output codec:',
                   valueText: useInputEncodeSettings.value
