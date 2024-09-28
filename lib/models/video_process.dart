@@ -102,7 +102,6 @@ class VideoProcess {
       if (!completer.isCompleted) {
         completer.complete();
       }
-      _cleanUp();
     });
     return completer.future;
   }
