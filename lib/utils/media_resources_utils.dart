@@ -609,13 +609,25 @@ void deleteMediaResource(int index) {
       globalMediaResourcesController.currentMediaIndex.value -= 1;
     }
     try {
-      globalMediaResourcesController.mediaResources[index].file.deleteSync();
-      if (globalMediaResourcesController.mediaResources[index].thumbFile !=
-              null &&
+      if (globalMediaResourcesController.mediaResources[index].isAeb) {
+        final aebPhotoResource = globalMediaResourcesController
+            .mediaResources[index] as AebPhotoResource;
+        for (final aebResource in aebPhotoResource.aebResources) {
+          aebResource.file.deleteSync();
+          if (aebResource.thumbFile != null &&
+              aebResource.thumbFile!.existsSync()) {
+            aebResource.thumbFile!.deleteSync();
+          }
+        }
+      } else {
+        globalMediaResourcesController.mediaResources[index].file.deleteSync();
+        if (globalMediaResourcesController.mediaResources[index].thumbFile !=
+                null &&
+            globalMediaResourcesController.mediaResources[index].thumbFile!
+                .existsSync()) {
           globalMediaResourcesController.mediaResources[index].thumbFile!
-              .existsSync()) {
-        globalMediaResourcesController.mediaResources[index].thumbFile!
-            .deleteSync();
+              .deleteSync();
+        }
       }
     } catch (e) {
       if (kDebugMode) {
@@ -765,7 +777,7 @@ void addSuffixToCurrentAebFilesName() {
           creationTime: currentMediaResource.creationTime,
           sequence: currentMediaResource.sequence,
           evBias: evBias)
-        ..thumbFile = currentMediaResource.aebResources[i].thumbFile);
+        ..thumbFile = newFile);
     } catch (e) {
       _debugLogging(
           'Error renaming file: ${oldFile.path}', oldFile.parent.path);
