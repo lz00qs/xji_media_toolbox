@@ -193,6 +193,7 @@ class VideoExportDialog extends StatelessWidget {
               ffmpegArgs.add('0');
               ffmpegArgs.add('-i');
               ffmpegArgs.add(inputFilesTxtPath);
+              ffmpegArgs.add('-map_metadata 0');
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
@@ -233,6 +234,7 @@ class VideoExportDialog extends StatelessWidget {
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
               ffmpegArgs.add(videoResource.file.path);
+              ffmpegArgs.add('-map_metadata 0');
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
