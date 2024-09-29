@@ -16,6 +16,7 @@ import '../models/media_resource.dart';
 final _mediaResources = <MediaResource>[];
 var _mediaResourcesCount = 0;
 var _processedMediaResourcesCount = 0;
+final stopwatch = Stopwatch();
 
 bool _isPhoto(Uri uri) {
   final ext = uri.path.split('.').last.toUpperCase();
@@ -352,6 +353,8 @@ Map<String, dynamic> _getGenericMediaResourceInfo(File file) {
 
 Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
   final mediaResources = <MediaResource>[];
+  final LoadingMediaResourcesController loadingMediaResourcesController =
+      Get.find<LoadingMediaResourcesController>();
   for (final file in photos) {
     final Map<String, dynamic> info = _getGenericMediaResourceInfo(file);
     final creationTime = info['creationTime'];
@@ -394,6 +397,9 @@ Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
       resource.errors.addAll(errors);
       mediaResources.add(resource);
     }
+    _processedMediaResourcesCount += 1;
+    loadingMediaResourcesController.progress.value =
+        _processedMediaResourcesCount / _mediaResourcesCount;
   }
   return mediaResources;
 }
@@ -401,6 +407,8 @@ Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
 Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
   final mediaResources = <MediaResource>[];
   final globalSettingsController = Get.find<GlobalSettingsController>();
+  final LoadingMediaResourcesController loadingMediaResourcesController =
+      Get.find<LoadingMediaResourcesController>();
   for (final file in videos) {
     final Map<String, dynamic> info = _getGenericMediaResourceInfo(file);
     final creationTime = info['creationTime'];
@@ -458,6 +466,9 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
         print('Parse video info error: $e');
       }
     }
+    _processedMediaResourcesCount += 1;
+    loadingMediaResourcesController.progress.value =
+        _processedMediaResourcesCount / _mediaResourcesCount;
   }
   return mediaResources;
 }
@@ -489,33 +500,31 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
         futures.add(processFunction(chunk));
       }
       // final results = await Future.wait(futures);
-      await Future.wait(futures).asStream().listen((results) {
-        for (final result in results) {
-          mediaResources.addAll(result);
-          _processedMediaResourcesCount += result.length;
-          loadingMediaResourcesController.progress.value =
-              _processedMediaResourcesCount / _mediaResourcesCount;
+      for (final future in futures) {
+        final result = await future;
+        mediaResources.addAll(result);
+        if (kDebugMode) {
+          print('progress: ${loadingMediaResourcesController.progress.value}');
         }
-      }).asFuture();
+      }
     } else {
       final futures = <Future<List<MediaResource>>>[];
       for (final mediaResourceFile in mediaResourceFiles) {
         futures.add(processFunction([mediaResourceFile]));
       }
-      await Future.wait(futures).asStream().listen((results) {
-        for (final result in results) {
-          mediaResources.addAll(result);
-          _processedMediaResourcesCount += result.length;
-          loadingMediaResourcesController.progress.value =
-              _processedMediaResourcesCount / _mediaResourcesCount;
+      for (final future in futures) {
+        final result = await future;
+        mediaResources.addAll(result);
+        if (kDebugMode) {
+          print('progress: ${loadingMediaResourcesController.progress.value}');
         }
-      }).asFuture();
+      }
     }
   } else {
     mediaResources.addAll(await processFunction(mediaResourceFiles));
-    _processedMediaResourcesCount += 1;
-    loadingMediaResourcesController.progress.value =
-        _processedMediaResourcesCount / _mediaResourcesCount;
+    if (kDebugMode) {
+      print('progress: ${loadingMediaResourcesController.progress.value}');
+    }
   }
   return mediaResources;
 }
@@ -526,6 +535,10 @@ Future<List<MediaResource>> loadMediaResources(
   _prepareThumbnailFolder(mediaResourcesDir.path);
   _processedMediaResourcesCount = 0;
   final classifyResult = _classifyMediaResources(mediaResourcesDir.listSync());
+  if (kDebugMode) {
+    print('classifyTime: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
   final List<File> photos = classifyResult[0];
   var processedPhotos = <MediaResource>[];
   final List<File> videos = classifyResult[1];
@@ -534,9 +547,15 @@ Future<List<MediaResource>> loadMediaResources(
   processedPhotos =
       await _multiThreadsProcessResources(photos, _photoResourcesProcess);
   processedPhotos.sort((a, b) => a.sequence.compareTo(b.sequence));
+  if (kDebugMode) {
+    print('photoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
+  }
   processedPhotos = await _analyzeAebFootage(processedPhotos);
   processedVideos =
       await _multiThreadsProcessResources(videos, _videoResourcesProcess);
+  if (kDebugMode) {
+    print('videoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
+  }
 
   _mediaResources.addAll(processedPhotos);
   _mediaResources.addAll(processedVideos);
@@ -566,6 +585,10 @@ Future<List<MediaResource>> loadMediaResources(
       break;
   }
 
+  if (kDebugMode) {
+    print('sortTime: ${stopwatch.elapsedMilliseconds}ms');
+  }
+
   return _mediaResources;
 }
 
@@ -581,7 +604,8 @@ Future<void> openMediaResourcesFolder() async {
       loadingMediaResourcesController.progress.value = 0.0;
       loadingMediaResourcesController.isLoadingMediaResources.value = true;
       globalMediaResourcesController.mediaResourceDir = mediaResourcesDir;
-      final stopwatch = Stopwatch()..start();
+      stopwatch.reset();
+      stopwatch.start();
       await loadMediaResources(mediaResourcesDir);
       stopwatch.stop();
       if (kDebugMode) {
