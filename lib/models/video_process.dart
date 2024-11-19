@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/utils/toast.dart';
 
 enum VideoProcessType {
   transcode,
@@ -72,6 +73,7 @@ class VideoProcess {
     _process?.kill();
     completer.complete();
     _cleanUp();
+    Toast.warning('$name canceled');
   }
 
   Future<void> process() async {
@@ -95,12 +97,11 @@ class VideoProcess {
         _cleanUp();
       } else if (exitCode == 0) {
         status.value = VideoProcessStatus.finished;
+        Toast.success('$name finished');
       } else {
         status.value = VideoProcessStatus.failed;
+        Toast.error('$name failed');
         _cleanUp();
-      }
-      if (kDebugMode) {
-        print('exit code: $exitCode');
       }
       if (!completer.isCompleted) {
         completer.complete();
