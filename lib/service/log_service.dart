@@ -15,7 +15,6 @@ class LogService {
     final logFileName =
         '${DateTime.now().toString().substring(0, 19).replaceAll(':', '-')}.log';
     _logFile = File('$logFileDir/$logFileName');
-    print('Log file path: ${_logFile.path}');
     if (!await _logFile.exists()) {
       await _logFile.create(recursive: true);
     }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:logging/logging.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
