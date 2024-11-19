@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:image/image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
+import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
 
@@ -45,11 +46,6 @@ bool _isAebImage(Image image) {
   return false;
 }
 
-void _debugLogging(String message, String logDir) {
-  // final logFile = File('$logDir/log.txt');
-  // logFile.writeAsStringSync('$message\n', mode: FileMode.append);
-}
-
 DateTime _getMediaCreationTime(File file) {
   RegExp regex = RegExp(r'DJI_(\d{14})_(\d{4})_D');
 
@@ -60,9 +56,8 @@ DateTime _getMediaCreationTime(File file) {
       return DateTime.parse(
           ('${match.group(1)!.substring(0, 8)}T${match.group(1)!.substring(8)}'));
     } catch (e) {
-      if (kDebugMode) {
-        print('Parse footage time error: $e');
-      }
+      LogService.warning(
+          '${file.uri.pathSegments.last} parse creation time error: $e');
     }
   }
   return DateTime(0);
@@ -77,9 +72,8 @@ int _getMediaSequence(File file) {
     try {
       return int.parse(match.group(2)!);
     } catch (e) {
-      if (kDebugMode) {
-        print('Parse footage sequence error: $e');
-      }
+      LogService.warning(
+          '${file.uri.pathSegments.last} parse sequence error: $e');
     }
   }
   return 0;
@@ -109,9 +103,8 @@ Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
     file.path,
   ]);
   if (result.exitCode != 0) {
-    _debugLogging(
-        'FFprobe error: ${result.stderr} for ${file.uri.pathSegments.last}',
-        file.parent.path);
+    LogService.warning(
+        '${file.uri.pathSegments.last} ffprobe error: ${result.stderr}');
     return null;
   } else {
     final Map<String, dynamic> ffprobeOutput = json.decode(result.stdout);
@@ -122,18 +115,14 @@ Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
 void _prepareThumbnailFolder(String mediaResourcesPath) {
   if (!Directory('$mediaResourcesPath/$thumbnailFolderName').existsSync()) {
     Directory('$mediaResourcesPath/$thumbnailFolderName').createSync();
-    if (kDebugMode) {
-      print('Create thumb folder');
-    }
+    LogService.info('Create thumb folder');
   } else {
     Directory('$mediaResourcesPath/$thumbnailFolderName')
         .listSync()
         .forEach((file) {
       file.deleteSync();
     });
-    if (kDebugMode) {
-      print('Clear thumb folder');
-    }
+    LogService.info('Clear thumb folder');
   }
 }
 
@@ -154,13 +143,11 @@ Future<File?> _generateThumbnail(List<String> args) async {
     thumbFileName,
   ]);
   if (result.exitCode != 0) {
-    _debugLogging('FFmpeg error: ${result.stderr} for $videoResourceName',
-        mediaResourcesPath);
+    LogService.warning(
+        '$videoResourceName generate thumbnail error: ${result.stderr}');
     return null;
   } else {
-    if (kDebugMode) {
-      print('Thumbnail path: $thumbFileName');
-    }
+    LogService.info('$videoResourceName generate thumbnail success');
     return File(thumbFileName);
   }
 }
@@ -173,67 +160,49 @@ Future<List<MediaResource>> _analyzeAebFootage(
         i++;
         continue;
       }
-      final startIndex = i;
+      final startResource = mediaResources[i] as AebPhotoResource;
       if (mediaResources[i] is AebPhotoResource) {
         if ((mediaResources[i] as AebPhotoResource).evBias == '0/10') {
           (mediaResources[i] as AebPhotoResource)
               .aebResources
               .add(mediaResources[i]);
-          if (kDebugMode) {
-            print('0/10 found');
-          }
+          LogService.info('${startResource.name}: 0/10 found');
           i++;
           if (i >= mediaResources.length) {
             break;
           }
           if (mediaResources[i].isAeb &&
               (mediaResources[i] as AebPhotoResource).evBias == '-7/10') {
-            (mediaResources[startIndex] as AebPhotoResource)
-                .aebResources
-                .add(mediaResources[i]);
+            startResource.aebResources.add(mediaResources[i]);
             mediaResources[i].hide = true;
-            if (kDebugMode) {
-              print('-7/10 found');
-            }
+            LogService.info('${startResource.name}: -7/10 found');
             i++;
             if (i >= mediaResources.length) {
               break;
             }
             if (mediaResources[i].isAeb &&
                 (mediaResources[i] as AebPhotoResource).evBias == '7/10') {
-              (mediaResources[startIndex] as AebPhotoResource)
-                  .aebResources
-                  .add(mediaResources[i]);
+              startResource.aebResources.add(mediaResources[i]);
               mediaResources[i].hide = true;
-              if (kDebugMode) {
-                print('7/10 found');
-              }
+              LogService.info('${startResource.name}: 7/10 found');
               i++;
               if (i >= mediaResources.length) {
                 break;
               }
               if (mediaResources[i].isAeb &&
                   (mediaResources[i] as AebPhotoResource).evBias == '-13/10') {
-                (mediaResources[startIndex] as AebPhotoResource)
-                    .aebResources
-                    .add(mediaResources[i]);
+                startResource.aebResources.add(mediaResources[i]);
                 mediaResources[i].hide = true;
-                if (kDebugMode) {
-                  print('-13/10 found');
-                }
+                LogService.info('${startResource.name}: -13/10 found');
                 i++;
                 if (i >= mediaResources.length) {
                   break;
                 }
                 if (mediaResources[i].isAeb &&
                     (mediaResources[i] as AebPhotoResource).evBias == '13/10') {
-                  (mediaResources[startIndex] as AebPhotoResource)
-                      .aebResources
-                      .add(mediaResources[i]);
+                  startResource.aebResources.add(mediaResources[i]);
                   mediaResources[i].hide = true;
-                  if (kDebugMode) {
-                    print('13/10 found');
-                  }
+                  LogService.info('${startResource.name}: 13/10 found');
                   i++;
                   if (i >= mediaResources.length) {
                     break;
@@ -241,13 +210,9 @@ Future<List<MediaResource>> _analyzeAebFootage(
                   if (mediaResources[i].isAeb &&
                       (mediaResources[i] as AebPhotoResource).evBias ==
                           '-20/10') {
-                    (mediaResources[startIndex] as AebPhotoResource)
-                        .aebResources
-                        .add(mediaResources[i]);
+                    startResource.aebResources.add(mediaResources[i]);
                     mediaResources[i].hide = true;
-                    if (kDebugMode) {
-                      print('-20/10 found');
-                    }
+                    LogService.info('${startResource.name}: -20/10 found');
                     i++;
                     if (i >= mediaResources.length) {
                       break;
@@ -255,20 +220,16 @@ Future<List<MediaResource>> _analyzeAebFootage(
                     if (mediaResources[i].isAeb &&
                         (mediaResources[i] as AebPhotoResource).evBias ==
                             '20/10') {
-                      (mediaResources[startIndex] as AebPhotoResource)
-                          .aebResources
-                          .add(mediaResources[i]);
+                      startResource.aebResources.add(mediaResources[i]);
                       mediaResources[i].hide = true;
-                      if (kDebugMode) {
-                        print('20/10 found');
-                      }
+                      LogService.info('${startResource.name}: 20/10 found');
                       i++;
                       if (i >= mediaResources.length) {
                         break;
                       }
                       continue;
                     } else {
-                      mediaResources[startIndex].errors[parseAebErrorCode] = [
+                      startResource.errors[parseAebErrorCode] = [
                         parseAebEndError
                       ];
                       continue;
@@ -277,24 +238,18 @@ Future<List<MediaResource>> _analyzeAebFootage(
                     continue;
                   }
                 } else {
-                  mediaResources[startIndex].errors[parseAebErrorCode] = [
-                    parseAebEndError
-                  ];
+                  startResource.errors[parseAebErrorCode] = [parseAebEndError];
                   continue;
                 }
               } else {
                 continue;
               }
             } else {
-              mediaResources[startIndex].errors[parseAebErrorCode] = [
-                parseAebEndError
-              ];
+              startResource.errors[parseAebErrorCode] = [parseAebEndError];
               continue;
             }
           } else {
-            mediaResources[startIndex].errors[parseAebErrorCode] = [
-              parseAebEndError
-            ];
+            startResource.errors[parseAebErrorCode] = [parseAebEndError];
             continue;
           }
         }
@@ -460,11 +415,8 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
       resource.errors.addAll(errors);
       mediaResources.add(resource);
     } catch (e) {
-      _debugLogging('FFprobe error: $e for ${file.uri.pathSegments.last}',
-          file.parent.path);
-      if (kDebugMode) {
-        print('Parse video info error: $e');
-      }
+      LogService.warning(
+          '${file.uri.pathSegments.last} parse video info error: $e');
     }
     _processedMediaResourcesCount += 1;
     loadingMediaResourcesController.progress.value =
@@ -499,7 +451,6 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
       for (final chunk in chunks) {
         futures.add(processFunction(chunk));
       }
-      // final results = await Future.wait(futures);
       for (final future in futures) {
         final result = await future;
         mediaResources.addAll(result);
@@ -535,9 +486,7 @@ Future<List<MediaResource>> loadMediaResources(
   _prepareThumbnailFolder(mediaResourcesDir.path);
   _processedMediaResourcesCount = 0;
   final classifyResult = _classifyMediaResources(mediaResourcesDir.listSync());
-  if (kDebugMode) {
-    print('classifyTime: ${stopwatch.elapsedMilliseconds}ms');
-  }
+  LogService.info('classifyTime: ${stopwatch.elapsedMilliseconds}ms');
 
   final List<File> photos = classifyResult[0];
   var processedPhotos = <MediaResource>[];
@@ -547,15 +496,11 @@ Future<List<MediaResource>> loadMediaResources(
   processedPhotos =
       await _multiThreadsProcessResources(photos, _photoResourcesProcess);
   processedPhotos.sort((a, b) => a.sequence.compareTo(b.sequence));
-  if (kDebugMode) {
-    print('photoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
-  }
+  LogService.info('photoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
   processedPhotos = await _analyzeAebFootage(processedPhotos);
   processedVideos =
       await _multiThreadsProcessResources(videos, _videoResourcesProcess);
-  if (kDebugMode) {
-    print('videoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
-  }
+  LogService.info('videoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
 
   _mediaResources.addAll(processedPhotos);
   _mediaResources.addAll(processedVideos);
@@ -585,9 +530,7 @@ Future<List<MediaResource>> loadMediaResources(
       break;
   }
 
-  if (kDebugMode) {
-    print('sortTime: ${stopwatch.elapsedMilliseconds}ms');
-  }
+  LogService.info('sortTime: ${stopwatch.elapsedMilliseconds}ms');
 
   return _mediaResources;
 }
@@ -600,6 +543,10 @@ Future<void> openMediaResourcesFolder() async {
       Get.find<LoadingMediaResourcesController>();
   if (selectedDirectory != null) {
     final mediaResourcesDir = Directory(selectedDirectory);
+    if (LogService.isDebug) {
+      LogService.disableDebug();
+      await LogService.enableDebug('$selectedDirectory/$logFolderName');
+    }
     if (mediaResourcesDir.existsSync()) {
       loadingMediaResourcesController.progress.value = 0.0;
       loadingMediaResourcesController.isLoadingMediaResources.value = true;
@@ -608,17 +555,15 @@ Future<void> openMediaResourcesFolder() async {
       stopwatch.start();
       await loadMediaResources(mediaResourcesDir);
       stopwatch.stop();
-      if (kDebugMode) {
-        print('Load media resources time: ${stopwatch.elapsedMilliseconds}ms');
-      }
+      LogService.info(
+          'loadMediaResourcesTime: ${stopwatch.elapsedMilliseconds}ms');
       globalMediaResourcesController.mediaResources.addAll(_mediaResources);
       globalMediaResourcesController.currentMediaIndex.value = 0;
       loadingMediaResourcesController.isLoadingMediaResources.value = false;
-      if (kDebugMode) {
-        print('Media resources loaded');
-      }
+      LogService.info(
+          'Media resources loaded, total media resources: ${_mediaResources.length}');
     } else {
-      _debugLogging('Invalid directory: $selectedDirectory', selectedDirectory);
+      LogService.warning('Invalid directory: $selectedDirectory');
     }
   }
 }
@@ -654,10 +599,8 @@ void deleteMediaResource(int index) {
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        print(
-            'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
-      }
+      LogService.warning(
+          'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
     }
     globalMediaResourcesController.mediaResources.removeAt(index);
   }
@@ -746,9 +689,7 @@ void renameMediaResource(int index, String newName) {
           newNormalPhotoResource;
     }
   } catch (e) {
-    if (kDebugMode) {
-      print('Error renaming file: ${oldFile.path}');
-    }
+    LogService.warning('Error renaming file: ${oldFile.path}');
   }
 }
 
@@ -803,8 +744,7 @@ void addSuffixToCurrentAebFilesName() {
           evBias: evBias)
         ..thumbFile = newFile);
     } catch (e) {
-      _debugLogging(
-          'Error renaming file: ${oldFile.path}', oldFile.parent.path);
+      LogService.warning('Error renaming file: ${oldFile.path}');
     }
   }
   final newAebPhotoResource = (AebPhotoResource(

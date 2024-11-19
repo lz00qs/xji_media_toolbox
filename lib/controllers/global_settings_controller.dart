@@ -16,6 +16,7 @@ class GlobalSettingsController extends GetxController {
   var ffmpegParentDir = '';
   final sortType = SortType.name.obs;
   final sortAsc = true.obs;
+  final isDebugMode = false.obs;
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();

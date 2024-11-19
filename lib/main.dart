@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
@@ -31,6 +33,10 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+
+  if (kDebugMode) {
+    LogService.isDebug = true;
+  }
 
   Get.put(GlobalMediaResourcesController());
 

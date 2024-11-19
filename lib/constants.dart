@@ -1,6 +1,7 @@
 // 托管常量
 
 const String thumbnailFolderName = 'thumb';
+const String logFolderName = 'log';
 
 const double macAppBarHeight = 30.0;
 const double macAppBarButtonPadding = 5.0;

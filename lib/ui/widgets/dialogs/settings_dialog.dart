@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:logging/logging.dart';
 import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
+import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/custom_dual_option_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+
+import '../../../constants.dart';
+import '../../../controllers/global_media_resources_controller.dart';
 
 class _PresetItemButton extends StatelessWidget {
   final IconData iconData;
@@ -209,18 +214,18 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       textSelectionTheme: TextSelectionThemeData(
                           selectionColor: ColorDark.blue5.withOpacity(0.8))),
                   child: Obx(() => TextField(
-                    cursorColor: ColorDark.text1,
-                    controller: nameController,
-                    style: SemiTextStyles.header5ENRegular
-                        .copyWith(color: ColorDark.text0),
-                    decoration: dialogInputDecoration.copyWith(
-                        errorText:
-                            name.value.isEmpty ? 'Name is required' : null),
-                    onChanged: (value) {
-                      nameController.text = value;
-                      name.value = value;
-                    },
-                  ))),
+                        cursorColor: ColorDark.text1,
+                        controller: nameController,
+                        style: SemiTextStyles.header5ENRegular
+                            .copyWith(color: ColorDark.text0),
+                        decoration: dialogInputDecoration.copyWith(
+                            errorText:
+                                name.value.isEmpty ? 'Name is required' : null),
+                        onChanged: (value) {
+                          nameController.text = value;
+                          name.value = value;
+                        },
+                      ))),
             ),
             SizedBox(
               height: DesignValues.smallPadding,
@@ -251,29 +256,30 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       child: Theme(
                           data: Theme.of(context).copyWith(
                               textSelectionTheme: TextSelectionThemeData(
-                                  selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                                  selectionColor:
+                                      ColorDark.blue5.withOpacity(0.8))),
                           child: Obx(() => TextField(
-                            cursorColor: ColorDark.text1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: widthController,
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text0),
-                            decoration: dialogInputDecoration.copyWith(
-                                errorText: width.value == 0
-                                    ? 'Width cannot be 0'
-                                    : null),
-                            onChanged: (value) {
-                              try {
-                                width.value = int.parse(value);
-                              } catch (e) {
-                                width.value = 0;
-                              }
-                              widthController.text = width.value.toString();
-                            },
-                          ))),
+                                cursorColor: ColorDark.text1,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                controller: widthController,
+                                style: SemiTextStyles.header5ENRegular
+                                    .copyWith(color: ColorDark.text0),
+                                decoration: dialogInputDecoration.copyWith(
+                                    errorText: width.value == 0
+                                        ? 'Width cannot be 0'
+                                        : null),
+                                onChanged: (value) {
+                                  try {
+                                    width.value = int.parse(value);
+                                  } catch (e) {
+                                    width.value = 0;
+                                  }
+                                  widthController.text = width.value.toString();
+                                },
+                              ))),
                     ),
                     Text(
                       'Height',
@@ -285,29 +291,31 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       child: Theme(
                           data: Theme.of(context).copyWith(
                               textSelectionTheme: TextSelectionThemeData(
-                                  selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                                  selectionColor:
+                                      ColorDark.blue5.withOpacity(0.8))),
                           child: Obx(() => TextField(
-                            cursorColor: ColorDark.text1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: heightController,
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text0),
-                            decoration: dialogInputDecoration.copyWith(
-                                errorText: height.value == 0
-                                    ? 'Height cannot be 0'
-                                    : null),
-                            onChanged: (value) {
-                              try {
-                                height.value = int.parse(value);
-                              } catch (e) {
-                                height.value = 0;
-                              }
-                              heightController.text = height.value.toString();
-                            },
-                          ))),
+                                cursorColor: ColorDark.text1,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: <TextInputFormatter>[
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                                controller: heightController,
+                                style: SemiTextStyles.header5ENRegular
+                                    .copyWith(color: ColorDark.text0),
+                                decoration: dialogInputDecoration.copyWith(
+                                    errorText: height.value == 0
+                                        ? 'Height cannot be 0'
+                                        : null),
+                                onChanged: (value) {
+                                  try {
+                                    height.value = int.parse(value);
+                                  } catch (e) {
+                                    height.value = 0;
+                                  }
+                                  heightController.text =
+                                      height.value.toString();
+                                },
+                              ))),
                     ),
                   ],
                 );
@@ -326,30 +334,31 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                   child: Theme(
                       data: Theme.of(context).copyWith(
                           textSelectionTheme: TextSelectionThemeData(
-                              selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                              selectionColor:
+                                  ColorDark.blue5.withOpacity(0.8))),
                       child: Obx(() => TextField(
-                        cursorColor: ColorDark.text1,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        controller: crfController,
-                        style: SemiTextStyles.header5ENRegular
-                            .copyWith(color: ColorDark.text0),
-                        decoration: dialogInputDecoration.copyWith(
-                            errorText: (crf.value > 0 && crf.value < 52)
-                                ? null
-                                : 'CRF must be between 0 and 51, higher is lower quality.',
-                            errorMaxLines: 3),
-                        onChanged: (value) {
-                          try {
-                            crf.value = int.parse(value);
-                          } catch (e) {
-                            crf.value = 0;
-                          }
-                          crfController.text = crf.value.toString();
-                        },
-                      ))),
+                            cursorColor: ColorDark.text1,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            controller: crfController,
+                            style: SemiTextStyles.header5ENRegular
+                                .copyWith(color: ColorDark.text0),
+                            decoration: dialogInputDecoration.copyWith(
+                                errorText: (crf.value > 0 && crf.value < 52)
+                                    ? null
+                                    : 'CRF must be between 0 and 51, higher is lower quality.',
+                                errorMaxLines: 3),
+                            onChanged: (value) {
+                              try {
+                                crf.value = int.parse(value);
+                              } catch (e) {
+                                crf.value = 0;
+                              }
+                              crfController.text = crf.value.toString();
+                            },
+                          ))),
                 ),
               ],
             ),
@@ -486,6 +495,37 @@ class SettingsDialog extends StatelessWidget {
           ),
           SizedBox(
             height: DesignValues.largePadding,
+          ),
+          Row(
+            children: [
+              Text('Debug Mode:',
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text1)),
+              const Spacer(),
+              Obx(() => Switch(
+                    value: settingsController.isDebugMode.value,
+                    onChanged: (value) async {
+                      settingsController.isDebugMode.value = value;
+                      LogService.isDebug = value;
+                      final GlobalMediaResourcesController
+                          globalMediaResourcesController = Get.find();
+                      if (globalMediaResourcesController.mediaResourceDir !=
+                          null) {
+                        if (value) {
+                          await LogService.enableDebug(
+                              '${globalMediaResourcesController.mediaResourceDir!.path}/$logFolderName');
+                        } else {
+                          LogService.disableDebug();
+                        }
+                      }
+                    },
+                    activeTrackColor: ColorDark.blue5,
+                    activeColor: ColorDark.white,
+                  )),
+            ],
+          ),
+          SizedBox(
+            height: DesignValues.smallPadding,
           ),
           Row(
             children: [
