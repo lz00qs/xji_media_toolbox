@@ -54,6 +54,7 @@ dependencies:
   flat_buffers: any
   package_info_plus:
   logging:
+  toastification:
 
 
 dev_dependencies:

@@ -9,6 +9,7 @@ import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart'
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
+import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
 import '../controllers/global_media_resources_controller.dart';
@@ -56,6 +57,7 @@ DateTime _getMediaCreationTime(File file) {
       return DateTime.parse(
           ('${match.group(1)!.substring(0, 8)}T${match.group(1)!.substring(8)}'));
     } catch (e) {
+      Toast.error('Failed to parse ${file.uri.pathSegments.last} creation time');
       LogService.warning(
           '${file.uri.pathSegments.last} parse creation time error: $e');
     }
@@ -72,6 +74,7 @@ int _getMediaSequence(File file) {
     try {
       return int.parse(match.group(2)!);
     } catch (e) {
+      Toast.error('Failed to parse ${file.uri.pathSegments.last} sequence');
       LogService.warning(
           '${file.uri.pathSegments.last} parse sequence error: $e');
     }
@@ -143,6 +146,7 @@ Future<File?> _generateThumbnail(List<String> args) async {
     thumbFileName,
   ]);
   if (result.exitCode != 0) {
+    Toast.error('Failed to generate thumbnail for $videoResourceName');
     LogService.warning(
         '$videoResourceName generate thumbnail error: ${result.stderr}');
     return null;
@@ -415,6 +419,7 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
       resource.errors.addAll(errors);
       mediaResources.add(resource);
     } catch (e) {
+      Toast.error('Failed to parse ${file.uri.pathSegments.last} video info');
       LogService.warning(
           '${file.uri.pathSegments.last} parse video info error: $e');
     }
@@ -561,8 +566,11 @@ Future<void> openMediaResourcesFolder() async {
       globalMediaResourcesController.currentMediaIndex.value = 0;
       loadingMediaResourcesController.isLoadingMediaResources.value = false;
       LogService.info(
-          'Media resources loaded, total media resources: ${_mediaResources.length}');
+          'Media resources loaded, total media resources: ${_mediaResources
+              .length}');
+      Toast.success('Media resources loaded');
     } else {
+      Toast.error('Invalid directory: $selectedDirectory');
       LogService.warning('Invalid directory: $selectedDirectory');
     }
   }
@@ -599,6 +607,8 @@ void deleteMediaResource(int index) {
         }
       }
     } catch (e) {
+      Toast.error('Failed to delete ${globalMediaResourcesController
+          .mediaResources[index].file.uri.pathSegments.last}');
       LogService.warning(
           'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
     }
@@ -689,6 +699,7 @@ void renameMediaResource(int index, String newName) {
           newNormalPhotoResource;
     }
   } catch (e) {
+    Toast.error('Failed to rename ${oldFile.uri.pathSegments.last}');
     LogService.warning('Error renaming file: ${oldFile.path}');
   }
 }
@@ -744,6 +755,7 @@ void addSuffixToCurrentAebFilesName() {
           evBias: evBias)
         ..thumbFile = newFile);
     } catch (e) {
+      Toast.error('Failed to rename ${oldFile.uri.pathSegments.last}');
       LogService.warning('Error renaming file: ${oldFile.path}');
     }
   }

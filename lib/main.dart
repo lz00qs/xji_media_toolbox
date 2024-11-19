@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
@@ -61,16 +62,18 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final LoadingMediaResourcesController loadingMediaResourcesController =
         Get.find<LoadingMediaResourcesController>();
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        endDrawer: const TaskDrawer(),
-        body: isFFmpegAvailable
-            ? Obx(() =>
-                loadingMediaResourcesController.isLoadingMediaResources.value
-                    ? const LoadingMediaResourcesPage()
-                    : const MainPage())
-            : const FFmpegNotAvailablePage(),
+    return ToastificationWrapper(
+      child: GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          endDrawer: const TaskDrawer(),
+          body: isFFmpegAvailable
+              ? Obx(() =>
+                  loadingMediaResourcesController.isLoadingMediaResources.value
+                      ? const LoadingMediaResourcesPage()
+                      : const MainPage())
+              : const FFmpegNotAvailablePage(),
+        ),
       ),
     );
   }
