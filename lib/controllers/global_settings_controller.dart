@@ -20,21 +20,16 @@ class GlobalSettingsController extends GetxController {
 
   Future<void> loadSettings() async {
     objectBox = await ObjectBox.create();
-    final transCodePresets = objectBox.transCodePresetBox.getAll();
-    if (transCodePresets.isEmpty) {
+    transCodingPresets.value = objectBox.transCodePresetBox.getAll();
+    if (transCodingPresets.isEmpty) {
       final defaultPreset = ExportPreset()..name = 'Default';
       objectBox.transCodePresetBox.put(defaultPreset);
-      transCodePresets.add(defaultPreset);
+      transCodingPresets.value = objectBox.transCodePresetBox.getAll();
     }
-    transCodingPresets.addAll(transCodePresets);
 
     final prefs = await SharedPreferences.getInstance();
     defaultTransCodePresetId.value =
-        prefs.getInt(defaultTransCodePresetIndexPrefKey) == null
-            ? 0
-            : transCodePresets.isEmpty
-                ? 0
-                : transCodePresets.first.id;
+        prefs.getInt(defaultTransCodePresetIndexPrefKey) ?? transCodingPresets.first.id;
     sortType.value = SortType.values[prefs.getInt(sortTypePrefKey) ?? 0];
     sortAsc.value = prefs.getBool(sortOderPrefKey) ?? true;
   }
