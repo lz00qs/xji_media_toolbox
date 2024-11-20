@@ -13,7 +13,7 @@ class LogService {
     Logger.root.level = Level.ALL;
     // log 文件名为 yyyy-MM-dd-HH-mm-ss.log
     final logFileName =
-        '${DateTime.now().toString().substring(0, 19).replaceAll(':', '-')}.log';
+        '${DateTime.now().toString().substring(0, 19).replaceAll(':', '').replaceAll(' ', '-')}.log';
     _logFile = File('$logFileDir/$logFileName');
     if (!await _logFile.exists()) {
       await _logFile.create(recursive: true);
@@ -35,9 +35,8 @@ class LogService {
     Logger.root.level = Level.INFO;
   }
 
-  static void _appendToFile(String logMessage) async {
+  static void _appendToFile(String logMessage){
     try {
-      // await _logFile.writeAsString(logMessage, mode: FileMode.append);
       _logFile.writeAsStringSync(logMessage, mode: FileMode.append);
     } catch (e) {
       if (kDebugMode) {
