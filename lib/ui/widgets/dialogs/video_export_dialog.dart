@@ -5,6 +5,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/constants.dart';
+import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/settings_dialog.dart';
 
@@ -229,6 +231,9 @@ class VideoExportDialog extends StatelessWidget {
                 duration: _getOutputDuration(),
                 ffmpegArgs: ffmpegArgs,
                 outputFilePath: outputFilePath,
+                logFilePath: LogService.isDebug
+                    ? '${videoResource.file.parent.path}/$logFolderName'
+                    : null,
               );
               globalTasksController.addTask(process);
             } else {
@@ -281,6 +286,9 @@ class VideoExportDialog extends StatelessWidget {
                 duration: _getOutputDuration(),
                 ffmpegArgs: ffmpegArgs,
                 outputFilePath: outputFilePath,
+                logFilePath: LogService.isDebug
+                    ? '${videoResource.file.parent.path}/$logFolderName'
+                    : null,
               );
               globalTasksController.addTask(process);
             }

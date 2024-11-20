@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 enum VideoProcessType {
@@ -31,10 +32,13 @@ class VideoProcess {
   final String outputFilePath;
   final List<String> tempFilePaths;
   final completer = Completer<void>();
+  final String? logFilePath;
   Timer? _heartbeatTimer;
   late File _outputFile;
   late List<File> _tempFiles;
+  late File _logFile;
   Process? _process;
+  bool _stopLogging = false;
 
   VideoProcess(
       {required this.name,
@@ -43,9 +47,18 @@ class VideoProcess {
       required this.duration,
       required this.ffmpegParentDir,
       required this.outputFilePath,
-      this.tempFilePaths = const []}) {
+      this.tempFilePaths = const [],
+      this.logFilePath}) {
     _outputFile = File(outputFilePath);
     _tempFiles = tempFilePaths.map((path) => File(path)).toList();
+    if (logFilePath != null) {
+      final logFileName =
+          '${DateTime.now().toString().substring(0, 19).replaceAll(':', '').replaceAll(' ', '-')}-$name.log';
+      _logFile = File('$logFilePath/$logFileName');
+      if (!_logFile.existsSync()) {
+        _logFile.createSync(recursive: true);
+      }
+    }
   }
 
   void _deleteOutputFile() {
@@ -77,6 +90,7 @@ class VideoProcess {
   }
 
   Future<void> process() async {
+    LogService.info('Start processing $name');
     status.value = VideoProcessStatus.processing;
     if (kDebugMode) {
       print('ffmpegArgs: $ffmpegArgs');
@@ -101,6 +115,7 @@ class VideoProcess {
       } else {
         status.value = VideoProcessStatus.failed;
         Toast.error('$name failed');
+        LogService.warning('$name failed with exit code $exitCode');
         _cleanUp();
       }
       if (!completer.isCompleted) {
@@ -110,8 +125,21 @@ class VideoProcess {
     return completer.future;
   }
 
+  void _appendToFile(String logMessage){
+    try {
+      if (!_stopLogging)
+      {
+        _logFile.writeAsStringSync(logMessage, mode: FileMode.append);
+      }
+    } catch (e) {
+      _stopLogging = true;
+      LogService.warning('Failed to write log to ${_logFile.path}: $e');
+    }
+  }
+
   void _processStdoutData(String data) {
     _resetWatchDog();
+    _appendToFile(data);
     if (kDebugMode) {
       print(data);
     }
