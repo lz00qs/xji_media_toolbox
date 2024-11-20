@@ -45,7 +45,7 @@ class MediaResourceThumbnail extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(DesignValues.smallBorderRadius),
         child: mediaResource.thumbFile == null
-            ? Image.asset('assets/images/resource_not_found.jpeg')
+            ? Image.asset('assets/common/images/resource_not_found.jpeg')
             : Image.file(
                 mediaResource.thumbFile!,
                 fit: BoxFit.fill,

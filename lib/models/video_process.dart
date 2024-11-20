@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
+import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 enum VideoProcessType {
@@ -28,7 +29,6 @@ class VideoProcess {
   final Duration duration;
   final RxDouble progress = 0.0.obs;
   final Rx<VideoProcessStatus> status = VideoProcessStatus.waiting.obs;
-  final String ffmpegParentDir;
   final String outputFilePath;
   final List<String> tempFilePaths;
   final completer = Completer<void>();
@@ -45,7 +45,6 @@ class VideoProcess {
       required this.type,
       required this.ffmpegArgs,
       required this.duration,
-      required this.ffmpegParentDir,
       required this.outputFilePath,
       this.tempFilePaths = const [],
       this.logFilePath}) {
@@ -96,7 +95,7 @@ class VideoProcess {
       print('ffmpegArgs: $ffmpegArgs');
     }
     _process = await Process.start(
-      '$ffmpegParentDir/ffmpeg',
+      FFmpegUtils.ffmpeg,
       ffmpegArgs,
     );
     _process?.stdout.transform(utf8.decoder).listen((data) {
@@ -125,10 +124,9 @@ class VideoProcess {
     return completer.future;
   }
 
-  void _appendToFile(String logMessage){
+  void _appendToFile(String logMessage) {
     try {
-      if (!_stopLogging)
-      {
+      if (!_stopLogging) {
         _logFile.writeAsStringSync(logMessage, mode: FileMode.append);
       }
     } catch (e) {

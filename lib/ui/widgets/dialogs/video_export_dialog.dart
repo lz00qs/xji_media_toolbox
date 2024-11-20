@@ -225,7 +225,6 @@ class VideoExportDialog extends StatelessWidget {
                 }
               }
               final process = VideoProcess(
-                ffmpegParentDir: globalSettingsController.ffmpegParentDir,
                 name: '$outputFileName.MP4',
                 type: VideoProcessType.merge,
                 duration: _getOutputDuration(),
@@ -277,7 +276,6 @@ class VideoExportDialog extends StatelessWidget {
               ffmpegArgs.add('0');
               ffmpegArgs.add(outputFilePath);
               final process = VideoProcess(
-                ffmpegParentDir: globalSettingsController.ffmpegParentDir,
                 name: '$outputFileName.MP4',
                 type:
                     globalMediaResourcesController.isEditingMediaResources.value

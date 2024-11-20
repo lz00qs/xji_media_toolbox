@@ -9,6 +9,7 @@ import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart'
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
+import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
@@ -57,7 +58,8 @@ DateTime _getMediaCreationTime(File file) {
       return DateTime.parse(
           ('${match.group(1)!.substring(0, 8)}T${match.group(1)!.substring(8)}'));
     } catch (e) {
-      Toast.error('Failed to parse ${file.uri.pathSegments.last} creation time');
+      Toast.error(
+          'Failed to parse ${file.uri.pathSegments.last} creation time');
       LogService.warning(
           '${file.uri.pathSegments.last} parse creation time error: $e');
     }
@@ -91,10 +93,8 @@ String _parseEvBias(Image image) {
 }
 
 Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
-  final GlobalSettingsController globalSettingsController =
-      Get.find<GlobalSettingsController>();
-  final result =
-      await Process.run('${globalSettingsController.ffmpegParentDir}/ffprobe', [
+  Get.find<GlobalSettingsController>();
+  final result = await Process.run(FFmpegUtils.ffprobe, [
     '-v',
     'error',
     '-show_entries',
@@ -131,12 +131,12 @@ void _prepareThumbnailFolder(String mediaResourcesPath) {
 
 Future<File?> _generateThumbnail(List<String> args) async {
   final file = File(args[0]);
-  final ffmpegParentDir = args[1];
+  final ffmpegPath = args[1];
   final mediaResourcesPath = file.parent.path;
   final videoResourceName = file.uri.pathSegments.last;
   final thumbFileName =
       '$mediaResourcesPath/$thumbnailFolderName/${videoResourceName.replaceAll('MP4', 'thumb')}.JPG';
-  final result = await Process.run('$ffmpegParentDir/ffmpeg', [
+  final result = await Process.run(ffmpegPath, [
     '-i',
     '$mediaResourcesPath/$videoResourceName',
     '-ss',
@@ -365,7 +365,7 @@ Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
 
 Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
   final mediaResources = <MediaResource>[];
-  final globalSettingsController = Get.find<GlobalSettingsController>();
+  Get.find<GlobalSettingsController>();
   final LoadingMediaResourcesController loadingMediaResourcesController =
       Get.find<LoadingMediaResourcesController>();
   for (final file in videos) {
@@ -402,8 +402,8 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
         width = ffprobeOutput['streams'][0]['width'];
         height = ffprobeOutput['streams'][0]['height'];
       }
-      final thumbFile = await compute(_generateThumbnail,
-          [file.path, globalSettingsController.ffmpegParentDir]);
+      final thumbFile =
+          await compute(_generateThumbnail, [file.path, FFmpegUtils.ffmpeg]);
       final resource = NormalVideoResource(
         name: file.uri.pathSegments.last,
         file: file,
@@ -566,8 +566,7 @@ Future<void> openMediaResourcesFolder() async {
       globalMediaResourcesController.currentMediaIndex.value = 0;
       loadingMediaResourcesController.isLoadingMediaResources.value = false;
       LogService.info(
-          'Media resources loaded, total media resources: ${_mediaResources
-              .length}');
+          'Media resources loaded, total media resources: ${_mediaResources.length}');
       Toast.success('Media resources loaded');
     } else {
       Toast.error('Invalid directory: $selectedDirectory');
@@ -607,8 +606,8 @@ void deleteMediaResource(int index) {
         }
       }
     } catch (e) {
-      Toast.error('Failed to delete ${globalMediaResourcesController
-          .mediaResources[index].file.uri.pathSegments.last}');
+      Toast.error(
+          'Failed to delete ${globalMediaResourcesController.mediaResources[index].file.uri.pathSegments.last}');
       LogService.warning(
           'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
     }

@@ -13,7 +13,6 @@ class GlobalSettingsController extends GetxController {
   final defaultTransCodePresetId = 0.obs;
   var cpuThreads = 1;
   var appVersion = '0.0.0';
-  var ffmpegParentDir = '';
   final sortType = SortType.name.obs;
   final sortAsc = true.obs;
   final isDebugMode = false.obs;
@@ -29,7 +28,8 @@ class GlobalSettingsController extends GetxController {
 
     final prefs = await SharedPreferences.getInstance();
     defaultTransCodePresetId.value =
-        prefs.getInt(defaultTransCodePresetIndexPrefKey) ?? transCodingPresets.first.id;
+        prefs.getInt(defaultTransCodePresetIndexPrefKey) ??
+            transCodingPresets.first.id;
     sortType.value = SortType.values[prefs.getInt(sortTypePrefKey) ?? 0];
     sortAsc.value = prefs.getBool(sortOderPrefKey) ?? true;
   }

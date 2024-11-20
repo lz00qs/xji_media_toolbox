@@ -26,7 +26,7 @@ class _VideoThumbnail extends StatelessWidget {
               height: 153,
               width: 272,
               child: videoResource.thumbFile == null
-                  ? Image.asset('assets/images/resource_not_found.jpeg')
+                  ? Image.asset('assets/common/images/resource_not_found.jpeg')
                   : Image.file(
                       videoResource.thumbFile!,
                       fit: BoxFit.fill,

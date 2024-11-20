@@ -50,7 +50,7 @@ Future<void> main() async {
   globalSettingsController.appVersion = packageInfo.version;
   await globalSettingsController.loadSettings();
 
-  final isFFmpegAvailable = await hasFFmpegAndFFprobe();
+  final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
   runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
 }

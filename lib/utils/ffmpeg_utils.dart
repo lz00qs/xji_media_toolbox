@@ -1,25 +1,30 @@
 import 'dart:io';
 
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
+class FFmpegUtils {
+  static var ffmpeg = '';
+  static var ffprobe = '';
 
-/// 检查系统是否拥有 FFmpeg 以及 FFprobe
-Future<bool> hasFFmpegAndFFprobe() async {
-  final GlobalSettingsController globalSettingsController =
-      Get.find<GlobalSettingsController>();
-  if (Platform.isMacOS) {
-    if (File('/opt/homebrew/bin/ffmpeg').existsSync() &&
-        File('/opt/homebrew/bin/ffprobe').existsSync()) {
-      globalSettingsController.ffmpegParentDir = '/opt/homebrew/bin/';
-      return true;
-    } else if (File('/usr/bin/ffmpeg').existsSync() &&
-        File('/usr/bin/ffprobe').existsSync()) {
-      globalSettingsController.ffmpegParentDir = '/usr/bin/';
-      return true;
+  static Future<bool> checkFFmpeg() async {
+    if (Platform.isMacOS) {
+      if (File('/opt/homebrew/bin/ffmpeg').existsSync() &&
+          File('/opt/homebrew/bin/ffprobe').existsSync()) {
+        ffmpeg = '/opt/homebrew/bin/ffmpeg';
+        ffprobe = '/opt/homebrew/bin/ffprobe';
+        return true;
+      } else if (File('/usr/bin/ffmpeg').existsSync() &&
+          File('/usr/bin/ffprobe').existsSync()) {
+        ffmpeg = '/usr/bin/ffmpeg';
+        ffprobe = '/usr/bin/ffprobe';
+        return true;
+      }
+    } else if (Platform.isWindows) {
+      if (File('assets/windows/ffmpeg/ffmpeg.exe').existsSync() &&
+          File('assets/windows/ffmpeg/ffprobe.exe').existsSync()) {
+        ffmpeg = 'assets/windows/ffmpeg/ffmpeg.exe';
+        ffprobe = 'assets/windows/ffmpeg/ffprobe.exe';
+        return true;
+      }
     }
-  } else if (Platform.isWindows) {
-    /// todo: windows ffmpeg detect
-    return true;
+    return false;
   }
-  return false;
 }
