@@ -194,7 +194,7 @@ class AebPhotoView extends GetView<AebPhotoViewController> {
                   await Get.dialog(const AddAebSuffixDialog());
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),

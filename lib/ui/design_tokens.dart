@@ -17,7 +17,7 @@ final dialogInputDecoration = InputDecoration(
 
 /// values
 class DesignValues {
-  static double macAppBarHeight = 32.0;
+  static double appBarHeight = 32.0;
   static double smallIconSize = 16.0;
   static double mediumIconSize = 24.0;
   static double largeIconSize = 48.0;

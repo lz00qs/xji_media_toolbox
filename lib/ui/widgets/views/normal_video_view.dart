@@ -40,7 +40,7 @@ class NormalVideoView extends StatelessWidget {
                       true;
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),
@@ -53,7 +53,7 @@ class NormalVideoView extends StatelessWidget {
                   await Get.dialog(const VideoExportDialog());
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),

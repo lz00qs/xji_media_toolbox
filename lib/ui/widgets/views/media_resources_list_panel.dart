@@ -66,7 +66,7 @@ class _MediaResourcesListTopBar
         borderRadius: BorderRadius.vertical(
             top: Radius.circular(DesignValues.mediumBorderRadius)),
         child: Container(
-          height: DesignValues.macAppBarHeight,
+          height: DesignValues.appBarHeight,
           width: double.infinity,
           color: ColorDark.bg3,
           child: Row(

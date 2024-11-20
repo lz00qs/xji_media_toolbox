@@ -9,7 +9,6 @@ import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.d
 import 'package:xji_footage_toolbox/ui/widgets/resizable_triple_panel.dart';
 
 import '../widgets/views/aeb_photo_view.dart';
-import '../widgets/main_page_app_bar.dart';
 import '../main_panel.dart';
 import '../widgets/buttons/main_panel_button.dart';
 import '../widgets/views/multi_select_panel.dart';
@@ -129,41 +128,33 @@ class MainPage extends StatelessWidget {
         Get.find();
     final GlobalFocusNodesController globalFocusNodesController = Get.find();
     return KeyboardListener(
-        focusNode: globalFocusNodesController.mediaResourcesListPanelFocusNode,
-        autofocus: true,
-        onKeyEvent: (event) {
-          if (event is KeyDownEvent || event is KeyRepeatEvent) {
-            switch (event.logicalKey) {
-              case LogicalKeyboardKey.arrowUp:
-                _decreaseCurrentMediaIndex();
-                break;
-              case LogicalKeyboardKey.arrowDown:
-                _increaseCurrentMediaIndex();
-                break;
-              case LogicalKeyboardKey.arrowLeft:
-                _decreaseCurrentAebIndex();
-                break;
-              case LogicalKeyboardKey.arrowRight:
-                _increaseCurrentAebIndex();
-                break;
-            }
+      focusNode: globalFocusNodesController.mediaResourcesListPanelFocusNode,
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent || event is KeyRepeatEvent) {
+          switch (event.logicalKey) {
+            case LogicalKeyboardKey.arrowUp:
+              _decreaseCurrentMediaIndex();
+              break;
+            case LogicalKeyboardKey.arrowDown:
+              _increaseCurrentMediaIndex();
+              break;
+            case LogicalKeyboardKey.arrowLeft:
+              _decreaseCurrentAebIndex();
+              break;
+            case LogicalKeyboardKey.arrowRight:
+              _increaseCurrentAebIndex();
+              break;
           }
-        },
-        child: Column(
-          children: [
-            const MainPageAppBar(),
-            Expanded(
-                child: Obx(() =>
-                    globalMediaResourcesController.mediaResources.isEmpty
-                        ? const _MainPageEmpty()
-                        : Obx(() => _MainPageNotEmpty(
-                            mediaResource:
-                                globalMediaResourcesController.mediaResources[
-                                    globalMediaResourcesController
-                                        .currentMediaIndex.value],
-                            isMultipleSelection: globalMediaResourcesController
-                                .isMultipleSelection.value)))),
-          ],
-        ));
+        }
+      },
+      child: Obx(() => globalMediaResourcesController.mediaResources.isEmpty
+          ? const _MainPageEmpty()
+          : _MainPageNotEmpty(
+              mediaResource: globalMediaResourcesController.mediaResources[
+                  globalMediaResourcesController.currentMediaIndex.value],
+              isMultipleSelection:
+                  globalMediaResourcesController.isMultipleSelection.value)),
+    );
   }
 }

@@ -19,7 +19,7 @@ Future<bool> hasFFmpegAndFFprobe() async {
     }
   } else if (Platform.isWindows) {
     /// todo: windows ffmpeg detect
-    return false;
+    return true;
   }
   return false;
 }

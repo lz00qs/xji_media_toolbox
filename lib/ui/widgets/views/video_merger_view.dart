@@ -117,7 +117,7 @@ class VideoMergerView extends StatelessWidget {
                   multiSelectPanelController.isMerging.value = false;
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),
@@ -132,7 +132,7 @@ class VideoMergerView extends StatelessWidget {
                   ));
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),

@@ -39,7 +39,7 @@ class NormalVideoTrimmerView extends StatelessWidget {
                       false;
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),
@@ -52,7 +52,7 @@ class NormalVideoTrimmerView extends StatelessWidget {
                   await Get.dialog(const VideoExportDialog());
                 },
                 iconSize: DesignValues.mediumIconSize,
-                buttonSize: DesignValues.macAppBarHeight,
+                buttonSize: DesignValues.appBarHeight,
                 hoverColor: ColorDark.defaultHover,
                 focusColor: ColorDark.defaultActive,
                 iconColor: ColorDark.text0),

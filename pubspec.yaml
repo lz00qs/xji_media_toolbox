@@ -55,6 +55,7 @@ dependencies:
   package_info_plus:
   logging:
   toastification:
+  iconify_flutter:
 
 
 dev_dependencies:

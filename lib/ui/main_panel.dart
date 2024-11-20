@@ -30,7 +30,7 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
             await Get.dialog(const MediaResourceDeleteDialog());
           },
           iconSize: DesignValues.mediumIconSize,
-          buttonSize: DesignValues.macAppBarHeight,
+          buttonSize: DesignValues.appBarHeight,
           hoverColor: ColorDark.defaultHover,
           focusColor: ColorDark.defaultActive,
           iconColor: ColorDark.text0,
@@ -44,7 +44,7 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
             await Get.dialog(const MediaResourceRenameDialog());
           },
           iconSize: DesignValues.mediumIconSize,
-          buttonSize: DesignValues.macAppBarHeight,
+          buttonSize: DesignValues.appBarHeight,
           hoverColor: ColorDark.defaultHover,
           focusColor: ColorDark.defaultActive,
           iconColor: ColorDark.text0,
@@ -65,7 +65,7 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
             }
           },
           iconSize: DesignValues.mediumIconSize,
-          buttonSize: DesignValues.macAppBarHeight,
+          buttonSize: DesignValues.appBarHeight,
           hoverColor: ColorDark.defaultHover,
           focusColor: ColorDark.defaultActive,
           iconColor: ColorDark.text0,
@@ -87,7 +87,7 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
             }
           },
           iconSize: DesignValues.mediumIconSize,
-          buttonSize: DesignValues.macAppBarHeight,
+          buttonSize: DesignValues.appBarHeight,
           hoverColor: ColorDark.defaultHover,
           focusColor: ColorDark.defaultActive,
           iconColor: ColorDark.text0,
@@ -109,7 +109,7 @@ class MainPanelSideBar extends StatelessWidget {
           right: Radius.circular(DesignValues.mediumBorderRadius)),
       child: Container(
         color: ColorDark.bg2,
-        width: DesignValues.macAppBarHeight,
+        width: DesignValues.appBarHeight,
         height: double.infinity,
         child: Padding(
           padding: EdgeInsets.only(top: DesignValues.smallPadding),
