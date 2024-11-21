@@ -13,6 +13,7 @@ import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
+import 'package:fvp/fvp.dart' as fvp;
 
 import 'controllers/global_settings_controller.dart';
 import 'ui/widgets/task_drawer.dart';
@@ -36,6 +37,10 @@ Future<void> main() async {
     await windowManager.show();
     await windowManager.focus();
   });
+
+  fvp.registerWith(options: {
+    'platforms': ['windows']
+  }); // only these platforms will use this plugin implementation
 
   if (kDebugMode) {
     LogService.isDebug = true;

@@ -56,7 +56,7 @@ dependencies:
   logging:
   toastification:
   iconify_flutter:
-
+  fvp:
 
 dev_dependencies:
   flutter_test:
