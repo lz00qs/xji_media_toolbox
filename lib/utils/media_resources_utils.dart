@@ -164,8 +164,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
         i++;
         continue;
       }
-      final startResource = mediaResources[i] as AebPhotoResource;
       if (mediaResources[i] is AebPhotoResource) {
+        final startResource = mediaResources[i] as AebPhotoResource;
         if ((mediaResources[i] as AebPhotoResource).evBias == '0/10') {
           (mediaResources[i] as AebPhotoResource)
               .aebResources
