@@ -57,7 +57,7 @@ def main():
             commands = [
                 "flutter clean",
                 "flutter pub get",
-                "flutter build macos",
+                "flutter build macos --release",
             ]
             for command in commands:
                 run_command(command)
@@ -70,7 +70,7 @@ def main():
             commands = [
                 "flutter clean",
                 "flutter pub get",
-                "flutter build windows",
+                "flutter build windows --release",
             ]
             for command in commands:
                 run_command(command)
