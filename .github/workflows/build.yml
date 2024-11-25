@@ -38,7 +38,7 @@ jobs:
         run: python build.py --build macos
 
       # 创建 DMG 镜像
-      - name: Create the DMG file
+      - name: Create the DMG file for macos app
         run: |
           hdiutil create -format UDZO -srcfolder build/macos/Build/Products/Release/XJI\ Media\ Toolbox.app build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
 
@@ -48,3 +48,40 @@ jobs:
         with:
           name: xji_media_toolbox_macos
           path: build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
+
+  # Windows 构建任务
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 设置 Flutter 环境
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+      
+      # 设置 Python 环境
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 获取 Flutter 依赖
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 构建 Windows 应用
+      - name: Build macOS App
+        run: python build.py --build windows
+
+      # 保存 Windows 构建产物
+      - name: Upload Windows build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: xji_media_toolbox_windows
+          path: build/windows/x64/runner/Release/*
