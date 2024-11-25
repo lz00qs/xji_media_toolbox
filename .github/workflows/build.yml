@@ -76,8 +76,8 @@ jobs:
         run: flutter pub get
 
       # 构建 Windows 应用
-      - name: Build macOS App
-        run: python build.py --build windows
+      - name: Build Windows App
+        run: flutter build windows --release
 
       # 保存 Windows 构建产物
       - name: Upload Windows build artifact
