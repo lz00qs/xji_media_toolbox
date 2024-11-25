@@ -12,6 +12,9 @@ This is a toolbox for DJI drone media processing. It base on flutter and can run
 
 > DNG photos are not tested.
 
+![app main page view](img/app_main_view.jpg)
+![app settings page view](img/app_settings_view.jpg)
+
 
 ## Installation
 1. Download the latest version from the release page.
