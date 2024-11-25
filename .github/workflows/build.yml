@@ -1,0 +1,45 @@
+name: Build Windows and macOS App
+
+on:
+  push:
+    branches:
+      - main  # 在推送到 main 分支时触发
+  pull_request:
+
+jobs:
+  # macOS 构建任务
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      # 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 设置 Flutter 环境
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.24.5
+      
+      # 设置 Python 环境
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      # 获取 Flutter 依赖
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 构建 macOS 应用
+      - name: Build macOS App
+        run: python build.py --build macos
+
+      # 保存 macOS 构建产物
+      - name: Upload macOS build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-app
+          path: build/macos/Build/Products/Release/*.app
