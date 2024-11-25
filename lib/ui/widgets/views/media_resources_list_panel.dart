@@ -48,7 +48,7 @@ class MediaResourceThumbnail extends StatelessWidget {
             ? Image.asset('assets/common/images/resource_not_found.jpeg')
             : Image.file(
                 mediaResource.thumbFile!,
-                fit: BoxFit.fill,
+                fit: BoxFit.contain,
               ),
       ),
     );
