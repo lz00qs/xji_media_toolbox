@@ -80,7 +80,6 @@ class MainPanelSideBarControlButtons extends StatelessWidget {
                 globalMediaResourcesController.mediaResources.length - 1) {
               final MediaResourcesListPanelController
                   mediaResourcesListPanelController = Get.find();
-              globalMediaResourcesController.currentMediaIndex.value--;
               globalMediaResourcesController.currentMediaIndex.value++;
               mediaResourcesListPanelController.scrollToIndex(
                   globalMediaResourcesController.currentMediaIndex.value, true);
