@@ -37,9 +37,14 @@ jobs:
       - name: Build macOS App
         run: python build.py --build macos
 
+      # 创建 DMG 镜像
+      - name: Create the DMG file
+        run: |
+          hdiutil create -format UDZO -srcfolder build/macos/Build/Products/Release/XJI\ Media\ Toolbox.app build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
+
       # 保存 macOS 构建产物
       - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: macos-app
-          path: build/macos/Build/Products/Release/*.app
+          name: xji_media_toolbox_macos
+          path: build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
