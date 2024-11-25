@@ -35,3 +35,8 @@ This is a toolbox for DJI drone media processing. It base on flutter and can run
 This app is developed by Flutter. You can clone the source code and run it by yourself. The source code is in the `src` folder.
 
 > For Windows, due to the `fvp` plugin does not support IDE debugging, you may need to run the app by `flutter run` in the terminal. See this [issue](https://github.com/wang-bin/fvp/issues/125) for more information.
+
+## Todo
+- [ ] i18n support
+- [ ] DNG photos support
+- [ ] Maybe migrate to electron for better performance and more features
