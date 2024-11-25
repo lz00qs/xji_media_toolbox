@@ -31,32 +31,24 @@ dependencies:
   flutter:
     sdk: flutter
 
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.6
-
-  get:
-  path_provider:
-  file_picker:
-  image:
-  video_player:
-  scrollable_positioned_list:
-  extended_image:
-  intl:
-  chewie:
-  window_manager:
-  percent_indicator:
-  path:
-  shared_preferences:
-  objectbox_flutter_libs:
+  get: ^4.6.6
+  path_provider: ^2.1.5
+  file_picker: ^8.1.4
+  image: ^4.3.0
+  video_player: ^2.9.2
+  extended_image: ^9.0.7
+  window_manager: ^0.4.3
+  path: ^1.9.0
+  shared_preferences: ^2.3.3
+  objectbox_flutter_libs: any
   objectbox: any
-  flat_buffers: any
-  package_info_plus:
-  logging:
-  toastification:
-  iconify_flutter:
-  fvp:
+#  flat_buffers: any
+  package_info_plus: ^8.1.1
+  logging: ^1.3.0
+  toastification: ^2.3.0
+  iconify_flutter: ^0.0.7
+  fvp: ^0.28.0
+  chewie: ^1.8.5
 
 dev_dependencies:
   flutter_test:
@@ -68,7 +60,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
-  build_runner:
+  build_runner: ^2.4.13
   objectbox_generator: any
 
 # For information on the generic Dart part of this file, see the
