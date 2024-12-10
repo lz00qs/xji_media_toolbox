@@ -7,6 +7,7 @@ import 'package:xji_footage_toolbox/ui/widgets/dialogs/media_resources_sort_dial
 import '../../../controllers/global_media_resources_controller.dart';
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
+import 'multi_select_panel.dart';
 
 const _listWidgetHeight = 73.0;
 
@@ -99,6 +100,8 @@ class _MediaResourcesListTopBar
                       ? Icons.keyboard_return
                       : Icons.checklist_rtl,
                   onPressed: () {
+                    final MultiSelectPanelController multiSelectPanelController = Get.find();
+                    multiSelectPanelController.isMerging.value = false;
                     if (controller.isMultipleSelection.value) {
                       controller.selectedIndexList.clear();
                     }
