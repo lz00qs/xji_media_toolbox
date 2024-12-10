@@ -15,6 +15,7 @@ import 'package:xji_footage_toolbox/utils/toast.dart';
 import '../constants.dart';
 import '../controllers/global_media_resources_controller.dart';
 import '../models/media_resource.dart';
+import '../ui/widgets/views/video_player_getx.dart';
 
 final _mediaResources = <MediaResource>[];
 var _mediaResourcesCount = 0;
@@ -584,10 +585,19 @@ void deleteMediaResource(int index) {
         index == globalMediaResourcesController.mediaResources.length - 1) {
       globalMediaResourcesController.currentMediaIndex.value -= 1;
     }
+    final mediaResource = globalMediaResourcesController.mediaResources[index];
+    globalMediaResourcesController.mediaResources.removeAt(index);
+
+    if (mediaResource.isVideo) {
+      final videoPlayerGetxController = Get.find<VideoPlayerGetxController>();
+      videoPlayerGetxController.footageInitialized.value = false;
+      videoPlayerGetxController.videoPlayerController.dispose();
+      videoPlayerGetxController.dispose();
+    }
+
     try {
-      if (globalMediaResourcesController.mediaResources[index].isAeb) {
-        final aebPhotoResource = globalMediaResourcesController
-            .mediaResources[index] as AebPhotoResource;
+      if (mediaResource.isAeb) {
+        final aebPhotoResource = mediaResource as AebPhotoResource;
         for (final aebResource in aebPhotoResource.aebResources) {
           aebResource.file.deleteSync();
           if (aebResource.thumbFile != null &&
@@ -596,22 +606,25 @@ void deleteMediaResource(int index) {
           }
         }
       } else {
-        globalMediaResourcesController.mediaResources[index].file.deleteSync();
-        if (globalMediaResourcesController.mediaResources[index].thumbFile !=
-                null &&
-            globalMediaResourcesController.mediaResources[index].thumbFile!
-                .existsSync()) {
-          globalMediaResourcesController.mediaResources[index].thumbFile!
-              .deleteSync();
+        if (mediaResource.isVideo && Platform.isWindows) {
+          // Delay to avoid file in use error on Windows
+          Future.delayed(const Duration(milliseconds: 500), () {
+            mediaResource.file.deleteSync();
+          });
+        } else {
+          mediaResource.file.deleteSync();
+        }
+        if (mediaResource.thumbFile != null &&
+            mediaResource.thumbFile!.existsSync()) {
+          mediaResource.thumbFile!.deleteSync();
         }
       }
     } catch (e) {
       Toast.error(
-          'Failed to delete ${globalMediaResourcesController.mediaResources[index].file.uri.pathSegments.last}');
+          'Failed to delete ${mediaResource.file.uri.pathSegments.last}');
       LogService.warning(
-          'Error deleting file: ${globalMediaResourcesController.mediaResources[index].file.path}');
+          'Error deleting file: ${mediaResource.file.path}, error: $e');
     }
-    globalMediaResourcesController.mediaResources.removeAt(index);
   }
 }
 
