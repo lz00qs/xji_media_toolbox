@@ -221,7 +221,6 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                             errorText:
                                 name.value.isEmpty ? 'Name is required' : null),
                         onChanged: (value) {
-                          nameController.text = value;
                           name.value = value;
                         },
                       ))),
@@ -276,7 +275,6 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                                   } catch (e) {
                                     width.value = 0;
                                   }
-                                  widthController.text = width.value.toString();
                                 },
                               ))),
                     ),
@@ -311,8 +309,6 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                                   } catch (e) {
                                     height.value = 0;
                                   }
-                                  heightController.text =
-                                      height.value.toString();
                                 },
                               ))),
                     ),
@@ -355,7 +351,6 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                               } catch (e) {
                                 crf.value = 0;
                               }
-                              crfController.text = crf.value.toString();
                             },
                           ))),
                 ),
