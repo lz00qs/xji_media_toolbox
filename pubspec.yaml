@@ -33,11 +33,11 @@ dependencies:
 
   get: ^4.6.6
   path_provider: ^2.1.5
-  file_picker: ^8.1.4
+  file_picker: ^10.2.0
   image: ^4.3.0
   video_player: ^2.9.2
-  extended_image: ^9.0.7
-  window_manager: ^0.4.3
+  extended_image: ^10.0.1
+  window_manager: ^0.5.0
   path: ^1.9.0
   shared_preferences: ^2.3.3
   objectbox_flutter_libs: any
@@ -45,9 +45,9 @@ dependencies:
 #  flat_buffers: any
   package_info_plus: ^8.1.1
   logging: ^1.3.0
-  toastification: ^2.3.0
+  toastification: ^3.0.3
   iconify_flutter: ^0.0.7
-  fvp: ^0.28.0
+  fvp: ^0.32.1
   chewie: ^1.8.5
 
 dev_dependencies:
@@ -59,7 +59,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   objectbox_generator: any
 
