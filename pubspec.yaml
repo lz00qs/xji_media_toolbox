@@ -49,6 +49,10 @@ dependencies:
   iconify_flutter: ^0.0.7
   fvp: ^0.32.1
   chewie: ^1.8.5
+  hooks_riverpod: ^2.6.1
+  flutter_hooks: ^0.21.2
+  freezed_annotation: ^3.0.0
+  freezed: ^3.0.6
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +66,8 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   build_runner: ^2.4.13
   objectbox_generator: any
+  custom_lint: ^0.7.5
+  riverpod_lint: ^2.6.5
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

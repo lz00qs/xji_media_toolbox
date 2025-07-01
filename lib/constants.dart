@@ -19,6 +19,6 @@ const int parseAebErrorCode = 1;
 const String parseAebStartError = "Parse AEB start error";
 const String parseAebEndError = "Parse AEB end error";
 
-const String defaultTransCodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
+const String defaultTranscodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
 const String sortTypePrefKey = 'sortType';
 const String sortOderPrefKey = 'sortOrder';

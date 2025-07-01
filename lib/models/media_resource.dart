@@ -1,5 +1,10 @@
 import 'dart:io';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+part 'media_resource.freezed.dart';
+
 abstract class MediaResource {
   final bool isVideo;
   final String name;
@@ -73,4 +78,52 @@ class NormalVideoResource extends MediaResource {
       required this.duration,
       required this.isHevc})
       : super(isVideo: true);
+}
+
+@freezed
+class MediaResources with _$MediaResources {
+  MediaResources({
+    required this.isLoading,
+    required this.resources,
+    required this.currentIndex,
+    required this.loadProgress,
+  });
+  @override
+  final bool isLoading;
+  @override
+  final List<MediaResource> resources;
+  @override
+  final int currentIndex;
+  @override
+  final double loadProgress;
+
+  factory MediaResources.initial() {
+    return MediaResources(
+      isLoading: false,
+      resources: [],
+      currentIndex: 0,
+      loadProgress: 0,
+    );
+  }
+}
+
+final mediaResourcesProvider =
+    StateNotifierProvider<MediaResourceProvider, MediaResources>(
+        (ref) => MediaResourceProvider());
+
+class MediaResourceProvider extends StateNotifier<MediaResources> {
+  MediaResourceProvider() : super(MediaResources.initial());
+  void setLoading(bool isLoading) {
+    state = state.copyWith(isLoading: isLoading);
+  }
+  void setResources(List<MediaResource> resources) {
+    state = state.copyWith(resources: resources);
+  }
+  void setCurrentIndex(int currentIndex) {
+    state = state.copyWith(currentIndex: currentIndex);
+  }
+
+  void setLoadProgress(double loadProgress) {
+    state = state.copyWith(loadProgress: loadProgress);
+  }
 }

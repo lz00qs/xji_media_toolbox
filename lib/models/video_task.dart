@@ -3,18 +3,22 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
-enum VideoProcessType {
+part 'video_task.freezed.dart';
+
+enum VideoTaskType {
   transcode,
   trim,
   merge,
 }
 
-enum VideoProcessStatus {
+enum VideoTaskStatus {
   waiting,
   processing,
   finished,
@@ -22,13 +26,13 @@ enum VideoProcessStatus {
   failed,
 }
 
-class VideoProcess {
+class VideoTask {
   final String name;
-  final VideoProcessType type;
+  final VideoTaskType type;
   final List<String> ffmpegArgs;
   final Duration duration;
   final RxDouble progress = 0.0.obs;
-  final Rx<VideoProcessStatus> status = VideoProcessStatus.waiting.obs;
+  final Rx<VideoTaskStatus> status = VideoTaskStatus.waiting.obs;
   final String outputFilePath;
   final List<String> tempFilePaths;
   final completer = Completer<void>();
@@ -40,7 +44,7 @@ class VideoProcess {
   Process? _process;
   bool _stopLogging = false;
 
-  VideoProcess(
+  VideoTask(
       {required this.name,
       required this.type,
       required this.ffmpegArgs,
@@ -80,7 +84,7 @@ class VideoProcess {
   }
 
   void cancel() {
-    status.value = VideoProcessStatus.canceled;
+    status.value = VideoTaskStatus.canceled;
     _cancelWatchDog();
     _process?.kill();
     completer.complete();
@@ -90,7 +94,7 @@ class VideoProcess {
 
   Future<void> process() async {
     LogService.info('Start processing $name');
-    status.value = VideoProcessStatus.processing;
+    status.value = VideoTaskStatus.processing;
     if (kDebugMode) {
       print('ffmpegArgs: $ffmpegArgs');
     }
@@ -106,13 +110,13 @@ class VideoProcess {
     });
     _process?.exitCode.then((exitCode) {
       _cancelWatchDog();
-      if (status.value == VideoProcessStatus.canceled) {
+      if (status.value == VideoTaskStatus.canceled) {
         _cleanUp();
       } else if (exitCode == 0) {
-        status.value = VideoProcessStatus.finished;
+        status.value = VideoTaskStatus.finished;
         Toast.success('$name finished');
       } else {
-        status.value = VideoProcessStatus.failed;
+        status.value = VideoTaskStatus.failed;
         Toast.error('$name failed');
         LogService.warning('$name failed with exit code $exitCode');
         _cleanUp();
@@ -150,7 +154,7 @@ class VideoProcess {
   void _startWatchDog() {
     _heartbeatTimer = Timer(const Duration(seconds: 15), () {
       _process?.kill();
-      status.value = VideoProcessStatus.failed;
+      status.value = VideoTaskStatus.failed;
     });
   }
 
@@ -199,5 +203,46 @@ class VideoProcess {
     } else {
       return 0.0;
     }
+  }
+}
+
+@freezed
+class Tasks with _$Tasks {
+  Tasks({required this.totalTasks, required this.waitingTasks});
+
+  @override
+  final List<VideoTask> totalTasks;
+  @override
+  final List<VideoTask> waitingTasks;
+
+  factory Tasks.initial() => Tasks(totalTasks: [], waitingTasks: []);
+}
+
+final tasksProvider = StateNotifierProvider<TaskProvider, Tasks>((ref) {
+  return TaskProvider();
+});
+class TaskProvider extends StateNotifier<Tasks> {
+  TaskProvider() : super(Tasks.initial());
+
+  var _isProcessing = false;
+
+  Future<void> addTask(VideoTask task) async {
+    state = state.copyWith(
+        waitingTasks: [...state.waitingTasks, task],
+        tasks: [...state.totalTasks, task]);
+    await _process();
+  }
+
+  Future<void> _process() async {
+    if (_isProcessing) {
+      return;
+    }
+    _isProcessing = true;
+    while (state.waitingTasks.isNotEmpty) {
+      final task = state.waitingTasks.first;
+      state = state.copyWith(waitingTasks: state.waitingTasks.sublist(1));
+      await task.process();
+    }
+    _isProcessing = false;
   }
 }

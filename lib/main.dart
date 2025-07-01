@@ -1,21 +1,17 @@
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:package_info_plus/package_info_plus.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:xji_footage_toolbox/controllers/global_media_resources_controller.dart';
+import 'package:xji_footage_toolbox/models/settings.dart';
+import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
-import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
-import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:fvp/fvp.dart' as fvp;
 
-import 'controllers/global_settings_controller.dart';
 import 'ui/widgets/task_drawer.dart';
 
 Future<void> main() async {
@@ -46,48 +42,80 @@ Future<void> main() async {
     LogService.isDebug = true;
   }
 
-  Get.put(GlobalMediaResourcesController());
-
-  final packageInfo = await PackageInfo.fromPlatform();
-
-  final globalSettingsController = Get.put(GlobalSettingsController());
-  globalSettingsController.cpuThreads = Platform.numberOfProcessors;
-  globalSettingsController.appVersion = packageInfo.version;
-  await globalSettingsController.loadSettings();
-
   final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
-  runApp(MyApp(isFFmpegAvailable: isFFmpegAvailable));
+  await ObjectBox.create();
+
+  final container = ProviderContainer();
+
+  await container.read(settingsProvider.notifier).loadSettings();
+
+  runApp(UncontrolledProviderScope(
+      container: container,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
+      )));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   final bool isFFmpegAvailable;
 
   const MyApp({super.key, required this.isFFmpegAvailable});
 
   @override
-  Widget build(BuildContext context) {
-    final LoadingMediaResourcesController loadingMediaResourcesController =
-        Get.find<LoadingMediaResourcesController>();
+  Widget build(BuildContext context, WidgetRef ref) {
     return ToastificationWrapper(
-      child: GetMaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-            endDrawer: const TaskDrawer(),
-            body: Center(
-              child: Column(children: [
-                const MainPageAppBar(),
-                Expanded(
-                  child: isFFmpegAvailable
-                      ? Obx(() => loadingMediaResourcesController
-                              .isLoadingMediaResources.value
-                          ? const LoadingMediaResourcesPage()
-                          : const MainPage())
-                      : const FFmpegNotAvailablePage(),
-                )
-              ]),
-            )),
+        child: Scaffold(
+      endDrawer: const TaskDrawer(),
+      body: Center(
+        child: Column(
+          children: [
+            const MainPageAppBar(),
+            // Expanded(
+            //   child: isFFmpegAvailable
+            //       ? Obx(() => loadingMediaResourcesController
+            //               .isLoadingMediaResources.value
+            //           ? const LoadingMediaResourcesPage()
+            //           : const MainPage())
+            //       : const FFmpegNotAvailablePage(),
+            // )
+            Expanded(child: const FFmpegNotAvailablePage())
+          ],
+        ),
       ),
-    );
+    ));
   }
 }
+
+// class MyApp extends StatelessWidget {
+//   final bool isFFmpegAvailable;
+//
+//   const MyApp({super.key, required this.isFFmpegAvailable});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     // final LoadingMediaResourcesController loadingMediaResourcesController =
+//     //     Get.find<LoadingMediaResourcesController>();
+//     return ToastificationWrapper(
+//       child: GetMaterialApp(
+//         debugShowCheckedModeBanner: false,
+//         home: Scaffold(
+//             endDrawer: const TaskDrawer(),
+//             body: Center(
+//               child: Column(children: [
+//                 const MainPageAppBar(),
+//                 Expanded(
+//                   child: isFFmpegAvailable
+//                       ? Obx(() => loadingMediaResourcesController
+//                               .isLoadingMediaResources.value
+//                           ? const LoadingMediaResourcesPage()
+//                           : const MainPage())
+//                       : const FFmpegNotAvailablePage(),
+//                 )
+//               ]),
+//             )),
+//       ),
+//     );
+//   }
+// }
