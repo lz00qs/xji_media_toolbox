@@ -10,6 +10,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 import 'buttons/custom_icon_button.dart';
+import 'dialogs/settings_dialog.dart';
 
 class _AppBarIconButton extends StatelessWidget {
   static const double _buttonSize = 32.0;
@@ -96,7 +97,9 @@ class _MacMainPageAppBar extends HookConsumerWidget {
                   return;
                 }
                 onPressed = true;
-                // await Get.dialog(const SettingsDialog());
+                await showDialog(context: context, builder: (BuildContext context) {
+                  return const SettingsDialog();
+                });
                 onPressed = false;
               }),
           const Spacer(),
