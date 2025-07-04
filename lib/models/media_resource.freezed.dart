@@ -19,6 +19,8 @@ mixin _$MediaResources {
   List<MediaResource> get resources;
   int get currentIndex;
   double get loadProgress;
+  dynamic get resourcesPath;
+  set resourcesPath(dynamic value);
 
   /// Create a copy of MediaResources
   /// with the given fields replaced by the non-null parameter values.
@@ -39,7 +41,9 @@ mixin _$MediaResources {
             (identical(other.currentIndex, currentIndex) ||
                 other.currentIndex == currentIndex) &&
             (identical(other.loadProgress, loadProgress) ||
-                other.loadProgress == loadProgress));
+                other.loadProgress == loadProgress) &&
+            const DeepCollectionEquality()
+                .equals(other.resourcesPath, resourcesPath));
   }
 
   @override
@@ -48,11 +52,12 @@ mixin _$MediaResources {
       isLoading,
       const DeepCollectionEquality().hash(resources),
       currentIndex,
-      loadProgress);
+      loadProgress,
+      const DeepCollectionEquality().hash(resourcesPath));
 
   @override
   String toString() {
-    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress)';
+    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, resourcesPath: $resourcesPath)';
   }
 }
 

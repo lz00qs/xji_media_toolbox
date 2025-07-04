@@ -9,6 +9,7 @@ import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
+import '../../utils/media_resources_utils.dart';
 import 'buttons/custom_icon_button.dart';
 import 'dialogs/settings_dialog.dart';
 
@@ -84,7 +85,7 @@ class _MacMainPageAppBar extends HookConsumerWidget {
                   return;
                 }
                 onPressed = true;
-                // await openMediaResourcesFolder(ref: ref);
+                await openMediaResourcesFolder(ref: ref);
                 onPressed = false;
               }),
           SizedBox(
@@ -138,7 +139,7 @@ class _WinMainPageAppBar extends HookConsumerWidget {
                   return;
                 }
                 onPressed = true;
-                // await openMediaResourcesFolder(ref: ref);
+                await openMediaResourcesFolder(ref: ref);
                 onPressed = false;
               }),
           SizedBox(

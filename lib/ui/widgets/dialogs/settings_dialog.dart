@@ -295,7 +295,8 @@ class _EditTranscodePresetDialog extends StatelessWidget {
               child: Theme(
                   data: Theme.of(context).copyWith(
                       textSelectionTheme: TextSelectionThemeData(
-                          selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                          selectionColor:
+                              ColorDark.blue5.withAlpha((0.8 * 255).round()))),
                   child: HookConsumer(builder: (context, ref, child) {
                     final nameController =
                         useTextEditingController(text: iPreset.name);
@@ -357,8 +358,8 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       child: Theme(
                         data: Theme.of(context).copyWith(
                             textSelectionTheme: TextSelectionThemeData(
-                                selectionColor:
-                                    ColorDark.blue5.withOpacity(0.8))),
+                                selectionColor: ColorDark.blue5
+                                    .withAlpha((0.8 * 255).round()))),
                         child: HookConsumer(builder: (context, ref, child) {
                           final widthController = useTextEditingController(
                               text: iPreset.width.toString());
@@ -404,8 +405,8 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       child: Theme(
                         data: Theme.of(context).copyWith(
                             textSelectionTheme: TextSelectionThemeData(
-                                selectionColor:
-                                    ColorDark.blue5.withOpacity(0.8))),
+                                selectionColor: ColorDark.blue5
+                                    .withAlpha((0.8 * 255).round()))),
                         child: HookConsumer(builder: (context, ref, child) {
                           final heightController = useTextEditingController(
                               text: iPreset.width.toString());
@@ -458,7 +459,8 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                   child: Theme(
                     data: Theme.of(context).copyWith(
                         textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: ColorDark.blue5.withOpacity(0.8))),
+                            selectionColor: ColorDark.blue5
+                                .withAlpha((0.8 * 255).round()))),
                     child: HookConsumer(builder: (context, ref, child) {
                       final crfController = useTextEditingController(
                           text: iPreset.crf.toString());

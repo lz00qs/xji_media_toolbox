@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:get/get.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -95,9 +94,6 @@ class VideoTask {
   Future<void> process() async {
     LogService.info('Start processing $name');
     status.value = VideoTaskStatus.processing;
-    if (kDebugMode) {
-      print('ffmpegArgs: $ffmpegArgs');
-    }
     _process = await Process.start(
       FFmpegUtils.ffmpeg,
       ffmpegArgs,
@@ -142,9 +138,6 @@ class VideoTask {
   void _processStdoutData(String data) {
     _resetWatchDog();
     _appendToFile(data);
-    if (kDebugMode) {
-      print(data);
-    }
     final time = _extractTimeInSeconds(data);
     if (time > 0) {
       progress.value = time / duration.inSeconds;
@@ -229,7 +222,7 @@ class TaskProvider extends StateNotifier<Tasks> {
   Future<void> addTask(VideoTask task) async {
     state = state.copyWith(
         waitingTasks: [...state.waitingTasks, task],
-        tasks: [...state.totalTasks, task]);
+        totalTasks: [...state.totalTasks, task]);
     await _process();
   }
 

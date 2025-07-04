@@ -30,7 +30,8 @@ mixin _$Tasks {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Tasks &&
-            const DeepCollectionEquality().equals(other.totalTasks, totalTasks) &&
+            const DeepCollectionEquality()
+                .equals(other.totalTasks, totalTasks) &&
             const DeepCollectionEquality()
                 .equals(other.waitingTasks, waitingTasks));
   }
@@ -42,8 +43,8 @@ mixin _$Tasks {
       const DeepCollectionEquality().hash(waitingTasks));
 
   @override
-  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Tasks(tasks: $totalTasks, waitingTasks: $waitingTasks)';
+  String toString() {
+    return 'Tasks(totalTasks: $totalTasks, waitingTasks: $waitingTasks)';
   }
 }
 
@@ -52,7 +53,7 @@ abstract mixin class $TasksCopyWith<$Res> {
   factory $TasksCopyWith(Tasks value, $Res Function(Tasks) _then) =
       _$TasksCopyWithImpl;
   @useResult
-  $Res call({List<VideoTask> tasks, List<VideoTask> waitingTasks});
+  $Res call({List<VideoTask> totalTasks, List<VideoTask> waitingTasks});
 }
 
 /// @nodoc
@@ -67,13 +68,13 @@ class _$TasksCopyWithImpl<$Res> implements $TasksCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? tasks = null,
+    Object? totalTasks = null,
     Object? waitingTasks = null,
   }) {
     return _then(Tasks(
-      totalTasks: null == tasks
+      totalTasks: null == totalTasks
           ? _self.totalTasks
-          : tasks // ignore: cast_nullable_to_non_nullable
+          : totalTasks // ignore: cast_nullable_to_non_nullable
               as List<VideoTask>,
       waitingTasks: null == waitingTasks
           ? _self.waitingTasks

@@ -97,6 +97,9 @@ class MediaResources with _$MediaResources {
   @override
   final double loadProgress;
 
+  @override
+  var resourcesPath = "";
+
   factory MediaResources.initial() {
     return MediaResources(
       isLoading: false,
@@ -126,4 +129,9 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
   void setLoadProgress(double loadProgress) {
     state = state.copyWith(loadProgress: loadProgress);
   }
+
+  void removeResource(int index) {
+    state = state.copyWith(resources: state.resources..removeAt(index));
+  }
+
 }
