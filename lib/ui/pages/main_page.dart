@@ -56,12 +56,10 @@ class MainPage extends StatelessWidget {
   void _increaseCurrentMediaIndex() {
     final currentIndex =
         ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resources =
-        ref.watch(mediaResourcesProvider.select((state) => state.resources));
-    if (currentIndex < resources.length - 1) {
-      ref
-          .read(mediaResourcesProvider.notifier)
-          .setCurrentIndex(currentIndex + 1);
+    final resourcesLength = ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.length));
+    if (currentIndex < resourcesLength - 1) {
+      ref.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex + 1, true);
     }
   }
@@ -70,9 +68,7 @@ class MainPage extends StatelessWidget {
     final currentIndex =
         ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
     if (currentIndex > 0) {
-      ref
-          .read(mediaResourcesProvider.notifier)
-          .setCurrentIndex(currentIndex - 1);
+      ref.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex - 1, false);
     }
   }
@@ -83,14 +79,7 @@ class MainPage extends StatelessWidget {
     final resource = ref.watch(mediaResourcesProvider
         .select((state) => state.resources[currentIndex]));
     if (resource.isAeb) {
-      final aebResource = resource as AebPhotoResource;
-      final currentAebIndex = ref.watch(
-          mediaResourcesProvider.select((state) => state.currentAebIndex));
-      if (currentAebIndex < aebResource.aebResources.length - 1) {
-        ref
-            .read(mediaResourcesProvider.notifier)
-            .setCurrentAebIndex(currentAebIndex + 1);
-      }
+      ref.read(mediaResourcesProvider.notifier).increaseCurrentAebIndex();
     }
   }
 
@@ -103,9 +92,7 @@ class MainPage extends StatelessWidget {
       final currentAebIndex = ref.watch(
           mediaResourcesProvider.select((state) => state.currentAebIndex));
       if (currentAebIndex > 0) {
-        ref
-            .read(mediaResourcesProvider.notifier)
-            .setCurrentAebIndex(currentAebIndex - 1);
+        ref.read(mediaResourcesProvider.notifier).decreaseCurrentAebIndex();
       }
     }
   }

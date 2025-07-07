@@ -147,8 +147,40 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
     state = state.copyWith(currentIndex: currentIndex, currentAebIndex: 0);
   }
 
+  void increaseCurrentIndex() {
+    if (state.currentIndex < state.resources.length - 1) {
+      state = state.copyWith(
+          currentIndex: state.currentIndex + 1, currentAebIndex: 0);
+    }
+  }
+
+  void decreaseCurrentIndex() {
+    if (state.currentIndex > 0) {
+      state = state.copyWith(
+          currentIndex: state.currentIndex - 1, currentAebIndex: 0);
+    }
+  }
+
   void setCurrentAebIndex(int currentAebIndex) {
     state = state.copyWith(currentAebIndex: currentAebIndex);
+  }
+
+  void increaseCurrentAebIndex() {
+    if (state.resources[state.currentIndex] is AebPhotoResource) {
+      if (state.currentAebIndex <
+          (state.resources[state.currentIndex] as AebPhotoResource)
+                  .aebResources
+                  .length -
+              1) {
+        state = state.copyWith(currentAebIndex: state.currentAebIndex + 1);
+      }
+    }
+  }
+
+  void decreaseCurrentAebIndex() {
+    if (state.currentAebIndex > 0) {
+      state = state.copyWith(currentAebIndex: state.currentAebIndex - 1);
+    }
   }
 
   void setLoadProgress(double loadProgress) {

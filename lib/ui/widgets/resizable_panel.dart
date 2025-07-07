@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/resizable_panel_state.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/main_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 
@@ -214,7 +215,7 @@ class ResizablePanel extends HookConsumerWidget {
                     right: 0,
                     height: height - DesignValues.smallPadding * 2,
                     child: _RoundedPanel(
-                      child: const Center(child: Text('Main Panel')),
+                      child: MainPanel(),
                     ),
                   ),
                 ],
