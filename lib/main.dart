@@ -8,7 +8,9 @@ import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
+import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
+import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:fvp/fvp.dart' as fvp;
 
@@ -75,53 +77,16 @@ class MyApp extends ConsumerWidget {
         child: Column(
           children: [
             const MainPageAppBar(),
-            // Expanded(
-            //   child: isFFmpegAvailable
-            //       ? Obx(() => loadingMediaResourcesController
-            //               .isLoadingMediaResources.value
-            //           ? const LoadingMediaResourcesPage()
-            //           : const MainPage())
-            //       : const FFmpegNotAvailablePage(),
-            // )
             Expanded(
-                child: isLoading
-                    ? const LoadingMediaResourcesPage()
-                    : const FFmpegNotAvailablePage())
+              child: ResizablePanel(),)
+                // child: isFFmpegAvailable
+                //     ? isLoading
+                //         ? const LoadingMediaResourcesPage()
+                //         : const MainPage()
+                //     : const FFmpegNotAvailablePage())
           ],
         ),
       ),
     );
   }
 }
-
-// class MyApp extends StatelessWidget {
-//   final bool isFFmpegAvailable;
-//
-//   const MyApp({super.key, required this.isFFmpegAvailable});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     // final LoadingMediaResourcesController loadingMediaResourcesController =
-//     //     Get.find<LoadingMediaResourcesController>();
-//     return ToastificationWrapper(
-//       child: GetMaterialApp(
-//         debugShowCheckedModeBanner: false,
-//         home: Scaffold(
-//             endDrawer: const TaskDrawer(),
-//             body: Center(
-//               child: Column(children: [
-//                 const MainPageAppBar(),
-//                 Expanded(
-//                   child: isFFmpegAvailable
-//                       ? Obx(() => loadingMediaResourcesController
-//                               .isLoadingMediaResources.value
-//                           ? const LoadingMediaResourcesPage()
-//                           : const MainPage())
-//                       : const FFmpegNotAvailablePage(),
-//                 )
-//               ]),
-//             )),
-//       ),
-//     );
-//   }
-// }

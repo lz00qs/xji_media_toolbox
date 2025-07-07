@@ -19,6 +19,7 @@ mixin _$MediaResources {
   List<MediaResource> get resources;
   int get currentIndex;
   double get loadProgress;
+  bool get isMultipleSelection;
   dynamic get resourcesPath;
   set resourcesPath(dynamic value);
 
@@ -42,6 +43,8 @@ mixin _$MediaResources {
                 other.currentIndex == currentIndex) &&
             (identical(other.loadProgress, loadProgress) ||
                 other.loadProgress == loadProgress) &&
+            (identical(other.isMultipleSelection, isMultipleSelection) ||
+                other.isMultipleSelection == isMultipleSelection) &&
             const DeepCollectionEquality()
                 .equals(other.resourcesPath, resourcesPath));
   }
@@ -53,11 +56,12 @@ mixin _$MediaResources {
       const DeepCollectionEquality().hash(resources),
       currentIndex,
       loadProgress,
+      isMultipleSelection,
       const DeepCollectionEquality().hash(resourcesPath));
 
   @override
   String toString() {
-    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, resourcesPath: $resourcesPath)';
+    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, resourcesPath: $resourcesPath)';
   }
 }
 
@@ -71,7 +75,8 @@ abstract mixin class $MediaResourcesCopyWith<$Res> {
       {bool isLoading,
       List<MediaResource> resources,
       int currentIndex,
-      double loadProgress});
+      double loadProgress,
+      bool isMultipleSelection});
 }
 
 /// @nodoc
@@ -91,6 +96,7 @@ class _$MediaResourcesCopyWithImpl<$Res>
     Object? resources = null,
     Object? currentIndex = null,
     Object? loadProgress = null,
+    Object? isMultipleSelection = null,
   }) {
     return _then(MediaResources(
       isLoading: null == isLoading
@@ -109,6 +115,10 @@ class _$MediaResourcesCopyWithImpl<$Res>
           ? _self.loadProgress
           : loadProgress // ignore: cast_nullable_to_non_nullable
               as double,
+      isMultipleSelection: null == isMultipleSelection
+          ? _self.isMultipleSelection
+          : isMultipleSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

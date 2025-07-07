@@ -87,7 +87,9 @@ class MediaResources with _$MediaResources {
     required this.resources,
     required this.currentIndex,
     required this.loadProgress,
+    required this.isMultipleSelection,
   });
+
   @override
   final bool isLoading;
   @override
@@ -96,6 +98,8 @@ class MediaResources with _$MediaResources {
   final int currentIndex;
   @override
   final double loadProgress;
+  @override
+  final bool isMultipleSelection;
 
   @override
   var resourcesPath = "";
@@ -106,6 +110,7 @@ class MediaResources with _$MediaResources {
       resources: [],
       currentIndex: 0,
       loadProgress: 0,
+      isMultipleSelection: false,
     );
   }
 }
@@ -116,12 +121,15 @@ final mediaResourcesProvider =
 
 class MediaResourceProvider extends StateNotifier<MediaResources> {
   MediaResourceProvider() : super(MediaResources.initial());
+
   void setLoading(bool isLoading) {
     state = state.copyWith(isLoading: isLoading);
   }
+
   void setResources(List<MediaResource> resources) {
     state = state.copyWith(resources: resources);
   }
+
   void setCurrentIndex(int currentIndex) {
     state = state.copyWith(currentIndex: currentIndex);
   }
@@ -134,4 +142,7 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
     state = state.copyWith(resources: state.resources..removeAt(index));
   }
 
+  void setIsMultipleSelection(bool isMultipleSelection) {
+    state = state.copyWith(isMultipleSelection: isMultipleSelection);
+  }
 }
