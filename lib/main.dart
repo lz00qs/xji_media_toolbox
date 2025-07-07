@@ -10,12 +10,13 @@ import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
-import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:fvp/fvp.dart' as fvp;
 
 import 'models/media_resource.dart';
 import 'ui/widgets/task_drawer.dart';
+
+final riverpodContainer = ProviderContainer();
 
 Future<void> main() async {
   // 确保 WidgetsFlutterBinding 已经初始化
@@ -49,12 +50,10 @@ Future<void> main() async {
 
   await ObjectBox.create();
 
-  final container = ProviderContainer();
-
-  await container.read(settingsProvider.notifier).loadSettings();
+  await riverpodContainer.read(settingsProvider.notifier).loadSettings();
 
   runApp(UncontrolledProviderScope(
-      container: container,
+      container: riverpodContainer,
       child: ToastificationWrapper(
           child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -78,12 +77,12 @@ class MyApp extends ConsumerWidget {
           children: [
             const MainPageAppBar(),
             Expanded(
-              child: ResizablePanel(),)
-                // child: isFFmpegAvailable
-                //     ? isLoading
-                //         ? const LoadingMediaResourcesPage()
-                //         : const MainPage()
-                //     : const FFmpegNotAvailablePage())
+              // child: ResizablePanel(),)
+                child: isFFmpegAvailable
+                    ? isLoading
+                        ? const LoadingMediaResourcesPage()
+                        : MainPage(ref: ref)
+                    : const FFmpegNotAvailablePage())
           ],
         ),
       ),

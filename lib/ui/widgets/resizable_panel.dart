@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/resizable_panel_state.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 
 import '../design_tokens.dart';
 
@@ -142,9 +144,9 @@ class ResizablePanel extends HookConsumerWidget {
                       children: [
                         SizedBox(
                           height: panelState.topLeftHeight,
-                          child: _RoundedPanel(
-                              child:
-                                  const Center(child: Text('Top Left Panel'))),
+                          child: _RoundedPanel(child: MediaResourcesListPanel()
+                              // const Center(child: Text('Top Left Panel'))
+                              ),
                         ),
                         MouseRegion(
                           cursor: SystemMouseCursors.resizeRow,
@@ -168,10 +170,9 @@ class ResizablePanel extends HookConsumerWidget {
                           ),
                         ),
                         Expanded(
-                          child: _RoundedPanel(
-                            child:
-                                const Center(child: Text('Bottom Left Panel')),
-                          ),
+                          child: _RoundedPanel(child: MediaResourceInfoPanel()
+                              // const Center(child: Text('Bottom Left Panel')),
+                              ),
                         ),
                       ],
                     ),

@@ -88,6 +88,8 @@ class MediaResources with _$MediaResources {
     required this.currentIndex,
     required this.loadProgress,
     required this.isMultipleSelection,
+    required this.selectedResources,
+    required this.currentAebIndex,
   });
 
   @override
@@ -102,6 +104,12 @@ class MediaResources with _$MediaResources {
   final bool isMultipleSelection;
 
   @override
+  final int currentAebIndex;
+
+  @override
+  final List<MediaResource> selectedResources;
+
+  @override
   var resourcesPath = "";
 
   factory MediaResources.initial() {
@@ -111,6 +119,8 @@ class MediaResources with _$MediaResources {
       currentIndex: 0,
       loadProgress: 0,
       isMultipleSelection: false,
+      selectedResources: [],
+      currentAebIndex: 0,
     );
   }
 }
@@ -131,7 +141,14 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
   }
 
   void setCurrentIndex(int currentIndex) {
-    state = state.copyWith(currentIndex: currentIndex);
+    if (state.currentIndex == currentIndex) {
+      return;
+    }
+    state = state.copyWith(currentIndex: currentIndex, currentAebIndex: 0);
+  }
+
+  void setCurrentAebIndex(int currentAebIndex) {
+    state = state.copyWith(currentAebIndex: currentAebIndex);
   }
 
   void setLoadProgress(double loadProgress) {
@@ -144,5 +161,23 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
 
   void setIsMultipleSelection(bool isMultipleSelection) {
     state = state.copyWith(isMultipleSelection: isMultipleSelection);
+  }
+
+  void toggleIsMultipleSelection() {
+    state = state.copyWith(isMultipleSelection: !state.isMultipleSelection);
+  }
+
+  void addSelectedResource(MediaResource resource) {
+    state = state.copyWith(
+        selectedResources: state.selectedResources..add(resource));
+  }
+
+  void removeSelectedResource(MediaResource resource) {
+    state = state.copyWith(
+        selectedResources: state.selectedResources..remove(resource));
+  }
+
+  void clearSelectedResources() {
+    state = state.copyWith(selectedResources: []);
   }
 }
