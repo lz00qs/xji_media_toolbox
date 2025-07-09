@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/resizable_panel_state.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/main_panel.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 
 import '../design_tokens.dart';
 
@@ -114,7 +111,15 @@ class _RoundedPanel extends StatelessWidget {
 }
 
 class ResizablePanel extends HookConsumerWidget {
-  const ResizablePanel({super.key});
+  final Widget mediaResourceInfoPanel;
+  final Widget mediaResourcesListPanel;
+  final Widget mainPanel;
+
+  const ResizablePanel(
+      {super.key,
+      required this.mediaResourcesListPanel,
+      required this.mediaResourceInfoPanel,
+      required this.mainPanel});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -145,9 +150,7 @@ class ResizablePanel extends HookConsumerWidget {
                       children: [
                         SizedBox(
                           height: panelState.topLeftHeight,
-                          child: _RoundedPanel(child: MediaResourcesListPanel()
-                              // const Center(child: Text('Top Left Panel'))
-                              ),
+                          child: _RoundedPanel(child: mediaResourcesListPanel),
                         ),
                         MouseRegion(
                           cursor: SystemMouseCursors.resizeRow,
@@ -171,9 +174,7 @@ class ResizablePanel extends HookConsumerWidget {
                           ),
                         ),
                         Expanded(
-                          child: _RoundedPanel(child: MediaResourceInfoPanel()
-                              // const Center(child: Text('Bottom Left Panel')),
-                              ),
+                          child: _RoundedPanel(child: mediaResourceInfoPanel),
                         ),
                       ],
                     ),
@@ -215,7 +216,7 @@ class ResizablePanel extends HookConsumerWidget {
                     right: 0,
                     height: height - DesignValues.smallPadding * 2,
                     child: _RoundedPanel(
-                      child: MainPanel(),
+                      child: mainPanel,
                     ),
                   ),
                 ],

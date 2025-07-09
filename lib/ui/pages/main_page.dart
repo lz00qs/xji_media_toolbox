@@ -4,9 +4,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
 import '../widgets/buttons/main_panel_button.dart';
 import '../../utils/media_resources_utils.dart';
+import '../widgets/views/main_panel.dart';
 
 final _mediaResourcesListPanelFocusNode = FocusNode();
 final _dialogFocusNode = FocusNode();
@@ -44,55 +46,58 @@ class _MainPageNotEmpty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ResizablePanel();
+    return ResizablePanel(
+        mediaResourcesListPanel: MediaResourcesListPanel(),
+        mediaResourceInfoPanel: MediaResourceInfoPanel(),
+        mainPanel: MainPanel());
   }
 }
 
 class MainPage extends StatelessWidget {
-  final WidgetRef ref;
+  final WidgetRef mainRef;
 
-  const MainPage({super.key, required this.ref});
+  const MainPage({super.key, required this.mainRef});
 
   void _increaseCurrentMediaIndex() {
-    final currentIndex =
-        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resourcesLength = ref.watch(
+    final currentIndex = mainRef
+        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final resourcesLength = mainRef.watch(
         mediaResourcesProvider.select((state) => state.resources.length));
     if (currentIndex < resourcesLength - 1) {
-      ref.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
+      mainRef.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex + 1, true);
     }
   }
 
   void _decreaseCurrentMediaIndex() {
-    final currentIndex =
-        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final currentIndex = mainRef
+        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
     if (currentIndex > 0) {
-      ref.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
+      mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex - 1, false);
     }
   }
 
   void _increaseCurrentAebIndex() {
-    final currentIndex =
-        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resource = ref.watch(mediaResourcesProvider
+    final currentIndex = mainRef
+        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final resource = mainRef.watch(mediaResourcesProvider
         .select((state) => state.resources[currentIndex]));
     if (resource.isAeb) {
-      ref.read(mediaResourcesProvider.notifier).increaseCurrentAebIndex();
+      mainRef.read(mediaResourcesProvider.notifier).increaseCurrentAebIndex();
     }
   }
 
   void _decreaseCurrentAebIndex() {
-    final currentIndex =
-        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resource = ref.watch(mediaResourcesProvider
+    final currentIndex = mainRef
+        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final resource = mainRef.watch(mediaResourcesProvider
         .select((state) => state.resources[currentIndex]));
     if (resource.isAeb) {
-      final currentAebIndex = ref.watch(
+      final currentAebIndex = mainRef.watch(
           mediaResourcesProvider.select((state) => state.currentAebIndex));
       if (currentAebIndex > 0) {
-        ref.read(mediaResourcesProvider.notifier).decreaseCurrentAebIndex();
+        mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentAebIndex();
       }
     }
   }
@@ -103,35 +108,35 @@ class MainPage extends StatelessWidget {
         canRequestFocus: true,
         autofocus: true,
         child: KeyboardListener(
-          focusNode: _mediaResourcesListPanelFocusNode,
-          autofocus: true,
-          onKeyEvent: (event) {
-            if (event is KeyDownEvent || event is KeyRepeatEvent) {
-              switch (event.logicalKey) {
-                case LogicalKeyboardKey.arrowUp:
-                  _decreaseCurrentMediaIndex();
-                  break;
-                case LogicalKeyboardKey.arrowDown:
-                  _increaseCurrentMediaIndex();
-                  break;
-                case LogicalKeyboardKey.arrowLeft:
-                  _decreaseCurrentAebIndex();
-                  break;
-                case LogicalKeyboardKey.arrowRight:
-                  _increaseCurrentAebIndex();
-                  break;
+            focusNode: _mediaResourcesListPanelFocusNode,
+            autofocus: true,
+            onKeyEvent: (event) {
+              if (event is KeyDownEvent || event is KeyRepeatEvent) {
+                switch (event.logicalKey) {
+                  case LogicalKeyboardKey.arrowUp:
+                    _decreaseCurrentMediaIndex();
+                    break;
+                  case LogicalKeyboardKey.arrowDown:
+                    _increaseCurrentMediaIndex();
+                    break;
+                  case LogicalKeyboardKey.arrowLeft:
+                    _decreaseCurrentAebIndex();
+                    break;
+                  case LogicalKeyboardKey.arrowRight:
+                    _increaseCurrentAebIndex();
+                    break;
+                }
               }
-            }
-          },
-          child: Builder(builder: (BuildContext context) {
-            final resources = ref.watch(
-                mediaResourcesProvider.select((state) => state.resources));
-            if (resources.isEmpty) {
-              return _MainPageEmpty(ref: ref);
-            } else {
-              return _MainPageNotEmpty();
-            }
-          }),
-        ));
+            },
+            child: Consumer(
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              final resourcesIsEmpty = ref.watch(mediaResourcesProvider
+                  .select((state) => state.resources.isEmpty));
+              if (resourcesIsEmpty) {
+                return _MainPageEmpty(ref: mainRef);
+              } else {
+                return const _MainPageNotEmpty();
+              }
+            })));
   }
 }

@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 
 import '../../design_tokens.dart';
 
-class PhotoViewer extends StatelessWidget {
+class PhotoViewerPanel extends StatelessWidget {
   final File photoFile;
 
-  const PhotoViewer({super.key, required this.photoFile});
+  const PhotoViewerPanel({super.key, required this.photoFile});
 
   @override
   Widget build(BuildContext context) {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer_panel.dart';
 
 import '../../../models/media_resource.dart';
 import '../buttons/custom_icon_button.dart';
@@ -9,11 +9,6 @@ import 'main_panel.dart';
 import 'media_resources_list_panel.dart';
 
 final _aebListScrollController = ScrollController();
-
-// class AebPhotoViewController extends GetxController {
-//   final currentAebIndex = 0.obs;
-//   final aebListScrollController = ScrollController();
-// }
 
 class _AebPhotoThumbnail extends ConsumerWidget {
   final AebPhotoResource photoResource;
@@ -104,10 +99,10 @@ class _AebPhotoThumbnailList extends StatelessWidget {
   }
 }
 
-class AebPhotoView extends StatelessWidget {
+class AebPhotoViewPanel extends StatelessWidget {
   final AebPhotoResource photoResource;
 
-  const AebPhotoView({super.key, required this.photoResource});
+  const AebPhotoViewPanel({super.key, required this.photoResource});
 
   @override
   Widget build(BuildContext context) {
@@ -121,18 +116,13 @@ class AebPhotoView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Expanded(child: Consumer(builder:
-                          (BuildContext context, WidgetRef ref, Widget? child) {
+                      (BuildContext context, WidgetRef ref, Widget? child) {
                     final currentAebIndex = ref.watch(mediaResourcesProvider
                         .select((state) => state.currentAebIndex));
-                    return PhotoViewer(
+                    return PhotoViewerPanel(
                         photoFile:
                             photoResource.aebResources[currentAebIndex].file);
-                  })
-                      // Obx(() => PhotoViewer(
-                      //     photoFile: photoResource
-                      //         .aebResources[controller.currentAebIndex.value]
-                      //         .file)),
-                      ),
+                  })),
                   Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

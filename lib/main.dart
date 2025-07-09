@@ -81,7 +81,7 @@ class MyApp extends ConsumerWidget {
                 child: isFFmpegAvailable
                     ? isLoading
                         ? const LoadingMediaResourcesPage()
-                        : MainPage(ref: ref)
+                        : MainPage(mainRef: ref)
                     : const FFmpegNotAvailablePage())
           ],
         ),

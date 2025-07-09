@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/chewie_video_player.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/photo_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/video_panel.dart';
 import '../buttons/custom_icon_button.dart';
-import 'normal_photo_view.dart';
+import '../dialogs/media_resource_delete_dialog.dart';
+import '../dialogs/media_resource_rename_dialog.dart';
 
 class MainPanelSideBarControlButtons extends ConsumerWidget {
   const MainPanelSideBarControlButtons({super.key});
@@ -19,7 +20,9 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
         CustomIconButton(
           iconData: Icons.delete,
           onPressed: () async {
-            // await Get.dialog(const MediaResourceDeleteDialog());
+            await showDialog(
+                context: context,
+                builder: (BuildContext context) => MediaResourceDeleteDialog());
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,
@@ -34,6 +37,33 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
           iconData: Icons.drive_file_rename_outline_rounded,
           onPressed: () async {
             // await Get.dialog(const MediaResourceRenameDialog());
+            final mediaResourcesLength = ref.watch(mediaResourcesProvider
+                .select((value) => value.resources.length));
+            if (mediaResourcesLength == 0) {
+              return;
+            }
+            final mediaResources = ref.watch(
+                mediaResourcesProvider.select((value) => value.resources));
+            final currentIndex = ref.watch(
+                mediaResourcesProvider.select((value) => value.currentIndex));
+            final mediaResource = mediaResources[currentIndex];
+            // await showDialog(context: context, builder: (BuildContext context){
+            //   return MediaResourceRenameDialog(mediaResource: mediaResource);
+            // });
+            if (mediaResource.isAeb) {
+              await showDialog(
+                  context: context,
+                  builder: (BuildContext context) => MediaResourceRenameDialog(
+                      mediaResource:
+                          (mediaResource as AebPhotoResource).aebResources[
+                              ref.watch(mediaResourcesProvider
+                                  .select((value) => value.currentAebIndex))]));
+            } else {
+              await showDialog(
+                  context: context,
+                  builder: (BuildContext context) =>
+                      MediaResourceRenameDialog(mediaResource: mediaResource));
+            }
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,
@@ -47,14 +77,6 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
         CustomIconButton(
           iconData: Icons.arrow_upward,
           onPressed: () {
-            // if (globalMediaResourcesController.currentMediaIndex.value > 0) {
-            //   final MediaResourcesListPanelController
-            //       mediaResourcesListPanelController = Get.find();
-            //   globalMediaResourcesController.currentMediaIndex.value--;
-            //   mediaResourcesListPanelController.scrollToIndex(
-            //       globalMediaResourcesController.currentMediaIndex.value,
-            //       false);
-            // }
             ref.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
           },
           iconSize: DesignValues.mediumIconSize,
@@ -69,14 +91,6 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
         CustomIconButton(
           iconData: Icons.arrow_downward,
           onPressed: () {
-            // if (globalMediaResourcesController.currentMediaIndex.value <
-            //     globalMediaResourcesController.mediaResources.length - 1) {
-            //   final MediaResourcesListPanelController
-            //       mediaResourcesListPanelController = Get.find();
-            //   globalMediaResourcesController.currentMediaIndex.value++;
-            //   mediaResourcesListPanelController.scrollToIndex(
-            //       globalMediaResourcesController.currentMediaIndex.value, true);
-            // }
             ref.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
           },
           iconSize: DesignValues.mediumIconSize,
@@ -122,14 +136,20 @@ class MainPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaResource = ref.watch(mediaResourcesProvider
-        .select((state) => state.resources[state.currentIndex]));
+    final mediaResources =
+        ref.watch(mediaResourcesProvider.select((state) => state.resources));
+    final currentIndex =
+        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final mediaResourcesLength = ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.length));
+    if (mediaResourcesLength == 0) {
+      return Container();
+    }
+    final mediaResource = mediaResources[currentIndex];
     if (mediaResource.isVideo) {
-      return ChewieVideoPlayer(videoFile: mediaResource.file);
-    } else if (mediaResource.isAeb) {
-      return AebPhotoView(photoResource: mediaResource as AebPhotoResource);
+      return VideoPanel(videoFile: mediaResource.file);
     } else {
-      return NormalPhotoView(photoFile: mediaResource.file);
+      return PhotoPanel(photoResource: mediaResource);
     }
   }
 }

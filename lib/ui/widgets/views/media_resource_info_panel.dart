@@ -138,8 +138,16 @@ class MediaResourceInfoPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mediaResource = ref.watch(mediaResourcesProvider
-        .select((state) => state.resources[state.currentIndex]));
+    final mediaResources =
+        ref.watch(mediaResourcesProvider.select((state) => state.resources));
+    final currentIndex =
+        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final mediaResourcesLength = ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.length));
+    if (mediaResourcesLength == 0) {
+      return Container();
+    }
+    final mediaResource = mediaResources[currentIndex];
     return Padding(
       padding: EdgeInsets.all(DesignValues.smallPadding),
       child: Column(

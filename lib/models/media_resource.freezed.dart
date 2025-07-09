@@ -23,6 +23,7 @@ mixin _$MediaResources {
   List<MediaResource> get selectedResources;
   dynamic get resourcesPath;
   set resourcesPath(dynamic value);
+  bool get isEditing;
 
   /// Create a copy of MediaResources
   /// with the given fields replaced by the non-null parameter values.
@@ -51,7 +52,9 @@ mixin _$MediaResources {
             const DeepCollectionEquality()
                 .equals(other.selectedResources, selectedResources) &&
             const DeepCollectionEquality()
-                .equals(other.resourcesPath, resourcesPath));
+                .equals(other.resourcesPath, resourcesPath) &&
+            (identical(other.isEditing, isEditing) ||
+                other.isEditing == isEditing));
   }
 
   @override
@@ -64,11 +67,12 @@ mixin _$MediaResources {
       isMultipleSelection,
       currentAebIndex,
       const DeepCollectionEquality().hash(selectedResources),
-      const DeepCollectionEquality().hash(resourcesPath));
+      const DeepCollectionEquality().hash(resourcesPath),
+      isEditing);
 
   @override
   String toString() {
-    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, currentAebIndex: $currentAebIndex, selectedResources: $selectedResources, resourcesPath: $resourcesPath)';
+    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, currentAebIndex: $currentAebIndex, selectedResources: $selectedResources, resourcesPath: $resourcesPath, isEditing: $isEditing)';
   }
 }
 
@@ -85,7 +89,8 @@ abstract mixin class $MediaResourcesCopyWith<$Res> {
       double loadProgress,
       bool isMultipleSelection,
       List<MediaResource> selectedResources,
-      int currentAebIndex});
+      int currentAebIndex,
+      bool isEditing});
 }
 
 /// @nodoc
@@ -108,6 +113,7 @@ class _$MediaResourcesCopyWithImpl<$Res>
     Object? isMultipleSelection = null,
     Object? selectedResources = null,
     Object? currentAebIndex = null,
+    Object? isEditing = null,
   }) {
     return _then(MediaResources(
       isLoading: null == isLoading
@@ -138,6 +144,10 @@ class _$MediaResourcesCopyWithImpl<$Res>
           ? _self.currentAebIndex
           : currentAebIndex // ignore: cast_nullable_to_non_nullable
               as int,
+      isEditing: null == isEditing
+          ? _self.isEditing
+          : isEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

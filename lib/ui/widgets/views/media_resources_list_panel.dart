@@ -18,8 +18,8 @@ void mediaResourcesListScrollToIndex(int index, bool isIncrement) {
         _panelHeight +
             _mediaResourcesListScrollController.position.pixels -
             _listWidgetHeight) {
-      _mediaResourcesListScrollController.jumpTo(
-          index * _listWidgetHeight - _panelHeight + _listWidgetHeight);
+      _mediaResourcesListScrollController
+          .jumpTo(index * _listWidgetHeight - _panelHeight + _listWidgetHeight);
     }
   } else {
     if (index * _listWidgetHeight <
@@ -368,11 +368,19 @@ class _MediaResourceListWidget extends ConsumerWidget {
   }
 }
 
-class MediaResourcesListPanel extends StatelessWidget {
+class MediaResourcesListPanel extends ConsumerWidget {
   const MediaResourcesListPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResources =
+        ref.watch(mediaResourcesProvider.select((value) => value.resources));
+    final currentIndex =
+        ref.watch(mediaResourcesProvider.select((value) => value.currentIndex));
+    final isMultipleSelection = ref.watch(
+        mediaResourcesProvider.select((value) => value.isMultipleSelection));
+    final mediaResourcesLength = ref.watch(
+        mediaResourcesProvider.select((value) => value.resources.length));
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -387,31 +395,23 @@ class MediaResourcesListPanel extends StatelessWidget {
               controller: _mediaResourcesListScrollController,
               child: Row(
                 children: [
-                  Expanded(child: Consumer(builder:
-                      (BuildContext context, WidgetRef ref, Widget? child) {
-                    final mediaResources = ref.watch(mediaResourcesProvider
-                        .select((value) => value.resources));
-                    final currentIndex = ref.watch(mediaResourcesProvider
-                        .select((value) => value.currentIndex));
-                    final isMultipleSelection = ref.watch(mediaResourcesProvider
-                        .select((value) => value.isMultipleSelection));
-                    return ListView.builder(
-                        scrollDirection: Axis.vertical,
-                        controller: _mediaResourcesListScrollController,
-                        itemCount: mediaResources.length,
-                        itemBuilder: (context, index) {
-                          final mediaResource = mediaResources[index];
-                          return _MediaResourceListWidget(
-                              index: index,
-                              mediaResource: mediaResource,
-                              isSelected: isMultipleSelection
-                                  ? ref.watch(mediaResourcesProvider.select(
-                                      (state) => state.selectedResources
-                                          .contains(mediaResource)))
-                                  : currentIndex == index,
-                              isMultipleSelection: isMultipleSelection);
-                        });
-                  })),
+                  Expanded(
+                      child: ListView.builder(
+                          scrollDirection: Axis.vertical,
+                          controller: _mediaResourcesListScrollController,
+                          itemCount: mediaResourcesLength,
+                          itemBuilder: (context, index) {
+                            final mediaResource = mediaResources[index];
+                            return _MediaResourceListWidget(
+                                index: index,
+                                mediaResource: mediaResource,
+                                isSelected: isMultipleSelection
+                                    ? ref.watch(mediaResourcesProvider.select(
+                                        (state) => state.selectedResources
+                                            .contains(mediaResource)))
+                                    : currentIndex == index,
+                                isMultipleSelection: isMultipleSelection);
+                          }))
                 ],
               ));
         }))
