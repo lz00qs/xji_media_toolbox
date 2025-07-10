@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
@@ -49,10 +49,10 @@ class _VideoThumbnail extends StatelessWidget {
 class VideoMergerPanel extends ConsumerWidget {
   const VideoMergerPanel({super.key});
 
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedResources = ref.watch(mediaResourcesProvider.select((state) => state.selectedResources.map((e) => e as NormalVideoResource).toList()));
+    final selectedResources = ref.watch(mediaResourcesProvider.select((state) =>
+        state.selectedResources.map((e) => e as NormalVideoResource).toList()));
     final scrollController = ScrollController();
     return Row(
       children: [
@@ -92,9 +92,10 @@ class VideoMergerPanel extends ConsumerWidget {
                             },
                             itemCount: selectedResources.length,
                             onReorder: (int oldIndex, int newIndex) {
-                              ref.read(mediaResourcesProvider.notifier)
-                                 .reorderSelectedResources(
-                                     oldIndex: oldIndex, newIndex: newIndex);
+                              ref
+                                  .read(mediaResourcesProvider.notifier)
+                                  .reorderSelectedResources(
+                                      oldIndex: oldIndex, newIndex: newIndex);
                             }))),
               ),
             ),
@@ -121,6 +122,9 @@ class VideoMergerPanel extends ConsumerWidget {
                   // await Get.dialog(VideoExportDialog(
                   //   videoResources: rxVideoResources,
                   // ));
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) => VideoExportDialog());
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,

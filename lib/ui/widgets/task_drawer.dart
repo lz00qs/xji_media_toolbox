@@ -3,10 +3,25 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-class TaskItem extends StatelessWidget {
-  final VideoTask videoProcess;
+String _getTimeString(int seconds) {
+  int minutes = seconds ~/ 60;
+  int hours = minutes ~/ 60;
+  minutes = minutes % 60;
+  seconds = seconds % 60;
+  return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
 
-  const TaskItem({super.key, required this.videoProcess});
+String _getFirstCapital(String str) {
+  if (str.isEmpty) {
+    return str;
+  }
+  return str[0].toUpperCase() + str.substring(1);
+}
+
+class TaskItem extends StatelessWidget {
+  final VideoTask videoTask;
+
+  const TaskItem({super.key, required this.videoTask});
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +49,14 @@ class TaskItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        VideoTaskType.values[videoProcess.type.index].name,
+                        "${_getFirstCapital(VideoTaskType.values[videoTask.type.index].name)}${videoTask.status == VideoTaskStatus.processing ? '     ETA: ${_getTimeString(videoTask.eta.inSeconds)}' : ''}",
                         style: SemiTextStyles.header4ENRegular.copyWith(
                             color: ColorDark.text0,
                             overflow: TextOverflow.ellipsis),
                       ),
                       const Spacer(),
                       Text(
-                        videoProcess.name,
+                        videoTask.name,
                         style: SemiTextStyles.regularENSemiBold.copyWith(
                             color: ColorDark.text1,
                             overflow: TextOverflow.ellipsis),
@@ -54,44 +69,20 @@ class TaskItem extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Obx(() {
-                        //   switch (videoProcess.status.value) {
-                        //     case VideoTaskStatus.processing:
-                        //       return SizedBox(
-                        //         width: 24,
-                        //         height: 24,
-                        //         child: IconButton(
-                        //             onPressed: () {
-                        //               videoProcess.cancel();
-                        //             },
-                        //             padding: EdgeInsets.zero,
-                        //             icon: const Icon(Icons.cancel_outlined,
-                        //                 color: ColorDark.warning)),
-                        //       );
-                        //     case VideoTaskStatus.finished:
-                        //       return const Icon(Icons.check,
-                        //           color: ColorDark.success);
-                        //     case VideoTaskStatus.canceled:
-                        //       return const Icon(Icons.cancel_outlined,
-                        //           color: ColorDark.warning);
-                        //     case VideoTaskStatus.failed:
-                        //       return const Icon(Icons.error,
-                        //           color: ColorDark.danger);
-                        //     case VideoTaskStatus.waiting:
-                        //       return const Icon(Icons.timer,
-                        //           color: ColorDark.text1);
-                        //   }
-                        // }),
-                        Builder(builder: (BuildContext context){
-                          switch (videoProcess.status.value) {
+                        Builder(builder: (BuildContext context) {
+                          switch (videoTask.status) {
                             case VideoTaskStatus.processing:
-                              return IconButton(
-                                  onPressed: () {
-                                    videoProcess.cancel();
-                                  },
-                                  padding: EdgeInsets.zero,
-                                  icon: const Icon(Icons.cancel_outlined,
-                                      color: ColorDark.warning));
+                              return SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: IconButton(
+                                    onPressed: () {
+                                      videoTask.cancel();
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    icon: const Icon(Icons.cancel_outlined,
+                                        color: ColorDark.warning)),
+                              );
                             case VideoTaskStatus.finished:
                               return const Icon(Icons.check,
                                   color: ColorDark.success);
@@ -106,74 +97,39 @@ class TaskItem extends StatelessWidget {
                                   color: ColorDark.text1);
                           }
                         }),
-                        // Obx(() {
-                        //   switch (videoProcess.status.value) {
-                        //     case VideoTaskStatus.processing:
-                        //       return Text(
-                        //           '${(videoProcess.progress.value * 100).toInt()}%',
-                        //           style: SemiTextStyles.regularENSemiBold
-                        //               .copyWith(
-                        //                   color: ColorDark.text1,
-                        //                   overflow: TextOverflow.ellipsis));
-                        //     case VideoTaskStatus.finished:
-                        //       return Text('finished',
-                        //           style: SemiTextStyles.regularENSemiBold
-                        //               .copyWith(
-                        //                   color: ColorDark.success,
-                        //                   overflow: TextOverflow.ellipsis));
-                        //     case VideoTaskStatus.canceled:
-                        //       return Text('canceled',
-                        //           style: SemiTextStyles.regularENSemiBold
-                        //               .copyWith(
-                        //                   color: ColorDark.warning,
-                        //                   overflow: TextOverflow.ellipsis));
-                        //     case VideoTaskStatus.failed:
-                        //       return Text('failed',
-                        //           style: SemiTextStyles.regularENSemiBold
-                        //               .copyWith(
-                        //                   color: ColorDark.danger,
-                        //                   overflow: TextOverflow.ellipsis));
-                        //     case VideoTaskStatus.waiting:
-                        //       return Text('waiting',
-                        //           style: SemiTextStyles.regularENSemiBold
-                        //               .copyWith(
-                        //                   color: ColorDark.text1,
-                        //                   overflow: TextOverflow.ellipsis));
-                        //   }
-                        // }),
-                        Builder(builder: (BuildContext context){
-                          switch (videoProcess.status.value) {
+                        Builder(builder: (BuildContext context) {
+                          switch (videoTask.status) {
                             case VideoTaskStatus.processing:
                               return Text(
-                                  '${(videoProcess.progress.value * 100).toInt()}%',
+                                  '${(videoTask.progress * 100).toInt()}%',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
-                                           color: ColorDark.text1,
-                                           overflow: TextOverflow.ellipsis));
+                                          color: ColorDark.text1,
+                                          overflow: TextOverflow.ellipsis));
                             case VideoTaskStatus.finished:
                               return Text('finished',
                                   style: SemiTextStyles.regularENSemiBold
-                                     .copyWith(
-                                           color: ColorDark.success,
-                                           overflow: TextOverflow.ellipsis));
+                                      .copyWith(
+                                          color: ColorDark.success,
+                                          overflow: TextOverflow.ellipsis));
                             case VideoTaskStatus.canceled:
                               return Text('canceled',
                                   style: SemiTextStyles.regularENSemiBold
-                                    .copyWith(
-                                           color: ColorDark.warning,
-                                           overflow: TextOverflow.ellipsis));
+                                      .copyWith(
+                                          color: ColorDark.warning,
+                                          overflow: TextOverflow.ellipsis));
                             case VideoTaskStatus.failed:
                               return Text('failed',
                                   style: SemiTextStyles.regularENSemiBold
-                                   .copyWith(
-                                           color: ColorDark.danger,
-                                           overflow: TextOverflow.ellipsis));
+                                      .copyWith(
+                                          color: ColorDark.danger,
+                                          overflow: TextOverflow.ellipsis));
                             case VideoTaskStatus.waiting:
                               return Text('waiting',
                                   style: SemiTextStyles.regularENSemiBold
-                                  .copyWith(
-                                           color: ColorDark.text1,
-                                           overflow: TextOverflow.ellipsis));
+                                      .copyWith(
+                                          color: ColorDark.text1,
+                                          overflow: TextOverflow.ellipsis));
                           }
                         }),
                       ],
@@ -194,7 +150,9 @@ class TaskDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasks = ref.watch(tasksProvider);
+    final taskManager = ref.watch(taskManagerProvider);
+    final tasksLength =
+        ref.watch(taskManagerProvider.select((state) => state.length));
     return Drawer(
         width: 480,
         shape: RoundedRectangleBorder(
@@ -216,11 +174,9 @@ class TaskDrawer extends ConsumerWidget {
               Expanded(
                   child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount:
-                      tasks.totalTasks.length,
+                      itemCount: tasksLength,
                       itemBuilder: (BuildContext context, int index) {
-                        return TaskItem(
-                            videoProcess: tasks.totalTasks[index]);
+                        return TaskItem(videoTask: taskManager[index]);
                       }))
             ],
           ),

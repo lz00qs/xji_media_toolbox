@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:get/get.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
@@ -25,153 +24,157 @@ enum VideoTaskStatus {
   failed,
 }
 
-class VideoTask {
+var _isCanceled = false;
+
+@freezed
+class VideoTask with _$VideoTask {
+  @override
   final String name;
+  @override
+  final VideoTaskStatus status;
+  @override
   final VideoTaskType type;
+  @override
   final List<String> ffmpegArgs;
+  @override
   final Duration duration;
-  final RxDouble progress = 0.0.obs;
-  final Rx<VideoTaskStatus> status = VideoTaskStatus.waiting.obs;
-  final String outputFilePath;
-  final List<String> tempFilePaths;
-  final completer = Completer<void>();
-  final String? logFilePath;
-  Timer? _heartbeatTimer;
-  late File _outputFile;
-  late List<File> _tempFiles;
-  late File _logFile;
-  Process? _process;
-  bool _stopLogging = false;
+  @override
+  final double progress;
+  @override
+  final File outputFile;
+  @override
+  final List<File> tempFiles;
+  @override
+  final File? logFile;
+  @override
+  final Duration eta;
+  @override
+  final Process? process;
 
-  VideoTask(
-      {required this.name,
-      required this.type,
-      required this.ffmpegArgs,
-      required this.duration,
-      required this.outputFilePath,
-      this.tempFilePaths = const [],
-      this.logFilePath}) {
-    _outputFile = File(outputFilePath);
-    _tempFiles = tempFilePaths.map((path) => File(path)).toList();
-    if (logFilePath != null) {
-      final logFileName =
-          '${DateTime.now().toString().substring(0, 19).replaceAll(':', '').replaceAll(' ', '-')}-$name.log';
-      _logFile = File('$logFilePath/$logFileName');
-      if (!_logFile.existsSync()) {
-        _logFile.createSync(recursive: true);
-      }
-    }
-  }
+  VideoTask({
+    required this.name,
+    required this.status,
+    required this.type,
+    required this.ffmpegArgs,
+    required this.duration,
+    required this.progress,
+    required this.outputFile,
+    required this.tempFiles,
+    required this.eta,
+    this.logFile,
+    this.process,
+  });
 
-  void _deleteOutputFile() {
-    if (_outputFile.existsSync()) {
-      _outputFile.deleteSync();
-    }
-  }
-
-  void _deleteTempFiles() {
-    for (var file in _tempFiles) {
+  void cancel() {
+    process?.kill();
+    _isCanceled = true;
+    for (var file in tempFiles) {
       if (file.existsSync()) {
         file.deleteSync();
       }
     }
-  }
-
-  void _cleanUp() {
-    _deleteTempFiles();
-    _deleteOutputFile();
-  }
-
-  void cancel() {
-    status.value = VideoTaskStatus.canceled;
-    _cancelWatchDog();
-    _process?.kill();
-    completer.complete();
-    _cleanUp();
-    Toast.warning('$name canceled');
-  }
-
-  Future<void> process() async {
-    LogService.info('Start processing $name');
-    status.value = VideoTaskStatus.processing;
-    _process = await Process.start(
-      FFmpegUtils.ffmpeg,
-      ffmpegArgs,
-    );
-    _process?.stdout.transform(utf8.decoder).listen((data) {
-      _processStdoutData(data);
-    });
-    _process?.stderr.transform(utf8.decoder).listen((data) {
-      _processStdoutData(data);
-    });
-    _process?.exitCode.then((exitCode) {
-      _cancelWatchDog();
-      if (status.value == VideoTaskStatus.canceled) {
-        _cleanUp();
-      } else if (exitCode == 0) {
-        status.value = VideoTaskStatus.finished;
-        Toast.success('$name finished');
-      } else {
-        status.value = VideoTaskStatus.failed;
-        Toast.error('$name failed');
-        LogService.warning('$name failed with exit code $exitCode');
-        _cleanUp();
-      }
-      if (!completer.isCompleted) {
-        completer.complete();
-      }
-    });
-    return completer.future;
-  }
-
-  void _appendToFile(String logMessage) {
-    try {
-      if (!_stopLogging) {
-        _logFile.writeAsStringSync(logMessage, mode: FileMode.append);
-      }
-    } catch (e) {
-      _stopLogging = true;
-      LogService.warning('Failed to write log to ${_logFile.path}: $e');
+    if (outputFile.existsSync()) {
+      outputFile.deleteSync();
     }
   }
+}
 
-  void _processStdoutData(String data) {
-    _resetWatchDog();
-    _appendToFile(data);
-    final time = _extractTimeInSeconds(data);
-    if (time > 0) {
-      progress.value = time / duration.inSeconds;
+final taskManagerProvider =
+    StateNotifierProvider<TaskManagerProvider, List<VideoTask>>(
+        (ref) => TaskManagerProvider([]));
+
+class TaskManagerProvider extends StateNotifier<List<VideoTask>> {
+  var _isProcessing = false;
+
+  TaskManagerProvider(super.state);
+
+  Future<void> addTask(VideoTask task) async {
+    state = state..add(task);
+    await _process();
+  }
+
+  Future<void> _process() async {
+    if (_isProcessing) {
+      return;
     }
-  }
-
-  void _startWatchDog() {
-    _heartbeatTimer = Timer(const Duration(seconds: 15), () {
-      _process?.kill();
-      status.value = VideoTaskStatus.failed;
-    });
-  }
-
-  void _resetWatchDog() {
-    _cancelWatchDog();
-    _startWatchDog();
-  }
-
-  void _cancelWatchDog() {
-    _heartbeatTimer?.cancel();
-  }
-
-  double _extractTimeInSeconds(String logLine) {
-    if (logLine.contains('encoded')) {
-      return duration.inSeconds.toDouble();
+    _isProcessing = true;
+    for (int i = 0; i < state.length; i++) {
+      var task = state[i];
+      if (task.status == VideoTaskStatus.waiting) {
+        _isCanceled = false;
+        state = state
+            .map((element) => element.copyWith(
+                status: element == task
+                    ? VideoTaskStatus.processing
+                    : element.status))
+            .toList();
+        task = state[i];
+        final process =
+            await Process.start(FFmpegUtils.ffmpeg, task.ffmpegArgs);
+        state = state
+            .map((element) => element.copyWith(
+                process: element == task ? process : element.process))
+            .toList();
+        task = state[i];
+        process.stdout.transform(utf8.decoder).listen((data) {
+          _appendToLogFile(task.logFile, data);
+          _processStdoutData(data, i);
+        });
+        process.stderr.transform(utf8.decoder).listen((data) {
+          _appendToLogFile(task.logFile, data);
+          _processStdoutData(data, i);
+        });
+        await process.exitCode.then((exitCode) {
+          task = state[i];
+          if (exitCode == 0) {
+            _deleteTempFiles(task);
+            state = state
+                .map((element) => element.copyWith(
+                    status: element == task
+                        ? VideoTaskStatus.finished
+                        : element.status,
+                    progress: element == task ? 1.0 : element.progress))
+                .toList();
+            Toast.success('${task.name} finished');
+          } else {
+            _deleteTempFiles(task);
+            _deleteOutputFile(task);
+            if (_isCanceled == true) {
+              state = state
+                  .map((element) => element.copyWith(
+                      status: element == task
+                          ? VideoTaskStatus.canceled
+                          : element.status))
+                  .toList();
+              task = state[i];
+              Toast.warning('${task.name} canceled');
+            } else {
+              state = state
+                  .map((element) => element.copyWith(
+                      status: element == task
+                          ? VideoTaskStatus.failed
+                          : element.status))
+                  .toList();
+              task = state[i];
+              Toast.error('${task.name} failed');
+            }
+          }
+        });
+      }
     }
-    // 正则表达式匹配时间字段
-    RegExp regex = RegExp(r'time=([-+\d:]+.\d+)');
-    final match = regex.firstMatch(logLine);
-    if (match != null) {
-      String timeString = match.group(1)!;
-      return _parseTimeToSeconds(timeString);
-    } else {
-      return 0.0;
+    _isProcessing = false;
+  }
+
+  void _appendToLogFile(File? logFile, String logMessage) {
+    if (logFile != null) {
+      try {
+        if (!logFile.existsSync()) {
+          logFile.createSync(recursive: true);
+        }
+        logFile.writeAsStringSync(logMessage, mode: FileMode.append);
+      } catch (e) {
+        LogService.warning('Failed to write log to ${logFile.path}: $e');
+      }
     }
   }
 
@@ -197,45 +200,68 @@ class VideoTask {
       return 0.0;
     }
   }
-}
 
-@freezed
-class Tasks with _$Tasks {
-  Tasks({required this.totalTasks, required this.waitingTasks});
-
-  @override
-  final List<VideoTask> totalTasks;
-  @override
-  final List<VideoTask> waitingTasks;
-
-  factory Tasks.initial() => Tasks(totalTasks: [], waitingTasks: []);
-}
-
-final tasksProvider = StateNotifierProvider<TaskProvider, Tasks>((ref) {
-  return TaskProvider();
-});
-class TaskProvider extends StateNotifier<Tasks> {
-  TaskProvider() : super(Tasks.initial());
-
-  var _isProcessing = false;
-
-  Future<void> addTask(VideoTask task) async {
-    state = state.copyWith(
-        waitingTasks: [...state.waitingTasks, task],
-        totalTasks: [...state.totalTasks, task]);
-    await _process();
+  double _extractTimeInSeconds(String logLine, VideoTask task) {
+    if (logLine.contains('encoded')) {
+      return task.duration.inSeconds.toDouble();
+    }
+    // 正则表达式匹配时间字段
+    RegExp regex = RegExp(r'time=([-+\d:]+.\d+)');
+    final match = regex.firstMatch(logLine);
+    if (match != null) {
+      String timeString = match.group(1)!;
+      return _parseTimeToSeconds(timeString);
+    } else {
+      return 0.0;
+    }
   }
 
-  Future<void> _process() async {
-    if (_isProcessing) {
-      return;
+  double _parseSpeed(String logLine) {
+    final regex = RegExp(r'speed=([0-9.]+)x');
+    final match = regex.firstMatch(logLine);
+    if (match != null) {
+      try {
+        return double.parse(match.group(1)!);
+      } catch (e) {
+        return 0.0;
+      }
+    } else {
+      return 0.0;
     }
-    _isProcessing = true;
-    while (state.waitingTasks.isNotEmpty) {
-      final task = state.waitingTasks.first;
-      state = state.copyWith(waitingTasks: state.waitingTasks.sublist(1));
-      await task.process();
+  }
+
+  void _processStdoutData(String logLine, int index) {
+    final task = state[index];
+    final time = _extractTimeInSeconds(logLine, task);
+    final speed = _parseSpeed(logLine);
+    var progress = task.progress;
+    LogService.info(logLine);
+    if (time > 0) {
+      progress = time / task.duration.inSeconds;
     }
-    _isProcessing = false;
+    var eta = Duration();
+    if (speed > 0) {
+      eta =
+          Duration(seconds: ((task.duration.inSeconds - time) / speed).round());
+    }
+    state = state
+        .map((element) => element.copyWith(
+            progress: element == task ? progress : element.progress,
+            eta: element == task ? eta : element.eta))
+        .toList();
+  }
+
+  void _deleteTempFiles(VideoTask task) {
+    for (var file in task.tempFiles) {
+      if (file.existsSync()) {
+        file.deleteSync();
+      }
+    }
+  }
+
+  void _deleteOutputFile(VideoTask task) {
+    if (task.outputFile.existsSync()) {
+      task.outputFile.deleteSync();
+    }
   }
 }

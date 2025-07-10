@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
 
 import '../../../models/media_resource.dart';
 import '../../design_tokens.dart';
@@ -26,7 +27,6 @@ class VideoPlayerPanel extends ConsumerWidget {
               videoFile: videoFile,
               showControls: true,
             ),
-            // child: VideoPlayerGetx(videoResource: videoResource)
           ),
         ),
         MainPanelSideBar(
@@ -51,7 +51,11 @@ class VideoPlayerPanel extends ConsumerWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  // await Get.dialog(const VideoExportDialog());
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return VideoExportDialog();
+                      });
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
