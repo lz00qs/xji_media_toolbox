@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view_panel.dart';
 
 import '../../../models/media_resource.dart';
-import 'normal_photo_view.dart';
+import 'normal_photo_view_panel.dart';
 
 class PhotoPanel extends StatelessWidget {
   final MediaResource photoResource;

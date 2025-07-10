@@ -403,15 +403,19 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
         selectedResources: state.selectedResources..remove(resource));
   }
 
+  void reorderSelectedResources({required int oldIndex, required int newIndex}) {
+    if (oldIndex < newIndex) newIndex -= 1;
+    final updated = [...(state.selectedResources)];
+    final item = updated.removeAt(oldIndex);
+    updated.insert(newIndex, item);
+    state = state.copyWith(selectedResources: updated);
+  }
+
   void clearSelectedResources() {
     state = state.copyWith(selectedResources: []);
   }
 
   void setIsEditing(bool isEditing) {
     state = state.copyWith(isEditing: isEditing);
-  }
-
-  void toggleIsEditing() {
-    state = state.copyWith(isEditing: !state.isEditing);
   }
 }

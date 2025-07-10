@@ -9,6 +9,7 @@ import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.
 import '../widgets/buttons/main_panel_button.dart';
 import '../../utils/media_resources_utils.dart';
 import '../widgets/views/main_panel.dart';
+import '../widgets/views/multi_select_panel.dart';
 
 final _mediaResourcesListPanelFocusNode = FocusNode();
 final _dialogFocusNode = FocusNode();
@@ -41,15 +42,19 @@ class _MainPageEmpty extends StatelessWidget {
   }
 }
 
-class _MainPageNotEmpty extends StatelessWidget {
+class _MainPageNotEmpty extends ConsumerWidget {
   const _MainPageNotEmpty();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ResizablePanel(
-        mediaResourcesListPanel: MediaResourcesListPanel(),
-        mediaResourceInfoPanel: MediaResourceInfoPanel(),
-        mainPanel: MainPanel());
+      mediaResourcesListPanel: MediaResourcesListPanel(),
+      mediaResourceInfoPanel: MediaResourceInfoPanel(),
+      mainPanel: ref.watch(mediaResourcesProvider
+              .select((state) => state.isMultipleSelection))
+          ? MultiSelectPanel()
+          : MainPanel(),
+    );
   }
 }
 
