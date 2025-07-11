@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:window_manager/window_manager.dart';
@@ -61,9 +65,9 @@ class _WinBarActionButton extends StatelessWidget {
   }
 }
 
-class _MacMainPageAppBar extends StatelessWidget {
+class _MacMainPageAppBar extends HookConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var onPressed = false;
     return SizedBox(
       height: DesignValues.appBarHeight,
@@ -81,7 +85,7 @@ class _MacMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
-                await openMediaResourcesFolder();
+                await openMediaResourcesFolder(ref: ref);
                 onPressed = false;
               }),
           SizedBox(
@@ -94,7 +98,9 @@ class _MacMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
-                await Get.dialog(const SettingsDialog());
+                await showDialog(context: context, builder: (BuildContext context) {
+                  return const SettingsDialog();
+                });
                 onPressed = false;
               }),
           const Spacer(),
@@ -112,11 +118,11 @@ class _MacMainPageAppBar extends StatelessWidget {
   }
 }
 
-class _WinMainPageAppBar extends StatelessWidget {
+class _WinMainPageAppBar extends HookConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var onPressed = false;
-    final isMaximizedObx = false.obs;
+    final isMaximizedState = useState(false);
     return SizedBox(
       height: DesignValues.appBarHeight,
       child: Row(
@@ -133,7 +139,7 @@ class _WinMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
-                await openMediaResourcesFolder();
+                await openMediaResourcesFolder(ref: ref);
                 onPressed = false;
               }),
           SizedBox(
@@ -146,7 +152,7 @@ class _WinMainPageAppBar extends StatelessWidget {
                   return;
                 }
                 onPressed = true;
-                await Get.dialog(const SettingsDialog());
+                // await Get.dialog(const SettingsDialog());
                 onPressed = false;
               }),
           const Spacer(),
@@ -166,18 +172,18 @@ class _WinMainPageAppBar extends StatelessWidget {
           SizedBox(
             width: DesignValues.mediumPadding,
           ),
-          Obx(() => _WinBarActionButton(
-              icon: isMaximizedObx.value
+          _WinBarActionButton(
+              icon: isMaximizedState.value
                   ? Mdi.window_restore
                   : Mdi.window_maximize,
               onPressed: () {
-                if (isMaximizedObx.value) {
+                if (isMaximizedState.value) {
                   WindowManager.instance.restore();
                 } else {
                   WindowManager.instance.maximize();
                 }
-                isMaximizedObx.value = !isMaximizedObx.value;
-              })),
+                isMaximizedState.value = !isMaximizedState.value;
+              }),
           SizedBox(
             width: DesignValues.mediumPadding,
           ),
@@ -203,8 +209,7 @@ class MainPageAppBar extends StatelessWidget {
     return DragToMoveArea(
         child: Container(
       color: ColorDark.bg4,
-      // color: const Color.fromRGBO(79, 81, 89, 1),
-      child: GetPlatform.isMacOS ? _MacMainPageAppBar() : _WinMainPageAppBar(),
+      child: Platform.isMacOS ? _MacMainPageAppBar() : _WinMainPageAppBar(),
     ));
   }
 }

@@ -2,20 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:image/image.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
+import 'package:xji_footage_toolbox/models/settings.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
-import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/aeb_photo_view.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
-import '../controllers/global_media_resources_controller.dart';
 import '../models/media_resource.dart';
-import '../ui/widgets/views/video_player_getx.dart';
 
 final _mediaResources = <MediaResource>[];
 var _mediaResourcesCount = 0;
@@ -85,16 +81,36 @@ int _getMediaSequence(File file) {
   return 0;
 }
 
+String _getEvBiasString(String rawEv){
+  if (rawEv == '0/10') {
+    return '0';
+  } else if (rawEv == '-7/10') {
+    return '-0.7';
+  } else if (rawEv == '7/10') {
+    return '+0.7';
+  } else if (rawEv == '-13/10') {
+    return '-1.3';
+  } else if (rawEv == '13/10') {
+    return '+1.3';
+  } else if (rawEv == '-20/10') {
+    return '-2';
+  } else if (rawEv == '20/10') {
+    return '+2';
+  } else {
+    return '';
+  }
+}
+
 String _parseEvBias(Image image) {
   final evBias = image.exif.exifIfd[0x9204]?.toString();
   if (evBias != null) {
-    return evBias;
+    return _getEvBiasString(evBias);
   }
   return '';
 }
 
 Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
-  Get.find<GlobalSettingsController>();
+  // Get.find<GlobalSettingsController>();
   final result = await Process.run(FFmpegUtils.ffprobe, [
     '-v',
     'error',
@@ -167,67 +183,67 @@ Future<List<MediaResource>> _analyzeAebFootage(
       }
       if (mediaResources[i] is AebPhotoResource) {
         final startResource = mediaResources[i] as AebPhotoResource;
-        if ((mediaResources[i] as AebPhotoResource).evBias == '0/10') {
+        if ((mediaResources[i] as AebPhotoResource).evBias == '0') {
           (mediaResources[i] as AebPhotoResource)
               .aebResources
-              .add(mediaResources[i]);
-          LogService.info('${startResource.name}: 0/10 found');
+              .add(mediaResources[i] as AebPhotoResource);
+          LogService.info('${startResource.name}: 0 found');
           i++;
           if (i >= mediaResources.length) {
             break;
           }
           if (mediaResources[i].isAeb &&
-              (mediaResources[i] as AebPhotoResource).evBias == '-7/10') {
-            startResource.aebResources.add(mediaResources[i]);
+              (mediaResources[i] as AebPhotoResource).evBias == '-0.7') {
+            startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
             mediaResources[i].hide = true;
-            LogService.info('${startResource.name}: -7/10 found');
+            LogService.info('${startResource.name}: -0.7 found');
             i++;
             if (i >= mediaResources.length) {
               break;
             }
             if (mediaResources[i].isAeb &&
-                (mediaResources[i] as AebPhotoResource).evBias == '7/10') {
-              startResource.aebResources.add(mediaResources[i]);
+                (mediaResources[i] as AebPhotoResource).evBias == '+0.7') {
+              startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
               mediaResources[i].hide = true;
-              LogService.info('${startResource.name}: 7/10 found');
+              LogService.info('${startResource.name}: +0.7 found');
               i++;
               if (i >= mediaResources.length) {
                 break;
               }
               if (mediaResources[i].isAeb &&
-                  (mediaResources[i] as AebPhotoResource).evBias == '-13/10') {
-                startResource.aebResources.add(mediaResources[i]);
+                  (mediaResources[i] as AebPhotoResource).evBias == '-1.3') {
+                startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                 mediaResources[i].hide = true;
-                LogService.info('${startResource.name}: -13/10 found');
+                LogService.info('${startResource.name}: -1.3 found');
                 i++;
                 if (i >= mediaResources.length) {
                   break;
                 }
                 if (mediaResources[i].isAeb &&
-                    (mediaResources[i] as AebPhotoResource).evBias == '13/10') {
-                  startResource.aebResources.add(mediaResources[i]);
+                    (mediaResources[i] as AebPhotoResource).evBias == '+1.3') {
+                  startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                   mediaResources[i].hide = true;
-                  LogService.info('${startResource.name}: 13/10 found');
+                  LogService.info('${startResource.name}: +1.3 found');
                   i++;
                   if (i >= mediaResources.length) {
                     break;
                   }
                   if (mediaResources[i].isAeb &&
                       (mediaResources[i] as AebPhotoResource).evBias ==
-                          '-20/10') {
-                    startResource.aebResources.add(mediaResources[i]);
+                          '-2') {
+                    startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                     mediaResources[i].hide = true;
-                    LogService.info('${startResource.name}: -20/10 found');
+                    LogService.info('${startResource.name}: -2 found');
                     i++;
                     if (i >= mediaResources.length) {
                       break;
                     }
                     if (mediaResources[i].isAeb &&
                         (mediaResources[i] as AebPhotoResource).evBias ==
-                            '20/10') {
-                      startResource.aebResources.add(mediaResources[i]);
+                            '+2') {
+                      startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                       mediaResources[i].hide = true;
-                      LogService.info('${startResource.name}: 20/10 found');
+                      LogService.info('${startResource.name}: +2 found');
                       i++;
                       if (i >= mediaResources.length) {
                         break;
@@ -311,11 +327,10 @@ Map<String, dynamic> _getGenericMediaResourceInfo(File file) {
   };
 }
 
-Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
+Future<List<MediaResource>> _photoResourcesProcess(
+    {required List<File> files, required WidgetRef ref}) async {
   final mediaResources = <MediaResource>[];
-  final LoadingMediaResourcesController loadingMediaResourcesController =
-      Get.find<LoadingMediaResourcesController>();
-  for (final file in photos) {
+  for (final file in files) {
     final Map<String, dynamic> info = _getGenericMediaResourceInfo(file);
     final creationTime = info['creationTime'];
     final sequence = info['sequence'];
@@ -358,18 +373,17 @@ Future<List<MediaResource>> _photoResourcesProcess(List<File> photos) async {
       mediaResources.add(resource);
     }
     _processedMediaResourcesCount += 1;
-    loadingMediaResourcesController.progress.value =
-        _processedMediaResourcesCount / _mediaResourcesCount;
+    ref
+        .read(mediaResourcesProvider.notifier)
+        .setLoadProgress(_processedMediaResourcesCount / _mediaResourcesCount);
   }
   return mediaResources;
 }
 
-Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
+Future<List<MediaResource>> _videoResourcesProcess(
+    {required List<File> files, required WidgetRef ref}) async {
   final mediaResources = <MediaResource>[];
-  Get.find<GlobalSettingsController>();
-  final LoadingMediaResourcesController loadingMediaResourcesController =
-      Get.find<LoadingMediaResourcesController>();
-  for (final file in videos) {
+  for (final file in files) {
     final Map<String, dynamic> info = _getGenericMediaResourceInfo(file);
     final creationTime = info['creationTime'];
     final sequence = info['sequence'];
@@ -425,26 +439,25 @@ Future<List<MediaResource>> _videoResourcesProcess(List<File> videos) async {
           '${file.uri.pathSegments.last} parse video info error: $e');
     }
     _processedMediaResourcesCount += 1;
-    loadingMediaResourcesController.progress.value =
-        _processedMediaResourcesCount / _mediaResourcesCount;
+    ref
+        .read(mediaResourcesProvider.notifier)
+        .setLoadProgress(_processedMediaResourcesCount / _mediaResourcesCount);
   }
   return mediaResources;
 }
 
 Future<List<MediaResource>> _multiThreadsProcessResources(
-    List<File> mediaResourceFiles,
-    Future<List<MediaResource>> Function(List<File> files)
-        processFunction) async {
-  final GlobalSettingsController globalSettingsController =
-      Get.find<GlobalSettingsController>();
+    {required List<File> mediaResourceFiles,
+    required Future<List<MediaResource>> Function(
+            {required List<File> files, required WidgetRef ref})
+        processFunction,
+    required WidgetRef ref}) async {
   final mediaResources = <MediaResource>[];
-  final LoadingMediaResourcesController loadingMediaResourcesController =
-      Get.find<LoadingMediaResourcesController>();
   if (mediaResourceFiles.length > 1) {
-    if (mediaResourceFiles.length > globalSettingsController.cpuThreads) {
-      final chunkSize =
-          (mediaResourceFiles.length / globalSettingsController.cpuThreads)
-              .ceil();
+    final cpuThreads =
+        ref.watch(settingsProvider.select((state) => state.cpuThreads));
+    if (mediaResourceFiles.length > cpuThreads) {
+      final chunkSize = (mediaResourceFiles.length / cpuThreads).ceil();
       final chunks = <List<File>>[];
       for (var i = 0; i < mediaResourceFiles.length; i += chunkSize) {
         chunks.add(mediaResourceFiles.sublist(
@@ -455,39 +468,43 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
       }
       final futures = <Future<List<MediaResource>>>[];
       for (final chunk in chunks) {
-        futures.add(processFunction(chunk));
+        futures.add(processFunction(files: chunk, ref: ref));
       }
       for (final future in futures) {
         final result = await future;
         mediaResources.addAll(result);
         if (kDebugMode) {
-          print('progress: ${loadingMediaResourcesController.progress.value}');
+          print(
+              'progress: ${ref.watch(mediaResourcesProvider.select((state) => state.loadProgress))}');
         }
       }
     } else {
       final futures = <Future<List<MediaResource>>>[];
       for (final mediaResourceFile in mediaResourceFiles) {
-        futures.add(processFunction([mediaResourceFile]));
+        futures.add(processFunction(files: [mediaResourceFile], ref: ref));
       }
       for (final future in futures) {
         final result = await future;
         mediaResources.addAll(result);
         if (kDebugMode) {
-          print('progress: ${loadingMediaResourcesController.progress.value}');
+          print(
+              'progress: ${ref.watch(mediaResourcesProvider.select((state) => state.loadProgress))}');
         }
       }
     }
   } else {
-    mediaResources.addAll(await processFunction(mediaResourceFiles));
+    mediaResources
+        .addAll(await processFunction(files: mediaResourceFiles, ref: ref));
     if (kDebugMode) {
-      print('progress: ${loadingMediaResourcesController.progress.value}');
+      print(
+          'progress: ${ref.watch(mediaResourcesProvider.select((state) => state.loadProgress))}');
     }
   }
   return mediaResources;
 }
 
 Future<List<MediaResource>> loadMediaResources(
-    Directory mediaResourcesDir) async {
+    {required Directory mediaResourcesDir, required WidgetRef ref}) async {
   _mediaResources.clear();
   _prepareThumbnailFolder(mediaResourcesDir.path);
   _processedMediaResourcesCount = 0;
@@ -499,38 +516,43 @@ Future<List<MediaResource>> loadMediaResources(
   final List<File> videos = classifyResult[1];
   var processedVideos = <MediaResource>[];
 
-  processedPhotos =
-      await _multiThreadsProcessResources(photos, _photoResourcesProcess);
+  processedPhotos = await _multiThreadsProcessResources(
+      mediaResourceFiles: photos,
+      processFunction: _photoResourcesProcess,
+      ref: ref);
   processedPhotos.sort((a, b) => a.sequence.compareTo(b.sequence));
   LogService.info('photoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
   processedPhotos = await _analyzeAebFootage(processedPhotos);
-  processedVideos =
-      await _multiThreadsProcessResources(videos, _videoResourcesProcess);
+  processedVideos = await _multiThreadsProcessResources(
+      mediaResourceFiles: videos,
+      processFunction: _videoResourcesProcess,
+      ref: ref);
   LogService.info('videoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
 
   _mediaResources.addAll(processedPhotos);
   _mediaResources.addAll(processedVideos);
 
-  final GlobalSettingsController globalSettingsController =
-      Get.find<GlobalSettingsController>();
-  switch (globalSettingsController.sortType.value) {
+  final sortType =
+      ref.watch(settingsProvider.select((state) => state.sortType));
+  final sortOrder =
+      ref.watch(settingsProvider.select((state) => state.sortAsc));
+  switch (sortType) {
     case SortType.name:
-      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
-          ? a.name.compareTo(b.name)
-          : b.name.compareTo(a.name));
+      _mediaResources.sort((a, b) =>
+          sortOrder ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
       break;
     case SortType.date:
-      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+      _mediaResources.sort((a, b) => sortOrder
           ? a.creationTime.compareTo(b.creationTime)
           : b.creationTime.compareTo(a.creationTime));
       break;
     case SortType.size:
-      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+      _mediaResources.sort((a, b) => sortOrder
           ? a.sizeInBytes.compareTo(b.sizeInBytes)
           : b.sizeInBytes.compareTo(a.sizeInBytes));
       break;
     case SortType.sequence:
-      _mediaResources.sort((a, b) => globalSettingsController.sortAsc.value
+      _mediaResources.sort((a, b) => sortOrder
           ? a.sequence.compareTo(b.sequence)
           : b.sequence.compareTo(a.sequence));
       break;
@@ -541,12 +563,8 @@ Future<List<MediaResource>> loadMediaResources(
   return _mediaResources;
 }
 
-Future<void> openMediaResourcesFolder() async {
+Future<void> openMediaResourcesFolder({required WidgetRef ref}) async {
   final selectedDirectory = await FilePicker.platform.getDirectoryPath();
-  final globalMediaResourcesController =
-      Get.find<GlobalMediaResourcesController>();
-  final LoadingMediaResourcesController loadingMediaResourcesController =
-      Get.find<LoadingMediaResourcesController>();
   if (selectedDirectory != null) {
     final mediaResourcesDir = Directory(selectedDirectory);
     if (LogService.isDebug) {
@@ -554,18 +572,17 @@ Future<void> openMediaResourcesFolder() async {
       await LogService.enableDebug('$selectedDirectory/$logFolderName');
     }
     if (mediaResourcesDir.existsSync()) {
-      loadingMediaResourcesController.progress.value = 0.0;
-      loadingMediaResourcesController.isLoadingMediaResources.value = true;
-      globalMediaResourcesController.mediaResourceDir = mediaResourcesDir;
+      ref.read(mediaResourcesProvider.notifier).setLoading(true);
+      ref.read(mediaResourcesProvider.notifier).setLoadProgress(0.0);
       stopwatch.reset();
       stopwatch.start();
-      await loadMediaResources(mediaResourcesDir);
+      await loadMediaResources(mediaResourcesDir: mediaResourcesDir, ref: ref);
       stopwatch.stop();
       LogService.info(
           'loadMediaResourcesTime: ${stopwatch.elapsedMilliseconds}ms');
-      globalMediaResourcesController.mediaResources.addAll(_mediaResources);
-      globalMediaResourcesController.currentMediaIndex.value = 0;
-      loadingMediaResourcesController.isLoadingMediaResources.value = false;
+      ref.read(mediaResourcesProvider.notifier).setResources(_mediaResources);
+      ref.read(mediaResourcesProvider.notifier).setCurrentIndex(0);
+      ref.read(mediaResourcesProvider.notifier).setLoading(false);
       LogService.info(
           'Media resources loaded, total media resources: ${_mediaResources.length}');
       Toast.success('Media resources loaded');
@@ -576,157 +593,67 @@ Future<void> openMediaResourcesFolder() async {
   }
 }
 
-void deleteMediaResource(int index) {
-  final globalMediaResourcesController =
-      Get.find<GlobalMediaResourcesController>();
-  if (index >= 0 &&
-      index < globalMediaResourcesController.mediaResources.length) {
-    if (index == globalMediaResourcesController.currentMediaIndex.value &&
-        index == globalMediaResourcesController.mediaResources.length - 1) {
-      globalMediaResourcesController.currentMediaIndex.value -= 1;
-    }
-    final mediaResource = globalMediaResourcesController.mediaResources[index];
-    globalMediaResourcesController.mediaResources.removeAt(index);
-
-    if (mediaResource.isVideo) {
-      final videoPlayerGetxController = Get.find<VideoPlayerGetxController>();
-      videoPlayerGetxController.footageInitialized.value = false;
-      videoPlayerGetxController.videoPlayerController.dispose();
-      videoPlayerGetxController.dispose();
-    }
-
-    try {
-      if (mediaResource.isAeb) {
-        final aebPhotoResource = mediaResource as AebPhotoResource;
-        for (final aebResource in aebPhotoResource.aebResources) {
-          aebResource.file.deleteSync();
-          if (aebResource.thumbFile != null &&
-              aebResource.thumbFile!.existsSync()) {
-            aebResource.thumbFile!.deleteSync();
-          }
-        }
-      } else {
-        if (mediaResource.isVideo && Platform.isWindows) {
-          // Delay to avoid file in use error on Windows
-          Future.delayed(const Duration(milliseconds: 500), () {
-            mediaResource.file.deleteSync();
-          });
-        } else {
-          mediaResource.file.deleteSync();
-        }
-        if (mediaResource.thumbFile != null &&
-            mediaResource.thumbFile!.existsSync()) {
-          mediaResource.thumbFile!.deleteSync();
-        }
-      }
-    } catch (e) {
-      Toast.error(
-          'Failed to delete ${mediaResource.file.uri.pathSegments.last}');
-      LogService.warning(
-          'Error deleting file: ${mediaResource.file.path}, error: $e');
-    }
-  }
-}
-
-void renameMediaResource(int index, String newName) {
-  final globalMediaResourcesController =
-      Get.find<GlobalMediaResourcesController>();
-  final AebPhotoViewController aebPhotoViewController =
-      Get.find<AebPhotoViewController>();
-  final mediaResource = globalMediaResourcesController.mediaResources[index];
-  final oldFile = mediaResource.isAeb
-      ? (mediaResource as AebPhotoResource)
-          .aebResources[aebPhotoViewController.currentAebIndex.value]
-          .file
-      : mediaResource.file;
-  final oldThumbFile = mediaResource.thumbFile;
-  final newPath = '${oldFile.parent.path}/$newName';
-  final newFile = File(newPath);
+int deleteMediaResource(
+    {required MediaResource mediaResource}) {
   try {
-    oldFile.renameSync(newFile.path);
     if (mediaResource.isAeb) {
-      final oldAebPhotoResource = mediaResource as AebPhotoResource;
-      final oldAebPhotoResourceSub = oldAebPhotoResource
-              .aebResources[aebPhotoViewController.currentAebIndex.value]
-          as AebPhotoResource;
-      final newAebPhotoResourceSub = (AebPhotoResource(
-          name: newFile.uri.pathSegments.last,
-          file: newFile,
-          width: oldAebPhotoResourceSub.width,
-          height: oldAebPhotoResourceSub.height,
-          sizeInBytes: oldAebPhotoResourceSub.sizeInBytes,
-          creationTime: oldAebPhotoResourceSub.creationTime,
-          sequence: oldAebPhotoResourceSub.sequence,
-          evBias: oldAebPhotoResourceSub.evBias)
-        ..thumbFile = oldThumbFile);
-      if (aebPhotoViewController.currentAebIndex.value == 0) {
-        final newAebPhotoResource = (AebPhotoResource(
-            name: newFile.uri.pathSegments.last,
-            file: newFile,
-            width: oldAebPhotoResource.width,
-            height: oldAebPhotoResource.height,
-            sizeInBytes: oldAebPhotoResource.sizeInBytes,
-            creationTime: oldAebPhotoResource.creationTime,
-            sequence: oldAebPhotoResource.sequence,
-            evBias: oldAebPhotoResource.evBias)
-          ..thumbFile = oldThumbFile);
-        newAebPhotoResource.aebResources.add(newAebPhotoResourceSub);
-        oldAebPhotoResource.aebResources.removeAt(0);
-        newAebPhotoResource.aebResources
-            .addAll(oldAebPhotoResource.aebResources);
-        globalMediaResourcesController.mediaResources[index] =
-            newAebPhotoResource;
-      } else {
-        oldAebPhotoResource
-                .aebResources[aebPhotoViewController.currentAebIndex.value] =
-            newAebPhotoResourceSub;
+      final aebPhotoResource = mediaResource as AebPhotoResource;
+      for (final aebResource in aebPhotoResource.aebResources) {
+        aebResource.file.deleteSync();
+        if (aebResource.thumbFile != null &&
+            aebResource.thumbFile!.existsSync()) {
+          aebResource.thumbFile!.deleteSync();
+        }
       }
-    } else if (mediaResource.isVideo) {
-      final oldVideoResource = mediaResource as NormalVideoResource;
-      final newVideoResource = (NormalVideoResource(
-          name: newFile.uri.pathSegments.last,
-          file: newFile,
-          width: oldVideoResource.width,
-          height: oldVideoResource.height,
-          sizeInBytes: oldVideoResource.sizeInBytes,
-          creationTime: oldVideoResource.creationTime,
-          sequence: oldVideoResource.sequence,
-          frameRate: oldVideoResource.frameRate,
-          duration: oldVideoResource.duration,
-          isHevc: oldVideoResource.isHevc)
-        ..thumbFile = oldThumbFile);
-      globalMediaResourcesController.mediaResources[index] = newVideoResource;
     } else {
-      final oldNormalPhotoResource = mediaResource as NormalPhotoResource;
-      final newNormalPhotoResource = (NormalPhotoResource(
-          name: newFile.uri.pathSegments.last,
-          file: newFile,
-          width: oldNormalPhotoResource.width,
-          height: oldNormalPhotoResource.height,
-          sizeInBytes: oldNormalPhotoResource.sizeInBytes,
-          creationTime: oldNormalPhotoResource.creationTime,
-          sequence: oldNormalPhotoResource.sequence)
-        ..thumbFile = oldThumbFile);
-      globalMediaResourcesController.mediaResources[index] =
-          newNormalPhotoResource;
+      if (mediaResource.isVideo && Platform.isWindows) {
+        // Delay to avoid file in use error on Windows
+        Future.delayed(const Duration(milliseconds: 500), () {
+          mediaResource.file.deleteSync();
+        });
+      } else {
+        mediaResource.file.deleteSync();
+      }
+      if (mediaResource.thumbFile != null &&
+          mediaResource.thumbFile!.existsSync()) {
+        mediaResource.thumbFile!.deleteSync();
+      }
     }
   } catch (e) {
-    Toast.error('Failed to rename ${oldFile.uri.pathSegments.last}');
-    LogService.warning('Error renaming file: ${oldFile.path}');
+    Toast.error('Failed to delete ${mediaResource.file.uri.pathSegments.last}');
+    LogService.warning(
+        'Error deleting file: ${mediaResource.file.path}, error: $e');
+    return -1;
   }
+  return 0;
 }
 
-void addSuffixToCurrentAebFilesName() {
-  final globalMediaResourcesController =
-      Get.find<GlobalMediaResourcesController>();
-  final currentMediaResource = globalMediaResourcesController.mediaResources[
-          globalMediaResourcesController.currentMediaIndex.value]
-      as AebPhotoResource;
-  for (var i = 0; i < currentMediaResource.aebResources.length; i++) {
+//
+File? renameMediaResource({required MediaResource mediaResource, required String newName}) {
+  final oldFile = mediaResource.file;
+  try {
+    final newFile = oldFile.renameSync('${oldFile.parent.path}/$newName');
+    if (newFile.existsSync()) {
+      return newFile;
+    } else {
+      Toast.error('Failed to rename ${mediaResource.file.uri.pathSegments.last}');
+      LogService.warning('Failed to rename ${mediaResource.file.path}');
+      return null;
+    }
+  } catch (e) {
+    Toast.error('Failed to rename ${mediaResource.file.uri.pathSegments.last}');
+    LogService.warning(
+        'Error renaming file: ${mediaResource.file.path}, error: $e');
+  }
+  return null;
+}
+//
+AebPhotoResource addSuffixToAebFilesName({required AebPhotoResource aebResource}) {
+  for (var i = 0; i < aebResource.aebResources.length; i++) {
     var evBias = '';
     switch (i) {
       case 0:
-        evBias = '0.0';
+        evBias = '0';
         break;
       case 1:
         evBias = '-0.7';
@@ -741,29 +668,29 @@ void addSuffixToCurrentAebFilesName() {
         evBias = '+1.3';
         break;
       case 5:
-        evBias = '-2.0';
+        evBias = '-2';
         break;
       case 6:
-        evBias = '+2.0';
+        evBias = '+2';
         break;
       default:
-        evBias = '0.0';
+        evBias = '0';
     }
-    final suffix = '_AEB_${currentMediaResource.sequence}_$evBias';
-    final oldFile = currentMediaResource.aebResources[i].file;
+    final suffix = '_AEB_${aebResource.sequence}_$evBias';
+    final oldFile = aebResource.aebResources[i].file;
     final newPath =
         '${oldFile.parent.path}/${oldFile.uri.pathSegments.last.split('.').first}$suffix.${oldFile.uri.pathSegments.last.split('.').last}';
     final newFile = File(newPath);
     try {
       oldFile.renameSync(newFile.path);
-      currentMediaResource.aebResources[i] = (AebPhotoResource(
+      aebResource.aebResources[i] = (AebPhotoResource(
           name: newFile.uri.pathSegments.last,
           file: newFile,
-          width: currentMediaResource.width,
-          height: currentMediaResource.height,
-          sizeInBytes: currentMediaResource.sizeInBytes,
-          creationTime: currentMediaResource.creationTime,
-          sequence: currentMediaResource.sequence,
+          width: aebResource.width,
+          height: aebResource.height,
+          sizeInBytes: aebResource.sizeInBytes,
+          creationTime: aebResource.creationTime,
+          sequence: aebResource.sequence,
           evBias: evBias)
         ..thumbFile = newFile);
     } catch (e) {
@@ -772,20 +699,19 @@ void addSuffixToCurrentAebFilesName() {
     }
   }
   final newAebPhotoResource = (AebPhotoResource(
-      name: currentMediaResource.aebResources[0].file.uri.pathSegments.last,
-      file: currentMediaResource.aebResources[0].file,
-      width: currentMediaResource.width,
-      height: currentMediaResource.height,
-      sizeInBytes: currentMediaResource.sizeInBytes,
-      creationTime: currentMediaResource.creationTime,
-      sequence: currentMediaResource.sequence,
-      evBias: currentMediaResource.evBias)
-    ..thumbFile = currentMediaResource.thumbFile);
-  newAebPhotoResource.aebResources.addAll(currentMediaResource.aebResources);
-  globalMediaResourcesController.mediaResources[globalMediaResourcesController
-      .currentMediaIndex.value] = newAebPhotoResource;
+      name: aebResource.aebResources[0].file.uri.pathSegments.last,
+      file: aebResource.aebResources[0].file,
+      width: aebResource.width,
+      height: aebResource.height,
+      sizeInBytes: aebResource.sizeInBytes,
+      creationTime: aebResource.creationTime,
+      sequence: aebResource.sequence,
+      evBias: aebResource.evBias)
+    ..thumbFile = aebResource.thumbFile);
+  newAebPhotoResource.aebResources.addAll(aebResource.aebResources);
+  return newAebPhotoResource;
 }
-
+//
 bool isFileExist(String path) {
   final file = File(path);
   return file.existsSync();

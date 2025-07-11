@@ -4,48 +4,48 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "1:6542342576071718515",
-      "lastPropertyId": "8:6600177316668141755",
-      "name": "ExportPreset",
+      "id": "2:5066807561326805015",
+      "lastPropertyId": "8:6947592021971297063",
+      "name": "TranscodePreset",
       "properties": [
         {
-          "id": "1:3441272698186930426",
+          "id": "1:1268788478972929064",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:2633146971749489003",
+          "id": "2:6604121700459575002",
           "name": "name",
           "type": 9
         },
         {
-          "id": "3:5469937351195833193",
+          "id": "3:6806958124699359397",
           "name": "useInputResolution",
           "type": 1
         },
         {
-          "id": "4:6942609030270405673",
+          "id": "4:4710756751357513035",
           "name": "useHevc",
           "type": 1
         },
         {
-          "id": "5:2255326580324500820",
+          "id": "5:1102421391753766293",
           "name": "width",
           "type": 6
         },
         {
-          "id": "6:3004389153049693201",
+          "id": "6:3946286356324700626",
           "name": "height",
           "type": 6
         },
         {
-          "id": "7:3288320502769605509",
+          "id": "7:4338324737020365168",
           "name": "crf",
           "type": 6
         },
         {
-          "id": "8:6600177316668141755",
+          "id": "8:6947592021971297063",
           "name": "ffmpegPreset",
           "type": 6
         }
@@ -53,15 +53,26 @@
       "relations": []
     }
   ],
-  "lastEntityId": "1:6542342576071718515",
+  "lastEntityId": "2:5066807561326805015",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [],
+  "retiredEntityUids": [
+    6542342576071718515
+  ],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3441272698186930426,
+    2633146971749489003,
+    5469937351195833193,
+    6942609030270405673,
+    2255326580324500820,
+    3004389153049693201,
+    3288320502769605509,
+    6600177316668141755
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/utils/format.dart';
-
-import 'aeb_photo_view.dart';
 
 class _MediaResourceInfoKeyText extends StatelessWidget {
   final String keyText;
@@ -89,7 +88,8 @@ class _AebPhotoInfoValueColumn extends StatelessWidget {
             valueText: '${mediaResource.width}x'
                 '${mediaResource.height}'),
         _MediaResourceInfoValueText(valueText: aebCount.toString()),
-        _MediaResourceInfoValueText(valueText: (mediaResource as AebPhotoResource).evBias),
+        _MediaResourceInfoValueText(
+            valueText: (mediaResource as AebPhotoResource).evBias),
       ],
     );
   }
@@ -102,7 +102,7 @@ class _AebPhotoInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AebPhotoViewController aebPhotoViewController = Get.find();
+    // final AebPhotoViewController aebPhotoViewController = Get.find();
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -120,24 +120,34 @@ class _AebPhotoInfo extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(child: Obx(() {
+        Expanded(child: Consumer(
+            builder: (BuildContext context, WidgetRef ref, Widget? child) {
+          final currentAebIndex = ref.watch(
+              mediaResourcesProvider.select((state) => state.currentAebIndex));
           return _AebPhotoInfoValueColumn(
-              mediaResource: mediaResource
-                  .aebResources[aebPhotoViewController.currentAebIndex.value],
+              mediaResource: mediaResource.aebResources[currentAebIndex],
               aebCount: mediaResource.aebResources.length);
-        })),
+        }))
       ],
     );
   }
 }
 
-class MediaResourceInfoPanel extends StatelessWidget {
-  final MediaResource mediaResource;
-
-  const MediaResourceInfoPanel({super.key, required this.mediaResource});
+class MediaResourceInfoPanel extends ConsumerWidget {
+  const MediaResourceInfoPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResources =
+        ref.watch(mediaResourcesProvider.select((state) => state.resources));
+    final currentIndex =
+        ref.watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final mediaResourcesLength = ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.length));
+    if (mediaResourcesLength == 0) {
+      return Container();
+    }
+    final mediaResource = mediaResources[currentIndex];
     return Padding(
       padding: EdgeInsets.all(DesignValues.smallPadding),
       child: Column(

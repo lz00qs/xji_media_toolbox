@@ -1,34 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/ui/widgets/dialogs/media_resources_sort_dialog.dart';
 
-import '../../../controllers/global_media_resources_controller.dart';
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
-import 'multi_select_panel.dart';
+import '../dialogs/media_resources_sort_dialog.dart';
 
 const _listWidgetHeight = 73.0;
 
-class MediaResourcesListPanelController extends GetxController {
-  final mediaResourcesListScrollController = ScrollController();
-  var panelHeight = 0.0;
+var _panelHeight = 0.0;
+final _mediaResourcesListScrollController = ScrollController();
 
-  void scrollToIndex(int index, bool isIncrement) {
-    if (isIncrement) {
-      if (index * _listWidgetHeight >
-          panelHeight +
-              mediaResourcesListScrollController.position.pixels -
-              _listWidgetHeight) {
-        mediaResourcesListScrollController.jumpTo(
-            index * _listWidgetHeight - panelHeight + _listWidgetHeight);
-      }
-    } else {
-      if (index * _listWidgetHeight <
-          mediaResourcesListScrollController.position.pixels) {
-        mediaResourcesListScrollController.jumpTo(index * _listWidgetHeight);
-      }
+void mediaResourcesListScrollToIndex(int index, bool isIncrement) {
+  if (isIncrement) {
+    if (index * _listWidgetHeight >
+        _panelHeight +
+            _mediaResourcesListScrollController.position.pixels -
+            _listWidgetHeight) {
+      _mediaResourcesListScrollController
+          .jumpTo(index * _listWidgetHeight - _panelHeight + _listWidgetHeight);
+    }
+  } else {
+    if (index * _listWidgetHeight <
+        _mediaResourcesListScrollController.position.pixels) {
+      _mediaResourcesListScrollController.jumpTo(index * _listWidgetHeight);
     }
   }
 }
@@ -56,8 +52,7 @@ class MediaResourceThumbnail extends StatelessWidget {
   }
 }
 
-class _MediaResourcesListTopBar
-    extends GetView<GlobalMediaResourcesController> {
+class _MediaResourcesListTopBar extends StatelessWidget {
   const _MediaResourcesListTopBar();
 
   @override
@@ -85,7 +80,11 @@ class _MediaResourcesListTopBar
               CustomIconButton(
                   iconData: Icons.sort,
                   onPressed: () async {
-                    await Get.dialog(const MediaResourcesSortDialog());
+                    await showDialog(
+                        context: context,
+                        builder: (context) {
+                          return const MediaResourcesSortDialog();
+                        });
                   },
                   iconSize: DesignValues.mediumIconSize,
                   buttonSize: 32.0,
@@ -95,24 +94,36 @@ class _MediaResourcesListTopBar
               SizedBox(
                 width: DesignValues.smallPadding,
               ),
-              Obx(() => CustomIconButton(
-                  iconData: controller.isMultipleSelection.value
-                      ? Icons.keyboard_return
-                      : Icons.checklist_rtl,
-                  onPressed: () {
-                    final MultiSelectPanelController multiSelectPanelController = Get.find();
-                    multiSelectPanelController.isMerging.value = false;
-                    if (controller.isMultipleSelection.value) {
-                      controller.selectedIndexList.clear();
-                    }
-                    controller.isMultipleSelection.value =
-                        !controller.isMultipleSelection.value;
-                  },
-                  iconSize: DesignValues.mediumIconSize,
-                  buttonSize: 32.0,
-                  hoverColor: ColorDark.defaultHover,
-                  focusColor: ColorDark.defaultActive,
-                  iconColor: ColorDark.text2)),
+              Consumer(builder:
+                  (BuildContext context, WidgetRef ref, Widget? child) {
+                final isMultipleSelection = ref.watch(mediaResourcesProvider
+                    .select((value) => value.isMultipleSelection));
+                return CustomIconButton(
+                    iconData: isMultipleSelection
+                        ? Icons.keyboard_return
+                        : Icons.checklist_rtl,
+                    onPressed: () {
+                      // todo: implement merge dialog
+                      // final MultiSelectPanelController multiSelectPanelController = Get.find();
+                      // multiSelectPanelController.isMerging.value = false;
+                      if (ref.watch(mediaResourcesProvider
+                          .select((state) => isMultipleSelection))) {
+                        ref
+                            .read(mediaResourcesProvider.notifier)
+                            .clearSelectedResources();
+                      }
+                      // controller.isMultipleSelection.value =
+                      // !controller.isMultipleSelection.value;
+                      ref
+                          .read(mediaResourcesProvider.notifier)
+                          .toggleIsMultipleSelection();
+                    },
+                    iconSize: DesignValues.mediumIconSize,
+                    buttonSize: 32.0,
+                    hoverColor: ColorDark.defaultHover,
+                    focusColor: ColorDark.defaultActive,
+                    iconColor: ColorDark.text2);
+              })
             ],
           ),
         ));
@@ -145,7 +156,7 @@ class _FileTypeFab extends StatelessWidget {
   }
 }
 
-class _MediaResourceListWidget extends StatelessWidget {
+class _MediaResourceListWidget extends ConsumerWidget {
   final MediaResource mediaResource;
   final bool isSelected;
   final bool isMultipleSelection;
@@ -158,23 +169,27 @@ class _MediaResourceListWidget extends StatelessWidget {
       this.isMultipleSelection = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final fileName = mediaResource.name.split('.').first;
     final extension = mediaResource.name.split('.').last.toUpperCase();
-    final GlobalMediaResourcesController globalMediaResourcesController =
-        Get.find();
     return Row(
       children: [
         Expanded(
             child: GestureDetector(
           onTap: () {
             if (isMultipleSelection) {
-              globalMediaResourcesController.selectedIndexList.contains(index)
-                  ? globalMediaResourcesController.selectedIndexList
-                      .remove(index)
-                  : globalMediaResourcesController.selectedIndexList.add(index);
+              ref
+                      .watch(mediaResourcesProvider)
+                      .selectedResources
+                      .contains(mediaResource)
+                  ? ref
+                      .read(mediaResourcesProvider.notifier)
+                      .removeSelectedResource(mediaResource)
+                  : ref
+                      .read(mediaResourcesProvider.notifier)
+                      .addSelectedResource(mediaResource);
             } else {
-              globalMediaResourcesController.currentMediaIndex.value = index;
+              ref.read(mediaResourcesProvider.notifier).setCurrentIndex(index);
             }
           },
           child: ClipRRect(
@@ -186,7 +201,8 @@ class _MediaResourceListWidget extends StatelessWidget {
                   height: _listWidgetHeight - 1,
                   width: double.infinity,
                   color: isSelected
-                      ? ColorDark.blue0.withOpacity(0.8)
+                      // ? ColorDark.blue0.withOpacity(0.8)
+                      ? ColorDark.blue0.withAlpha((0.8 * 255).round())
                       : Colors.transparent,
                   child: Padding(
                     padding: EdgeInsets.only(
@@ -274,15 +290,23 @@ class _MediaResourceListWidget extends StatelessWidget {
                                                 : Icons.check_box_outline_blank,
                                             onPressed: () {
                                               if (isMultipleSelection) {
-                                                globalMediaResourcesController
-                                                        .selectedIndexList
-                                                        .contains(index)
-                                                    ? globalMediaResourcesController
-                                                        .selectedIndexList
-                                                        .remove(index)
-                                                    : globalMediaResourcesController
-                                                        .selectedIndexList
-                                                        .add(index);
+                                                ref
+                                                        .watch(
+                                                            mediaResourcesProvider)
+                                                        .selectedResources
+                                                        .contains(mediaResource)
+                                                    ? ref
+                                                        .read(
+                                                            mediaResourcesProvider
+                                                                .notifier)
+                                                        .removeSelectedResource(
+                                                            mediaResource)
+                                                    : ref
+                                                        .read(
+                                                            mediaResourcesProvider
+                                                                .notifier)
+                                                        .addSelectedResource(
+                                                            mediaResource);
                                               }
                                             },
                                             iconSize:
@@ -344,56 +368,50 @@ class _MediaResourceListWidget extends StatelessWidget {
   }
 }
 
-class MediaResourcesListPanel extends StatelessWidget {
+class MediaResourcesListPanel extends ConsumerWidget {
   const MediaResourcesListPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final MediaResourcesListPanelController mediaResourcesListPanelController =
-        Get.find();
-    final globalMediaResourcesController =
-        Get.find<GlobalMediaResourcesController>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResources =
+        ref.watch(mediaResourcesProvider.select((value) => value.resources));
+    final currentIndex =
+        ref.watch(mediaResourcesProvider.select((value) => value.currentIndex));
+    final isMultipleSelection = ref.watch(
+        mediaResourcesProvider.select((value) => value.isMultipleSelection));
+    final mediaResourcesLength = ref.watch(
+        mediaResourcesProvider.select((value) => value.resources.length));
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const _MediaResourcesListTopBar(),
         Expanded(child: LayoutBuilder(builder: (context, constraints) {
-          mediaResourcesListPanelController.panelHeight = constraints.maxHeight;
+          _panelHeight = constraints.maxHeight;
           return RawScrollbar(
               thickness: DesignValues.smallPadding,
               trackVisibility: false,
               thumbVisibility: true,
               radius: Radius.circular(DesignValues.smallBorderRadius),
-              controller: mediaResourcesListPanelController
-                  .mediaResourcesListScrollController,
+              controller: _mediaResourcesListScrollController,
               child: Row(
                 children: [
                   Expanded(
-                      child: Obx(() => ListView.builder(
+                      child: ListView.builder(
                           scrollDirection: Axis.vertical,
-                          controller: mediaResourcesListPanelController
-                              .mediaResourcesListScrollController,
-                          itemCount: globalMediaResourcesController
-                              .mediaResources.length,
+                          controller: _mediaResourcesListScrollController,
+                          itemCount: mediaResourcesLength,
                           itemBuilder: (context, index) {
-                            final mediaResource = globalMediaResourcesController
-                                .mediaResources[index];
-                            return Obx(() => _MediaResourceListWidget(
-                                  index: index,
-                                  mediaResource: mediaResource,
-                                  isSelected: globalMediaResourcesController
-                                          .selectedIndexList
-                                          .contains(index) ||
-                                      (!globalMediaResourcesController
-                                              .isMultipleSelection.value &&
-                                          globalMediaResourcesController
-                                                  .currentMediaIndex.value ==
-                                              index),
-                                  isMultipleSelection:
-                                      globalMediaResourcesController
-                                          .isMultipleSelection.value,
-                                ));
-                          }))),
+                            final mediaResource = mediaResources[index];
+                            return _MediaResourceListWidget(
+                                index: index,
+                                mediaResource: mediaResource,
+                                isSelected: isMultipleSelection
+                                    ? ref.watch(mediaResourcesProvider.select(
+                                        (state) => state.selectedResources
+                                            .contains(mediaResource)))
+                                    : currentIndex == index,
+                                isMultipleSelection: isMultipleSelection);
+                          }))
                 ],
               ));
         }))

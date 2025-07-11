@@ -7,10 +7,12 @@ import 'objectbox.g.dart'; // created by `flutter pub run build_runner build`
 class ObjectBox {
   /// The Store of this app.
   late final Store store;
-  late final Box<ExportPreset> transCodePresetBox;
+  late final Box<TranscodePreset> transcodePresetBox;
+
+  static ObjectBox? _instance;
 
   ObjectBox._create(this.store) {
-    transCodePresetBox = Box<ExportPreset>(store);
+    transcodePresetBox = Box<TranscodePreset>(store);
   }
 
   /// Create an instance of ObjectBox to use throughout the app.
@@ -19,6 +21,16 @@ class ObjectBox {
     // Future<Store> openStore() {...} is defined in the generated objectbox.g.dart
     final store =
         await openStore(directory: p.join(docsDir.path, "objectbox-test"));
-    return ObjectBox._create(store);
+    final objectbox = ObjectBox._create(store);
+    _instance = objectbox;
+    return objectbox;
+  }
+
+  static ObjectBox get instance {
+    if (_instance == null) {
+      throw Exception(
+          "ObjectBox not initialized. Call ObjectBox.create() first.");
+    }
+    return _instance!;
   }
 }

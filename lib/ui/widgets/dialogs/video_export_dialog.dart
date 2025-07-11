@@ -4,23 +4,18 @@ import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/constants.dart';
-import 'package:xji_footage_toolbox/service/log_service.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/settings_dialog.dart';
-
-import '../../../controllers/global_media_resources_controller.dart';
-import '../../../controllers/global_settings_controller.dart';
-import '../../../controllers/global_tasks_controller.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 import '../../../models/media_resource.dart';
 import '../../../models/settings.dart';
-import '../../../models/video_process.dart';
 import '../../../utils/media_resources_utils.dart';
 import 'custom_dual_option_dialog.dart';
 import '../buttons/custom_icon_button.dart';
 import '../../design_tokens.dart';
-import '../views/video_trimmer.dart';
 
 String _getDefaultOutputFileName(String originalFileName) {
   final lastDotIndex = originalFileName.lastIndexOf('.');
@@ -33,27 +28,28 @@ String _get4DigitRandomString() {
   return random.nextInt(10000).toString().padLeft(4, '0');
 }
 
-Duration _getOutputDuration() {
+Duration _getOutputDuration(
+    {required bool isMerging,
+    required bool isEditing,
+    required WidgetRef ref}) {
   var duration = const Duration(seconds: 0);
-  final GlobalMediaResourcesController globalMediaResourcesController =
-      Get.find<GlobalMediaResourcesController>();
-  final MultiSelectPanelController multiSelectPanelController = Get.find();
-  if (multiSelectPanelController.isMerging.value) {
-    for (final index in globalMediaResourcesController.selectedIndexList) {
-      final videoResource = globalMediaResourcesController.mediaResources[index]
-          as NormalVideoResource;
+  if (isMerging) {
+    for (final element in ref.watch(
+        mediaResourcesProvider.select((state) => state.selectedResources))) {
+      final videoResource = element as NormalVideoResource;
       duration += videoResource.duration;
     }
   } else {
-    if (globalMediaResourcesController.isEditingMediaResources.value) {
-      final videoTrimmerController = Get.find<VideoTrimmerController>();
-      duration = videoTrimmerController.savedEnd.value -
-          videoTrimmerController.savedStart.value;
+    if (isEditing) {
+      duration = ref.watch(trimmerSavedEnd) -
+          ref.watch(trimmerSavedStart);
     } else {
-      final videoResource = globalMediaResourcesController.mediaResources[
-              globalMediaResourcesController.currentMediaIndex.value]
-          as NormalVideoResource;
-      duration = videoResource.duration;
+      if (ref.watch(mediaResourcesProvider
+          .select((state) => state.resources.isNotEmpty))) {
+        final videoResource = ref.watch(mediaResourcesProvider.select((state) =>
+            state.resources[state.currentIndex] as NormalVideoResource));
+        duration = videoResource.duration;
+      }
     }
   }
   return duration;
@@ -88,8 +84,6 @@ class _MergeFileListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final GlobalMediaResourcesController globalMediaResourcesController =
-        Get.find<GlobalMediaResourcesController>();
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       Text('Merge files:',
           style:
@@ -104,61 +98,70 @@ class _MergeFileListView extends StatelessWidget {
               style: SemiTextStyles.header6ENRegular
                   .copyWith(color: ColorDark.text0));
         },
-        itemCount: globalMediaResourcesController.selectedIndexList.length,
+        itemCount: videoResources.length,
       )),
     ]);
   }
 }
 
-class VideoExportDialog extends StatelessWidget {
-  final List<NormalVideoResource> videoResources;
-
-  const VideoExportDialog({super.key, this.videoResources = const []});
+class VideoExportDialog extends HookConsumerWidget {
+  const VideoExportDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final GlobalMediaResourcesController globalMediaResourcesController =
-        Get.find<GlobalMediaResourcesController>();
-    final GlobalSettingsController globalSettingsController =
-        Get.find<GlobalSettingsController>();
-    final MultiSelectPanelController multiSelectPanelController = Get.find();
-    final GlobalTasksController globalTasksController =
-        Get.find<GlobalTasksController>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isMerging = ref.watch(isMergingStateProvider);
+    final isEditing =
+        ref.watch(mediaResourcesProvider.select((state) => state.isEditing));
 
     late final NormalVideoResource videoResource;
 
-    if (multiSelectPanelController.isMerging.value) {
-      videoResource = globalMediaResourcesController.mediaResources[
-              globalMediaResourcesController.selectedIndexList.first]
-          as NormalVideoResource;
+    if (isMerging) {
+      videoResource = ref.watch(mediaResourcesProvider.select(
+          (state) => state.selectedResources[0] as NormalVideoResource));
     } else {
-      if (globalMediaResourcesController.isEditingMediaResources.value) {
-        videoResource = globalMediaResourcesController.mediaResources[
-                globalMediaResourcesController.currentMediaIndex.value]
-            as NormalVideoResource;
-      } else {
-        videoResource = globalMediaResourcesController.mediaResources[
-                globalMediaResourcesController.currentMediaIndex.value]
-            as NormalVideoResource;
+      if (ref.watch(mediaResourcesProvider
+          .select((state) => state.resources.isNotEmpty))) {
+        videoResource = ref.watch(mediaResourcesProvider.select((state) =>
+            state.resources[state.currentIndex] as NormalVideoResource));
       }
     }
 
-    final useSameDirectory = true.obs;
-    final selectedDirectory = ''.obs;
-    final outputFileName = _getDefaultOutputFileName(videoResource.name).obs;
-    final isOutputPathValid = (!isFileExist(
-            '${videoResource.file.parent.path}/${outputFileName.value}.MP4'))
-        .obs;
-    final useInputEncodeSettings = false.obs;
-    final transCodePresetIndex =
-        globalSettingsController.defaultTransCodePresetId.value.obs;
+    final useSameDirectory = useState(true);
+    final selectedDirectory = useState('');
+    final outputFileName =
+        useState(_getDefaultOutputFileName(videoResource.name));
+    final isOutputPathValid = useState(!isFileExist(
+        '${videoResource.file.parent.path}/${outputFileName.value}.MP4'));
+    final useInputEncodeSettings = useState(false);
+    final transcodePresetIndex = useState(ref.watch(
+        settingsProvider.select((state) => state.defaultTranscodePresetId)));
 
-    final outputFileNameTextEditingController = TextEditingController();
-    final selectedDirectoryTextController = TextEditingController();
+    final outputFileNameTextEditingController =
+        useTextEditingController(text: outputFileName.value);
 
-    outputFileNameTextEditingController.text = outputFileName.value;
+    useEffect(() {
+      outputFileNameTextEditingController.addListener(() {
+        outputFileName.value = outputFileNameTextEditingController.text;
+        isOutputPathValid.value = !isFileExist(
+            '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
+            '/${outputFileName.value}.MP4');
+      });
+      return null;
+    }, []);
 
-    return Obx(() => CustomDualOptionDialog(
+    final selectedDirectoryTextController = useTextEditingController(text: '');
+
+    useEffect(() {
+      selectedDirectoryTextController.addListener(() {
+        selectedDirectory.value = selectedDirectoryTextController.text;
+        isOutputPathValid.value = !isFileExist(
+            '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
+            '/${outputFileName.value}.MP4');
+      });
+      return null;
+    }, []);
+
+    return CustomDualOptionDialog(
         width: 480,
         height: 680,
         title: 'Export',
@@ -166,18 +169,18 @@ class VideoExportDialog extends StatelessWidget {
         option2: 'Export',
         disableOption2: !isOutputPathValid.value,
         onOption1Pressed: () {
-          Get.back();
+          Navigator.pop(context);
         },
         onOption2Pressed: () async {
           if (isOutputPathValid.value) {
             final outputFilePath =
                 '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
                 '/${outputFileName.value}.MP4';
-            final preset = globalSettingsController.transCodingPresets
-                .firstWhere(
-                    (element) => element.id == transCodePresetIndex.value);
+            final preset = ref.watch(settingsProvider.select((state) =>
+                state.transcodingPresets.firstWhere(
+                    (element) => element.id == transcodePresetIndex.value)));
 
-            if (multiSelectPanelController.isMerging.value) {
+            if (isMerging) {
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
                   '${videoResource.file.parent.path}/.${outputFileName.value}_'
@@ -186,9 +189,13 @@ class VideoExportDialog extends StatelessWidget {
               if (inputFilesTxtFile.existsSync()) {
                 inputFilesTxtFile.deleteSync();
               }
-              inputFilesTxtFile.writeAsStringSync(videoResources
+              inputFilesTxtFile.writeAsStringSync(ref
+                  .watch(mediaResourcesProvider
+                      .select((state) => state.selectedResources))
                   .map((e) => 'file \'${e.file.path}\'')
                   .join('\n'));
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-f');
               ffmpegArgs.add('concat');
               ffmpegArgs.add('-safe');
@@ -224,17 +231,19 @@ class VideoExportDialog extends StatelessWidget {
                   print(arg);
                 }
               }
-              final process = VideoProcess(
-                name: '$outputFileName.MP4',
-                type: VideoProcessType.merge,
-                duration: _getOutputDuration(),
+              final task = VideoTask(
+                name: '${outputFileName.value}.MP4',
+                status: VideoTaskStatus.waiting,
+                type: VideoTaskType.merge,
                 ffmpegArgs: ffmpegArgs,
-                outputFilePath: outputFilePath,
-                logFilePath: LogService.isDebug
-                    ? '${videoResource.file.parent.path}/$logFolderName'
-                    : null,
+                duration: _getOutputDuration(
+                    isMerging: true, isEditing: isEditing, ref: ref),
+                progress: 0.0,
+                outputFile: File(outputFilePath),
+                tempFiles: [inputFilesTxtFile],
+                eta: Duration(),
               );
-              globalTasksController.addTask(process);
+              ref.read(taskManagerProvider.notifier).addTask(task);
             } else {
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
@@ -261,52 +270,50 @@ class VideoExportDialog extends StatelessWidget {
                 ffmpegArgs.add('copy');
               }
 
-              if (globalMediaResourcesController
-                  .isEditingMediaResources.value) {
-                final videoTrimmerController =
-                    Get.find<VideoTrimmerController>();
+              if (isEditing) {
                 ffmpegArgs.add('-ss');
                 ffmpegArgs
-                    .add(videoTrimmerController.savedStart.value.toString());
+                    .add(ref.watch(trimmerSavedStart).toString());
                 ffmpegArgs.add('-to');
                 ffmpegArgs
-                    .add(videoTrimmerController.savedEnd.value.toString());
+                    .add(ref.watch(trimmerSavedEnd).toString());
               }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
               ffmpegArgs.add(outputFilePath);
-              final process = VideoProcess(
-                name: '$outputFileName.MP4',
-                type:
-                    globalMediaResourcesController.isEditingMediaResources.value
-                        ? VideoProcessType.trim
-                        : VideoProcessType.transcode,
-                duration: _getOutputDuration(),
+              final task = VideoTask(
+                name: '${outputFileName.value}.MP4',
+                status: VideoTaskStatus.waiting,
+                type: isEditing
+                   ? VideoTaskType.trim
+                   : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
-                outputFilePath: outputFilePath,
-                logFilePath: LogService.isDebug
-                    ? '${videoResource.file.parent.path}/$logFolderName'
-                    : null,
+                duration: _getOutputDuration(
+                    isMerging: false, isEditing: isEditing, ref: ref),
+                progress: 0.0,
+                outputFile: File(outputFilePath),
+                tempFiles: [],
+                eta: Duration(),
               );
-              globalTasksController.addTask(process);
+              ref.read(taskManagerProvider.notifier).addTask(task);
             }
-            Get.back();
+            Navigator.pop(context);
           }
         },
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => CustomDialogCheckBoxWithText(
+              CustomDialogCheckBoxWithText(
                   text: 'Use the same directory as source',
                   value: useSameDirectory.value,
                   onPressed: () {
                     useSameDirectory.value = !useSameDirectory.value;
-                  })),
+                  }),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
-              Obx(() => useSameDirectory.value
+              useSameDirectory.value
                   ? const SizedBox()
                   : CustomDialogIconButtonWithText(
                       iconData: Icons.folder_open,
@@ -318,20 +325,25 @@ class VideoExportDialog extends StatelessWidget {
                           selectedDirectory.value = result;
                           selectedDirectoryTextController.text = result;
                         }
-                      })),
+                      }),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
-              Obx(() => useSameDirectory.value
+              useSameDirectory.value
                   ? const SizedBox()
-                  : TextField(
-                      readOnly: true,
-                      cursorColor: ColorDark.text1,
-                      controller: selectedDirectoryTextController,
-                      style: SemiTextStyles.header6ENRegular
-                          .copyWith(color: ColorDark.text0),
-                      decoration: dialogInputDecoration,
-                    )),
+                  : Theme(
+                      data: Theme.of(context).copyWith(
+                          textSelectionTheme: TextSelectionThemeData(
+                              selectionColor: ColorDark.blue5
+                                  .withAlpha((0.8 * 255).round()))),
+                      child: TextField(
+                        readOnly: true,
+                        cursorColor: ColorDark.text1,
+                        controller: selectedDirectoryTextController,
+                        style: SemiTextStyles.header6ENRegular
+                            .copyWith(color: ColorDark.text0),
+                        decoration: dialogInputDecoration,
+                      )),
               SizedBox(
                 height: DesignValues.ultraSmallPadding,
               ),
@@ -345,41 +357,36 @@ class VideoExportDialog extends StatelessWidget {
                 child: Theme(
                     data: Theme.of(context).copyWith(
                         textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: ColorDark.blue5.withOpacity(0.8))),
-                    child: Obx(() => TextField(
-                          cursorColor: ColorDark.text1,
-                          controller: outputFileNameTextEditingController,
-                          style: SemiTextStyles.header5ENRegular
-                              .copyWith(color: ColorDark.text0),
-                          decoration: dialogInputDecoration.copyWith(
-                              suffix: Text(
-                                '.MP4',
-                                style: SemiTextStyles.header5ENRegular
-                                    .copyWith(color: ColorDark.text1),
-                              ),
-                              errorText: isOutputPathValid.value
-                                  ? null
-                                  : 'File already exists',
-                              errorMaxLines: 3),
-                          onChanged: (value) {
-                            outputFileName.value = value;
-                            isOutputPathValid.value = !isFileExist(
-                                '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
-                                '/${outputFileName.value}.MP4');
-                          },
-                        ))),
+                            selectionColor: ColorDark.blue5
+                                .withAlpha((0.8 * 255).round()))),
+                    child: TextField(
+                      cursorColor: ColorDark.text1,
+                      controller: outputFileNameTextEditingController,
+                      style: SemiTextStyles.header5ENRegular
+                          .copyWith(color: ColorDark.text0),
+                      decoration: dialogInputDecoration.copyWith(
+                          suffix: Text(
+                            '.MP4',
+                            style: SemiTextStyles.header5ENRegular
+                                .copyWith(color: ColorDark.text1),
+                          ),
+                          errorText: isOutputPathValid.value
+                              ? null
+                              : 'File already exists',
+                          errorMaxLines: 3),
+                    )),
               ),
               SizedBox(
                 height: DesignValues.ultraSmallPadding,
               ),
-              Obx(() => CustomDialogCheckBoxWithText(
+              CustomDialogCheckBoxWithText(
                   text: 'Use the same encodings as source',
                   value: useInputEncodeSettings.value,
                   onPressed: () {
                     useInputEncodeSettings.value =
                         !useInputEncodeSettings.value;
-                  })),
-              Obx(() => useInputEncodeSettings.value
+                  }),
+              useInputEncodeSettings.value
                   ? const SizedBox()
                   : Row(
                       children: [
@@ -390,31 +397,37 @@ class VideoExportDialog extends StatelessWidget {
                           width: DesignValues.mediumPadding,
                         ),
                         Expanded(
-                            child: Obx(() => DropdownButton<int>(
-                                  isExpanded: true,
-                                  value: transCodePresetIndex.value,
-                                  focusColor: ColorDark.defaultActive,
-                                  dropdownColor: ColorDark.bg2,
-                                  style: SemiTextStyles.header5ENRegular
-                                      .copyWith(color: ColorDark.text0),
-                                  items: globalSettingsController
-                                      .transCodingPresets
-                                      .map((e) => DropdownMenuItem<int>(
-                                          value: e.id, child: Text(e.name)))
-                                      .toList(),
-                                  onChanged: (value) {
-                                    if (value != null) {
-                                      transCodePresetIndex.value = value;
-                                    }
-                                  },
-                                ))),
+                            child: DropdownButton<int>(
+                          isExpanded: true,
+                          value: transcodePresetIndex.value,
+                          focusColor: ColorDark.defaultActive,
+                          dropdownColor: ColorDark.bg2,
+                          style: SemiTextStyles.header5ENRegular
+                              .copyWith(color: ColorDark.text0),
+                          items: ref
+                              .watch(settingsProvider.select((state) => state
+                                  .transcodingPresets
+                                  .map((e) => DropdownMenuItem<int>(
+                                      value: e.id, child: Text(e.name)))
+                                  .toList()))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              transcodePresetIndex.value = value;
+                            }
+                          },
+                        )),
                         SizedBox(
                           width: DesignValues.largePadding,
                         ),
                         CustomIconButton(
                             iconData: Icons.settings,
                             onPressed: () async {
-                              await Get.dialog(const SettingsDialog());
+                              showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return SettingsDialog();
+                                  });
                             },
                             iconSize: DesignValues.mediumIconSize,
                             buttonSize: 24,
@@ -422,7 +435,7 @@ class VideoExportDialog extends StatelessWidget {
                             focusColor: ColorDark.defaultActive,
                             iconColor: ColorDark.text1)
                       ],
-                    )),
+                    ),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
@@ -436,51 +449,61 @@ class VideoExportDialog extends StatelessWidget {
               ),
               _OutputInfoItem(
                   keyText: 'Output duration:',
-                  valueText: _getOutputDuration().toString()),
-              Obx(() => _OutputInfoItem(
+                  valueText: _getOutputDuration(
+                          isEditing: isEditing, isMerging: isMerging, ref: ref)
+                      .toString()),
+              _OutputInfoItem(
                   keyText: 'Output resolution:',
                   valueText: useInputEncodeSettings.value
                       ? '${videoResource.width}x${videoResource.height}'
-                      : globalSettingsController.transCodingPresets
-                              .firstWhere((element) =>
-                                  element.id == transCodePresetIndex.value)
+                      : ref
+                              .watch(settingsProvider.select((state) => state
+                                  .transcodingPresets
+                                  .firstWhere((element) =>
+                                      element.id ==
+                                      transcodePresetIndex.value)))
                               .useInputResolution
                           ? '${videoResource.width}x${videoResource.height}'
-                          : '${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).width}'
-                              'x${globalSettingsController.transCodingPresets.firstWhere((element) => element.id == transCodePresetIndex.value).height}')),
-              Obx(() => _OutputInfoItem(
-                  keyText: 'Output codec:',
-                  valueText: useInputEncodeSettings.value
-                      ? videoResource.isHevc
-                          ? 'H.265'
-                          : 'H.264'
-                      : globalSettingsController.transCodingPresets
-                              .firstWhere((element) =>
-                                  element.id == transCodePresetIndex.value)
-                              .useHevc
-                          ? 'H.265'
-                          : 'H.264')),
-              Obx(() => useInputEncodeSettings.value
+                          : '${ref.watch(settingsProvider.select((state) => state.transcodingPresets.firstWhere((element) => element.id == transcodePresetIndex.value))).width}x${ref.watch(settingsProvider.select((state) => state.transcodingPresets.firstWhere((element) => element.id == transcodePresetIndex.value))).height}'),
+              _OutputInfoItem(
+                keyText: 'Output codec:',
+                valueText: useInputEncodeSettings.value
+                    ? videoResource.isHevc
+                        ? 'H.265'
+                        : 'H.264'
+                    : ref
+                            .watch(settingsProvider.select((state) =>
+                                state.transcodingPresets.firstWhere((element) =>
+                                    element.id == transcodePresetIndex.value)))
+                            .useHevc
+                        ? 'H.265'
+                        : 'H.264',
+              ),
+              useInputEncodeSettings.value
                   ? const SizedBox()
                   : _OutputInfoItem(
                       keyText: 'Output CRF:',
-                      valueText: globalSettingsController.transCodingPresets
-                          .firstWhere((element) =>
-                              element.id == transCodePresetIndex.value)
+                      valueText: ref
+                          .watch(settingsProvider.select((state) =>
+                              state.transcodingPresets.firstWhere((element) =>
+                                  element.id == transcodePresetIndex.value)))
                           .crf
-                          .toString())),
-              Obx(() => useInputEncodeSettings.value
+                          .toString(),
+                    ),
+              useInputEncodeSettings.value
                   ? const SizedBox()
                   : _OutputInfoItem(
                       keyText: 'Output FFMPEG preset:',
-                      valueText: FFmpegPreset.values[globalSettingsController
-                              .transCodingPresets
-                              .firstWhere((element) =>
-                                  element.id == transCodePresetIndex.value)
+                      valueText: FFmpegPreset.values[ref
+                              .watch(settingsProvider.select((state) => state
+                                  .transcodingPresets
+                                  .firstWhere((element) =>
+                                      element.id ==
+                                      transcodePresetIndex.value)))
                               .ffmpegPreset]
                           .toString()
                           .split('.')
-                          .last)),
+                          .last),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
@@ -492,11 +515,15 @@ class VideoExportDialog extends StatelessWidget {
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
-              if (multiSelectPanelController.isMerging.value)
+              if (isMerging)
                 Expanded(
                     child: _MergeFileListView(
-                  videoResources: videoResources,
+                  videoResources: ref.watch(mediaResourcesProvider.select(
+                    (state) => state.selectedResources
+                        .map((element) => element as NormalVideoResource)
+                        .toList(),
+                  )),
                 )),
-            ])));
+            ]));
   }
 }

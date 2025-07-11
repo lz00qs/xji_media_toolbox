@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
-import '../../main_panel.dart';
+import 'main_panel.dart';
 
 class _VideoThumbnail extends StatelessWidget {
   final NormalVideoResource videoResource;
@@ -46,20 +46,14 @@ class _VideoThumbnail extends StatelessWidget {
   }
 }
 
-class VideoMergerView extends StatelessWidget {
-  final List<MediaResource> videoResources;
-
-  const VideoMergerView({super.key, required this.videoResources});
+class VideoMergerPanel extends ConsumerWidget {
+  const VideoMergerPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final rxVideoResources = <NormalVideoResource>[].obs;
-    rxVideoResources.addAll(videoResources
-        .map((e) => e as NormalVideoResource)
-        .toList()
-        .cast<NormalVideoResource>());
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedResources = ref.watch(mediaResourcesProvider.select((state) =>
+        state.selectedResources.map((e) => e as NormalVideoResource).toList()));
     final scrollController = ScrollController();
-    final MultiSelectPanelController multiSelectPanelController = Get.find();
     return Row(
       children: [
         Expanded(
@@ -79,7 +73,7 @@ class VideoMergerView extends StatelessWidget {
                     controller: scrollController,
                     thumbVisibility: true,
                     radius: Radius.circular(DesignValues.smallBorderRadius),
-                    child: Obx(() => Theme(
+                    child: Theme(
                         data: Theme.of(context).copyWith(
                           canvasColor: ColorDark.bg3,
                           // shadowColor: Colors.transparent,
@@ -90,21 +84,19 @@ class VideoMergerView extends StatelessWidget {
                             scrollController: scrollController,
                             itemBuilder: (context, index) {
                               return ReorderableDragStartListener(
-                                  key: ValueKey(rxVideoResources[index]),
+                                  key: ValueKey(selectedResources[index]),
                                   index: index,
                                   child: _VideoThumbnail(
-                                    videoResource: rxVideoResources[index],
+                                    videoResource: selectedResources[index],
                                   ));
                             },
-                            itemCount: rxVideoResources.length,
+                            itemCount: selectedResources.length,
                             onReorder: (int oldIndex, int newIndex) {
-                              final NormalVideoResource videoResource =
-                                  rxVideoResources.removeAt(oldIndex);
-                              if (newIndex > oldIndex) {
-                                newIndex -= 1;
-                              }
-                              rxVideoResources.insert(newIndex, videoResource);
-                            })))),
+                              ref
+                                  .read(mediaResourcesProvider.notifier)
+                                  .reorderSelectedResources(
+                                      oldIndex: oldIndex, newIndex: newIndex);
+                            }))),
               ),
             ),
           ),
@@ -114,7 +106,7 @@ class VideoMergerView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.arrow_back_ios_new,
                 onPressed: () {
-                  multiSelectPanelController.isMerging.value = false;
+                  ref.read(isMergingStateProvider.notifier).state = false;
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
@@ -127,9 +119,12 @@ class VideoMergerView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.save,
                 onPressed: () async {
-                  await Get.dialog(VideoExportDialog(
-                    videoResources: rxVideoResources,
-                  ));
+                  // await Get.dialog(VideoExportDialog(
+                  //   videoResources: rxVideoResources,
+                  // ));
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) => VideoExportDialog());
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,

@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/models/video_process.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import '../../controllers/global_tasks_controller.dart';
+String _getTimeString(int seconds) {
+  int minutes = seconds ~/ 60;
+  int hours = minutes ~/ 60;
+  minutes = minutes % 60;
+  seconds = seconds % 60;
+  return '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+}
+
+String _getFirstCapital(String str) {
+  if (str.isEmpty) {
+    return str;
+  }
+  return str[0].toUpperCase() + str.substring(1);
+}
 
 class TaskItem extends StatelessWidget {
-  final VideoProcess videoProcess;
+  final VideoTask videoTask;
 
-  const TaskItem({super.key, required this.videoProcess});
+  const TaskItem({super.key, required this.videoTask});
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +49,14 @@ class TaskItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        VideoProcessType.values[videoProcess.type.index].name,
+                        "${_getFirstCapital(VideoTaskType.values[videoTask.type.index].name)}${videoTask.status == VideoTaskStatus.processing ? '     ETA: ${_getTimeString(videoTask.eta.inSeconds)}' : ''}",
                         style: SemiTextStyles.header4ENRegular.copyWith(
                             color: ColorDark.text0,
                             overflow: TextOverflow.ellipsis),
                       ),
                       const Spacer(),
                       Text(
-                        videoProcess.name,
+                        videoTask.name,
                         style: SemiTextStyles.regularENSemiBold.copyWith(
                             color: ColorDark.text1,
                             overflow: TextOverflow.ellipsis),
@@ -56,62 +69,62 @@ class TaskItem extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Obx(() {
-                          switch (videoProcess.status.value) {
-                            case VideoProcessStatus.processing:
+                        Builder(builder: (BuildContext context) {
+                          switch (videoTask.status) {
+                            case VideoTaskStatus.processing:
                               return SizedBox(
                                 width: 24,
                                 height: 24,
                                 child: IconButton(
                                     onPressed: () {
-                                      videoProcess.cancel();
+                                      videoTask.cancel();
                                     },
                                     padding: EdgeInsets.zero,
                                     icon: const Icon(Icons.cancel_outlined,
                                         color: ColorDark.warning)),
                               );
-                            case VideoProcessStatus.finished:
+                            case VideoTaskStatus.finished:
                               return const Icon(Icons.check,
                                   color: ColorDark.success);
-                            case VideoProcessStatus.canceled:
+                            case VideoTaskStatus.canceled:
                               return const Icon(Icons.cancel_outlined,
                                   color: ColorDark.warning);
-                            case VideoProcessStatus.failed:
+                            case VideoTaskStatus.failed:
                               return const Icon(Icons.error,
                                   color: ColorDark.danger);
-                            case VideoProcessStatus.waiting:
+                            case VideoTaskStatus.waiting:
                               return const Icon(Icons.timer,
                                   color: ColorDark.text1);
                           }
                         }),
-                        Obx(() {
-                          switch (videoProcess.status.value) {
-                            case VideoProcessStatus.processing:
+                        Builder(builder: (BuildContext context) {
+                          switch (videoTask.status) {
+                            case VideoTaskStatus.processing:
                               return Text(
-                                  '${(videoProcess.progress.value * 100).toInt()}%',
+                                  '${(videoTask.progress * 100).toInt()}%',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
                                           color: ColorDark.text1,
                                           overflow: TextOverflow.ellipsis));
-                            case VideoProcessStatus.finished:
+                            case VideoTaskStatus.finished:
                               return Text('finished',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
                                           color: ColorDark.success,
                                           overflow: TextOverflow.ellipsis));
-                            case VideoProcessStatus.canceled:
+                            case VideoTaskStatus.canceled:
                               return Text('canceled',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
                                           color: ColorDark.warning,
                                           overflow: TextOverflow.ellipsis));
-                            case VideoProcessStatus.failed:
+                            case VideoTaskStatus.failed:
                               return Text('failed',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
                                           color: ColorDark.danger,
                                           overflow: TextOverflow.ellipsis));
-                            case VideoProcessStatus.waiting:
+                            case VideoTaskStatus.waiting:
                               return Text('waiting',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
@@ -132,13 +145,14 @@ class TaskItem extends StatelessWidget {
   }
 }
 
-class TaskDrawer extends StatelessWidget {
+class TaskDrawer extends ConsumerWidget {
   const TaskDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final GlobalTasksController globalTasksController =
-        Get.find<GlobalTasksController>();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final taskManager = ref.watch(taskManagerProvider);
+    final tasksLength =
+        ref.watch(taskManagerProvider.select((state) => state.length));
     return Drawer(
         width: 480,
         shape: RoundedRectangleBorder(
@@ -151,22 +165,19 @@ class TaskDrawer extends StatelessWidget {
             children: [
               IconButton(
                   onPressed: () {
-                    Get.back();
+                    Navigator.of(context).pop();
                   },
                   icon: const Icon(
                     Icons.arrow_forward,
                     color: ColorDark.text0,
                   )),
-              Obx(() => Expanded(
+              Expanded(
                   child: ListView.builder(
                       shrinkWrap: true,
-                      itemCount:
-                          globalTasksController.videoProcessingTasks.length,
+                      itemCount: tasksLength,
                       itemBuilder: (BuildContext context, int index) {
-                        return TaskItem(
-                            videoProcess: globalTasksController
-                                .videoProcessingTasks[index]);
-                      })))
+                        return TaskItem(videoTask: taskManager[index]);
+                      }))
             ],
           ),
         ));

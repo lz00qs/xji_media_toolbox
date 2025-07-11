@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/utils/media_resources_utils.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/models/media_resource.dart';
 
 import '../../design_tokens.dart';
 import 'custom_dual_option_dialog.dart';
@@ -18,11 +18,11 @@ class _ConfirmText extends StatelessWidget {
   }
 }
 
-class AddAebSuffixDialog extends StatelessWidget {
-  const AddAebSuffixDialog({super.key});
+class AebAddSuffixDialog extends ConsumerWidget {
+  const AebAddSuffixDialog({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return CustomDualOptionDialog(
         width: 400,
         height: 240,
@@ -30,11 +30,13 @@ class AddAebSuffixDialog extends StatelessWidget {
         option1: 'Cancel',
         option2: 'Add',
         onOption1Pressed: () {
-          Get.back();
+          Navigator.of(context).pop();
         },
         onOption2Pressed: () {
-          addSuffixToCurrentAebFilesName();
-          Get.back();
+          ref
+              .read(mediaResourcesProvider.notifier)
+              .addAebSuffixToCurrentAebFilesName();
+          Navigator.of(context).pop();
         },
         child: const _ConfirmText(
             text:

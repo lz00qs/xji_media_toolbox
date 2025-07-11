@@ -20,54 +20,63 @@ export 'package:objectbox/objectbox.dart'; // so that callers only have to impor
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-      id: const obx_int.IdUid(1, 6542342576071718515),
-      name: 'ExportPreset',
-      lastPropertyId: const obx_int.IdUid(8, 6600177316668141755),
-      flags: 0,
-      properties: <obx_int.ModelProperty>[
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(1, 3441272698186930426),
-            name: 'id',
-            type: 6,
-            flags: 1),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(2, 2633146971749489003),
-            name: 'name',
-            type: 9,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(3, 5469937351195833193),
-            name: 'useInputResolution',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(4, 6942609030270405673),
-            name: 'useHevc',
-            type: 1,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(5, 2255326580324500820),
-            name: 'width',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(6, 3004389153049693201),
-            name: 'height',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(7, 3288320502769605509),
-            name: 'crf',
-            type: 6,
-            flags: 0),
-        obx_int.ModelProperty(
-            id: const obx_int.IdUid(8, 6600177316668141755),
-            name: 'ffmpegPreset',
-            type: 6,
-            flags: 0)
-      ],
-      relations: <obx_int.ModelRelation>[],
-      backlinks: <obx_int.ModelBacklink>[])
+    id: const obx_int.IdUid(2, 5066807561326805015),
+    name: 'TranscodePreset',
+    lastPropertyId: const obx_int.IdUid(8, 6947592021971297063),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 1268788478972929064),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 6604121700459575002),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 6806958124699359397),
+        name: 'useInputResolution',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 4710756751357513035),
+        name: 'useHevc',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 1102421391753766293),
+        name: 'width',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 3946286356324700626),
+        name: 'height',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 4338324737020365168),
+        name: 'crf',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 6947592021971297063),
+        name: 'ffmpegPreset',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
 ];
 
 /// Shortcut for [obx.Store.new] that passes [getObjectBoxModel] and for Flutter
@@ -81,123 +90,156 @@ final _entities = <obx_int.ModelEntity>[
 /// For Flutter apps, also calls `loadObjectBoxLibraryAndroidCompat()` from
 /// the ObjectBox Flutter library to fix loading the native ObjectBox library
 /// on Android 6 and older.
-Future<obx.Store> openStore(
-    {String? directory,
-    int? maxDBSizeInKB,
-    int? maxDataSizeInKB,
-    int? fileMode,
-    int? maxReaders,
-    bool queriesCaseSensitiveDefault = true,
-    String? macosApplicationGroup}) async {
+Future<obx.Store> openStore({
+  String? directory,
+  int? maxDBSizeInKB,
+  int? maxDataSizeInKB,
+  int? fileMode,
+  int? maxReaders,
+  bool queriesCaseSensitiveDefault = true,
+  String? macosApplicationGroup,
+}) async {
   await loadObjectBoxLibraryAndroidCompat();
-  return obx.Store(getObjectBoxModel(),
-      directory: directory ?? (await defaultStoreDirectory()).path,
-      maxDBSizeInKB: maxDBSizeInKB,
-      maxDataSizeInKB: maxDataSizeInKB,
-      fileMode: fileMode,
-      maxReaders: maxReaders,
-      queriesCaseSensitiveDefault: queriesCaseSensitiveDefault,
-      macosApplicationGroup: macosApplicationGroup);
+  return obx.Store(
+    getObjectBoxModel(),
+    directory: directory ?? (await defaultStoreDirectory()).path,
+    maxDBSizeInKB: maxDBSizeInKB,
+    maxDataSizeInKB: maxDataSizeInKB,
+    fileMode: fileMode,
+    maxReaders: maxReaders,
+    queriesCaseSensitiveDefault: queriesCaseSensitiveDefault,
+    macosApplicationGroup: macosApplicationGroup,
+  );
 }
 
 /// Returns the ObjectBox model definition for this project for use with
 /// [obx.Store.new].
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
-      entities: _entities,
-      lastEntityId: const obx_int.IdUid(1, 6542342576071718515),
-      lastIndexId: const obx_int.IdUid(0, 0),
-      lastRelationId: const obx_int.IdUid(0, 0),
-      lastSequenceId: const obx_int.IdUid(0, 0),
-      retiredEntityUids: const [],
-      retiredIndexUids: const [],
-      retiredPropertyUids: const [],
-      retiredRelationUids: const [],
-      modelVersion: 5,
-      modelVersionParserMinimum: 5,
-      version: 1);
+    entities: _entities,
+    lastEntityId: const obx_int.IdUid(2, 5066807561326805015),
+    lastIndexId: const obx_int.IdUid(0, 0),
+    lastRelationId: const obx_int.IdUid(0, 0),
+    lastSequenceId: const obx_int.IdUid(0, 0),
+    retiredEntityUids: const [6542342576071718515],
+    retiredIndexUids: const [],
+    retiredPropertyUids: const [
+      3441272698186930426,
+      2633146971749489003,
+      5469937351195833193,
+      6942609030270405673,
+      2255326580324500820,
+      3004389153049693201,
+      3288320502769605509,
+      6600177316668141755,
+    ],
+    retiredRelationUids: const [],
+    modelVersion: 5,
+    modelVersionParserMinimum: 5,
+    version: 1,
+  );
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    ExportPreset: obx_int.EntityDefinition<ExportPreset>(
-        model: _entities[0],
-        toOneRelations: (ExportPreset object) => [],
-        toManyRelations: (ExportPreset object) => {},
-        getId: (ExportPreset object) => object.id,
-        setId: (ExportPreset object, int id) {
-          object.id = id;
-        },
-        objectToFB: (ExportPreset object, fb.Builder fbb) {
-          final nameOffset = fbb.writeString(object.name);
-          fbb.startTable(9);
-          fbb.addInt64(0, object.id);
-          fbb.addOffset(1, nameOffset);
-          fbb.addBool(2, object.useInputResolution);
-          fbb.addBool(3, object.useHevc);
-          fbb.addInt64(4, object.width);
-          fbb.addInt64(5, object.height);
-          fbb.addInt64(6, object.crf);
-          fbb.addInt64(7, object.ffmpegPreset);
-          fbb.finish(fbb.endTable());
-          return object.id;
-        },
-        objectFromFB: (obx.Store store, ByteData fbData) {
-          final buffer = fb.BufferContext(fbData);
-          final rootOffset = buffer.derefObject(0);
+    TranscodePreset: obx_int.EntityDefinition<TranscodePreset>(
+      model: _entities[0],
+      toOneRelations: (TranscodePreset object) => [],
+      toManyRelations: (TranscodePreset object) => {},
+      getId: (TranscodePreset object) => object.id,
+      setId: (TranscodePreset object, int id) {
+        object.id = id;
+      },
+      objectToFB: (TranscodePreset object, fb.Builder fbb) {
+        final nameOffset = fbb.writeString(object.name);
+        fbb.startTable(9);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, nameOffset);
+        fbb.addBool(2, object.useInputResolution);
+        fbb.addBool(3, object.useHevc);
+        fbb.addInt64(4, object.width);
+        fbb.addInt64(5, object.height);
+        fbb.addInt64(6, object.crf);
+        fbb.addInt64(7, object.ffmpegPreset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
 
-          final object = ExportPreset()
-            ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-            ..name = const fb.StringReader(asciiOptimization: true)
-                .vTableGet(buffer, rootOffset, 6, '')
-            ..useInputResolution =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 8, false)
-            ..useHevc =
-                const fb.BoolReader().vTableGet(buffer, rootOffset, 10, false)
-            ..width =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)
-            ..height =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
-            ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
-            ..ffmpegPreset =
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 18, 0);
+        final object = TranscodePreset()
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+          ..name = const fb.StringReader(
+            asciiOptimization: true,
+          ).vTableGet(buffer, rootOffset, 6, '')
+          ..useInputResolution = const fb.BoolReader().vTableGet(
+            buffer,
+            rootOffset,
+            8,
+            false,
+          )
+          ..useHevc = const fb.BoolReader().vTableGet(
+            buffer,
+            rootOffset,
+            10,
+            false,
+          )
+          ..width = const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)
+          ..height = const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
+          ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
+          ..ffmpegPreset = const fb.Int64Reader().vTableGet(
+            buffer,
+            rootOffset,
+            18,
+            0,
+          );
 
-          return object;
-        })
+        return object;
+      },
+    ),
   };
 
   return obx_int.ModelDefinition(model, bindings);
 }
 
-/// [ExportPreset] entity fields to define ObjectBox queries.
-class ExportPreset_ {
-  /// See [ExportPreset.id].
-  static final id =
-      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[0]);
+/// [TranscodePreset] entity fields to define ObjectBox queries.
+class TranscodePreset_ {
+  /// See [TranscodePreset.id].
+  static final id = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[0],
+  );
 
-  /// See [ExportPreset.name].
-  static final name =
-      obx.QueryStringProperty<ExportPreset>(_entities[0].properties[1]);
+  /// See [TranscodePreset.name].
+  static final name = obx.QueryStringProperty<TranscodePreset>(
+    _entities[0].properties[1],
+  );
 
-  /// See [ExportPreset.useInputResolution].
-  static final useInputResolution =
-      obx.QueryBooleanProperty<ExportPreset>(_entities[0].properties[2]);
+  /// See [TranscodePreset.useInputResolution].
+  static final useInputResolution = obx.QueryBooleanProperty<TranscodePreset>(
+    _entities[0].properties[2],
+  );
 
-  /// See [ExportPreset.useHevc].
-  static final useHevc =
-      obx.QueryBooleanProperty<ExportPreset>(_entities[0].properties[3]);
+  /// See [TranscodePreset.useHevc].
+  static final useHevc = obx.QueryBooleanProperty<TranscodePreset>(
+    _entities[0].properties[3],
+  );
 
-  /// See [ExportPreset.width].
-  static final width =
-      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[4]);
+  /// See [TranscodePreset.width].
+  static final width = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[4],
+  );
 
-  /// See [ExportPreset.height].
-  static final height =
-      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[5]);
+  /// See [TranscodePreset.height].
+  static final height = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[5],
+  );
 
-  /// See [ExportPreset.crf].
-  static final crf =
-      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[6]);
+  /// See [TranscodePreset.crf].
+  static final crf = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[6],
+  );
 
-  /// See [ExportPreset.ffmpegPreset].
-  static final ffmpegPreset =
-      obx.QueryIntegerProperty<ExportPreset>(_entities[0].properties[7]);
+  /// See [TranscodePreset.ffmpegPreset].
+  static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[7],
+  );
 }

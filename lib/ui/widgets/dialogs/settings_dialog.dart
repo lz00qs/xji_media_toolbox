@@ -1,15 +1,223 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/controllers/global_settings_controller.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
-import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/custom_dual_option_dialog.dart';
-import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-import '../../../constants.dart';
-import '../../../controllers/global_media_resources_controller.dart';
+import '../../design_tokens.dart';
+import '../buttons/custom_icon_button.dart';
+
+class SettingsDialog extends HookConsumerWidget {
+  const SettingsDialog({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final outputPresetScrollController = useScrollController();
+    final transcodingPresets =
+        ref.watch(settingsProvider.select((value) => value.transcodingPresets));
+    final isDebugMode =
+        ref.watch(settingsProvider.select((value) => value.isDebugMode));
+    final appVersion =
+        ref.watch(settingsProvider.select((value) => value.appVersion));
+    return CustomDualOptionDialog(
+        width: 480,
+        height: 640,
+        title: 'Settings',
+        option1: '',
+        option2: 'Close',
+        onOption1Pressed: () {},
+        onOption2Pressed: () {
+          Navigator.of(context).pop();
+        },
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text(
+                  'Transcode Presets',
+                  style: SemiTextStyles.header4ENRegular
+                      .copyWith(color: ColorDark.text0),
+                ),
+                SizedBox(
+                  width: DesignValues.smallPadding,
+                ),
+                CustomIconButton(
+                    iconData: Icons.add_circle_outline,
+                    onPressed: () async {
+                      final oPreset = await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _EditTranscodePresetDialog(preset: null);
+                          });
+                      if (oPreset != null) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .addTranscodePreset(oPreset);
+                      }
+                    },
+                    iconSize: DesignValues.mediumIconSize,
+                    buttonSize: 28,
+                    hoverColor: ColorDark.defaultHover,
+                    focusColor: ColorDark.defaultActive,
+                    iconColor: ColorDark.text0),
+              ],
+            ),
+            SizedBox(
+              height: DesignValues.ultraSmallPadding,
+            ),
+            ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(DesignValues.smallBorderRadius),
+              child: Container(
+                color: ColorDark.bg3,
+                height: 200,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: DesignValues.ultraSmallPadding,
+                      bottom: DesignValues.ultraSmallPadding,
+                      left: DesignValues.ultraSmallPadding),
+                  child: RawScrollbar(
+                    thickness: DesignValues.smallPadding,
+                    trackVisibility: false,
+                    thumbVisibility: true,
+                    radius: Radius.circular(DesignValues.smallBorderRadius),
+                    controller: outputPresetScrollController,
+                    child: Consumer(builder: (context, ref, child) {
+                      return ListView.builder(
+                          controller: outputPresetScrollController,
+                          itemCount: transcodingPresets.length,
+                          itemBuilder: (context, index) {
+                            return _PresetItem(
+                                preset: transcodingPresets[index]);
+                          });
+                    }),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: DesignValues.largePadding,
+            ),
+            Row(
+              children: [
+                Text('Debug Mode:',
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text1)),
+                const Spacer(),
+                Switch(
+                  value: isDebugMode,
+                  onChanged: (value) {
+                    ref.read(settingsProvider.notifier).setIsDebugMode(value);
+                    // todo: log service
+                  },
+                  activeTrackColor: ColorDark.blue5,
+                  activeColor: ColorDark.white,
+                )
+              ],
+            ),
+            SizedBox(
+              height: DesignValues.smallPadding,
+            ),
+            Row(
+              children: [
+                Text('Version:',
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text1)),
+                const Spacer(),
+                Text(appVersion,
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text0)),
+              ],
+            ),
+            SizedBox(
+              height: DesignValues.mediumPadding,
+            ),
+            Row(
+              children: [
+                Text('Author:',
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text1)),
+                const Spacer(),
+                Text('lz00qs',
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text0)),
+              ],
+            ),
+          ],
+        ));
+  }
+}
+
+class _PresetItem extends ConsumerWidget {
+  final TranscodePreset preset;
+
+  const _PresetItem({required this.preset});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDefaultPreset = ref.watch(settingsProvider
+        .select((value) => value.defaultTranscodePresetId == preset.id));
+    return SizedBox(
+      height: 37,
+      child: Row(
+        children: [
+          Expanded(
+              child: Column(
+            children: [
+              Expanded(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  _PresetItemButton(
+                      iconData: isDefaultPreset
+                          ? Icons.check_box_outlined
+                          : Icons.check_box_outline_blank,
+                      onPressed: () {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setDefaultTranscodePreset(preset.id);
+                      }),
+                  Expanded(
+                      child: Text(preset.name,
+                          style: SemiTextStyles.header5ENRegular.copyWith(
+                              color: ColorDark.text0,
+                              overflow: TextOverflow.ellipsis))),
+                  _PresetItemButton(
+                      iconData: Icons.edit,
+                      onPressed: () async {
+                        final oPreset = await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return _EditTranscodePresetDialog(preset: preset);
+                            });
+                        if (oPreset != null) {
+                          ref
+                              .read(settingsProvider.notifier)
+                              .updateTranscodePreset(oPreset);
+                        }
+                      }),
+                  SizedBox(
+                    width: DesignValues.mediumPadding,
+                  ),
+                  _PresetItemButton(iconData: Icons.delete, onPressed: () {}),
+                ],
+              )),
+              const Divider(
+                color: ColorDark.border,
+                thickness: 1,
+                height: 1,
+              ),
+            ],
+          )),
+          SizedBox(
+            width: DesignValues.smallPadding,
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class _PresetItemButton extends StatelessWidget {
   final IconData iconData;
@@ -30,172 +238,48 @@ class _PresetItemButton extends StatelessWidget {
   }
 }
 
-class _PresetItem extends StatelessWidget {
-  final ExportPreset preset;
-  final int index;
-
-  const _PresetItem({required this.preset, required this.index});
-
-  @override
-  Widget build(BuildContext context) {
-    final GlobalSettingsController settingsController = Get.find();
-    return SizedBox(
-      height: 37,
-      child: Row(
-        children: [
-          Expanded(
-              child: Column(
-            children: [
-              Expanded(
-                  child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Obx(() => _PresetItemButton(
-                      iconData:
-                          settingsController.defaultTransCodePresetId.value ==
-                                  preset.id
-                              ? Icons.check_box_outlined
-                              : Icons.check_box_outline_blank,
-                      onPressed: () {
-                        settingsController.defaultTransCodePresetId.value =
-                            preset.id;
-                      })),
-                  Expanded(
-                      child: Text(preset.name,
-                          style: SemiTextStyles.header5ENRegular.copyWith(
-                              color: ColorDark.text0,
-                              overflow: TextOverflow.ellipsis))),
-                  _PresetItemButton(
-                      iconData: Icons.edit,
-                      onPressed: () {
-                        Get.dialog(_EditTranscodePresetDialog(
-                          preset: preset,
-                        )).then((value) async {
-                          if (value != null) {
-                            settingsController.transCodingPresets[index] =
-                                value;
-                            await settingsController.saveSettings();
-                          }
-                        });
-                      }),
-                  SizedBox(
-                    width: DesignValues.mediumPadding,
-                  ),
-                  _PresetItemButton(
-                      iconData: Icons.delete,
-                      onPressed: () {
-                        Get.dialog(_PresetDeleteDialog(id: preset.id));
-                      }),
-                ],
-              )),
-              const Divider(
-                color: ColorDark.border,
-                thickness: 1,
-                height: 1,
-              ),
-            ],
-          )),
-          SizedBox(
-            width: DesignValues.smallPadding,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PresetDeleteDialog extends StatelessWidget {
-  final int id;
-
-  const _PresetDeleteDialog({required this.id});
-
-  @override
-  Widget build(BuildContext context) {
-    final GlobalSettingsController settingsController = Get.find();
-    return CustomDualOptionDialog(
-        width: 400,
-        height: 240,
-        title: 'Delete',
-        option1: 'Delete',
-        option2: 'Cancel',
-        onOption1Pressed: () async {
-          settingsController.transCodingPresets
-              .removeWhere((element) => element.id == id);
-          await settingsController.saveSettings();
-          Get.back();
-        },
-        onOption2Pressed: () {
-          Get.back();
-        },
-        child: Text('Are you sure you want to delete this preset?',
-            style: SemiTextStyles.header5ENRegular
-                .copyWith(color: ColorDark.text0)));
-  }
-}
-
-bool _isPresetParametersValid(String name, int width, int height, int crf) {
-  return name.isNotEmpty && width > 0 && height > 0 && crf > 0 && crf < 52;
-}
-
 class _EditTranscodePresetDialog extends StatelessWidget {
-  final nameController = TextEditingController();
-  final widthController = TextEditingController();
-  final heightController = TextEditingController();
-  final crfController = TextEditingController();
-  final name = ''.obs;
-  final width = 0.obs;
-  final height = 0.obs;
-  final crf = 22.obs;
-  final useHevc = false.obs;
-  final useInputResolution = false.obs;
-  final selectedFFmpegPreset = FFmpegPreset.medium.index.obs;
-  final ExportPreset? preset;
+  final TranscodePreset? preset;
+  late final TranscodePreset iPreset;
+  late final StateProvider<String> nameProvider;
+  late final StateProvider<int> widthProvider;
+  late final StateProvider<int> heightProvider;
+  late final StateProvider<int> crfProvider;
+  late final StateProvider<bool> useHevcProvider;
+  late final StateProvider<bool> useInputResolutionProvider;
+  late final StateProvider<int> selectedFFmpegPresetProvider;
 
   _EditTranscodePresetDialog({required this.preset}) {
     final isNew = preset == null;
-    late final ExportPreset editingPreset;
     if (isNew) {
-      editingPreset = ExportPreset();
+      iPreset = TranscodePreset();
     } else {
-      editingPreset = preset!;
+      iPreset = preset!;
     }
-    nameController.text = editingPreset.name;
-    widthController.text = editingPreset.width.toString();
-    heightController.text = editingPreset.height.toString();
-    crfController.text = editingPreset.crf.toString();
-    name.value = editingPreset.name;
-    width.value = editingPreset.width;
-    height.value = editingPreset.height;
-    crf.value = editingPreset.crf;
-    useHevc.value = editingPreset.useHevc;
-    useInputResolution.value = editingPreset.useInputResolution;
-    selectedFFmpegPreset.value = editingPreset.ffmpegPreset;
+    nameProvider = StateProvider<String>((ref) => iPreset.name);
+    widthProvider = StateProvider<int>((ref) => iPreset.width);
+    heightProvider = StateProvider<int>((ref) => iPreset.height);
+    crfProvider = StateProvider<int>((ref) => iPreset.crf);
+    useHevcProvider = StateProvider<bool>((ref) => iPreset.useHevc);
+    useInputResolutionProvider =
+        StateProvider<bool>((ref) => iPreset.useInputResolution);
+    selectedFFmpegPresetProvider =
+        StateProvider<int>((ref) => iPreset.ffmpegPreset);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => CustomDualOptionDialog(
+    return CustomDualOptionDialog(
         width: 480,
         height: 680,
         title: preset == null ? 'Add Preset' : 'Edit Preset',
         option1: 'Cancel',
         option2: preset == null ? 'Add' : 'Save',
-        disableOption2: !_isPresetParametersValid(
-            name.value, width.value, height.value, crf.value),
         onOption1Pressed: () {
-          Get.back();
+          Navigator.of(context).pop();
         },
         onOption2Pressed: () {
-          final newPreset = ExportPreset()
-            ..id = preset?.id ?? 0
-            ..name = nameController.text
-            ..width = width.value
-            ..height = height.value
-            ..crf = crf.value
-            ..useHevc = useHevc.value
-            ..useInputResolution = useInputResolution.value
-            ..ffmpegPreset = selectedFFmpegPreset.value;
-          Get.back(result: newPreset);
+          Navigator.of(context).pop(iPreset);
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -211,34 +295,54 @@ class _EditTranscodePresetDialog extends StatelessWidget {
               child: Theme(
                   data: Theme.of(context).copyWith(
                       textSelectionTheme: TextSelectionThemeData(
-                          selectionColor: ColorDark.blue5.withOpacity(0.8))),
-                  child: Obx(() => TextField(
-                        cursorColor: ColorDark.text1,
-                        controller: nameController,
-                        style: SemiTextStyles.header5ENRegular
-                            .copyWith(color: ColorDark.text0),
-                        decoration: dialogInputDecoration.copyWith(
-                            errorText:
-                                name.value.isEmpty ? 'Name is required' : null),
-                        onChanged: (value) {
-                          name.value = value;
-                        },
-                      ))),
+                          selectionColor:
+                              ColorDark.blue5.withAlpha((0.8 * 255).round()))),
+                  child: HookConsumer(builder: (context, ref, child) {
+                    final nameController =
+                        useTextEditingController(text: iPreset.name);
+                    useEffect(() {
+                      nameController.addListener(() {
+                        ref.read(nameProvider.notifier).state =
+                            nameController.text;
+                        if (nameController.text.isNotEmpty) {
+                          iPreset.name = nameController.text;
+                        }
+                      });
+                      return null;
+                    });
+                    return TextField(
+                      cursorColor: ColorDark.text1,
+                      controller: nameController,
+                      style: SemiTextStyles.header5ENRegular
+                          .copyWith(color: ColorDark.text0),
+                      decoration: dialogInputDecoration.copyWith(
+                          errorText: (ref.watch(nameProvider)).isEmpty
+                              ? 'Name is required'
+                              : null),
+                    );
+                  })),
             ),
             SizedBox(
               height: DesignValues.smallPadding,
             ),
-            Obx(() => CustomDialogCheckBoxWithText(
-                text: 'Use Input Resolution',
-                value: useInputResolution.value,
-                onPressed: () {
-                  useInputResolution.value = !useInputResolution.value;
-                })),
+            Consumer(
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              return CustomDialogCheckBoxWithText(
+                  text: 'Use Input Resolution',
+                  value: ref.watch(useInputResolutionProvider),
+                  onPressed: () {
+                    ref.read(useInputResolutionProvider.notifier).state =
+                        !ref.watch(useInputResolutionProvider);
+                    iPreset.useInputResolution =
+                        ref.watch(useInputResolutionProvider);
+                  });
+            }),
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
-            Obx(() {
-              if (useInputResolution.value) {
+            Consumer(
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              if (ref.watch(useInputResolutionProvider)) {
                 return const SizedBox();
               } else {
                 return Column(
@@ -252,31 +356,44 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                     SizedBox(
                       height: 72,
                       child: Theme(
-                          data: Theme.of(context).copyWith(
-                              textSelectionTheme: TextSelectionThemeData(
-                                  selectionColor:
-                                      ColorDark.blue5.withOpacity(0.8))),
-                          child: Obx(() => TextField(
-                                cursorColor: ColorDark.text1,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                controller: widthController,
-                                style: SemiTextStyles.header5ENRegular
-                                    .copyWith(color: ColorDark.text0),
-                                decoration: dialogInputDecoration.copyWith(
-                                    errorText: width.value == 0
-                                        ? 'Width cannot be 0'
-                                        : null),
-                                onChanged: (value) {
-                                  try {
-                                    width.value = int.parse(value);
-                                  } catch (e) {
-                                    width.value = 0;
-                                  }
-                                },
-                              ))),
+                        data: Theme.of(context).copyWith(
+                            textSelectionTheme: TextSelectionThemeData(
+                                selectionColor: ColorDark.blue5
+                                    .withAlpha((0.8 * 255).round()))),
+                        child: HookConsumer(builder: (context, ref, child) {
+                          final widthController = useTextEditingController(
+                              text: iPreset.width.toString());
+                          useEffect(() {
+                            widthController.addListener(() {
+                              try {
+                                ref.read(widthProvider.notifier).state =
+                                    int.parse(widthController.text);
+                              } catch (e) {
+                                ref.read(widthProvider.notifier).state = 0;
+                              }
+                              if (ref.watch(widthProvider) != 0 &&
+                                  !ref.watch(useInputResolutionProvider)) {
+                                iPreset.width = ref.watch(widthProvider);
+                              }
+                            });
+                            return null;
+                          });
+                          return TextField(
+                            cursorColor: ColorDark.text1,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            controller: widthController,
+                            style: SemiTextStyles.header5ENRegular
+                                .copyWith(color: ColorDark.text0),
+                            decoration: dialogInputDecoration.copyWith(
+                                errorText: ref.watch(widthProvider) == 0
+                                    ? 'Width cannot be 0'
+                                    : null),
+                          );
+                        }),
+                      ),
                     ),
                     Text(
                       'Height',
@@ -286,31 +403,44 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                     SizedBox(
                       height: 72,
                       child: Theme(
-                          data: Theme.of(context).copyWith(
-                              textSelectionTheme: TextSelectionThemeData(
-                                  selectionColor:
-                                      ColorDark.blue5.withOpacity(0.8))),
-                          child: Obx(() => TextField(
-                                cursorColor: ColorDark.text1,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: <TextInputFormatter>[
-                                  FilteringTextInputFormatter.digitsOnly
-                                ],
-                                controller: heightController,
-                                style: SemiTextStyles.header5ENRegular
-                                    .copyWith(color: ColorDark.text0),
-                                decoration: dialogInputDecoration.copyWith(
-                                    errorText: height.value == 0
-                                        ? 'Height cannot be 0'
-                                        : null),
-                                onChanged: (value) {
-                                  try {
-                                    height.value = int.parse(value);
-                                  } catch (e) {
-                                    height.value = 0;
-                                  }
-                                },
-                              ))),
+                        data: Theme.of(context).copyWith(
+                            textSelectionTheme: TextSelectionThemeData(
+                                selectionColor: ColorDark.blue5
+                                    .withAlpha((0.8 * 255).round()))),
+                        child: HookConsumer(builder: (context, ref, child) {
+                          final heightController = useTextEditingController(
+                              text: iPreset.width.toString());
+                          useEffect(() {
+                            heightController.addListener(() {
+                              try {
+                                ref.read(heightProvider.notifier).state =
+                                    int.parse(heightController.text);
+                              } catch (e) {
+                                ref.read(heightProvider.notifier).state = 0;
+                              }
+                              if (ref.watch(heightProvider) != 0 &&
+                                  !ref.watch(useInputResolutionProvider)) {
+                                iPreset.height = ref.watch(heightProvider);
+                              }
+                            });
+                            return null;
+                          });
+                          return TextField(
+                            cursorColor: ColorDark.text1,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            controller: heightController,
+                            style: SemiTextStyles.header5ENRegular
+                                .copyWith(color: ColorDark.text0),
+                            decoration: dialogInputDecoration.copyWith(
+                                errorText: ref.watch(heightProvider) == 0
+                                    ? 'Height cannot be 0'
+                                    : null),
+                          );
+                        }),
+                      ),
                     ),
                   ],
                 );
@@ -327,44 +457,61 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                 SizedBox(
                   height: 72,
                   child: Theme(
-                      data: Theme.of(context).copyWith(
-                          textSelectionTheme: TextSelectionThemeData(
-                              selectionColor:
-                                  ColorDark.blue5.withOpacity(0.8))),
-                      child: Obx(() => TextField(
-                            cursorColor: ColorDark.text1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: crfController,
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text0),
-                            decoration: dialogInputDecoration.copyWith(
-                                errorText: (crf.value > 0 && crf.value < 52)
-                                    ? null
-                                    : 'CRF must be between 0 and 51, higher is lower quality.',
-                                errorMaxLines: 3),
-                            onChanged: (value) {
-                              try {
-                                crf.value = int.parse(value);
-                              } catch (e) {
-                                crf.value = 0;
-                              }
-                            },
-                          ))),
+                    data: Theme.of(context).copyWith(
+                        textSelectionTheme: TextSelectionThemeData(
+                            selectionColor: ColorDark.blue5
+                                .withAlpha((0.8 * 255).round()))),
+                    child: HookConsumer(builder: (context, ref, child) {
+                      final crfController = useTextEditingController(
+                          text: iPreset.crf.toString());
+                      final crf = ref.watch(crfProvider);
+                      useEffect(() {
+                        crfController.addListener(() {
+                          try {
+                            ref.read(crfProvider.notifier).state =
+                                int.parse(crfController.text);
+                          } catch (e) {
+                            ref.read(crfProvider.notifier).state = 0;
+                          }
+                          if (crf > 0 && crf < 52) {
+                            iPreset.crf = ref.watch(crfProvider);
+                          }
+                        });
+                        return null;
+                      });
+                      return TextField(
+                        cursorColor: ColorDark.text1,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        controller: crfController,
+                        style: SemiTextStyles.header5ENRegular
+                            .copyWith(color: ColorDark.text0),
+                        decoration: dialogInputDecoration.copyWith(
+                            errorText: (crf > 0 && crf < 52)
+                                ? null
+                                : 'CRF must be between 0 and 51, higher is lower quality.'),
+                      );
+                    }),
+                  ),
                 ),
               ],
             ),
             SizedBox(
               width: DesignValues.smallPadding,
             ),
-            Obx(() => CustomDialogCheckBoxWithText(
-                text: 'Use H.265',
-                value: useHevc.value,
-                onPressed: () {
-                  useHevc.value = !useHevc.value;
-                })),
+            Consumer(
+                builder: (BuildContext context, WidgetRef ref, Widget? child) {
+              return CustomDialogCheckBoxWithText(
+                  text: 'Use H.265',
+                  value: ref.watch(useHevcProvider),
+                  onPressed: () {
+                    ref.read(useHevcProvider.notifier).state =
+                        !ref.watch(useHevcProvider);
+                    iPreset.useHevc = ref.watch(useHevcProvider);
+                  });
+            }),
             SizedBox(
               height: DesignValues.smallPadding,
             ),
@@ -376,178 +523,33 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       .copyWith(color: ColorDark.text1),
                 ),
                 const Spacer(),
-                Obx(() => DropdownButton<FFmpegPreset>(
-                      value: FFmpegPreset.values[selectedFFmpegPreset.value],
-                      focusColor: ColorDark.defaultActive,
-                      dropdownColor: ColorDark.bg2,
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text0),
-                      items: FFmpegPreset.values
-                          .map((e) => DropdownMenuItem<FFmpegPreset>(
-                                value: e,
-                                child: Text(e.name),
-                              ))
-                          .toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          selectedFFmpegPreset.value = value.index;
-                        }
-                      },
-                    )),
+                Consumer(builder:
+                    (BuildContext context, WidgetRef ref, Widget? child) {
+                  return DropdownButton<FFmpegPreset>(
+                    value: FFmpegPreset
+                        .values[ref.watch(selectedFFmpegPresetProvider)],
+                    focusColor: ColorDark.defaultActive,
+                    dropdownColor: ColorDark.bg2,
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text0),
+                    items: FFmpegPreset.values
+                        .map((e) => DropdownMenuItem<FFmpegPreset>(
+                              value: e,
+                              child: Text(e.name),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        ref.read(selectedFFmpegPresetProvider.notifier).state =
+                            value.index;
+                        iPreset.ffmpegPreset = value.index;
+                      }
+                    },
+                  );
+                })
               ],
             )
           ],
-        )));
-  }
-}
-
-class SettingsDialog extends StatelessWidget {
-  const SettingsDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final outputPresetScrollController = ScrollController();
-    final settingsController = Get.find<GlobalSettingsController>();
-    return CustomDualOptionDialog(
-      width: 480,
-      height: 640,
-      title: 'Settings',
-      option1: '',
-      option2: 'Close',
-      onOption1Pressed: () {},
-      onOption2Pressed: () {
-        Get.back();
-      },
-      disableOption1: true,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Text(
-                'Output Presets',
-                style: SemiTextStyles.header4ENRegular
-                    .copyWith(color: ColorDark.text0),
-              ),
-              SizedBox(
-                width: DesignValues.smallPadding,
-              ),
-              CustomIconButton(
-                  iconData: Icons.add_circle_outline,
-                  onPressed: () {
-                    Get.dialog(_EditTranscodePresetDialog(
-                      preset: null,
-                    )).then((value) async {
-                      if (value != null) {
-                        settingsController.transCodingPresets.add(value);
-                        await settingsController.saveSettings();
-                      }
-                    });
-                  },
-                  iconSize: DesignValues.mediumIconSize,
-                  buttonSize: 28,
-                  hoverColor: ColorDark.defaultHover,
-                  focusColor: ColorDark.defaultActive,
-                  iconColor: ColorDark.text0)
-            ],
-          ),
-          SizedBox(
-            height: DesignValues.ultraSmallPadding,
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(DesignValues.smallBorderRadius),
-            child: Container(
-              color: ColorDark.bg3,
-              height: 200,
-              child: Padding(
-                padding: EdgeInsets.only(
-                    top: DesignValues.ultraSmallPadding,
-                    bottom: DesignValues.ultraSmallPadding,
-                    left: DesignValues.ultraSmallPadding),
-                child: RawScrollbar(
-                  thickness: DesignValues.smallPadding,
-                  trackVisibility: false,
-                  thumbVisibility: true,
-                  radius: Radius.circular(DesignValues.smallBorderRadius),
-                  controller: outputPresetScrollController,
-                  child: Obx(() {
-                    final settingsController =
-                        Get.find<GlobalSettingsController>();
-                    return ListView.builder(
-                        controller: outputPresetScrollController,
-                        itemCount: settingsController.transCodingPresets.length,
-                        itemBuilder: (context, index) {
-                          return _PresetItem(
-                            preset:
-                                settingsController.transCodingPresets[index],
-                            index: index,
-                          );
-                        });
-                  }),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(
-            height: DesignValues.largePadding,
-          ),
-          Row(
-            children: [
-              Text('Debug Mode:',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text1)),
-              const Spacer(),
-              Obx(() => Switch(
-                    value: settingsController.isDebugMode.value,
-                    onChanged: (value) async {
-                      settingsController.isDebugMode.value = value;
-                      LogService.isDebug = value;
-                      final GlobalMediaResourcesController
-                          globalMediaResourcesController = Get.find();
-                      if (globalMediaResourcesController.mediaResourceDir !=
-                          null) {
-                        if (value) {
-                          await LogService.enableDebug(
-                              '${globalMediaResourcesController.mediaResourceDir!.path}/$logFolderName');
-                        } else {
-                          LogService.disableDebug();
-                        }
-                      }
-                    },
-                    activeTrackColor: ColorDark.blue5,
-                    activeColor: ColorDark.white,
-                  )),
-            ],
-          ),
-          SizedBox(
-            height: DesignValues.smallPadding,
-          ),
-          Row(
-            children: [
-              Text('Version:',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text1)),
-              const Spacer(),
-              Text(settingsController.appVersion,
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text0)),
-            ],
-          ),
-          SizedBox(
-            height: DesignValues.mediumPadding,
-          ),
-          Row(
-            children: [
-              Text('Author:',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text1)),
-              const Spacer(),
-              Text('lz00qs',
-                  style: SemiTextStyles.header5ENRegular
-                      .copyWith(color: ColorDark.text0)),
-            ],
-          ),
-        ],
-      ),
-    );
+        ));
   }
 }

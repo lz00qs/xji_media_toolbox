@@ -1,28 +1,33 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/video_player_getx.dart';
+import 'dart:io';
 
-import '../../../controllers/global_media_resources_controller.dart';
+import 'package:flutter/material.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
+
 import '../../../models/media_resource.dart';
 import '../../design_tokens.dart';
-import '../../main_panel.dart';
+import '../buttons/custom_icon_button.dart';
+import 'chewie_video_player_hook.dart';
+import 'main_panel.dart';
 
-class NormalVideoView extends StatelessWidget {
-  final NormalVideoResource videoResource;
+class VideoPlayer extends ConsumerWidget {
+  final File videoFile;
 
-  const NormalVideoView({super.key, required this.videoResource});
+  const VideoPlayer({super.key, required this.videoFile});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
-              padding: EdgeInsets.all(DesignValues.smallPadding),
-              child: VideoPlayerGetx(videoResource: videoResource)),
+            padding: EdgeInsets.all(DesignValues.smallPadding),
+            child: ChewieVideoPlayerHook(
+              videoFile: videoFile,
+              showControls: true,
+            ),
+          ),
         ),
         MainPanelSideBar(
           children: [
@@ -33,11 +38,7 @@ class NormalVideoView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.cut,
                 onPressed: () async {
-                  final GlobalMediaResourcesController
-                      globalMediaResourcesController =
-                      Get.find<GlobalMediaResourcesController>();
-                  globalMediaResourcesController.isEditingMediaResources.value =
-                      true;
+                  ref.read(mediaResourcesProvider.notifier).setIsEditing(true);
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
@@ -50,7 +51,11 @@ class NormalVideoView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  await Get.dialog(const VideoExportDialog());
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return VideoExportDialog();
+                      });
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,

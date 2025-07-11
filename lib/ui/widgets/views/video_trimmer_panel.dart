@@ -1,28 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 
-import '../../../controllers/global_media_resources_controller.dart';
 import '../buttons/custom_icon_button.dart';
 import '../../design_tokens.dart';
-import '../../main_panel.dart';
+import 'main_panel.dart';
 
-class NormalVideoTrimmerView extends StatelessWidget {
-  final NormalVideoResource videoResource;
-
-  const NormalVideoTrimmerView({super.key, required this.videoResource});
+class VideoTrimmerPanel extends ConsumerWidget {
+  const VideoTrimmerPanel({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.isEmpty))) {
+      return Container();
+    }
+    final resource = ref.watch(mediaResourcesProvider.select(
+        (state) => state.resources[state.currentIndex] as NormalVideoResource));
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
               padding: EdgeInsets.all(DesignValues.smallPadding),
-              child: VideoTrimmer(videoResource: videoResource)),
+              child: VideoTrimmer(videoResource: resource)),
         ),
         MainPanelSideBar(
           children: [
@@ -32,11 +35,7 @@ class NormalVideoTrimmerView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.arrow_back_ios_new,
                 onPressed: () async {
-                  final GlobalMediaResourcesController
-                      globalMediaResourcesController =
-                      Get.find<GlobalMediaResourcesController>();
-                  globalMediaResourcesController.isEditingMediaResources.value =
-                      false;
+                  ref.read(mediaResourcesProvider.notifier).setIsEditing(false);
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
@@ -49,7 +48,11 @@ class NormalVideoTrimmerView extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  await Get.dialog(const VideoExportDialog());
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return VideoExportDialog();
+                      });
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
