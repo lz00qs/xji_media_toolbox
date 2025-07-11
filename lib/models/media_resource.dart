@@ -1,7 +1,9 @@
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/models/settings.dart';
 
 import '../utils/media_resources_utils.dart';
 
@@ -388,6 +390,16 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
     }
   }
 
+  void addAebSuffixToCurrentAebFilesName() {
+    var aebResource = state.resources[state.currentIndex] as AebPhotoResource;
+    final oldName = aebResource.name;
+    aebResource = addSuffixToAebFilesName(aebResource: aebResource);
+    state = state.copyWith(resources: [
+      ...state.resources
+          .map((element) => element.name == oldName ? aebResource : element)
+    ]);
+  }
+
   void setIsMultipleSelection(bool isMultipleSelection) {
     state = state.copyWith(isMultipleSelection: isMultipleSelection);
   }
@@ -406,7 +418,8 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
         selectedResources: state.selectedResources..remove(resource));
   }
 
-  void reorderSelectedResources({required int oldIndex, required int newIndex}) {
+  void reorderSelectedResources(
+      {required int oldIndex, required int newIndex}) {
     if (oldIndex < newIndex) newIndex -= 1;
     final updated = [...(state.selectedResources)];
     final item = updated.removeAt(oldIndex);
@@ -420,5 +433,38 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
 
   void setIsEditing(bool isEditing) {
     state = state.copyWith(isEditing: isEditing);
+  }
+
+  // sorAsc: true -> asc, false -> desc
+  void sortResources({required SortType sortType, required bool sortAsc}) {
+    switch (sortType) {
+      case SortType.name:
+        final newList = state.resources.map((e) => e).toList();
+        newList.sort((a, b) =>
+            sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+        state = state.copyWith(resources: newList, currentIndex: 0);
+        break;
+      case SortType.date:
+        final newList = state.resources.map((e) => e).toList();
+        newList.sort((a, b) => sortAsc
+            ? a.creationTime.compareTo(b.creationTime)
+            : b.creationTime.compareTo(a.creationTime));
+        state = state.copyWith(resources: newList, currentIndex: 0);
+        break;
+      case SortType.size:
+        final newList = state.resources.map((e) => e).toList();
+        newList.sort((a, b) => sortAsc
+            ? a.sizeInBytes.compareTo(b.sizeInBytes)
+            : b.sizeInBytes.compareTo(a.sizeInBytes));
+        state = state.copyWith(resources: newList, currentIndex: 0);
+        break;
+      case SortType.sequence:
+        final newList = state.resources.map((e) => e).toList();
+        newList.sort((a, b) => sortAsc
+            ? a.sequence.compareTo(b.sequence)
+            : b.sequence.compareTo(a.sequence));
+        state = state.copyWith(resources: newList, currentIndex: 0);
+        break;
+    }
   }
 }

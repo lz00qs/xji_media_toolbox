@@ -81,10 +81,30 @@ int _getMediaSequence(File file) {
   return 0;
 }
 
+String _getEvBiasString(String rawEv){
+  if (rawEv == '0/10') {
+    return '0';
+  } else if (rawEv == '-7/10') {
+    return '-0.7';
+  } else if (rawEv == '7/10') {
+    return '+0.7';
+  } else if (rawEv == '-13/10') {
+    return '-1.3';
+  } else if (rawEv == '13/10') {
+    return '+1.3';
+  } else if (rawEv == '-20/10') {
+    return '-2';
+  } else if (rawEv == '20/10') {
+    return '+2';
+  } else {
+    return '';
+  }
+}
+
 String _parseEvBias(Image image) {
   final evBias = image.exif.exifIfd[0x9204]?.toString();
   if (evBias != null) {
-    return evBias;
+    return _getEvBiasString(evBias);
   }
   return '';
 }
@@ -163,67 +183,67 @@ Future<List<MediaResource>> _analyzeAebFootage(
       }
       if (mediaResources[i] is AebPhotoResource) {
         final startResource = mediaResources[i] as AebPhotoResource;
-        if ((mediaResources[i] as AebPhotoResource).evBias == '0/10') {
+        if ((mediaResources[i] as AebPhotoResource).evBias == '0') {
           (mediaResources[i] as AebPhotoResource)
               .aebResources
               .add(mediaResources[i] as AebPhotoResource);
-          LogService.info('${startResource.name}: 0/10 found');
+          LogService.info('${startResource.name}: 0 found');
           i++;
           if (i >= mediaResources.length) {
             break;
           }
           if (mediaResources[i].isAeb &&
-              (mediaResources[i] as AebPhotoResource).evBias == '-7/10') {
+              (mediaResources[i] as AebPhotoResource).evBias == '-0.7') {
             startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
             mediaResources[i].hide = true;
-            LogService.info('${startResource.name}: -7/10 found');
+            LogService.info('${startResource.name}: -0.7 found');
             i++;
             if (i >= mediaResources.length) {
               break;
             }
             if (mediaResources[i].isAeb &&
-                (mediaResources[i] as AebPhotoResource).evBias == '7/10') {
+                (mediaResources[i] as AebPhotoResource).evBias == '+0.7') {
               startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
               mediaResources[i].hide = true;
-              LogService.info('${startResource.name}: 7/10 found');
+              LogService.info('${startResource.name}: +0.7 found');
               i++;
               if (i >= mediaResources.length) {
                 break;
               }
               if (mediaResources[i].isAeb &&
-                  (mediaResources[i] as AebPhotoResource).evBias == '-13/10') {
+                  (mediaResources[i] as AebPhotoResource).evBias == '-1.3') {
                 startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                 mediaResources[i].hide = true;
-                LogService.info('${startResource.name}: -13/10 found');
+                LogService.info('${startResource.name}: -1.3 found');
                 i++;
                 if (i >= mediaResources.length) {
                   break;
                 }
                 if (mediaResources[i].isAeb &&
-                    (mediaResources[i] as AebPhotoResource).evBias == '13/10') {
+                    (mediaResources[i] as AebPhotoResource).evBias == '+1.3') {
                   startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                   mediaResources[i].hide = true;
-                  LogService.info('${startResource.name}: 13/10 found');
+                  LogService.info('${startResource.name}: +1.3 found');
                   i++;
                   if (i >= mediaResources.length) {
                     break;
                   }
                   if (mediaResources[i].isAeb &&
                       (mediaResources[i] as AebPhotoResource).evBias ==
-                          '-20/10') {
+                          '-2') {
                     startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                     mediaResources[i].hide = true;
-                    LogService.info('${startResource.name}: -20/10 found');
+                    LogService.info('${startResource.name}: -2 found');
                     i++;
                     if (i >= mediaResources.length) {
                       break;
                     }
                     if (mediaResources[i].isAeb &&
                         (mediaResources[i] as AebPhotoResource).evBias ==
-                            '20/10') {
+                            '+2') {
                       startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
                       mediaResources[i].hide = true;
-                      LogService.info('${startResource.name}: 20/10 found');
+                      LogService.info('${startResource.name}: +2 found');
                       i++;
                       if (i >= mediaResources.length) {
                         break;
@@ -628,75 +648,69 @@ File? renameMediaResource({required MediaResource mediaResource, required String
   return null;
 }
 //
-// void addSuffixToCurrentAebFilesName() {
-//   final globalMediaResourcesController =
-//       Get.find<GlobalMediaResourcesController>();
-//   final currentMediaResource = globalMediaResourcesController.mediaResources[
-//           globalMediaResourcesController.currentMediaIndex.value]
-//       as AebPhotoResource;
-//   for (var i = 0; i < currentMediaResource.aebResources.length; i++) {
-//     var evBias = '';
-//     switch (i) {
-//       case 0:
-//         evBias = '0.0';
-//         break;
-//       case 1:
-//         evBias = '-0.7';
-//         break;
-//       case 2:
-//         evBias = '+0.7';
-//         break;
-//       case 3:
-//         evBias = '-1.3';
-//         break;
-//       case 4:
-//         evBias = '+1.3';
-//         break;
-//       case 5:
-//         evBias = '-2.0';
-//         break;
-//       case 6:
-//         evBias = '+2.0';
-//         break;
-//       default:
-//         evBias = '0.0';
-//     }
-//     final suffix = '_AEB_${currentMediaResource.sequence}_$evBias';
-//     final oldFile = currentMediaResource.aebResources[i].file;
-//     final newPath =
-//         '${oldFile.parent.path}/${oldFile.uri.pathSegments.last.split('.').first}$suffix.${oldFile.uri.pathSegments.last.split('.').last}';
-//     final newFile = File(newPath);
-//     try {
-//       oldFile.renameSync(newFile.path);
-//       currentMediaResource.aebResources[i] = (AebPhotoResource(
-//           name: newFile.uri.pathSegments.last,
-//           file: newFile,
-//           width: currentMediaResource.width,
-//           height: currentMediaResource.height,
-//           sizeInBytes: currentMediaResource.sizeInBytes,
-//           creationTime: currentMediaResource.creationTime,
-//           sequence: currentMediaResource.sequence,
-//           evBias: evBias)
-//         ..thumbFile = newFile);
-//     } catch (e) {
-//       Toast.error('Failed to rename ${oldFile.uri.pathSegments.last}');
-//       LogService.warning('Error renaming file: ${oldFile.path}');
-//     }
-//   }
-//   final newAebPhotoResource = (AebPhotoResource(
-//       name: currentMediaResource.aebResources[0].file.uri.pathSegments.last,
-//       file: currentMediaResource.aebResources[0].file,
-//       width: currentMediaResource.width,
-//       height: currentMediaResource.height,
-//       sizeInBytes: currentMediaResource.sizeInBytes,
-//       creationTime: currentMediaResource.creationTime,
-//       sequence: currentMediaResource.sequence,
-//       evBias: currentMediaResource.evBias)
-//     ..thumbFile = currentMediaResource.thumbFile);
-//   newAebPhotoResource.aebResources.addAll(currentMediaResource.aebResources);
-//   globalMediaResourcesController.mediaResources[globalMediaResourcesController
-//       .currentMediaIndex.value] = newAebPhotoResource;
-// }
+AebPhotoResource addSuffixToAebFilesName({required AebPhotoResource aebResource}) {
+  for (var i = 0; i < aebResource.aebResources.length; i++) {
+    var evBias = '';
+    switch (i) {
+      case 0:
+        evBias = '0';
+        break;
+      case 1:
+        evBias = '-0.7';
+        break;
+      case 2:
+        evBias = '+0.7';
+        break;
+      case 3:
+        evBias = '-1.3';
+        break;
+      case 4:
+        evBias = '+1.3';
+        break;
+      case 5:
+        evBias = '-2';
+        break;
+      case 6:
+        evBias = '+2';
+        break;
+      default:
+        evBias = '0';
+    }
+    final suffix = '_AEB_${aebResource.sequence}_$evBias';
+    final oldFile = aebResource.aebResources[i].file;
+    final newPath =
+        '${oldFile.parent.path}/${oldFile.uri.pathSegments.last.split('.').first}$suffix.${oldFile.uri.pathSegments.last.split('.').last}';
+    final newFile = File(newPath);
+    try {
+      oldFile.renameSync(newFile.path);
+      aebResource.aebResources[i] = (AebPhotoResource(
+          name: newFile.uri.pathSegments.last,
+          file: newFile,
+          width: aebResource.width,
+          height: aebResource.height,
+          sizeInBytes: aebResource.sizeInBytes,
+          creationTime: aebResource.creationTime,
+          sequence: aebResource.sequence,
+          evBias: evBias)
+        ..thumbFile = newFile);
+    } catch (e) {
+      Toast.error('Failed to rename ${oldFile.uri.pathSegments.last}');
+      LogService.warning('Error renaming file: ${oldFile.path}');
+    }
+  }
+  final newAebPhotoResource = (AebPhotoResource(
+      name: aebResource.aebResources[0].file.uri.pathSegments.last,
+      file: aebResource.aebResources[0].file,
+      width: aebResource.width,
+      height: aebResource.height,
+      sizeInBytes: aebResource.sizeInBytes,
+      creationTime: aebResource.creationTime,
+      sequence: aebResource.sequence,
+      evBias: aebResource.evBias)
+    ..thumbFile = aebResource.thumbFile);
+  newAebPhotoResource.aebResources.addAll(aebResource.aebResources);
+  return newAebPhotoResource;
+}
 //
 bool isFileExist(String path) {
   final file = File(path);

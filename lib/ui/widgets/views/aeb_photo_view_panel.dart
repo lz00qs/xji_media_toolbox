@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/ui/widgets/dialogs/aeb_add_suffix_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer_panel.dart';
 
 import '../../../models/media_resource.dart';
@@ -15,10 +16,9 @@ class _AebPhotoThumbnail extends ConsumerWidget {
   final bool isSelected;
   final int index;
 
-  const _AebPhotoThumbnail(
-      {required this.photoResource,
-      required this.index,
-      required this.isSelected});
+  const _AebPhotoThumbnail({required this.photoResource,
+    required this.index,
+    required this.isSelected});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,40 +26,44 @@ class _AebPhotoThumbnail extends ConsumerWidget {
       children: [
         Expanded(
             child: GestureDetector(
-          onTap: () {
-            ref.read(mediaResourcesProvider.notifier).setCurrentAebIndex(index);
-          },
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(DesignValues.ultraSmallPadding),
-            child: Container(
-              height: 100 - DesignValues.smallPadding,
-              color: isSelected
-                  ? ColorDark.data8.withAlpha((0.7 * 255).round())
-                  : Colors.transparent,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                        top: DesignValues.ultraSmallPadding,
-                        left: DesignValues.ultraSmallPadding,
-                        right: DesignValues.ultraSmallPadding),
-                    child: MediaResourceThumbnail(mediaResource: photoResource),
+              onTap: () {
+                ref.read(mediaResourcesProvider.notifier).setCurrentAebIndex(
+                    index);
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(
+                    DesignValues.ultraSmallPadding),
+                child: Container(
+                  height: 100 - DesignValues.smallPadding,
+                  color: isSelected
+                      ? ColorDark.data8.withAlpha((0.7 * 255).round())
+                      : Colors.transparent,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: DesignValues.ultraSmallPadding,
+                            left: DesignValues.ultraSmallPadding,
+                            right: DesignValues.ultraSmallPadding),
+                        child: MediaResourceThumbnail(
+                            mediaResource: photoResource),
+                      ),
+                      Expanded(
+                          child: Center(
+                            child: Text(photoResource.evBias,
+                                style: SemiTextStyles.regularENRegular.copyWith(
+                                    color:
+                                    isSelected ? ColorDark.text0 : ColorDark
+                                        .text1,
+                                    overflow: TextOverflow.ellipsis)),
+                          )),
+                    ],
                   ),
-                  Expanded(
-                      child: Center(
-                    child: Text(photoResource.evBias,
-                        style: SemiTextStyles.regularENRegular.copyWith(
-                            color:
-                                isSelected ? ColorDark.text0 : ColorDark.text1,
-                            overflow: TextOverflow.ellipsis)),
-                  )),
-                ],
+                ),
               ),
-            ),
-          ),
-        )),
+            )),
         SizedBox(
           height: DesignValues.smallPadding,
         ),
@@ -121,7 +125,7 @@ class AebPhotoViewPanel extends StatelessWidget {
                         .select((state) => state.currentAebIndex));
                     return PhotoViewerPanel(
                         photoFile:
-                            photoResource.aebResources[currentAebIndex].file);
+                        photoResource.aebResources[currentAebIndex].file);
                   })),
                   Center(
                     child: Row(
@@ -175,13 +179,13 @@ class AebPhotoViewPanel extends StatelessWidget {
                         children: [
                           Expanded(
                               child: Padding(
-                            padding: EdgeInsets.only(
-                                left: DesignValues.ultraSmallPadding,
-                                right: DesignValues.ultraSmallPadding,
-                                top: DesignValues.ultraSmallPadding),
-                            child: _AebPhotoThumbnailList(
-                                resources: photoResource.aebResources),
-                          )),
+                                padding: EdgeInsets.only(
+                                    left: DesignValues.ultraSmallPadding,
+                                    right: DesignValues.ultraSmallPadding,
+                                    top: DesignValues.ultraSmallPadding),
+                                child: _AebPhotoThumbnailList(
+                                    resources: photoResource.aebResources),
+                              )),
                         ],
                       ),
                     ),
@@ -198,7 +202,10 @@ class AebPhotoViewPanel extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  // await Get.dialog(const AddAebSuffixDialog());
+                  await showDialog(
+                      context: context, builder: (BuildContext context) {
+                    return AebAddSuffixDialog();
+                  });
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,

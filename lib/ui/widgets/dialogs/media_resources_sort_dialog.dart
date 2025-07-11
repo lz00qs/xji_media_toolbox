@@ -23,50 +23,9 @@ class MediaResourcesSortDialog extends ConsumerWidget {
         option2: 'OK',
         onOption1Pressed: () {},
         onOption2Pressed: () async {
-          final mediaResources = ref
-              .watch(mediaResourcesProvider.select((state) => state.resources));
-          switch (sortType) {
-            case SortType.name:
-              // globalMediaResourcesController.mediaResources.sort((a, b) =>
-              //     globalSettingsController.sortAsc.value
-              //         ? a.name.compareTo(b.name)
-              //         : b.name.compareTo(a.name));
-              mediaResources.sort((a, b) => sortAsc
-                  ? a.name.compareTo(b.name)
-                  : b.name.compareTo(a.name));
-              break;
-            case SortType.date:
-              // globalMediaResourcesController.mediaResources.sort((a, b) =>
-              //     globalSettingsController.sortAsc.value
-              //         ? a.creationTime.compareTo(b.creationTime)
-              //         : b.creationTime.compareTo(a.creationTime));
-              mediaResources.sort((a, b) => sortAsc
-                  ? a.creationTime.compareTo(b.creationTime)
-                  : b.creationTime.compareTo(a.creationTime));
-              break;
-            case SortType.size:
-              // globalMediaResourcesController.mediaResources.sort((a, b) =>
-              //     globalSettingsController.sortAsc.value
-              //         ? a.sizeInBytes.compareTo(b.sizeInBytes)
-              //         : b.sizeInBytes.compareTo(a.sizeInBytes));
-              mediaResources.sort((a, b) => sortAsc
-                  ? a.sizeInBytes.compareTo(b.sizeInBytes)
-                  : b.sizeInBytes.compareTo(a.sizeInBytes));
-              break;
-            case SortType.sequence:
-              // globalMediaResourcesController.mediaResources.sort((a, b) =>
-              //     globalSettingsController.sortAsc.value
-              //         ? a.sequence.compareTo(b.sequence)
-              //         : b.sequence.compareTo(a.sequence));
-              mediaResources.sort((a, b) => sortAsc
-                  ? a.sequence.compareTo(b.sequence)
-                  : b.sequence.compareTo(a.sequence));
-              break;
-          }
           ref
               .read(mediaResourcesProvider.notifier)
-              .setResources(mediaResources);
-          ref.read(mediaResourcesProvider.notifier).setCurrentIndex(0);
+              .sortResources(sortType: sortType, sortAsc: sortAsc);
           ref.read(settingsProvider.notifier).saveSettings();
           Navigator.of(context).pop();
         },
