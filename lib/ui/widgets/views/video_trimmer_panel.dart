@@ -1,44 +1,41 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 
-import '../../../models/media_resource.dart';
-import '../../design_tokens.dart';
 import '../buttons/custom_icon_button.dart';
-import 'chewie_video_player_hook.dart';
+import '../../design_tokens.dart';
 import 'main_panel.dart';
 
-class VideoPlayerPanel extends ConsumerWidget {
-  final File videoFile;
-
-  const VideoPlayerPanel({super.key, required this.videoFile});
+class VideoTrimmerPanel extends ConsumerWidget {
+  const VideoTrimmerPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(
+        mediaResourcesProvider.select((state) => state.resources.isEmpty))) {
+      return Container();
+    }
+    final resource = ref.watch(mediaResourcesProvider.select(
+        (state) => state.resources[state.currentIndex] as NormalVideoResource));
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Expanded(
           child: Padding(
-            padding: EdgeInsets.all(DesignValues.smallPadding),
-            child: ChewieVideoPlayerHook(
-              videoFile: videoFile,
-              showControls: true,
-            ),
-          ),
+              padding: EdgeInsets.all(DesignValues.smallPadding),
+              child: VideoTrimmer(videoResource: resource)),
         ),
         MainPanelSideBar(
           children: [
-            const MainPanelSideBarControlButtons(),
             SizedBox(
               height: DesignValues.mediumPadding,
             ),
             CustomIconButton(
-                iconData: Icons.cut,
+                iconData: Icons.arrow_back_ios_new,
                 onPressed: () async {
-                  ref.read(mediaResourcesProvider.notifier).setIsEditing(true);
+                  ref.read(mediaResourcesProvider.notifier).setIsEditing(false);
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
@@ -51,7 +48,7 @@ class VideoPlayerPanel extends ConsumerWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  await showDialog(
+                  showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return VideoExportDialog();

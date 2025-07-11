@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_merger_panel.dart';
 import '../../../models/media_resource.dart';
 import '../../design_tokens.dart';
 import '../buttons/main_panel_button.dart';
 import '../dialogs/media_resource_delete_dialog.dart';
-
-class MultiSelectPanelController extends GetxController {
-  final isMerging = false.obs;
-}
 
 class _DeleteButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -71,14 +66,22 @@ class MultiSelectPanel extends ConsumerWidget {
                   .copyWith(color: ColorDark.text0))
           : containPhotos
               ? _DeleteButton(onPressed: () async {
-                  await Get.dialog(const MediaResourceDeleteDialog());
+                  await showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return const MediaResourceDeleteDialog();
+                      });
                 })
               : ref.watch(isMergingStateProvider) == false
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _DeleteButton(onPressed: () async {
-                          await Get.dialog(const MediaResourceDeleteDialog());
+                          await showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return const MediaResourceDeleteDialog();
+                              });
                         }),
                         const SizedBox(
                           width: 64,

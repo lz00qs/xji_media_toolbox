@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/aeb_add_suffix_dialog.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer_panel.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/photo_viewer.dart';
 
 import '../../../models/media_resource.dart';
 import '../buttons/custom_icon_button.dart';
@@ -123,7 +123,7 @@ class AebPhotoViewPanel extends StatelessWidget {
                       (BuildContext context, WidgetRef ref, Widget? child) {
                     final currentAebIndex = ref.watch(mediaResourcesProvider
                         .select((state) => state.currentAebIndex));
-                    return PhotoViewerPanel(
+                    return PhotoViewer(
                         photoFile:
                         photoResource.aebResources[currentAebIndex].file);
                   })),

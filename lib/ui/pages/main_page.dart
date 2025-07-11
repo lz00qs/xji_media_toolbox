@@ -12,7 +12,6 @@ import '../widgets/views/main_panel.dart';
 import '../widgets/views/multi_select_panel.dart';
 
 final _mediaResourcesListPanelFocusNode = FocusNode();
-final _dialogFocusNode = FocusNode();
 
 class _MainPageEmpty extends StatelessWidget {
   final WidgetRef ref;

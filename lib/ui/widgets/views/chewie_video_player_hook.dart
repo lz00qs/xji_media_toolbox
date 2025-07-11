@@ -11,7 +11,8 @@ class ChewieVideoPlayerHook extends HookWidget {
   final File videoFile;
   final bool showControls;
 
-  const ChewieVideoPlayerHook({super.key,
+  const ChewieVideoPlayerHook({
+    super.key,
     required this.videoFile,
     this.showControls = true,
   });
@@ -19,7 +20,7 @@ class ChewieVideoPlayerHook extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final videoController = useMemoized(
-          () => VideoPlayerController.file(videoFile),
+      () => VideoPlayerController.file(videoFile),
       [videoFile.path], // 重建依赖
     );
     final chewieController = useState<ChewieController?>(null);
@@ -53,13 +54,13 @@ class ChewieVideoPlayerHook extends HookWidget {
 
     return ClipRRect(
       borderRadius:
-      BorderRadius.all(Radius.circular(DesignValues.smallBorderRadius)),
+          BorderRadius.all(Radius.circular(DesignValues.smallBorderRadius)),
       child: isInitialized.value
           ? Chewie(controller: chewieController.value!)
           : const Center(
-          child: CircularProgressIndicator(
-            color: ColorDark.primary,
-          )),
+              child: CircularProgressIndicator(
+              color: ColorDark.primary,
+            )),
     );
   }
 }

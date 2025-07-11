@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-  get: ^4.6.6
   path_provider: ^2.1.5
   file_picker: ^10.2.0
   image: ^4.3.0

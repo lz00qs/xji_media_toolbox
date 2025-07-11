@@ -9,6 +9,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/settings_dialog.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 import '../../../models/media_resource.dart';
 import '../../../models/settings.dart';
 import '../../../utils/media_resources_utils.dart';
@@ -40,10 +41,8 @@ Duration _getOutputDuration(
     }
   } else {
     if (isEditing) {
-      // final videoTrimmerController = Get.find<VideoTrimmerController>();
-      // duration = videoTrimmerController.savedEnd.value -
-      //     videoTrimmerController.savedStart.value;
-      // todo: implement editing
+      duration = ref.watch(trimmerSavedEnd) -
+          ref.watch(trimmerSavedStart);
     } else {
       if (ref.watch(mediaResourcesProvider
           .select((state) => state.resources.isNotEmpty))) {
@@ -272,14 +271,12 @@ class VideoExportDialog extends HookConsumerWidget {
               }
 
               if (isEditing) {
-                // final videoTrimmerController =
-                //     Get.find<VideoTrimmerController>();
-                // ffmpegArgs.add('-ss');
-                // ffmpegArgs
-                //     .add(videoTrimmerController.savedStart.value.toString());
-                // ffmpegArgs.add('-to');
-                // ffmpegArgs
-                //     .add(videoTrimmerController.savedEnd.value.toString());
+                ffmpegArgs.add('-ss');
+                ffmpegArgs
+                    .add(ref.watch(trimmerSavedStart).toString());
+                ffmpegArgs.add('-to');
+                ffmpegArgs
+                    .add(ref.watch(trimmerSavedEnd).toString());
               }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
@@ -287,7 +284,9 @@ class VideoExportDialog extends HookConsumerWidget {
               final task = VideoTask(
                 name: '${outputFileName.value}.MP4',
                 status: VideoTaskStatus.waiting,
-                type: VideoTaskType.transcode,
+                type: isEditing
+                   ? VideoTaskType.trim
+                   : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(
                     isMerging: false, isEditing: isEditing, ref: ref),
