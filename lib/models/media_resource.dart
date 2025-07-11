@@ -325,6 +325,9 @@ class MediaResourceProvider extends StateNotifier<MediaResources> {
         state = state.copyWith(currentIndex: state.currentIndex - 1);
       }
     }
+    state = state.copyWith(
+        resources: state.resources..remove(resource),
+        selectedResources: state.selectedResources..remove(resource));
   }
 
   void renameResource(
