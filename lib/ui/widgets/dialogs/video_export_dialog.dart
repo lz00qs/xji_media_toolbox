@@ -195,6 +195,8 @@ class VideoExportDialog extends HookConsumerWidget {
                       .select((state) => state.selectedResources))
                   .map((e) => 'file \'${e.file.path}\'')
                   .join('\n'));
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-f');
               ffmpegArgs.add('concat');
               ffmpegArgs.add('-safe');
