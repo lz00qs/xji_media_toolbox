@@ -336,8 +336,15 @@ Future<List<MediaResource>> _photoResourcesProcess(
     final sequence = info['sequence'];
     final errors = info['errors'];
 
-    final image = await compute(decodeJpgFile, file.path);
+    Image? image;
+    try {
+      image = await compute(decodeJpgFile, file.path);
+    } catch (e) {
+      // print("${file.uri.pathSegments.last} decode error: $e");
+      continue;
+    }
     if (image == null) {
+      // print("${file.uri.pathSegments.last} decode error: null");
       continue;
     }
     final width = image.width;
@@ -520,7 +527,7 @@ Future<List<MediaResource>> loadMediaResources(
       mediaResourceFiles: photos,
       processFunction: _photoResourcesProcess,
       ref: ref);
-  processedPhotos.sort((a, b) => a.sequence.compareTo(b.sequence));
+  processedPhotos.sort((a, b) => a.name.compareTo(b.name));
   LogService.info('photoProcessTime: ${stopwatch.elapsedMilliseconds}ms');
   processedPhotos = await _analyzeAebFootage(processedPhotos);
   processedVideos = await _multiThreadsProcessResources(
