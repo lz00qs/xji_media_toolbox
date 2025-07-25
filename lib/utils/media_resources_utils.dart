@@ -714,7 +714,7 @@ AebPhotoResource addSuffixToAebFilesName({required AebPhotoResource aebResource}
       creationTime: aebResource.creationTime,
       sequence: aebResource.sequence,
       evBias: aebResource.evBias)
-    ..thumbFile = aebResource.thumbFile);
+    ..thumbFile = aebResource.aebResources[0].file);
   newAebPhotoResource.aebResources.addAll(aebResource.aebResources);
   return newAebPhotoResource;
 }
