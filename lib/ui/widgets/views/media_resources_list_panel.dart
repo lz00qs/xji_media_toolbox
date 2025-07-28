@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
+import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
@@ -103,20 +104,18 @@ class _MediaResourcesListTopBar extends StatelessWidget {
                         ? Icons.keyboard_return
                         : Icons.checklist_rtl,
                     onPressed: () {
-                      // todo: implement merge dialog
-                      // final MultiSelectPanelController multiSelectPanelController = Get.find();
-                      // multiSelectPanelController.isMerging.value = false;
                       if (ref.watch(mediaResourcesProvider
                           .select((state) => isMultipleSelection))) {
                         ref
                             .read(mediaResourcesProvider.notifier)
                             .clearSelectedResources();
                       }
-                      // controller.isMultipleSelection.value =
-                      // !controller.isMultipleSelection.value;
                       ref
                           .read(mediaResourcesProvider.notifier)
                           .toggleIsMultipleSelection();
+                      if (isMultipleSelection) {
+                        ref.read(isMergingStateProvider.notifier).state = false;
+                      }
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: 32.0,

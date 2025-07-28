@@ -97,9 +97,20 @@ class SettingsNotifier extends StateNotifier<Settings> {
       transcodingPresets = objectBox.transcodePresetBox.getAll();
     }
     prefs = await SharedPreferences.getInstance();
-    final defaultTranscodePresetId =
+    var defaultTranscodePresetId =
         prefs.getInt(defaultTranscodePresetIndexPrefKey) ??
             transcodingPresets.first.id;
+    // 检查默认预设是否存在
+    var defaultTranscodePresetIdValid = false;
+    for (var preset in transcodingPresets) {
+      if (preset.id == defaultTranscodePresetId) {
+        defaultTranscodePresetIdValid = true;
+        break;
+      }
+    }
+    if (!defaultTranscodePresetIdValid) {
+      defaultTranscodePresetId = transcodingPresets.first.id;
+    }
     final sortType = SortType.values[prefs.getInt(sortTypePrefKey)?? 0];
     final sortAsc = prefs.getBool(sortOderPrefKey)?? true;
     final cpuThreads = Platform.numberOfProcessors;
