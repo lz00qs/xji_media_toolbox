@@ -110,7 +110,6 @@ String _parseEvBias(Image image) {
 }
 
 Future<Map<String, dynamic>?> _ffprobeVideoInfo(File file) async {
-  // Get.find<GlobalSettingsController>();
   final result = await Process.run(FFmpegUtils.ffprobe, [
     '-v',
     'error',
@@ -160,10 +159,13 @@ Future<File?> _generateThumbnail(List<String> args) async {
     '00:00:01.000',
     '-vframes',
     '1',
+    // 添加严格标准合规性参数，允许非标准YUV范围
+    '-strict',
+    'unofficial',
     thumbFileName,
   ]);
   if (result.exitCode != 0) {
-    Toast.error('Failed to generate thumbnail for $videoResourceName');
+    // Toast.error('Failed to generate thumbnail for $videoResourceName');
     LogService.warning(
         '$videoResourceName generate thumbnail error: ${result.stderr}');
     return null;
@@ -426,6 +428,11 @@ Future<List<MediaResource>> _videoResourcesProcess(
       }
       final thumbFile =
           await compute(_generateThumbnail, [file.path, FFmpegUtils.ffmpeg]);
+      if (thumbFile == null) {
+        LogService.warning('${file.uri.pathSegments.last} generate thumbnail error');
+        Toast.error('${file.uri.pathSegments.last} generate thumbnail error');
+        continue;
+      }
       final resource = NormalVideoResource(
         name: file.uri.pathSegments.last,
         file: file,

@@ -194,14 +194,16 @@ class VideoExportDialog extends HookConsumerWidget {
                       .select((state) => state.selectedResources))
                   .map((e) => 'file \'${e.file.path}\'')
                   .join('\n'));
-              ffmpegArgs.add('-i');
-              ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-f');
               ffmpegArgs.add('concat');
               ffmpegArgs.add('-safe');
               ffmpegArgs.add('0');
               ffmpegArgs.add('-i');
               ffmpegArgs.add(inputFilesTxtPath);
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(videoResource.file.path);
+              ffmpegArgs.add('-map_metadata');
+              ffmpegArgs.add('1');
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
@@ -223,8 +225,6 @@ class VideoExportDialog extends HookConsumerWidget {
               } else {
                 ffmpegArgs.add('copy');
               }
-              ffmpegArgs.add('-map_metadata');
-              ffmpegArgs.add('0');
               ffmpegArgs.add(outputFilePath);
               for (final arg in ffmpegArgs) {
                 if (kDebugMode) {

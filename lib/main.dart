@@ -52,13 +52,13 @@ Future<void> main() async {
 
   await riverpodContainer.read(settingsProvider.notifier).loadSettings();
 
-  runApp(UncontrolledProviderScope(
-      container: riverpodContainer,
-      child: ToastificationWrapper(
+  runApp(ToastificationWrapper(
+      child: UncontrolledProviderScope(
+          container: riverpodContainer,
           child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
-      ))));
+            debugShowCheckedModeBanner: false,
+            home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
+          ))));
 }
 
 class MyApp extends ConsumerWidget {
@@ -77,7 +77,7 @@ class MyApp extends ConsumerWidget {
           children: [
             const MainPageAppBar(),
             Expanded(
-              // child: ResizablePanel(),)
+                // child: ResizablePanel(),)
                 child: isFFmpegAvailable
                     ? isLoading
                         ? const LoadingMediaResourcesPage()
