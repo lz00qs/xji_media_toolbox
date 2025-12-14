@@ -136,12 +136,23 @@ class SettingsNotifier extends StateNotifier<Settings> {
 
   void addTranscodePreset(TranscodePreset preset) async {
     objectBox.transcodePresetBox.put(preset);
-    state = state.copyWith(
-      transcodingPresets: [...state.transcodingPresets, preset],
-    );
+    if (state.transcodingPresets.isEmpty) {
+      state = state.copyWith(
+        transcodingPresets: [...state.transcodingPresets, preset],
+        defaultTranscodePresetId: preset.id,
+      );
+      setDefaultTranscodePreset(preset.id);
+    } else {
+      state = state.copyWith(
+        transcodingPresets: [...state.transcodingPresets, preset],
+      );
+    }
   }
 
   void removeTranscodePreset(int id) async {
+    if (id == state.defaultTranscodePresetId) {
+      setDefaultTranscodePreset(state.transcodingPresets.first.id);
+    }
     objectBox.transcodePresetBox.remove(id);
     state = state.copyWith(
       transcodingPresets: state.transcodingPresets.where((element) => element.id != id).toList(),

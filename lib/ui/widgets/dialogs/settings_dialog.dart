@@ -112,7 +112,7 @@ class SettingsDialog extends HookConsumerWidget {
                     // todo: log service
                   },
                   activeTrackColor: ColorDark.blue5,
-                  activeColor: ColorDark.white,
+                  activeThumbColor: ColorDark.white,
                 )
               ],
             ),
@@ -200,7 +200,33 @@ class _PresetItem extends ConsumerWidget {
                   SizedBox(
                     width: DesignValues.mediumPadding,
                   ),
-                  _PresetItemButton(iconData: Icons.delete, onPressed: () {}),
+                  _PresetItemButton(
+                      iconData: Icons.delete,
+                      onPressed: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomDualOptionDialog(
+                                  width: 400,
+                                  height: 240,
+                                  title: 'Delete',
+                                  option1: 'Delete',
+                                  option2: 'Cancel',
+                                  onOption1Pressed: () {
+                                    ref
+                                        .read(settingsProvider.notifier)
+                                        .removeTranscodePreset(preset.id);
+                                    Navigator.of(context).pop();
+                                  },
+                                  onOption2Pressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(
+                                      'Are you sure you want to delete this preset?',
+                                      style: SemiTextStyles.header5ENRegular
+                                          .copyWith(color: ColorDark.text0)));
+                            });
+                      }),
                 ],
               )),
               const Divider(
