@@ -868,8 +868,10 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                   style: SemiTextStyles.header5ENRegular
                       .copyWith(color: ColorDark.text1),
                 ),
-                const Spacer(),
-                Consumer(
+                SizedBox(
+                  width: DesignValues.largePadding,
+                ),
+                Expanded(child: Consumer(
                   builder: (context, ref, child) {
                     final luts = ref.watch(settingsProvider).luts;
                     final selectedId = ref.watch(selectedLutProvider);
@@ -880,9 +882,10 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       (e) => e.id == selectedId,
                       orElse: () => noneLut,
                     );
-
                     return DropdownButton<Lut>(
                       value: selectedLut,
+                      itemHeight: null,
+                      isExpanded: true,
                       focusColor: ColorDark.defaultActive,
                       dropdownColor: ColorDark.bg2,
                       style: SemiTextStyles.header5ENRegular
@@ -901,13 +904,12 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       ],
                       onChanged: (value) {
                         if (value == null) return;
-
                         ref.read(selectedLutProvider.notifier).state = value.id;
                         iPreset.lutId = value.id;
                       },
                     );
                   },
-                )
+                ))
               ],
             ),
           ],
