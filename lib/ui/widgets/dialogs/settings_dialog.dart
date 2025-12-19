@@ -480,6 +480,7 @@ class _EditLutDialog extends StatelessWidget {
                           selectionColor:
                               ColorDark.blue5.withAlpha((0.8 * 255).round()))),
                   child: TextField(
+                    maxLength: 24,
                     cursorColor: ColorDark.text1,
                     controller: nameController,
                     style: SemiTextStyles.header5ENRegular
@@ -521,6 +522,8 @@ class _EditLutDialog extends StatelessWidget {
                                     result.files.single.path!.split('/').last;
                                 iLut.name = iLut.name
                                     .substring(0, iLut.name.length - 5);
+                                // 截取前 24 个字符
+                                iLut.name = iLut.name.substring(0, 24);
                                 nameController.text = iLut.name;
                               }
                             },
@@ -623,6 +626,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       return null;
                     });
                     return TextField(
+                      maxLength: 24,
                       cursorColor: ColorDark.text1,
                       controller: nameController,
                       style: SemiTextStyles.header5ENRegular
