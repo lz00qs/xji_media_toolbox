@@ -178,7 +178,6 @@ class VideoExportDialog extends HookConsumerWidget {
             final preset = ref.watch(settingsProvider.select((state) =>
                 state.transcodingPresets.firstWhere(
                     (element) => element.id == transcodePresetIndex.value)));
-
             if (isMerging) {
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
@@ -203,6 +202,11 @@ class VideoExportDialog extends HookConsumerWidget {
               ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('1');
+              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                    "lut3d='${ref.watch(settingsProvider.select((state) => state.luts.firstWhere((element) => element.id == preset.lutId))).path}'");
+              }
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
@@ -244,9 +248,23 @@ class VideoExportDialog extends HookConsumerWidget {
               );
               ref.read(taskManagerProvider.notifier).addTask(task);
             } else {
+              // Export single file
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
               ffmpegArgs.add(videoResource.file.path);
+              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
+                final lutPath = ref
+                    .watch(settingsProvider.select(
+                      (state) =>
+                          state.luts.firstWhere((e) => e.id == preset.lutId),
+                    ))
+                    .path;
+
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                  'lut3d=$lutPath,format=yuv420p10le',
+                );
+              }
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
