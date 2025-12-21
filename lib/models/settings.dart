@@ -4,10 +4,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:objectbox/objectbox.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
 import '../objectbox.dart';
+import '../service/log_service.dart';
 
 part 'settings.freezed.dart';
 
@@ -34,6 +37,15 @@ class TranscodePreset {
   int height = 2160;
   int crf = 22;
   int ffmpegPreset = FFmpegPreset.medium.index;
+  int lutId = 0;
+}
+
+@Entity()
+class Lut {
+  @Id()
+  int id = 0;
+  String name = 'Default';
+  String path = '';
 }
 
 enum SortType { name, date, size, sequence }
@@ -42,6 +54,8 @@ enum SortType { name, date, size, sequence }
 class Settings with _$Settings {
   @override
   final List<TranscodePreset> transcodingPresets;
+  @override
+  final List<Lut> luts;
   @override
   final int defaultTranscodePresetId;
   @override
@@ -57,6 +71,7 @@ class Settings with _$Settings {
 
   Settings({
     required this.transcodingPresets,
+    required this.luts,
     required this.defaultTranscodePresetId,
     required this.cpuThreads,
     required this.appVersion,
@@ -68,6 +83,7 @@ class Settings with _$Settings {
   factory Settings.initial() {
     return Settings(
       transcodingPresets: [],
+      luts: [],
       defaultTranscodePresetId: 0,
       cpuThreads: 1,
       appVersion: '0.0.0',
@@ -111,12 +127,14 @@ class SettingsNotifier extends StateNotifier<Settings> {
     if (!defaultTranscodePresetIdValid) {
       defaultTranscodePresetId = transcodingPresets.first.id;
     }
+    var luts = objectBox.lutBox.getAll();
     final sortType = SortType.values[prefs.getInt(sortTypePrefKey)?? 0];
     final sortAsc = prefs.getBool(sortOderPrefKey)?? true;
     final cpuThreads = Platform.numberOfProcessors;
     final appVersion = await PackageInfo.fromPlatform();
     state = state.copyWith(
       transcodingPresets: transcodingPresets,
+      luts: luts,
       defaultTranscodePresetId: defaultTranscodePresetId,
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
@@ -163,6 +181,78 @@ class SettingsNotifier extends StateNotifier<Settings> {
     objectBox.transcodePresetBox.put(preset);
     state = state.copyWith(
       transcodingPresets: state.transcodingPresets.map((e) => e.id== preset.id? preset : e).toList(),
+    );
+  }
+
+  void addLut(Lut lut) async {
+    final id = objectBox.lutBox.put(lut);
+    final oLut = objectBox.lutBox.get(id);
+    if (oLut == null) {
+      LogService.warning('Add lut failed, id: $id, name: ${lut.name}');
+      objectBox.lutBox.remove(id);
+      return;
+    }
+    final srcFile = File(lut.path);
+    if (!srcFile.existsSync()) {
+      LogService.warning('Add lut failed, id: $id, name: ${lut.name}, path: ${lut.path} not exists');
+      objectBox.lutBox.remove(id);
+      return;
+    }
+
+    // Application Support
+    final baseDir = await getApplicationSupportDirectory();
+
+    // luts/user
+    final targetDir = Directory(
+      p.join(baseDir.path, 'luts', 'user'),
+    );
+    await targetDir.create(recursive: true);
+
+    var targetFile = File(p.join(targetDir.path, "${oLut.id}_${oLut.name}.cube"));
+
+    targetFile = await srcFile.copy(targetFile.path);
+
+    if (!targetFile.existsSync()) {
+      LogService.warning('Add lut failed, id: $id, name: ${lut.name}, copy to ${targetFile.path} failed');
+      objectBox.lutBox.remove(id);
+      return;
+    }
+
+    oLut.path = targetFile.path;
+    objectBox.lutBox.put(oLut);
+    state = state.copyWith(
+      luts: [...state.luts, oLut],
+    );
+  }
+
+  void removeLut(int id) async {
+    final oLut = objectBox.lutBox.get(id);
+    if (oLut == null) {
+      LogService.warning('Remove lut failed, id: $id');
+      return;
+    }
+    objectBox.lutBox.remove(id);
+    // 遍历 preset 中的 lutId ，如果等于 id ，则设置为 0
+    for (var preset in state.transcodingPresets) {
+      if (preset.lutId == id) {
+        preset.lutId = 0;
+        objectBox.transcodePresetBox.put(preset);
+      }
+    }
+    // 删除文件
+    final lutFile = File(oLut.path);
+    if (lutFile.existsSync()) {
+      lutFile.deleteSync();
+    }
+    state = state.copyWith(
+      luts: state.luts.where((element) => element.id != id).toList(),
+    );
+  }
+
+  void updateLut(Lut lut) async {
+    objectBox.lutBox.put(lut);
+    state = state.copyWith(
+      luts: state.luts.map((e) => e.id== lut.id? lut : e).toList(),
     );
   }
 

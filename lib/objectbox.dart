@@ -8,11 +8,12 @@ class ObjectBox {
   /// The Store of this app.
   late final Store store;
   late final Box<TranscodePreset> transcodePresetBox;
-
+  late final Box<Lut> lutBox;
   static ObjectBox? _instance;
 
   ObjectBox._create(this.store) {
     transcodePresetBox = Box<TranscodePreset>(store);
+    lutBox = Box<Lut>(store);
   }
 
   /// Create an instance of ObjectBox to use throughout the app.

@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 5066807561326805015),
     name: 'TranscodePreset',
-    lastPropertyId: const obx_int.IdUid(8, 6947592021971297063),
+    lastPropertyId: const obx_int.IdUid(9, 3123510047051500198),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -73,6 +73,40 @@ final _entities = <obx_int.ModelEntity>[
         type: 6,
         flags: 0,
       ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 3123510047051500198),
+        name: 'lutId',
+        type: 6,
+        flags: 0,
+      ),
+    ],
+    relations: <obx_int.ModelRelation>[],
+    backlinks: <obx_int.ModelBacklink>[],
+  ),
+  obx_int.ModelEntity(
+    id: const obx_int.IdUid(3, 6915199295852249867),
+    name: 'Lut',
+    lastPropertyId: const obx_int.IdUid(3, 1274234915978651286),
+    flags: 0,
+    properties: <obx_int.ModelProperty>[
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(1, 326848679578729628),
+        name: 'id',
+        type: 6,
+        flags: 1,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(2, 4216341812967579692),
+        name: 'name',
+        type: 9,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(3, 1274234915978651286),
+        name: 'path',
+        type: 9,
+        flags: 0,
+      ),
     ],
     relations: <obx_int.ModelRelation>[],
     backlinks: <obx_int.ModelBacklink>[],
@@ -117,7 +151,7 @@ Future<obx.Store> openStore({
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(2, 5066807561326805015),
+    lastEntityId: const obx_int.IdUid(3, 6915199295852249867),
     lastIndexId: const obx_int.IdUid(0, 0),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
@@ -150,7 +184,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (TranscodePreset object, fb.Builder fbb) {
         final nameOffset = fbb.writeString(object.name);
-        fbb.startTable(9);
+        fbb.startTable(10);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, nameOffset);
         fbb.addBool(2, object.useInputResolution);
@@ -159,6 +193,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(5, object.height);
         fbb.addInt64(6, object.crf);
         fbb.addInt64(7, object.ffmpegPreset);
+        fbb.addInt64(8, object.lutId);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -191,7 +226,42 @@ obx_int.ModelDefinition getObjectBoxModel() {
             rootOffset,
             18,
             0,
-          );
+          )
+          ..lutId = const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+
+        return object;
+      },
+    ),
+    Lut: obx_int.EntityDefinition<Lut>(
+      model: _entities[1],
+      toOneRelations: (Lut object) => [],
+      toManyRelations: (Lut object) => {},
+      getId: (Lut object) => object.id,
+      setId: (Lut object, int id) {
+        object.id = id;
+      },
+      objectToFB: (Lut object, fb.Builder fbb) {
+        final nameOffset = fbb.writeString(object.name);
+        final pathOffset = fbb.writeString(object.path);
+        fbb.startTable(4);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, nameOffset);
+        fbb.addOffset(2, pathOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+
+        final object = Lut()
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
+          ..name = const fb.StringReader(
+            asciiOptimization: true,
+          ).vTableGet(buffer, rootOffset, 6, '')
+          ..path = const fb.StringReader(
+            asciiOptimization: true,
+          ).vTableGet(buffer, rootOffset, 8, '');
 
         return object;
       },
@@ -242,4 +312,21 @@ class TranscodePreset_ {
   static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePreset>(
     _entities[0].properties[7],
   );
+
+  /// See [TranscodePreset.lutId].
+  static final lutId = obx.QueryIntegerProperty<TranscodePreset>(
+    _entities[0].properties[8],
+  );
+}
+
+/// [Lut] entity fields to define ObjectBox queries.
+class Lut_ {
+  /// See [Lut.id].
+  static final id = obx.QueryIntegerProperty<Lut>(_entities[1].properties[0]);
+
+  /// See [Lut.name].
+  static final name = obx.QueryStringProperty<Lut>(_entities[1].properties[1]);
+
+  /// See [Lut.path].
+  static final path = obx.QueryStringProperty<Lut>(_entities[1].properties[2]);
 }

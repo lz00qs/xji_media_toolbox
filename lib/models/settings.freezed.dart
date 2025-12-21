@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Settings {
   List<TranscodePreset> get transcodingPresets;
+  List<Lut> get luts;
   int get defaultTranscodePresetId;
   int get cpuThreads;
   String get appVersion;
@@ -36,6 +37,7 @@ mixin _$Settings {
             other is Settings &&
             const DeepCollectionEquality()
                 .equals(other.transcodingPresets, transcodingPresets) &&
+            const DeepCollectionEquality().equals(other.luts, luts) &&
             (identical(
                     other.defaultTranscodePresetId, defaultTranscodePresetId) ||
                 other.defaultTranscodePresetId == defaultTranscodePresetId) &&
@@ -54,6 +56,7 @@ mixin _$Settings {
   int get hashCode => Object.hash(
       runtimeType,
       const DeepCollectionEquality().hash(transcodingPresets),
+      const DeepCollectionEquality().hash(luts),
       defaultTranscodePresetId,
       cpuThreads,
       appVersion,
@@ -63,7 +66,7 @@ mixin _$Settings {
 
   @override
   String toString() {
-    return 'Settings(transcodingPresets: $transcodingPresets, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
   }
 }
 
@@ -74,6 +77,7 @@ abstract mixin class $SettingsCopyWith<$Res> {
   @useResult
   $Res call(
       {List<TranscodePreset> transcodingPresets,
+      List<Lut> luts,
       int defaultTranscodePresetId,
       int cpuThreads,
       String appVersion,
@@ -95,6 +99,7 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
   @override
   $Res call({
     Object? transcodingPresets = null,
+    Object? luts = null,
     Object? defaultTranscodePresetId = null,
     Object? cpuThreads = null,
     Object? appVersion = null,
@@ -107,6 +112,10 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
           ? _self.transcodingPresets
           : transcodingPresets // ignore: cast_nullable_to_non_nullable
               as List<TranscodePreset>,
+      luts: null == luts
+          ? _self.luts
+          : luts // ignore: cast_nullable_to_non_nullable
+              as List<Lut>,
       defaultTranscodePresetId: null == defaultTranscodePresetId
           ? _self.defaultTranscodePresetId
           : defaultTranscodePresetId // ignore: cast_nullable_to_non_nullable

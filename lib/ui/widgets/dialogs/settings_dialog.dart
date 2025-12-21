@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -16,6 +17,8 @@ class SettingsDialog extends HookConsumerWidget {
     final outputPresetScrollController = useScrollController();
     final transcodingPresets =
         ref.watch(settingsProvider.select((value) => value.transcodingPresets));
+    final lutScrollController = useScrollController();
+    final luts = ref.watch(settingsProvider.select((value) => value.luts));
     final isDebugMode =
         ref.watch(settingsProvider.select((value) => value.isDebugMode));
     final appVersion =
@@ -71,7 +74,7 @@ class SettingsDialog extends HookConsumerWidget {
                   BorderRadius.circular(DesignValues.smallBorderRadius),
               child: Container(
                 color: ColorDark.bg3,
-                height: 200,
+                height: 120,
                 child: Padding(
                   padding: EdgeInsets.only(
                       top: DesignValues.ultraSmallPadding,
@@ -90,6 +93,71 @@ class SettingsDialog extends HookConsumerWidget {
                           itemBuilder: (context, index) {
                             return _PresetItem(
                                 preset: transcodingPresets[index]);
+                          });
+                    }),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: DesignValues.largePadding,
+            ),
+            Row(
+              children: [
+                Text(
+                  'Luts',
+                  style: SemiTextStyles.header4ENRegular
+                      .copyWith(color: ColorDark.text0),
+                ),
+                SizedBox(
+                  width: DesignValues.smallPadding,
+                ),
+                CustomIconButton(
+                    iconData: Icons.add_circle_outline,
+                    onPressed: () async {
+                      final oLut = await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _EditLutDialog(lut: null);
+                          });
+                      if (oLut != null) {
+                        ref.read(settingsProvider.notifier).addLut(oLut);
+                      }
+                    },
+                    iconSize: DesignValues.mediumIconSize,
+                    buttonSize: 28,
+                    hoverColor: ColorDark.defaultHover,
+                    focusColor: ColorDark.defaultActive,
+                    iconColor: ColorDark.text0),
+              ],
+            ),
+            SizedBox(
+              height: DesignValues.ultraSmallPadding,
+            ),
+            ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(DesignValues.smallBorderRadius),
+              child: Container(
+                color: ColorDark.bg3,
+                height: 120,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: DesignValues.ultraSmallPadding,
+                      bottom: DesignValues.ultraSmallPadding,
+                      left: DesignValues.ultraSmallPadding),
+                  child: RawScrollbar(
+                    thickness: DesignValues.smallPadding,
+                    trackVisibility: false,
+                    thumbVisibility: true,
+                    radius: Radius.circular(DesignValues.smallBorderRadius),
+                    controller: lutScrollController,
+                    child: Consumer(builder: (context, ref, child) {
+                      return ListView.builder(
+                          controller: lutScrollController,
+                          itemCount: luts.length,
+                          // itemCount: 1,
+                          itemBuilder: (context, index) {
+                            return _LutItem(lut: luts[index]);
                           });
                     }),
                   ),
@@ -169,7 +237,7 @@ class _PresetItem extends ConsumerWidget {
                   child: Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  _PresetItemButton(
+                  _ItemButton(
                       iconData: isDefaultPreset
                           ? Icons.check_box_outlined
                           : Icons.check_box_outline_blank,
@@ -183,7 +251,7 @@ class _PresetItem extends ConsumerWidget {
                           style: SemiTextStyles.header5ENRegular.copyWith(
                               color: ColorDark.text0,
                               overflow: TextOverflow.ellipsis))),
-                  _PresetItemButton(
+                  _ItemButton(
                       iconData: Icons.edit,
                       onPressed: () async {
                         final oPreset = await showDialog(
@@ -200,7 +268,7 @@ class _PresetItem extends ConsumerWidget {
                   SizedBox(
                     width: DesignValues.mediumPadding,
                   ),
-                  _PresetItemButton(
+                  _ItemButton(
                       iconData: Icons.delete,
                       onPressed: () async {
                         await showDialog(
@@ -245,11 +313,99 @@ class _PresetItem extends ConsumerWidget {
   }
 }
 
-class _PresetItemButton extends StatelessWidget {
+class _LutItem extends ConsumerWidget {
+  final Lut lut;
+
+  const _LutItem({required this.lut});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // final isDefaultLut = ref.watch(settingsProvider
+    //     .select((value) => value.defaultLutId == lut.id));
+    return SizedBox(
+      height: 37,
+      child: Row(
+        children: [
+          Expanded(
+              child: Column(
+            children: [
+              Expanded(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: DesignValues.smallPadding,
+                  ),
+                  Expanded(
+                      child: Text(lut.name,
+                          style: SemiTextStyles.header5ENRegular.copyWith(
+                              color: ColorDark.text0,
+                              overflow: TextOverflow.ellipsis))),
+                  _ItemButton(
+                      iconData: Icons.edit,
+                      onPressed: () async {
+                        final oLut = await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return _EditLutDialog(lut: lut);
+                            });
+                        if (oLut != null) {
+                          ref.read(settingsProvider.notifier).updateLut(oLut);
+                        }
+                      }),
+                  SizedBox(
+                    width: DesignValues.mediumPadding,
+                  ),
+                  _ItemButton(
+                      iconData: Icons.delete,
+                      onPressed: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return CustomDualOptionDialog(
+                                  width: 400,
+                                  height: 240,
+                                  title: 'Delete',
+                                  option1: 'Delete',
+                                  option2: 'Cancel',
+                                  onOption1Pressed: () {
+                                    ref
+                                        .read(settingsProvider.notifier)
+                                        .removeLut(lut.id);
+                                    Navigator.of(context).pop();
+                                  },
+                                  onOption2Pressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text(
+                                      'Are you sure you want to delete this lut?',
+                                      style: SemiTextStyles.header5ENRegular
+                                          .copyWith(color: ColorDark.text0)));
+                            });
+                      }),
+                ],
+              )),
+              const Divider(
+                color: ColorDark.border,
+                thickness: 1,
+                height: 1,
+              ),
+            ],
+          )),
+          SizedBox(
+            width: DesignValues.smallPadding,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ItemButton extends StatelessWidget {
   final IconData iconData;
   final VoidCallback onPressed;
 
-  const _PresetItemButton({required this.iconData, required this.onPressed});
+  const _ItemButton({required this.iconData, required this.onPressed});
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +420,137 @@ class _PresetItemButton extends StatelessWidget {
   }
 }
 
+class _EditLutDialog extends StatelessWidget {
+  final Lut? lut;
+  late final Lut iLut;
+  late final StateProvider<String> nameProvider;
+  late final StateProvider<String> pathProvider;
+
+  _EditLutDialog({required this.lut}) {
+    final isNew = lut == null;
+    if (isNew) {
+      iLut = Lut();
+    } else {
+      iLut = lut!;
+    }
+    nameProvider = StateProvider<String>((ref) => iLut.name);
+    pathProvider = StateProvider<String>((ref) => iLut.path);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomDualOptionDialog(
+      width: 480,
+      height: 320,
+      title: lut == null ? 'Add Lut' : 'Edit Lut',
+      option1: 'Cancel',
+      option2: lut == null ? 'Add' : 'Save',
+      onOption1Pressed: () {
+        Navigator.of(context).pop();
+      },
+      onOption2Pressed: () {
+        Navigator.of(context).pop(iLut);
+      },
+      child: HookConsumer(builder: (context, ref, child) {
+        final nameController = useTextEditingController(text: iLut.name);
+        final scrollController = ScrollController();
+        useEffect(() {
+          nameController.addListener(() {
+            ref.read(nameProvider.notifier).state = nameController.text;
+            if (nameController.text.isNotEmpty) {
+              iLut.name = nameController.text;
+            }
+          });
+          return null;
+        });
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Lut name',
+              style: SemiTextStyles.header5ENRegular
+                  .copyWith(color: ColorDark.text1),
+            ),
+            SizedBox(
+              height: 72,
+              child: Theme(
+                  data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                          selectionColor:
+                              ColorDark.blue5.withAlpha((0.8 * 255).round()))),
+                  child: TextField(
+                    maxLength: 24,
+                    cursorColor: ColorDark.text1,
+                    controller: nameController,
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text0),
+                    decoration: dialogInputDecoration.copyWith(
+                        errorText: (ref.watch(nameProvider)).isEmpty
+                            ? 'Name is required'
+                            : null),
+                  )),
+            ),
+            lut == null
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Select lut file',
+                            style: SemiTextStyles.header5ENRegular
+                                .copyWith(color: ColorDark.text1),
+                          ),
+                          SizedBox(
+                            width: DesignValues.smallPadding,
+                          ),
+                          _ItemButton(
+                            iconData: Icons.folder_open,
+                            onPressed: () async {
+                              final result =
+                                  await FilePicker.platform.pickFiles(
+                                type: FileType.custom,
+                                allowedExtensions: ['cube'],
+                              );
+                              if (result != null) {
+                                ref.read(pathProvider.notifier).state =
+                                    result.files.single.path!;
+                                iLut.path = result.files.single.path!;
+                                iLut.name =
+                                    result.files.single.path!.split('/').last;
+                                iLut.name = iLut.name
+                                    .substring(0, iLut.name.length - 5);
+                                // 截取前 24 个字符
+                                iLut.name = iLut.name.substring(0, 24);
+                                nameController.text = iLut.name;
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      Scrollbar(
+                          controller: scrollController,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: scrollController,
+                            child: Text(
+                              ref.watch(pathProvider).split('/').last,
+                              style: SemiTextStyles.header5ENRegular
+                                  .copyWith(color: ColorDark.text0),
+                            ),
+                          )),
+                    ],
+                  )
+                : SizedBox()
+          ],
+        );
+      }),
+    );
+  }
+}
+
 class _EditTranscodePresetDialog extends StatelessWidget {
   final TranscodePreset? preset;
   late final TranscodePreset iPreset;
@@ -274,6 +561,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
   late final StateProvider<bool> useHevcProvider;
   late final StateProvider<bool> useInputResolutionProvider;
   late final StateProvider<int> selectedFFmpegPresetProvider;
+  late final StateProvider<int> selectedLutProvider;
 
   _EditTranscodePresetDialog({required this.preset}) {
     final isNew = preset == null;
@@ -291,6 +579,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
         StateProvider<bool>((ref) => iPreset.useInputResolution);
     selectedFFmpegPresetProvider =
         StateProvider<int>((ref) => iPreset.ffmpegPreset);
+    selectedLutProvider = StateProvider<int>((ref) => iPreset.lutId);
   }
 
   @override
@@ -337,6 +626,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       return null;
                     });
                     return TextField(
+                      maxLength: 24,
                       cursorColor: ColorDark.text1,
                       controller: nameController,
                       style: SemiTextStyles.header5ENRegular
@@ -574,7 +864,58 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                   );
                 })
               ],
-            )
+            ),
+            Row(
+              children: [
+                Text(
+                  "LUT:",
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text1),
+                ),
+                SizedBox(
+                  width: DesignValues.largePadding,
+                ),
+                Expanded(child: Consumer(
+                  builder: (context, ref, child) {
+                    final luts = ref.watch(settingsProvider).luts;
+                    final selectedId = ref.watch(selectedLutProvider);
+                    final noneLut = Lut()..id = 0;
+                    noneLut.name = 'None';
+
+                    final selectedLut = luts.firstWhere(
+                      (e) => e.id == selectedId,
+                      orElse: () => noneLut,
+                    );
+                    return DropdownButton<Lut>(
+                      value: selectedLut,
+                      itemHeight: null,
+                      isExpanded: true,
+                      focusColor: ColorDark.defaultActive,
+                      dropdownColor: ColorDark.bg2,
+                      style: SemiTextStyles.header5ENRegular
+                          .copyWith(color: ColorDark.text0),
+                      items: [
+                        DropdownMenuItem<Lut>(
+                          value: noneLut,
+                          child: Text(noneLut.name),
+                        ),
+                        ...luts.map(
+                          (e) => DropdownMenuItem<Lut>(
+                            value: e,
+                            child: Text(e.name),
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        if (value == null) return;
+                        ref.read(selectedLutProvider.notifier).state = value.id;
+                        iPreset.lutId = value.id;
+                      },
+                    );
+                  },
+                ))
+              ],
+            ),
           ],
         ));
   }

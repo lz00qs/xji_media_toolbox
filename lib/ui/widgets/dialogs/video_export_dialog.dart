@@ -41,8 +41,7 @@ Duration _getOutputDuration(
     }
   } else {
     if (isEditing) {
-      duration = ref.watch(trimmerSavedEnd) -
-          ref.watch(trimmerSavedStart);
+      duration = ref.watch(trimmerSavedEnd) - ref.watch(trimmerSavedStart);
     } else {
       if (ref.watch(mediaResourcesProvider
           .select((state) => state.resources.isNotEmpty))) {
@@ -179,7 +178,6 @@ class VideoExportDialog extends HookConsumerWidget {
             final preset = ref.watch(settingsProvider.select((state) =>
                 state.transcodingPresets.firstWhere(
                     (element) => element.id == transcodePresetIndex.value)));
-
             if (isMerging) {
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
@@ -204,6 +202,11 @@ class VideoExportDialog extends HookConsumerWidget {
               ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('1');
+              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                    "lut3d='${ref.watch(settingsProvider.select((state) => state.luts.firstWhere((element) => element.id == preset.lutId))).path}'");
+              }
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
@@ -245,9 +248,23 @@ class VideoExportDialog extends HookConsumerWidget {
               );
               ref.read(taskManagerProvider.notifier).addTask(task);
             } else {
+              // Export single file
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
               ffmpegArgs.add(videoResource.file.path);
+              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
+                final lutPath = ref
+                    .watch(settingsProvider.select(
+                      (state) =>
+                          state.luts.firstWhere((e) => e.id == preset.lutId),
+                    ))
+                    .path;
+
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                  'lut3d=$lutPath,format=yuv420p10le',
+                );
+              }
               ffmpegArgs.add('-c:v');
               if (useInputEncodeSettings.value == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
@@ -272,11 +289,9 @@ class VideoExportDialog extends HookConsumerWidget {
 
               if (isEditing) {
                 ffmpegArgs.add('-ss');
-                ffmpegArgs
-                    .add(ref.watch(trimmerSavedStart).toString());
+                ffmpegArgs.add(ref.watch(trimmerSavedStart).toString());
                 ffmpegArgs.add('-to');
-                ffmpegArgs
-                    .add(ref.watch(trimmerSavedEnd).toString());
+                ffmpegArgs.add(ref.watch(trimmerSavedEnd).toString());
               }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
@@ -284,9 +299,7 @@ class VideoExportDialog extends HookConsumerWidget {
               final task = VideoTask(
                 name: '${outputFileName.value}.MP4',
                 status: VideoTaskStatus.waiting,
-                type: isEditing
-                   ? VideoTaskType.trim
-                   : VideoTaskType.transcode,
+                type: isEditing ? VideoTaskType.trim : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(
                     isMerging: false, isEditing: isEditing, ref: ref),
@@ -386,54 +399,59 @@ class VideoExportDialog extends HookConsumerWidget {
                     useInputEncodeSettings.value =
                         !useInputEncodeSettings.value;
                   }),
+              SizedBox(
+                height: DesignValues.mediumPadding,
+              ),
               useInputEncodeSettings.value
                   ? const SizedBox()
-                  : Row(
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Transcode Preset:',
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text1)),
-                        SizedBox(
-                          width: DesignValues.mediumPadding,
-                        ),
-                        Expanded(
-                            child: DropdownButton<int>(
-                          isExpanded: true,
-                          value: transcodePresetIndex.value,
-                          focusColor: ColorDark.defaultActive,
-                          dropdownColor: ColorDark.bg2,
-                          style: SemiTextStyles.header5ENRegular
-                              .copyWith(color: ColorDark.text0),
-                          items: ref
-                              .watch(settingsProvider.select((state) => state
-                                  .transcodingPresets
-                                  .map((e) => DropdownMenuItem<int>(
-                                      value: e.id, child: Text(e.name)))
-                                  .toList()))
-                              .toList(),
-                          onChanged: (value) {
-                            if (value != null) {
-                              transcodePresetIndex.value = value;
-                            }
-                          },
-                        )),
-                        SizedBox(
-                          width: DesignValues.largePadding,
-                        ),
-                        CustomIconButton(
-                            iconData: Icons.settings,
-                            onPressed: () async {
-                              showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return SettingsDialog();
-                                  });
-                            },
-                            iconSize: DesignValues.mediumIconSize,
-                            buttonSize: 24,
-                            hoverColor: ColorDark.defaultHover,
-                            focusColor: ColorDark.defaultActive,
-                            iconColor: ColorDark.text1)
+                        Row(
+                          children: [
+                            DropdownButton<int>(
+                              isExpanded: false,
+                              value: transcodePresetIndex.value,
+                              focusColor: ColorDark.defaultActive,
+                              dropdownColor: ColorDark.bg2,
+                              style: SemiTextStyles.header5ENRegular
+                                  .copyWith(color: ColorDark.text0),
+                              items: ref
+                                  .watch(settingsProvider.select((state) =>
+                                      state.transcodingPresets
+                                          .map((e) => DropdownMenuItem<int>(
+                                              value: e.id, child: Text(e.name)))
+                                          .toList()))
+                                  .toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  transcodePresetIndex.value = value;
+                                }
+                              },
+                            ),
+                            Spacer(),
+                            SizedBox(
+                              width: DesignValues.largePadding,
+                            ),
+                            CustomIconButton(
+                                iconData: Icons.settings,
+                                onPressed: () async {
+                                  showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return SettingsDialog();
+                                      });
+                                },
+                                iconSize: DesignValues.mediumIconSize,
+                                buttonSize: 24,
+                                hoverColor: ColorDark.defaultHover,
+                                focusColor: ColorDark.defaultActive,
+                                iconColor: ColorDark.text1)
+                          ],
+                        )
                       ],
                     ),
               SizedBox(
@@ -504,6 +522,27 @@ class VideoExportDialog extends HookConsumerWidget {
                           .toString()
                           .split('.')
                           .last),
+              // Output LUT:
+              useInputEncodeSettings.value
+                  ? const SizedBox()
+                  : _OutputInfoItem(
+                      keyText: 'Output LUT:',
+                      valueText: ref
+                          .watch(settingsProvider.select((state) => state.luts
+                              .firstWhere(
+                                  (element) =>
+                                      element.id ==
+                                      ref
+                                          .watch(settingsProvider.select(
+                                              (state) => state
+                                                  .transcodingPresets
+                                                  .firstWhere((element) =>
+                                                      element.id ==
+                                                      transcodePresetIndex
+                                                          .value)))
+                                          .lutId,
+                                  orElse: () => Lut()..name = "None")))
+                          .name),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
