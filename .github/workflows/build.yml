@@ -2,86 +2,57 @@ name: Build Windows and macOS App
 
 on:
   push:
-    branches:
-      - main  # 在推送到 main 分支时触发
+    branches: [main]
   pull_request:
 
+env:
+  FLUTTER_VERSION: 3.38.5
+  PYTHON_VERSION: '3.13'
+
 jobs:
-  # macOS 构建任务
-  build-macos:
-    runs-on: macos-latest
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
 
     steps:
-      # 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 设置 Flutter 环境
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: stable
-          flutter-version: 3.38.5
-      
-      # 设置 Python 环境
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
+          python-version: ${{ env.PYTHON_VERSION }}
 
-      # 获取 Flutter 依赖
-      - name: Install dependencies
+      - name: Flutter pub get
         run: flutter pub get
 
-      # 构建 macOS 应用
+      # macOS
       - name: Build macOS App
-        run: python build.py --build macos
-
-      # 创建 DMG 镜像
-      - name: Create the DMG file for macos app
+        if: matrix.os == 'macos-latest'
         run: |
-          hdiutil create -format UDZO -srcfolder build/macos/Build/Products/Release/XJI\ Media\ Toolbox.app build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
+          python build.py --build macos
+          hdiutil create -format UDZO \
+            -srcfolder build/macos/Build/Products/Release/XJI\ Media\ Toolbox.app \
+            build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
 
-      # 保存 macOS 构建产物
-      - name: Upload macOS build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: xji_media_toolbox_macos
-          path: build/macos/Build/Products/Release/xji_media_toolbox_macos.dmg
-
-  # Windows 构建任务
-  build-windows:
-    runs-on: windows-latest
-
-    steps:
-      # 检出代码
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # 设置 Flutter 环境
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.32.6
-      
-      # 设置 Python 环境
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
-
-      # 获取 Flutter 依赖
-      - name: Install dependencies
-        run: flutter pub get
-
-      # 构建 Windows 应用
+      # Windows
       - name: Build Windows App
+        if: matrix.os == 'windows-latest'
         run: flutter build windows --release
 
-      # 保存 Windows 构建产物
-      - name: Upload Windows build artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: xji_media_toolbox_windows
-          path: build/windows/x64/runner/Release/*
+          name: xji_media_toolbox_${{ matrix.os }}
+          path: |
+            build/macos/Build/Products/Release/*.dmg
+            build/windows/x64/runner/Release/*
