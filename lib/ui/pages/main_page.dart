@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
+import '../../providers/media_resources_provider.dart';
 import '../widgets/buttons/main_panel_button.dart';
 import '../../utils/media_resources_utils.dart';
 import '../widgets/views/main_panel.dart';
@@ -63,10 +64,10 @@ class MainPage extends StatelessWidget {
   const MainPage({super.key, required this.mainRef});
 
   void _increaseCurrentMediaIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resourcesLength = mainRef.watch(
-        mediaResourcesProvider.select((state) => state.resources.length));
+    final currentIndex = mainRef.watch(
+        mediaResourcesProvider.select((state) => state.currentIndex));
+    final resourcesLength = mainRef.watch(mediaResourcesProvider
+        .select((state) => state.resources.length));
     if (currentIndex < resourcesLength - 1) {
       mainRef.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex + 1, true);
@@ -74,8 +75,8 @@ class MainPage extends StatelessWidget {
   }
 
   void _decreaseCurrentMediaIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final currentIndex = mainRef.watch(
+        mediaResourcesProvider.select((state) => state.currentIndex));
     if (currentIndex > 0) {
       mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
       mediaResourcesListScrollToIndex(currentIndex - 1, false);
@@ -83,28 +84,30 @@ class MainPage extends StatelessWidget {
   }
 
   void _increaseCurrentAebIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final currentIndex = mainRef.watch(
+        mediaResourcesProvider.select((state) => state.currentIndex));
     final resource = mainRef.watch(mediaResourcesProvider
         .select((state) => state.resources[currentIndex]));
-    if (resource.isAeb) {
+    if (resource.isAeb == true) {
       mainRef.read(mediaResourcesProvider.notifier).increaseCurrentAebIndex();
     }
-  }
+    }
 
   void _decreaseCurrentAebIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
+    final currentIndex = mainRef.watch(
+        mediaResourcesProvider.select((state) => state.currentIndex));
     final resource = mainRef.watch(mediaResourcesProvider
         .select((state) => state.resources[currentIndex]));
-    if (resource.isAeb) {
-      final currentAebIndex = mainRef.watch(
-          mediaResourcesProvider.select((state) => state.currentAebIndex));
+    if (resource.isAeb == true) {
+      final currentAebIndex = mainRef.watch(mediaResourcesProvider
+          .select((state) => state.currentAebIndex));
       if (currentAebIndex > 0) {
-        mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentAebIndex();
+        mainRef
+            .read(mediaResourcesProvider.notifier)
+            .decreaseCurrentAebIndex();
       }
     }
-  }
+    }
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +138,7 @@ class MainPage extends StatelessWidget {
             child: Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
               final resourcesIsEmpty = ref.watch(mediaResourcesProvider
-                  .select((state) => state.resources.isEmpty));
+                      .select((state) => state.resources.isEmpty));
               if (resourcesIsEmpty) {
                 return _MainPageEmpty(ref: mainRef);
               } else {

@@ -1,28 +1,62 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/custom_dual_option_dialog.dart';
 
+import '../../../providers/settings_provider.dart';
 import '../../design_tokens.dart';
 import '../buttons/custom_icon_button.dart';
 
-class SettingsDialog extends HookConsumerWidget {
+part 'settings_dialog.g.dart';
+
+class _SettingsDialogUiState {
+  const _SettingsDialogUiState();
+}
+
+@riverpod
+class _SettingsDialogController extends _$SettingsDialogController {
+  late final ScrollController outputPresetScrollController;
+  late final ScrollController lutScrollController;
+
+  @override
+  _SettingsDialogUiState build() {
+    outputPresetScrollController = ScrollController();
+    lutScrollController = ScrollController();
+
+    ref.onDispose(() {
+      outputPresetScrollController.dispose();
+      lutScrollController.dispose();
+    });
+
+    return const _SettingsDialogUiState();
+  }
+}
+
+class SettingsDialog extends ConsumerWidget {
   const SettingsDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final outputPresetScrollController = useScrollController();
+    // 只为初始化 / 生命周期
+    ref.watch(_settingsDialogControllerProvider);
+
+    final uiNotifier =
+    ref.read(_settingsDialogControllerProvider.notifier);
+
+    final outputPresetScrollController =
+        uiNotifier.outputPresetScrollController;
+    final lutScrollController = uiNotifier.lutScrollController;
+
     final transcodingPresets =
-        ref.watch(settingsProvider.select((value) => value.transcodingPresets));
-    final lutScrollController = useScrollController();
-    final luts = ref.watch(settingsProvider.select((value) => value.luts));
+        ref.watch(settingsProvider.select((s) => s.value?.transcodingPresets ?? []));
+    final luts = ref.watch(settingsProvider.select((s) => s.value?.luts ?? []));
     final isDebugMode =
-        ref.watch(settingsProvider.select((value) => value.isDebugMode));
+        ref.watch(settingsProvider.select((s) => s.value?.isDebugMode ?? false));
     final appVersion =
-        ref.watch(settingsProvider.select((value) => value.appVersion));
+        ref.watch(settingsProvider.select((s) => s.value?.appVersion ?? ''));
     return CustomDualOptionDialog(
         width: 480,
         height: 640,
@@ -225,7 +259,7 @@ class _PresetItem extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isDefaultPreset = ref.watch(settingsProvider
-        .select((value) => value.defaultTranscodePresetId == preset.id));
+        .select((s) => s.value?.defaultTranscodePresetId == preset.id));
     return SizedBox(
       height: 37,
       child: Row(
@@ -283,7 +317,7 @@ class _PresetItem extends ConsumerWidget {
                                   onOption1Pressed: () {
                                     ref
                                         .read(settingsProvider.notifier)
-                                        .removeTranscodePreset(preset.id);
+                                        .removeTranscodePreset(preset);
                                     Navigator.of(context).pop();
                                   },
                                   onOption2Pressed: () {
@@ -420,170 +454,483 @@ class _ItemButton extends StatelessWidget {
   }
 }
 
-class _EditLutDialog extends StatelessWidget {
-  final Lut? lut;
-  late final Lut iLut;
-  late final StateProvider<String> nameProvider;
-  late final StateProvider<String> pathProvider;
+class _EditLutState {
+  final String name;
+  final String path;
 
-  _EditLutDialog({required this.lut}) {
-    final isNew = lut == null;
-    if (isNew) {
-      iLut = Lut();
-    } else {
-      iLut = lut!;
-    }
-    nameProvider = StateProvider<String>((ref) => iLut.name);
-    pathProvider = StateProvider<String>((ref) => iLut.path);
+  const _EditLutState({
+    required this.name,
+    required this.path,
+  });
+
+  bool get isNameValid => name.isNotEmpty;
+
+  _EditLutState copyWith({
+    String? name,
+    String? path,
+  }) {
+    return _EditLutState(
+      name: name ?? this.name,
+      path: path ?? this.path,
+    );
   }
+}
+
+@riverpod
+class _EditLutController extends _$EditLutController {
+  late final TextEditingController nameController;
+  late final ScrollController pathScrollController;
+
+  late final Lut _lut;
 
   @override
-  Widget build(BuildContext context) {
+  _EditLutState build(Lut? lut) {
+    _lut = lut ?? Lut();
+
+    nameController = TextEditingController(text: _lut.name);
+    pathScrollController = ScrollController();
+
+    void nameListener() {
+      final text = nameController.text;
+      if (text != state.name) {
+        _lut.name = text;
+        state = state.copyWith(name: text);
+      }
+    }
+
+    nameController.addListener(nameListener);
+
+    ref.onDispose(() {
+      nameController.removeListener(nameListener);
+      nameController.dispose();
+      pathScrollController.dispose();
+    });
+
+    return _EditLutState(
+      name: _lut.name,
+      path: _lut.path,
+    );
+  }
+
+  /// 选择 lut 文件（仅新建时使用）
+  Future<void> pickLutFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['cube'],
+    );
+    if (result == null) return;
+
+    final path = result.files.single.path!;
+    var name = path.split('/').last;
+    name = name.substring(0, name.length - 5);
+    if (name.length > 24) {
+      name = name.substring(0, 24);
+    }
+
+    _lut
+      ..path = path
+      ..name = name;
+
+    nameController.text = name;
+
+    state = state.copyWith(
+      name: name,
+      path: path,
+    );
+  }
+
+  Lut get result => _lut;
+}
+
+class _EditLutDialog extends ConsumerWidget {
+  final Lut? lut;
+
+  const _EditLutDialog({required this.lut});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(_editLutControllerProvider(lut));
+    final controller =
+    ref.read(_editLutControllerProvider(lut).notifier);
+
     return CustomDualOptionDialog(
       width: 480,
       height: 320,
       title: lut == null ? 'Add Lut' : 'Edit Lut',
       option1: 'Cancel',
       option2: lut == null ? 'Add' : 'Save',
+      disableOption2: !state.isNameValid,
       onOption1Pressed: () {
         Navigator.of(context).pop();
       },
       onOption2Pressed: () {
-        Navigator.of(context).pop(iLut);
+        Navigator.of(context).pop(controller.result);
       },
-      child: HookConsumer(builder: (context, ref, child) {
-        final nameController = useTextEditingController(text: iLut.name);
-        final scrollController = ScrollController();
-        useEffect(() {
-          nameController.addListener(() {
-            ref.read(nameProvider.notifier).state = nameController.text;
-            if (nameController.text.isNotEmpty) {
-              iLut.name = nameController.text;
-            }
-          });
-          return null;
-        });
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Lut name',
-              style: SemiTextStyles.header5ENRegular
-                  .copyWith(color: ColorDark.text1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Lut name',
+            style: SemiTextStyles.header5ENRegular
+                .copyWith(color: ColorDark.text1),
+          ),
+          SizedBox(
+            height: 72,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor:
+                  ColorDark.blue5.withAlpha((0.8 * 255).round()),
+                ),
+              ),
+              child: TextField(
+                maxLength: 24,
+                controller: controller.nameController,
+                cursorColor: ColorDark.text1,
+                style: SemiTextStyles.header5ENRegular
+                    .copyWith(color: ColorDark.text0),
+                decoration: dialogInputDecoration.copyWith(
+                  errorText:
+                  state.isNameValid ? null : 'Name is required',
+                ),
+              ),
             ),
-            SizedBox(
-              height: 72,
-              child: Theme(
-                  data: Theme.of(context).copyWith(
-                      textSelectionTheme: TextSelectionThemeData(
-                          selectionColor:
-                              ColorDark.blue5.withAlpha((0.8 * 255).round()))),
-                  child: TextField(
-                    maxLength: 24,
-                    cursorColor: ColorDark.text1,
-                    controller: nameController,
-                    style: SemiTextStyles.header5ENRegular
-                        .copyWith(color: ColorDark.text0),
-                    decoration: dialogInputDecoration.copyWith(
-                        errorText: (ref.watch(nameProvider)).isEmpty
-                            ? 'Name is required'
-                            : null),
-                  )),
+          ),
+
+          if (lut == null) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select lut file',
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text1),
+                ),
+                _ItemButton(
+                  iconData: Icons.folder_open,
+                  onPressed: controller.pickLutFile,
+                ),
+              ],
             ),
-            lut == null
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Select lut file',
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text1),
-                          ),
-                          SizedBox(
-                            width: DesignValues.smallPadding,
-                          ),
-                          _ItemButton(
-                            iconData: Icons.folder_open,
-                            onPressed: () async {
-                              final result =
-                                  await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: ['cube'],
-                              );
-                              if (result != null) {
-                                ref.read(pathProvider.notifier).state =
-                                    result.files.single.path!;
-                                iLut.path = result.files.single.path!;
-                                iLut.name =
-                                    result.files.single.path!.split('/').last;
-                                iLut.name = iLut.name
-                                    .substring(0, iLut.name.length - 5);
-                                // 截取前 24 个字符
-                                iLut.name = iLut.name.substring(0, 24);
-                                nameController.text = iLut.name;
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      Scrollbar(
-                          controller: scrollController,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: scrollController,
-                            child: Text(
-                              ref.watch(pathProvider).split('/').last,
-                              style: SemiTextStyles.header5ENRegular
-                                  .copyWith(color: ColorDark.text0),
-                            ),
-                          )),
-                    ],
-                  )
-                : SizedBox()
+            Scrollbar(
+              controller: controller.pathScrollController,
+              child: SingleChildScrollView(
+                controller: controller.pathScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  state.path.split('/').last,
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text0),
+                ),
+              ),
+            ),
           ],
-        );
-      }),
+        ],
+      ),
     );
   }
 }
 
-class _EditTranscodePresetDialog extends StatelessWidget {
-  final TranscodePreset? preset;
-  late final TranscodePreset iPreset;
-  late final StateProvider<String> nameProvider;
-  late final StateProvider<int> widthProvider;
-  late final StateProvider<int> heightProvider;
-  late final StateProvider<int> crfProvider;
-  late final StateProvider<bool> useHevcProvider;
-  late final StateProvider<bool> useInputResolutionProvider;
-  late final StateProvider<int> selectedFFmpegPresetProvider;
-  late final StateProvider<int> selectedLutProvider;
+// class _EditLutDialog extends StatelessWidget {
+//   final Lut? lut;
+//   late final Lut iLut;
+//   late final StateProvider<String> nameProvider;
+//   late final StateProvider<String> pathProvider;
+//
+//   _EditLutDialog({required this.lut}) {
+//     final isNew = lut == null;
+//     if (isNew) {
+//       iLut = Lut();
+//     } else {
+//       iLut = lut!;
+//     }
+//     nameProvider = StateProvider<String>((ref) => iLut.name);
+//     pathProvider = StateProvider<String>((ref) => iLut.path);
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return CustomDualOptionDialog(
+//       width: 480,
+//       height: 320,
+//       title: lut == null ? 'Add Lut' : 'Edit Lut',
+//       option1: 'Cancel',
+//       option2: lut == null ? 'Add' : 'Save',
+//       onOption1Pressed: () {
+//         Navigator.of(context).pop();
+//       },
+//       onOption2Pressed: () {
+//         Navigator.of(context).pop(iLut);
+//       },
+//       child: HookConsumer(builder: (context, ref, child) {
+//         final nameController = useTextEditingController(text: iLut.name);
+//         final scrollController = ScrollController();
+//         useEffect(() {
+//           nameController.addListener(() {
+//             ref.read(nameProvider.notifier).state = nameController.text;
+//             if (nameController.text.isNotEmpty) {
+//               iLut.name = nameController.text;
+//             }
+//           });
+//           return null;
+//         });
+//         return Column(
+//           mainAxisAlignment: MainAxisAlignment.start,
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Text(
+//               'Lut name',
+//               style: SemiTextStyles.header5ENRegular
+//                   .copyWith(color: ColorDark.text1),
+//             ),
+//             SizedBox(
+//               height: 72,
+//               child: Theme(
+//                   data: Theme.of(context).copyWith(
+//                       textSelectionTheme: TextSelectionThemeData(
+//                           selectionColor:
+//                               ColorDark.blue5.withAlpha((0.8 * 255).round()))),
+//                   child: TextField(
+//                     maxLength: 24,
+//                     cursorColor: ColorDark.text1,
+//                     controller: nameController,
+//                     style: SemiTextStyles.header5ENRegular
+//                         .copyWith(color: ColorDark.text0),
+//                     decoration: dialogInputDecoration.copyWith(
+//                         errorText: (ref.watch(nameProvider)).isEmpty
+//                             ? 'Name is required'
+//                             : null),
+//                   )),
+//             ),
+//             lut == null
+//                 ? Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text(
+//                             'Select lut file',
+//                             style: SemiTextStyles.header5ENRegular
+//                                 .copyWith(color: ColorDark.text1),
+//                           ),
+//                           SizedBox(
+//                             width: DesignValues.smallPadding,
+//                           ),
+//                           _ItemButton(
+//                             iconData: Icons.folder_open,
+//                             onPressed: () async {
+//                               final result =
+//                                   await FilePicker.platform.pickFiles(
+//                                 type: FileType.custom,
+//                                 allowedExtensions: ['cube'],
+//                               );
+//                               if (result != null) {
+//                                 ref.read(pathProvider.notifier).state =
+//                                     result.files.single.path!;
+//                                 iLut.path = result.files.single.path!;
+//                                 iLut.name =
+//                                     result.files.single.path!.split('/').last;
+//                                 iLut.name = iLut.name
+//                                     .substring(0, iLut.name.length - 5);
+//                                 // 截取前 24 个字符
+//                                 iLut.name = iLut.name.substring(0, 24);
+//                                 nameController.text = iLut.name;
+//                               }
+//                             },
+//                           ),
+//                         ],
+//                       ),
+//                       Scrollbar(
+//                           controller: scrollController,
+//                           child: SingleChildScrollView(
+//                             scrollDirection: Axis.horizontal,
+//                             controller: scrollController,
+//                             child: Text(
+//                               ref.watch(pathProvider).split('/').last,
+//                               style: SemiTextStyles.header5ENRegular
+//                                   .copyWith(color: ColorDark.text0),
+//                             ),
+//                           )),
+//                     ],
+//                   )
+//                 : SizedBox()
+//           ],
+//         );
+//       }),
+//     );
+//   }
+// }
 
-  _EditTranscodePresetDialog({required this.preset}) {
-    final isNew = preset == null;
-    if (isNew) {
-      iPreset = TranscodePreset();
-    } else {
-      iPreset = preset!;
-    }
-    nameProvider = StateProvider<String>((ref) => iPreset.name);
-    widthProvider = StateProvider<int>((ref) => iPreset.width);
-    heightProvider = StateProvider<int>((ref) => iPreset.height);
-    crfProvider = StateProvider<int>((ref) => iPreset.crf);
-    useHevcProvider = StateProvider<bool>((ref) => iPreset.useHevc);
-    useInputResolutionProvider =
-        StateProvider<bool>((ref) => iPreset.useInputResolution);
-    selectedFFmpegPresetProvider =
-        StateProvider<int>((ref) => iPreset.ffmpegPreset);
-    selectedLutProvider = StateProvider<int>((ref) => iPreset.lutId);
+class _EditTranscodePresetState {
+  final String name;
+  final bool useInputResolution;
+  final int width;
+  final int height;
+  final int crf;
+  final bool useHevc;
+  final int ffmpegPreset;
+  final int lutId;
+
+  const _EditTranscodePresetState({
+    required this.name,
+    required this.useInputResolution,
+    required this.width,
+    required this.height,
+    required this.crf,
+    required this.useHevc,
+    required this.ffmpegPreset,
+    required this.lutId,
+  });
+
+  bool get isNameValid => name.isNotEmpty;
+  bool get isWidthValid => width > 0;
+  bool get isHeightValid => height > 0;
+  bool get isCrfValid => crf > 0 && crf < 52;
+  _EditTranscodePresetState copyWith({
+    String? name,
+    bool? useInputResolution,
+    int? width,
+    int? height,
+    int? crf,
+    bool? useHevc,
+    int? ffmpegPreset,
+    int? lutId,
+  }) {
+    return _EditTranscodePresetState(
+      name: name ?? this.name,
+      useInputResolution:
+      useInputResolution ?? this.useInputResolution,
+      width: width ?? this.width,
+      height: height ?? this.height,
+      crf: crf ?? this.crf,
+      useHevc: useHevc ?? this.useHevc,
+      ffmpegPreset: ffmpegPreset ?? this.ffmpegPreset,
+      lutId: lutId ?? this.lutId,
+    );
   }
+}
+
+@riverpod
+class _EditTranscodePresetController
+    extends _$EditTranscodePresetController {
+  late final TranscodePreset _preset;
+
+  late final TextEditingController nameController;
+  late final TextEditingController widthController;
+  late final TextEditingController heightController;
+  late final TextEditingController crfController;
 
   @override
-  Widget build(BuildContext context) {
+  _EditTranscodePresetState build(TranscodePreset? preset) {
+    _preset = preset ?? TranscodePreset();
+
+    nameController =
+        TextEditingController(text: _preset.name);
+    widthController =
+        TextEditingController(text: _preset.width.toString());
+    heightController =
+        TextEditingController(text: _preset.height.toString());
+    crfController =
+        TextEditingController(text: _preset.crf.toString());
+
+    nameController.addListener(_onNameChanged);
+    widthController.addListener(_onWidthChanged);
+    heightController.addListener(_onHeightChanged);
+    crfController.addListener(_onCrfChanged);
+
+    ref.onDispose(() {
+      nameController.dispose();
+      widthController.dispose();
+      heightController.dispose();
+      crfController.dispose();
+    });
+
+    return _EditTranscodePresetState(
+      name: _preset.name,
+      useInputResolution: _preset.useInputResolution,
+      width: _preset.width,
+      height: _preset.height,
+      crf: _preset.crf,
+      useHevc: _preset.useHevc,
+      ffmpegPreset: _preset.ffmpegPreset,
+      lutId: _preset.lutId,
+    );
+  }
+
+  // ---------------- listeners ----------------
+
+  void _onNameChanged() {
+    final v = nameController.text;
+    _preset.name = v;
+    state = state.copyWith(name: v);
+  }
+
+  void _onWidthChanged() {
+    final v = int.tryParse(widthController.text) ?? 0;
+    if (!state.useInputResolution) {
+      _preset.width = v;
+    }
+    state = state.copyWith(width: v);
+  }
+
+  void _onHeightChanged() {
+    final v = int.tryParse(heightController.text) ?? 0;
+    if (!state.useInputResolution) {
+      _preset.height = v;
+    }
+    state = state.copyWith(height: v);
+  }
+
+  void _onCrfChanged() {
+    final v = int.tryParse(crfController.text) ?? 0;
+    if (v > 0 && v < 52) {
+      _preset.crf = v;
+    }
+    state = state.copyWith(crf: v);
+  }
+
+  // ---------------- actions ----------------
+
+  void toggleUseInputResolution() {
+    final v = !state.useInputResolution;
+    _preset.useInputResolution = v;
+    state = state.copyWith(useInputResolution: v);
+  }
+
+  void toggleUseHevc() {
+    final v = !state.useHevc;
+    _preset.useHevc = v;
+    state = state.copyWith(useHevc: v);
+  }
+
+  void setFfmpegPreset(int preset) {
+    _preset.ffmpegPreset = preset;
+    state = state.copyWith(ffmpegPreset: preset);
+  }
+
+  void setLut(int id) {
+    _preset.lutId = id;
+    state = state.copyWith(lutId: id);
+  }
+
+  TranscodePreset get result => _preset;
+}
+
+class _EditTranscodePresetDialog extends ConsumerWidget {
+  final TranscodePreset? preset;
+
+  const _EditTranscodePresetDialog({required this.preset});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state =
+    ref.watch(_editTranscodePresetControllerProvider(preset));
+    final controller =
+    ref.read(_editTranscodePresetControllerProvider(preset).notifier);
+
+    final noneLut = Lut()..id = 0 ..name = 'None';
+
     return CustomDualOptionDialog(
         width: 480,
         height: 680,
@@ -594,7 +941,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
           Navigator.of(context).pop();
         },
         onOption2Pressed: () {
-          Navigator.of(context).pop(iPreset);
+          Navigator.of(context).pop(controller.result);
         },
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -612,31 +959,17 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       textSelectionTheme: TextSelectionThemeData(
                           selectionColor:
                               ColorDark.blue5.withAlpha((0.8 * 255).round()))),
-                  child: HookConsumer(builder: (context, ref, child) {
-                    final nameController =
-                        useTextEditingController(text: iPreset.name);
-                    useEffect(() {
-                      nameController.addListener(() {
-                        ref.read(nameProvider.notifier).state =
-                            nameController.text;
-                        if (nameController.text.isNotEmpty) {
-                          iPreset.name = nameController.text;
-                        }
-                      });
-                      return null;
-                    });
-                    return TextField(
-                      maxLength: 24,
-                      cursorColor: ColorDark.text1,
-                      controller: nameController,
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text0),
-                      decoration: dialogInputDecoration.copyWith(
-                          errorText: (ref.watch(nameProvider)).isEmpty
-                              ? 'Name is required'
-                              : null),
-                    );
-                  })),
+                  child: TextField(
+                    maxLength: 24,
+                    cursorColor: ColorDark.text1,
+                    controller: controller.nameController,
+                    style: SemiTextStyles.header5ENRegular
+                        .copyWith(color: ColorDark.text0),
+                    decoration: dialogInputDecoration.copyWith(
+                        errorText: state.isNameValid
+                            ? 'Name is required'
+                            : null),
+                  )),
             ),
             SizedBox(
               height: DesignValues.smallPadding,
@@ -645,12 +978,9 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
               return CustomDialogCheckBoxWithText(
                   text: 'Use Input Resolution',
-                  value: ref.watch(useInputResolutionProvider),
+                  value: state.useInputResolution,
                   onPressed: () {
-                    ref.read(useInputResolutionProvider.notifier).state =
-                        !ref.watch(useInputResolutionProvider);
-                    iPreset.useInputResolution =
-                        ref.watch(useInputResolutionProvider);
+                    controller.toggleUseInputResolution();
                   });
             }),
             SizedBox(
@@ -658,7 +988,7 @@ class _EditTranscodePresetDialog extends StatelessWidget {
             ),
             Consumer(
                 builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              if (ref.watch(useInputResolutionProvider)) {
+              if (state.useInputResolution) {
                 return const SizedBox();
               } else {
                 return Column(
@@ -676,39 +1006,20 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                             textSelectionTheme: TextSelectionThemeData(
                                 selectionColor: ColorDark.blue5
                                     .withAlpha((0.8 * 255).round()))),
-                        child: HookConsumer(builder: (context, ref, child) {
-                          final widthController = useTextEditingController(
-                              text: iPreset.width.toString());
-                          useEffect(() {
-                            widthController.addListener(() {
-                              try {
-                                ref.read(widthProvider.notifier).state =
-                                    int.parse(widthController.text);
-                              } catch (e) {
-                                ref.read(widthProvider.notifier).state = 0;
-                              }
-                              if (ref.watch(widthProvider) != 0 &&
-                                  !ref.watch(useInputResolutionProvider)) {
-                                iPreset.width = ref.watch(widthProvider);
-                              }
-                            });
-                            return null;
-                          });
-                          return TextField(
-                            cursorColor: ColorDark.text1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: widthController,
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text0),
-                            decoration: dialogInputDecoration.copyWith(
-                                errorText: ref.watch(widthProvider) == 0
-                                    ? 'Width cannot be 0'
-                                    : null),
-                          );
-                        }),
+                        child: TextField(
+                          cursorColor: ColorDark.text1,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          controller: controller.widthController,
+                          style: SemiTextStyles.header5ENRegular
+                              .copyWith(color: ColorDark.text0),
+                          decoration: dialogInputDecoration.copyWith(
+                              errorText: state.isWidthValid
+                                  ? 'Width cannot be 0'
+                                  : null),
+                        ),
                       ),
                     ),
                     Text(
@@ -723,39 +1034,20 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                             textSelectionTheme: TextSelectionThemeData(
                                 selectionColor: ColorDark.blue5
                                     .withAlpha((0.8 * 255).round()))),
-                        child: HookConsumer(builder: (context, ref, child) {
-                          final heightController = useTextEditingController(
-                              text: iPreset.width.toString());
-                          useEffect(() {
-                            heightController.addListener(() {
-                              try {
-                                ref.read(heightProvider.notifier).state =
-                                    int.parse(heightController.text);
-                              } catch (e) {
-                                ref.read(heightProvider.notifier).state = 0;
-                              }
-                              if (ref.watch(heightProvider) != 0 &&
-                                  !ref.watch(useInputResolutionProvider)) {
-                                iPreset.height = ref.watch(heightProvider);
-                              }
-                            });
-                            return null;
-                          });
-                          return TextField(
-                            cursorColor: ColorDark.text1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: <TextInputFormatter>[
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            controller: heightController,
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text0),
-                            decoration: dialogInputDecoration.copyWith(
-                                errorText: ref.watch(heightProvider) == 0
-                                    ? 'Height cannot be 0'
-                                    : null),
-                          );
-                        }),
+                        child: TextField(
+                          cursorColor: ColorDark.text1,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          controller: controller.heightController,
+                          style: SemiTextStyles.header5ENRegular
+                              .copyWith(color: ColorDark.text0),
+                          decoration: dialogInputDecoration.copyWith(
+                              errorText: state.isHeightValid
+                                  ? 'Height cannot be 0'
+                                  : null),
+                        ),
                       ),
                     ),
                   ],
@@ -777,39 +1069,20 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                         textSelectionTheme: TextSelectionThemeData(
                             selectionColor: ColorDark.blue5
                                 .withAlpha((0.8 * 255).round()))),
-                    child: HookConsumer(builder: (context, ref, child) {
-                      final crfController = useTextEditingController(
-                          text: iPreset.crf.toString());
-                      final crf = ref.watch(crfProvider);
-                      useEffect(() {
-                        crfController.addListener(() {
-                          try {
-                            ref.read(crfProvider.notifier).state =
-                                int.parse(crfController.text);
-                          } catch (e) {
-                            ref.read(crfProvider.notifier).state = 0;
-                          }
-                          if (crf > 0 && crf < 52) {
-                            iPreset.crf = ref.watch(crfProvider);
-                          }
-                        });
-                        return null;
-                      });
-                      return TextField(
-                        cursorColor: ColorDark.text1,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        controller: crfController,
-                        style: SemiTextStyles.header5ENRegular
-                            .copyWith(color: ColorDark.text0),
-                        decoration: dialogInputDecoration.copyWith(
-                            errorText: (crf > 0 && crf < 52)
-                                ? null
-                                : 'CRF must be between 0 and 51, higher is lower quality.'),
-                      );
-                    }),
+                    child: TextField(
+                      cursorColor: ColorDark.text1,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly
+                      ],
+                      controller: controller.crfController,
+                      style: SemiTextStyles.header5ENRegular
+                          .copyWith(color: ColorDark.text0),
+                      decoration: dialogInputDecoration.copyWith(
+                          errorText: state.isCrfValid
+                              ? null
+                              : 'CRF must be between 0 and 51, higher is lower quality.'),
+                    ),
                   ),
                 ),
               ],
@@ -817,17 +1090,12 @@ class _EditTranscodePresetDialog extends StatelessWidget {
             SizedBox(
               width: DesignValues.smallPadding,
             ),
-            Consumer(
-                builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              return CustomDialogCheckBoxWithText(
-                  text: 'Use H.265',
-                  value: ref.watch(useHevcProvider),
-                  onPressed: () {
-                    ref.read(useHevcProvider.notifier).state =
-                        !ref.watch(useHevcProvider);
-                    iPreset.useHevc = ref.watch(useHevcProvider);
-                  });
-            }),
+            CustomDialogCheckBoxWithText(
+                text: 'Use H.265',
+                value: state.useHevc,
+                onPressed: () {
+                  controller.toggleUseHevc();
+                }),
             SizedBox(
               height: DesignValues.smallPadding,
             ),
@@ -839,30 +1107,24 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                       .copyWith(color: ColorDark.text1),
                 ),
                 const Spacer(),
-                Consumer(builder:
-                    (BuildContext context, WidgetRef ref, Widget? child) {
-                  return DropdownButton<FFmpegPreset>(
-                    value: FFmpegPreset
-                        .values[ref.watch(selectedFFmpegPresetProvider)],
-                    focusColor: ColorDark.defaultActive,
-                    dropdownColor: ColorDark.bg2,
-                    style: SemiTextStyles.header5ENRegular
-                        .copyWith(color: ColorDark.text0),
-                    items: FFmpegPreset.values
-                        .map((e) => DropdownMenuItem<FFmpegPreset>(
-                              value: e,
-                              child: Text(e.name),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        ref.read(selectedFFmpegPresetProvider.notifier).state =
-                            value.index;
-                        iPreset.ffmpegPreset = value.index;
-                      }
-                    },
-                  );
-                })
+                DropdownButton<FFmpegPreset>(
+                  value: FFmpegPreset.values[state.ffmpegPreset],
+                  focusColor: ColorDark.defaultActive,
+                  dropdownColor: ColorDark.bg2,
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text0),
+                  items: FFmpegPreset.values
+                      .map((e) => DropdownMenuItem<FFmpegPreset>(
+                    value: e,
+                    child: Text(e.name),
+                  ))
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      controller.setFfmpegPreset(value.index);
+                    }
+                  },
+                )
               ],
             ),
             Row(
@@ -875,43 +1137,35 @@ class _EditTranscodePresetDialog extends StatelessWidget {
                 SizedBox(
                   width: DesignValues.largePadding,
                 ),
-                Expanded(child: Consumer(
-                  builder: (context, ref, child) {
-                    final luts = ref.watch(settingsProvider).luts;
-                    final selectedId = ref.watch(selectedLutProvider);
-                    final noneLut = Lut()..id = 0;
-                    noneLut.name = 'None';
-
-                    final selectedLut = luts.firstWhere(
-                      (e) => e.id == selectedId,
-                      orElse: () => noneLut,
-                    );
-                    return DropdownButton<Lut>(
-                      value: selectedLut,
-                      itemHeight: null,
-                      isExpanded: true,
-                      focusColor: ColorDark.defaultActive,
-                      dropdownColor: ColorDark.bg2,
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text0),
-                      items: [
-                        DropdownMenuItem<Lut>(
-                          value: noneLut,
-                          child: Text(noneLut.name),
-                        ),
-                        ...luts.map(
+                Expanded(child: DropdownButton<Lut>(
+                  value: ref.watch(settingsProvider.select((s){
+                    final luts = s.value?.luts;
+                    if (luts != null && luts.isNotEmpty && luts.length > state.lutId) {
+                      return luts[state.lutId];
+                    }
+                    return noneLut;
+                  })),
+                  itemHeight: null,
+                  isExpanded: true,
+                  focusColor: ColorDark.defaultActive,
+                  dropdownColor: ColorDark.bg2,
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text0),
+                  items: [
+                    DropdownMenuItem<Lut>(
+                      value: noneLut,
+                      child: Text(noneLut.name),
+                    ),
+                    ...ref.watch(settingsProvider.select((s) => s.value?.luts ?? [])).map(
                           (e) => DropdownMenuItem<Lut>(
-                            value: e,
-                            child: Text(e.name),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        if (value == null) return;
-                        ref.read(selectedLutProvider.notifier).state = value.id;
-                        iPreset.lutId = value.id;
-                      },
-                    );
+                        value: e,
+                        child: Text(e.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    controller.setLut(value.id);
                   },
                 ))
               ],

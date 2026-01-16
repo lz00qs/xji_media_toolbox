@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
+import 'package:xji_footage_toolbox/providers/task_manager_provider.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 String _getTimeString(int seconds) {

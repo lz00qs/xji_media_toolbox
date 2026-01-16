@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:xji_footage_toolbox/models/resizable_panel_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:xji_footage_toolbox/providers/resizable_panel_state_provider.dart';
 
 import '../design_tokens.dart';
+
+part 'resizable_panel.g.dart';
 
 const _draggableAreaSize = 8.0;
 const _leftPanelMinWidth = 324.0;
@@ -110,7 +112,23 @@ class _RoundedPanel extends StatelessWidget {
   }
 }
 
-class ResizablePanel extends HookConsumerWidget {
+@riverpod
+class _DraggingX extends _$DraggingX {
+  @override
+  bool build() => false;
+
+  set draggingX(bool value) => state = value;
+}
+
+@riverpod
+class _DraggingY extends _$DraggingY {
+  @override
+  bool build() => false;
+
+  set draggingY(bool value) => state = value;
+}
+
+class ResizablePanel extends ConsumerWidget {
   final Widget mediaResourceInfoPanel;
   final Widget mediaResourcesListPanel;
   final Widget mainPanel;
@@ -125,9 +143,6 @@ class ResizablePanel extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final panelState = ref.watch(resizablePanelStateProvider);
     final panelNotifier = ref.read(resizablePanelStateProvider.notifier);
-
-    final draggingX = useState(false);
-    final draggingY = useState(false);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -155,10 +170,14 @@ class ResizablePanel extends HookConsumerWidget {
                         MouseRegion(
                           cursor: SystemMouseCursors.resizeRow,
                           onEnter: (_) {
-                            draggingY.value = true;
+                            // draggingY.value = true;
+                            ref.read(_draggingYProvider.notifier).draggingY =
+                                true;
                           },
                           onExit: (_) {
-                            draggingY.value = false;
+                            // draggingY.value = false;
+                            ref.read(_draggingYProvider.notifier).draggingY =
+                                false;
                           },
                           child: GestureDetector(
                             onVerticalDragUpdate: (details) {
@@ -170,7 +189,8 @@ class ResizablePanel extends HookConsumerWidget {
                               }
                             },
                             child: _DragIdentifier(
-                                isVertical: false, highlight: draggingY.value),
+                                isVertical: false,
+                                highlight: ref.watch(_draggingYProvider)),
                           ),
                         ),
                         Expanded(
@@ -189,10 +209,12 @@ class ResizablePanel extends HookConsumerWidget {
                     child: MouseRegion(
                       cursor: SystemMouseCursors.resizeColumn,
                       onEnter: (_) {
-                        draggingX.value = true;
+                        // draggingX.value = true;
+                        ref.read(_draggingXProvider.notifier).draggingX = true;
                       },
                       onExit: (_) {
-                        draggingX.value = false;
+                        // draggingX.value = false;
+                        ref.read(_draggingXProvider.notifier).draggingX = false;
                       },
                       child: GestureDetector(
                         onHorizontalDragUpdate: (details) {
@@ -204,7 +226,8 @@ class ResizablePanel extends HookConsumerWidget {
                           }
                         },
                         child: _DragIdentifier(
-                            isVertical: true, highlight: draggingX.value),
+                            isVertical: true,
+                            highlight: ref.watch(_draggingXProvider)),
                       ),
                     ),
                   ),

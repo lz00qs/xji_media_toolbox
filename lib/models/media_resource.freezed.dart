@@ -15,14 +15,14 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MediaResources {
   bool get isLoading;
+  bool get isMerging;
   List<MediaResource> get resources;
   int get currentIndex;
   double get loadProgress;
   bool get isMultipleSelection;
-  int get currentAebIndex;
   List<MediaResource> get selectedResources;
-  dynamic get resourcesPath;
-  set resourcesPath(dynamic value);
+  int get currentAebIndex;
+  String get resourcesPath;
   bool get isEditing;
 
   /// Create a copy of MediaResources
@@ -40,6 +40,8 @@ mixin _$MediaResources {
             other is MediaResources &&
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
+            (identical(other.isMerging, isMerging) ||
+                other.isMerging == isMerging) &&
             const DeepCollectionEquality().equals(other.resources, resources) &&
             (identical(other.currentIndex, currentIndex) ||
                 other.currentIndex == currentIndex) &&
@@ -47,12 +49,12 @@ mixin _$MediaResources {
                 other.loadProgress == loadProgress) &&
             (identical(other.isMultipleSelection, isMultipleSelection) ||
                 other.isMultipleSelection == isMultipleSelection) &&
-            (identical(other.currentAebIndex, currentAebIndex) ||
-                other.currentAebIndex == currentAebIndex) &&
             const DeepCollectionEquality()
                 .equals(other.selectedResources, selectedResources) &&
-            const DeepCollectionEquality()
-                .equals(other.resourcesPath, resourcesPath) &&
+            (identical(other.currentAebIndex, currentAebIndex) ||
+                other.currentAebIndex == currentAebIndex) &&
+            (identical(other.resourcesPath, resourcesPath) ||
+                other.resourcesPath == resourcesPath) &&
             (identical(other.isEditing, isEditing) ||
                 other.isEditing == isEditing));
   }
@@ -61,18 +63,19 @@ mixin _$MediaResources {
   int get hashCode => Object.hash(
       runtimeType,
       isLoading,
+      isMerging,
       const DeepCollectionEquality().hash(resources),
       currentIndex,
       loadProgress,
       isMultipleSelection,
-      currentAebIndex,
       const DeepCollectionEquality().hash(selectedResources),
-      const DeepCollectionEquality().hash(resourcesPath),
+      currentAebIndex,
+      resourcesPath,
       isEditing);
 
   @override
   String toString() {
-    return 'MediaResources(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, currentAebIndex: $currentAebIndex, selectedResources: $selectedResources, resourcesPath: $resourcesPath, isEditing: $isEditing)';
+    return 'MediaResources(isLoading: $isLoading, isMerging: $isMerging, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, currentAebIndex: $currentAebIndex, resourcesPath: $resourcesPath, isEditing: $isEditing)';
   }
 }
 
@@ -84,12 +87,14 @@ abstract mixin class $MediaResourcesCopyWith<$Res> {
   @useResult
   $Res call(
       {bool isLoading,
+      bool isMerging,
       List<MediaResource> resources,
       int currentIndex,
       double loadProgress,
       bool isMultipleSelection,
       List<MediaResource> selectedResources,
       int currentAebIndex,
+      String resourcesPath,
       bool isEditing});
 }
 
@@ -107,18 +112,24 @@ class _$MediaResourcesCopyWithImpl<$Res>
   @override
   $Res call({
     Object? isLoading = null,
+    Object? isMerging = null,
     Object? resources = null,
     Object? currentIndex = null,
     Object? loadProgress = null,
     Object? isMultipleSelection = null,
     Object? selectedResources = null,
     Object? currentAebIndex = null,
+    Object? resourcesPath = null,
     Object? isEditing = null,
   }) {
-    return _then(MediaResources(
+    return _then(_self.copyWith(
       isLoading: null == isLoading
           ? _self.isLoading
           : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isMerging: null == isMerging
+          ? _self.isMerging
+          : isMerging // ignore: cast_nullable_to_non_nullable
               as bool,
       resources: null == resources
           ? _self.resources
@@ -144,6 +155,10 @@ class _$MediaResourcesCopyWithImpl<$Res>
           ? _self.currentAebIndex
           : currentAebIndex // ignore: cast_nullable_to_non_nullable
               as int,
+      resourcesPath: null == resourcesPath
+          ? _self.resourcesPath
+          : resourcesPath // ignore: cast_nullable_to_non_nullable
+              as String,
       isEditing: null == isEditing
           ? _self.isEditing
           : isEditing // ignore: cast_nullable_to_non_nullable
@@ -167,11 +182,14 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_MediaResources value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
+      case _MediaResources() when $default != null:
+        return $default(_that);
       case _:
         return orElse();
     }
@@ -191,9 +209,13 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult map<TResult extends Object?>() {
+  TResult map<TResult extends Object?>(
+    TResult Function(_MediaResources value) $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _MediaResources():
+        return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -212,9 +234,13 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>() {
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_MediaResources value)? $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _MediaResources() when $default != null:
+        return $default(_that);
       case _:
         return null;
     }
@@ -233,11 +259,35 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            bool isLoading,
+            bool isMerging,
+            List<MediaResource> resources,
+            int currentIndex,
+            double loadProgress,
+            bool isMultipleSelection,
+            List<MediaResource> selectedResources,
+            int currentAebIndex,
+            String resourcesPath,
+            bool isEditing)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
+      case _MediaResources() when $default != null:
+        return $default(
+            _that.isLoading,
+            _that.isMerging,
+            _that.resources,
+            _that.currentIndex,
+            _that.loadProgress,
+            _that.isMultipleSelection,
+            _that.selectedResources,
+            _that.currentAebIndex,
+            _that.resourcesPath,
+            _that.isEditing);
       case _:
         return orElse();
     }
@@ -257,9 +307,34 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult when<TResult extends Object?>() {
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            bool isLoading,
+            bool isMerging,
+            List<MediaResource> resources,
+            int currentIndex,
+            double loadProgress,
+            bool isMultipleSelection,
+            List<MediaResource> selectedResources,
+            int currentAebIndex,
+            String resourcesPath,
+            bool isEditing)
+        $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _MediaResources():
+        return $default(
+            _that.isLoading,
+            _that.isMerging,
+            _that.resources,
+            _that.currentIndex,
+            _that.loadProgress,
+            _that.isMultipleSelection,
+            _that.selectedResources,
+            _that.currentAebIndex,
+            _that.resourcesPath,
+            _that.isEditing);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -278,12 +353,243 @@ extension MediaResourcesPatterns on MediaResources {
   /// ```
 
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>() {
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            bool isLoading,
+            bool isMerging,
+            List<MediaResource> resources,
+            int currentIndex,
+            double loadProgress,
+            bool isMultipleSelection,
+            List<MediaResource> selectedResources,
+            int currentAebIndex,
+            String resourcesPath,
+            bool isEditing)?
+        $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _MediaResources() when $default != null:
+        return $default(
+            _that.isLoading,
+            _that.isMerging,
+            _that.resources,
+            _that.currentIndex,
+            _that.loadProgress,
+            _that.isMultipleSelection,
+            _that.selectedResources,
+            _that.currentAebIndex,
+            _that.resourcesPath,
+            _that.isEditing);
       case _:
         return null;
     }
+  }
+}
+
+/// @nodoc
+
+class _MediaResources implements MediaResources {
+  const _MediaResources(
+      {this.isLoading = false,
+      this.isMerging = false,
+      final List<MediaResource> resources = const <MediaResource>[],
+      this.currentIndex = 0,
+      this.loadProgress = 0.0,
+      this.isMultipleSelection = false,
+      final List<MediaResource> selectedResources = const <MediaResource>[],
+      this.currentAebIndex = 0,
+      this.resourcesPath = "",
+      this.isEditing = false})
+      : _resources = resources,
+        _selectedResources = selectedResources;
+
+  @override
+  @JsonKey()
+  final bool isLoading;
+  @override
+  @JsonKey()
+  final bool isMerging;
+  final List<MediaResource> _resources;
+  @override
+  @JsonKey()
+  List<MediaResource> get resources {
+    if (_resources is EqualUnmodifiableListView) return _resources;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_resources);
+  }
+
+  @override
+  @JsonKey()
+  final int currentIndex;
+  @override
+  @JsonKey()
+  final double loadProgress;
+  @override
+  @JsonKey()
+  final bool isMultipleSelection;
+  final List<MediaResource> _selectedResources;
+  @override
+  @JsonKey()
+  List<MediaResource> get selectedResources {
+    if (_selectedResources is EqualUnmodifiableListView)
+      return _selectedResources;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_selectedResources);
+  }
+
+  @override
+  @JsonKey()
+  final int currentAebIndex;
+  @override
+  @JsonKey()
+  final String resourcesPath;
+  @override
+  @JsonKey()
+  final bool isEditing;
+
+  /// Create a copy of MediaResources
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$MediaResourcesCopyWith<_MediaResources> get copyWith =>
+      __$MediaResourcesCopyWithImpl<_MediaResources>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _MediaResources &&
+            (identical(other.isLoading, isLoading) ||
+                other.isLoading == isLoading) &&
+            (identical(other.isMerging, isMerging) ||
+                other.isMerging == isMerging) &&
+            const DeepCollectionEquality()
+                .equals(other._resources, _resources) &&
+            (identical(other.currentIndex, currentIndex) ||
+                other.currentIndex == currentIndex) &&
+            (identical(other.loadProgress, loadProgress) ||
+                other.loadProgress == loadProgress) &&
+            (identical(other.isMultipleSelection, isMultipleSelection) ||
+                other.isMultipleSelection == isMultipleSelection) &&
+            const DeepCollectionEquality()
+                .equals(other._selectedResources, _selectedResources) &&
+            (identical(other.currentAebIndex, currentAebIndex) ||
+                other.currentAebIndex == currentAebIndex) &&
+            (identical(other.resourcesPath, resourcesPath) ||
+                other.resourcesPath == resourcesPath) &&
+            (identical(other.isEditing, isEditing) ||
+                other.isEditing == isEditing));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      isLoading,
+      isMerging,
+      const DeepCollectionEquality().hash(_resources),
+      currentIndex,
+      loadProgress,
+      isMultipleSelection,
+      const DeepCollectionEquality().hash(_selectedResources),
+      currentAebIndex,
+      resourcesPath,
+      isEditing);
+
+  @override
+  String toString() {
+    return 'MediaResources(isLoading: $isLoading, isMerging: $isMerging, resources: $resources, currentIndex: $currentIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, currentAebIndex: $currentAebIndex, resourcesPath: $resourcesPath, isEditing: $isEditing)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$MediaResourcesCopyWith<$Res>
+    implements $MediaResourcesCopyWith<$Res> {
+  factory _$MediaResourcesCopyWith(
+          _MediaResources value, $Res Function(_MediaResources) _then) =
+      __$MediaResourcesCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {bool isLoading,
+      bool isMerging,
+      List<MediaResource> resources,
+      int currentIndex,
+      double loadProgress,
+      bool isMultipleSelection,
+      List<MediaResource> selectedResources,
+      int currentAebIndex,
+      String resourcesPath,
+      bool isEditing});
+}
+
+/// @nodoc
+class __$MediaResourcesCopyWithImpl<$Res>
+    implements _$MediaResourcesCopyWith<$Res> {
+  __$MediaResourcesCopyWithImpl(this._self, this._then);
+
+  final _MediaResources _self;
+  final $Res Function(_MediaResources) _then;
+
+  /// Create a copy of MediaResources
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? isLoading = null,
+    Object? isMerging = null,
+    Object? resources = null,
+    Object? currentIndex = null,
+    Object? loadProgress = null,
+    Object? isMultipleSelection = null,
+    Object? selectedResources = null,
+    Object? currentAebIndex = null,
+    Object? resourcesPath = null,
+    Object? isEditing = null,
+  }) {
+    return _then(_MediaResources(
+      isLoading: null == isLoading
+          ? _self.isLoading
+          : isLoading // ignore: cast_nullable_to_non_nullable
+              as bool,
+      isMerging: null == isMerging
+          ? _self.isMerging
+          : isMerging // ignore: cast_nullable_to_non_nullable
+              as bool,
+      resources: null == resources
+          ? _self._resources
+          : resources // ignore: cast_nullable_to_non_nullable
+              as List<MediaResource>,
+      currentIndex: null == currentIndex
+          ? _self.currentIndex
+          : currentIndex // ignore: cast_nullable_to_non_nullable
+              as int,
+      loadProgress: null == loadProgress
+          ? _self.loadProgress
+          : loadProgress // ignore: cast_nullable_to_non_nullable
+              as double,
+      isMultipleSelection: null == isMultipleSelection
+          ? _self.isMultipleSelection
+          : isMultipleSelection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      selectedResources: null == selectedResources
+          ? _self._selectedResources
+          : selectedResources // ignore: cast_nullable_to_non_nullable
+              as List<MediaResource>,
+      currentAebIndex: null == currentAebIndex
+          ? _self.currentAebIndex
+          : currentAebIndex // ignore: cast_nullable_to_non_nullable
+              as int,
+      resourcesPath: null == resourcesPath
+          ? _self.resourcesPath
+          : resourcesPath // ignore: cast_nullable_to_non_nullable
+              as String,
+      isEditing: null == isEditing
+          ? _self.isEditing
+          : isEditing // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
   }
 }
 

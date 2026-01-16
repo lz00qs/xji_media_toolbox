@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 
+import '../../../providers/media_resources_provider.dart';
 import '../../../utils/format.dart';
 import '../../design_tokens.dart';
 import '../dialogs/media_resources_sort_dialog.dart';
@@ -114,7 +114,9 @@ class _MediaResourcesListTopBar extends StatelessWidget {
                           .read(mediaResourcesProvider.notifier)
                           .toggleIsMultipleSelection();
                       if (isMultipleSelection) {
-                        ref.read(isMergingStateProvider.notifier).state = false;
+                        ref
+                            .read(mediaResourcesProvider.notifier)
+                            .setIsMerging(false);
                       }
                     },
                     iconSize: DesignValues.mediumIconSize,

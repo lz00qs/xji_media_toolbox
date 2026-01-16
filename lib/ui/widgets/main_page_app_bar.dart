@@ -1,17 +1,19 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 import '../../utils/media_resources_utils.dart';
 import 'buttons/custom_icon_button.dart';
 import 'dialogs/settings_dialog.dart';
+
+part 'main_page_app_bar.g.dart';
 
 class _AppBarIconButton extends StatelessWidget {
   static const double _buttonSize = 32.0;
@@ -65,7 +67,7 @@ class _WinBarActionButton extends StatelessWidget {
   }
 }
 
-class _MacMainPageAppBar extends HookConsumerWidget {
+class _MacMainPageAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var onPressed = false;
@@ -118,11 +120,23 @@ class _MacMainPageAppBar extends HookConsumerWidget {
   }
 }
 
-class _WinMainPageAppBar extends HookConsumerWidget {
+@riverpod
+class _IsMaximizedState extends _$IsMaximizedState {
+  @override
+  bool build() {
+    return false;
+  }
+
+  void setState(bool value) {
+    state = value;
+  }
+}
+
+class _WinMainPageAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isMaximizedState = ref.watch(_isMaximizedStateProvider);
     var onPressed = false;
-    final isMaximizedState = useState(false);
     return SizedBox(
       height: DesignValues.appBarHeight,
       child: Row(
@@ -173,16 +187,16 @@ class _WinMainPageAppBar extends HookConsumerWidget {
             width: DesignValues.mediumPadding,
           ),
           _WinBarActionButton(
-              icon: isMaximizedState.value
+              icon: isMaximizedState
                   ? Mdi.window_restore
                   : Mdi.window_maximize,
               onPressed: () {
-                if (isMaximizedState.value) {
+                if (isMaximizedState) {
                   WindowManager.instance.restore();
                 } else {
                   WindowManager.instance.maximize();
                 }
-                isMaximizedState.value = !isMaximizedState.value;
+                ref.read(_isMaximizedStateProvider.notifier).setState(!isMaximizedState);
               }),
           SizedBox(
             width: DesignValues.mediumPadding,

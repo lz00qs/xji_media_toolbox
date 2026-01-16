@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/utils/format.dart';
+
+import '../../../providers/media_resources_provider.dart';
 
 class _MediaResourceInfoKeyText extends StatelessWidget {
   final String keyText;

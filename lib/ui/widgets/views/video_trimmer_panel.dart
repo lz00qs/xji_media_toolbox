@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 
+import '../../../providers/media_resources_provider.dart';
 import '../buttons/custom_icon_button.dart';
 import '../../design_tokens.dart';
 import 'main_panel.dart';

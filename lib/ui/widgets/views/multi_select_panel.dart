@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_merger_panel.dart';
-import '../../../models/media_resource.dart';
+import '../../../providers/media_resources_provider.dart';
 import '../../design_tokens.dart';
 import '../buttons/main_panel_button.dart';
 import '../dialogs/media_resource_delete_dialog.dart';
@@ -48,7 +48,7 @@ class _MergeVideoButton extends StatelessWidget {
   }
 }
 
-final isMergingStateProvider = StateProvider<bool>((ref) => false);
+// final isMergingStateProvider = StateProvider<bool>((ref) => false);
 
 class MultiSelectPanel extends ConsumerWidget {
   const MultiSelectPanel({super.key});
@@ -72,7 +72,7 @@ class MultiSelectPanel extends ConsumerWidget {
                         return const MediaResourceDeleteDialog();
                       });
                 })
-              : ref.watch(isMergingStateProvider) == false
+              : ref.watch(mediaResourcesProvider.select((state) => !state.isMerging))
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -87,8 +87,9 @@ class MultiSelectPanel extends ConsumerWidget {
                           width: 64,
                         ),
                         _MergeVideoButton(onPressed: () {
-                          ref.read(isMergingStateProvider.notifier).state =
-                              true;
+                          ref
+                              .read(mediaResourcesProvider.notifier)
+                              .setIsMerging(true);
                         })
                       ],
                     )

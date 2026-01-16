@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:xji_footage_toolbox/models/settings.dart';
+import 'package:xji_footage_toolbox/providers/media_resources_provider.dart';
+import 'package:xji_footage_toolbox/providers/settings_provider.dart';
 import 'package:xji_footage_toolbox/service/log_service.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
@@ -81,7 +83,7 @@ int _getMediaSequence(File file) {
   return 0;
 }
 
-String _getEvBiasString(String rawEv){
+String _getEvBiasString(String rawEv) {
   if (rawEv == '0/10') {
     return '0';
   } else if (rawEv == '-7/10') {
@@ -196,7 +198,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
           }
           if (mediaResources[i].isAeb &&
               (mediaResources[i] as AebPhotoResource).evBias == '-0.7') {
-            startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+            startResource.aebResources
+                .add(mediaResources[i] as AebPhotoResource);
             mediaResources[i].hide = true;
             LogService.info('${startResource.name}: -0.7 found');
             i++;
@@ -205,7 +208,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
             }
             if (mediaResources[i].isAeb &&
                 (mediaResources[i] as AebPhotoResource).evBias == '+0.7') {
-              startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+              startResource.aebResources
+                  .add(mediaResources[i] as AebPhotoResource);
               mediaResources[i].hide = true;
               LogService.info('${startResource.name}: +0.7 found');
               i++;
@@ -214,7 +218,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
               }
               if (mediaResources[i].isAeb &&
                   (mediaResources[i] as AebPhotoResource).evBias == '-1.3') {
-                startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+                startResource.aebResources
+                    .add(mediaResources[i] as AebPhotoResource);
                 mediaResources[i].hide = true;
                 LogService.info('${startResource.name}: -1.3 found');
                 i++;
@@ -223,7 +228,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
                 }
                 if (mediaResources[i].isAeb &&
                     (mediaResources[i] as AebPhotoResource).evBias == '+1.3') {
-                  startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+                  startResource.aebResources
+                      .add(mediaResources[i] as AebPhotoResource);
                   mediaResources[i].hide = true;
                   LogService.info('${startResource.name}: +1.3 found');
                   i++;
@@ -231,9 +237,9 @@ Future<List<MediaResource>> _analyzeAebFootage(
                     break;
                   }
                   if (mediaResources[i].isAeb &&
-                      (mediaResources[i] as AebPhotoResource).evBias ==
-                          '-2') {
-                    startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+                      (mediaResources[i] as AebPhotoResource).evBias == '-2') {
+                    startResource.aebResources
+                        .add(mediaResources[i] as AebPhotoResource);
                     mediaResources[i].hide = true;
                     LogService.info('${startResource.name}: -2 found');
                     i++;
@@ -243,7 +249,8 @@ Future<List<MediaResource>> _analyzeAebFootage(
                     if (mediaResources[i].isAeb &&
                         (mediaResources[i] as AebPhotoResource).evBias ==
                             '+2') {
-                      startResource.aebResources.add(mediaResources[i] as AebPhotoResource);
+                      startResource.aebResources
+                          .add(mediaResources[i] as AebPhotoResource);
                       mediaResources[i].hide = true;
                       LogService.info('${startResource.name}: +2 found');
                       i++;
@@ -429,7 +436,8 @@ Future<List<MediaResource>> _videoResourcesProcess(
       final thumbFile =
           await compute(_generateThumbnail, [file.path, FFmpegUtils.ffmpeg]);
       if (thumbFile == null) {
-        LogService.warning('${file.uri.pathSegments.last} generate thumbnail error');
+        LogService.warning(
+            '${file.uri.pathSegments.last} generate thumbnail error');
         Toast.error('${file.uri.pathSegments.last} generate thumbnail error');
         continue;
       }
@@ -468,8 +476,10 @@ Future<List<MediaResource>> _multiThreadsProcessResources(
     required WidgetRef ref}) async {
   final mediaResources = <MediaResource>[];
   if (mediaResourceFiles.length > 1) {
-    final cpuThreads =
-        ref.watch(settingsProvider.select((state) => state.cpuThreads));
+    final cpuThreads = ref.watch(
+          settingsProvider.select((s) => s.value?.cpuThreads),
+        ) ??
+        1;
     if (mediaResourceFiles.length > cpuThreads) {
       final chunkSize = (mediaResourceFiles.length / cpuThreads).ceil();
       final chunks = <List<File>>[];
@@ -547,9 +557,11 @@ Future<List<MediaResource>> loadMediaResources(
   _mediaResources.addAll(processedVideos);
 
   final sortType =
-      ref.watch(settingsProvider.select((state) => state.sortType));
+      ref.watch(settingsProvider.select((state) => state.value?.sortType)) ??
+          SortType.name;
   final sortOrder =
-      ref.watch(settingsProvider.select((state) => state.sortAsc));
+      ref.watch(settingsProvider.select((state) => state.value?.sortAsc)) ??
+          true;
   switch (sortType) {
     case SortType.name:
       _mediaResources.sort((a, b) =>
@@ -607,8 +619,7 @@ Future<void> openMediaResourcesFolder({required WidgetRef ref}) async {
   }
 }
 
-int deleteMediaResource(
-    {required MediaResource mediaResource}) {
+int deleteMediaResource({required MediaResource mediaResource}) {
   try {
     if (mediaResource.isAeb) {
       final aebPhotoResource = mediaResource as AebPhotoResource;
@@ -643,14 +654,16 @@ int deleteMediaResource(
 }
 
 //
-File? renameMediaResource({required MediaResource mediaResource, required String newName}) {
+File? renameMediaResource(
+    {required MediaResource mediaResource, required String newName}) {
   final oldFile = mediaResource.file;
   try {
     final newFile = oldFile.renameSync('${oldFile.parent.path}/$newName');
     if (newFile.existsSync()) {
       return newFile;
     } else {
-      Toast.error('Failed to rename ${mediaResource.file.uri.pathSegments.last}');
+      Toast.error(
+          'Failed to rename ${mediaResource.file.uri.pathSegments.last}');
       LogService.warning('Failed to rename ${mediaResource.file.path}');
       return null;
     }
@@ -661,8 +674,10 @@ File? renameMediaResource({required MediaResource mediaResource, required String
   }
   return null;
 }
+
 //
-AebPhotoResource addSuffixToAebFilesName({required AebPhotoResource aebResource}) {
+AebPhotoResource addSuffixToAebFilesName(
+    {required AebPhotoResource aebResource}) {
   for (var i = 0; i < aebResource.aebResources.length; i++) {
     var evBias = '';
     switch (i) {
@@ -725,6 +740,7 @@ AebPhotoResource addSuffixToAebFilesName({required AebPhotoResource aebResource}
   newAebPhotoResource.aebResources.addAll(aebResource.aebResources);
   return newAebPhotoResource;
 }
+
 //
 bool isFileExist(String path) {
   final file = File(path);

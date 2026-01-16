@@ -3,13 +3,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
 
 import '../../../models/media_resource.dart';
 import '../../design_tokens.dart';
+
+part 'video_trimmer.g.dart';
 
 const _scaleValueList = [
   50000, // 50ms
@@ -62,283 +64,420 @@ String _getFormattedTime(Duration duration) {
   return origString.substring(0, origString.length - 2);
 }
 
-final trimmerSavedStart = StateProvider<Duration>((ref) => Duration.zero);
-final trimmerSavedEnd = StateProvider<Duration>((ref) => Duration.zero);
+// final trimmerSavedStart = StateProvider<Duration>((ref) => Duration.zero);
+// final trimmerSavedEnd = StateProvider<Duration>((ref) => Duration.zero);
 
-class VideoTrimmer extends HookConsumerWidget {
-  const VideoTrimmer({super.key, required this.videoResource});
+class _VideoTrimmerState {
+  final bool isInitialized;
+  final bool isPlaying;
+  final bool changing;
 
+  final Duration playPosition;
+  final Duration cutStart;
+  final Duration cutEnd;
+
+  final int stepValueIndex;
+  final int minimumStepIndex;
+  final int lastStepValueIndex;
+
+  final double videoResourceWidth;
+  final double startPosition;
+  final double endPosition;
+  final double actualStartPosition;
+  final double actualEndPosition;
+
+  const _VideoTrimmerState({
+    required this.isInitialized,
+    required this.isPlaying,
+    required this.changing,
+    required this.playPosition,
+    required this.cutStart,
+    required this.cutEnd,
+    required this.stepValueIndex,
+    required this.minimumStepIndex,
+    required this.lastStepValueIndex,
+    required this.videoResourceWidth,
+    required this.startPosition,
+    required this.endPosition,
+    required this.actualStartPosition,
+    required this.actualEndPosition,
+  });
+
+  _VideoTrimmerState copyWith({
+    bool? isInitialized,
+    bool? isPlaying,
+    bool? changing,
+    Duration? playPosition,
+    Duration? cutStart,
+    Duration? cutEnd,
+    int? stepValueIndex,
+    int? minimumStepIndex,
+    int? lastStepValueIndex,
+    double? videoResourceWidth,
+    double? startPosition,
+    double? endPosition,
+    double? actualStartPosition,
+    double? actualEndPosition,
+  }) {
+    return _VideoTrimmerState(
+      isInitialized: isInitialized ?? this.isInitialized,
+      isPlaying: isPlaying ?? this.isPlaying,
+      changing: changing ?? this.changing,
+      playPosition: playPosition ?? this.playPosition,
+      cutStart: cutStart ?? this.cutStart,
+      cutEnd: cutEnd ?? this.cutEnd,
+      stepValueIndex: stepValueIndex ?? this.stepValueIndex,
+      minimumStepIndex: minimumStepIndex ?? this.minimumStepIndex,
+      lastStepValueIndex: lastStepValueIndex ?? this.lastStepValueIndex,
+      videoResourceWidth:
+      videoResourceWidth ?? this.videoResourceWidth,
+      startPosition: startPosition ?? this.startPosition,
+      endPosition: endPosition ?? this.endPosition,
+      actualStartPosition:
+      actualStartPosition ?? this.actualStartPosition,
+      actualEndPosition:
+      actualEndPosition ?? this.actualEndPosition,
+    );
+  }
+}
+
+@riverpod
+class _VideoTrimmerController extends _$VideoTrimmerController {
+  late final VideoPlayerController videoController;
+  late final ChewieController chewieController;
+  final scrollController = ScrollController();
+
+  double trimmerWidth = 0;
+
+  @override
+  _VideoTrimmerState build(NormalVideoResource videoResource) {
+    videoController =
+        VideoPlayerController.file(videoResource.file);
+
+    _init(videoResource);
+
+    ref.onDispose(() {
+      scrollController.dispose();
+      videoController.dispose();
+      chewieController.dispose();
+    });
+
+    return _VideoTrimmerState(
+      isInitialized: false,
+      isPlaying: false,
+      changing: false,
+      playPosition: Duration.zero,
+      cutStart: Duration.zero,
+      cutEnd: videoResource.duration,
+      stepValueIndex: 0,
+      minimumStepIndex: 0,
+      lastStepValueIndex: 0,
+      videoResourceWidth: 0,
+      startPosition: 0,
+      endPosition: 0,
+      actualStartPosition: 0,
+      actualEndPosition: 0,
+    );
+  }
+
+  Future<void> _init(NormalVideoResource video) async {
+    await videoController.initialize();
+
+    chewieController = ChewieController(
+      videoPlayerController: videoController,
+      autoPlay: false,
+      looping: false,
+      showControls: false,
+    );
+
+    _initScale(video);
+
+    videoController.addListener(_onVideoTick);
+
+    state = state.copyWith(isInitialized: true);
+  }
+
+  void _onVideoTick() async {
+    final value = videoController.value;
+
+    state = state.copyWith(isPlaying: value.isPlaying);
+
+    if (state.changing) return;
+
+    final pos = value.position;
+    if (pos < state.cutStart || pos > state.cutEnd) {
+      await videoController.pause();
+      await videoController.seekTo(state.cutStart);
+      state = state.copyWith(
+        isPlaying: false,
+        playPosition: state.cutStart,
+      );
+    } else {
+      state = state.copyWith(playPosition: pos);
+    }
+  }
+
+  void _initScale(NormalVideoResource video) {
+    final duration = video.duration.inMicroseconds;
+    int index = 0;
+
+    if (duration < _scaleValueList.first * 50) {
+      index = 0;
+    } else if (duration > _scaleValueList.last * 50) {
+      index = _scaleValueList.length - 1;
+    } else {
+      for (var i = 0; i < _scaleValueList.length - 1; i++) {
+        if (duration >= _scaleValueList[i] * 50 &&
+            duration < _scaleValueList[i + 1] * 50) {
+          index = i;
+          break;
+        }
+      }
+    }
+
+    final width =
+        (duration / _scaleValueList[index] + 1).round() *
+            _stepWidth;
+
+    state = state.copyWith(
+      stepValueIndex: index,
+      minimumStepIndex: index,
+      lastStepValueIndex: index,
+      videoResourceWidth: width,
+      endPosition: width,
+      actualEndPosition: width,
+    );
+  }
+
+  void setTrimmerWidth(double width) {
+    trimmerWidth = width;
+  }
+
+  void zoomIn() {
+    if (state.stepValueIndex > 0) {
+      state = state.copyWith(
+          stepValueIndex: state.stepValueIndex - 1);
+      _updateScale();
+    }
+  }
+
+  void zoomOut() {
+    if (state.stepValueIndex < state.minimumStepIndex) {
+      state = state.copyWith(
+          stepValueIndex: state.stepValueIndex + 1);
+      _updateScale();
+    }
+  }
+
+  void _updateScale() {
+    final videoWidth =
+        (videoController.value.duration.inMicroseconds /
+            _scaleValueList[state.stepValueIndex] +
+            1)
+            .round() *
+            _stepWidth;
+
+    state = state.copyWith(
+      videoResourceWidth: videoWidth,
+      lastStepValueIndex: state.stepValueIndex,
+    );
+  }
+
+  Future<void> dragLeft(double dx) async {
+    final newActual =
+    (state.actualStartPosition + dx).clamp(
+      0.0,
+      state.endPosition - _thumbBetweenDistance,
+    );
+
+    final snapped =
+        (newActual / _stepWidth).round() * _stepWidth;
+
+    final cut = Duration(
+        microseconds: (snapped /
+            _stepWidth *
+            _scaleValueList[state.stepValueIndex])
+            .round());
+
+    state = state.copyWith(
+      actualStartPosition: newActual,
+      startPosition: snapped,
+      cutStart: cut,
+      playPosition: cut,
+    );
+
+    await videoController.seekTo(cut);
+  }
+
+  Future<void> dragRight(double dx) async {
+    final newActual =
+    (state.actualEndPosition + dx).clamp(
+      state.startPosition + _thumbBetweenDistance,
+      state.videoResourceWidth,
+    );
+
+    final snapped =
+        (newActual / _stepWidth).round() * _stepWidth;
+
+    var cut = Duration(
+        microseconds: (snapped /
+            _stepWidth *
+            _scaleValueList[state.stepValueIndex])
+            .round());
+
+    if (cut > videoController.value.duration) {
+      cut = videoController.value.duration;
+    }
+
+    state = state.copyWith(
+      actualEndPosition: newActual,
+      endPosition: snapped,
+      cutEnd: cut,
+    );
+
+    await videoController.seekTo(cut);
+  }
+
+  void edgeScroll(double position, bool increase, bool isLeft) {
+    if (increase) {
+      if (kDebugMode) {
+        print(
+            'scroll to right, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
+      }
+      var offset = 0.0;
+      if (isLeft) {
+        offset = -10;
+      }
+      if (position >
+          trimmerWidth +
+              scrollController.position.pixels -
+              DesignValues.mediumPadding +
+              offset) {
+        scrollController.jumpTo(
+            position - trimmerWidth + DesignValues.mediumPadding - offset);
+      }
+    } else {
+      if (kDebugMode) {
+        print(
+            'scroll to left, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
+      }
+      var offset = 0.0;
+      if (!isLeft) {
+        offset = -10;
+      }
+      if (position < scrollController.position.pixels - offset) {
+        scrollController.jumpTo(position + offset);
+      }
+    }
+  }
+
+  Future<void> onDragLeft(DragUpdateDetails details) async {
+    // actualStartPosition.value = (actualStartPosition.value + details.delta.dx)
+    //     .clamp(0.0, endPosition.value - _thumbBetweenDistance);
+    state = state.copyWith(
+      actualStartPosition: (state.actualStartPosition + details.delta.dx)
+          .clamp(0.0, state.endPosition - _thumbBetweenDistance),
+    );
+    // startPosition.value =
+    //     (actualStartPosition.value / _stepWidth).round() * _stepWidth;
+    state = state.copyWith(
+      startPosition: (state.actualStartPosition / _stepWidth).round() * _stepWidth,
+    );
+    // cutStart.value = Duration(
+    //     microseconds: (startPosition.value /
+    //         _stepWidth *
+    //         _scaleValueList[stepValueIndex.value])
+    //         .round());
+    state = state.copyWith(cutStart: Duration(
+          microseconds: (state.startPosition /
+              _stepWidth *
+              _scaleValueList[state.stepValueIndex])
+              .round()));
+    state = state.copyWith(playPosition: state.cutStart);
+    await videoController.seekTo(state.cutStart);
+    edgeScroll(state.startPosition, details.delta.dx > 0, true);
+  }
+
+  Future<void> onDragRight(DragUpdateDetails details) async {
+    state = state.copyWith(
+      actualEndPosition: (state.actualEndPosition + details.delta.dx)
+          .clamp(state.startPosition + _thumbBetweenDistance,
+          state.videoResourceWidth),
+    );
+    state = state.copyWith(
+      endPosition: (state.actualEndPosition / _stepWidth).round() * _stepWidth,
+    );
+    state = state.copyWith(cutEnd: Duration(
+        microseconds: (state.endPosition /
+            _stepWidth *
+            _scaleValueList[state.stepValueIndex])
+            .round()));
+    if (state.cutEnd > videoResource.duration) {
+      state = state.copyWith(cutEnd: videoResource.duration);
+    }
+    await videoController.seekTo(state.cutEnd);
+    edgeScroll(state.endPosition, details.delta.dx > 0, false);
+  }
+
+  void onDragStart(DragStartDetails details) {
+    // changing.value = true;
+    state = state.copyWith(changing: true);
+  }
+
+  Future<void> onDragEnd(DragEndDetails details) async {
+    state = state.copyWith(changing: false);
+    state = state.copyWith(playPosition: state.cutStart);
+    ref.read(trimmerSavedStartProvider.notifier).state = state.cutStart;
+    ref.read(trimmerSavedEndProvider.notifier).state = state.cutEnd;
+    await videoController.seekTo(state.cutStart);
+  }
+
+  void scrollToMarker(Duration position) {
+    final positionInMicroseconds = position.inMicroseconds;
+    final positionInStep = positionInMicroseconds /
+        _scaleValueList[state.stepValueIndex] *
+        _stepWidth;
+    var scrollPosition = positionInStep - trimmerWidth / 2;
+    if (scrollPosition < 0) {
+      scrollPosition = 0;
+    } else if (scrollPosition > state.videoResourceWidth - trimmerWidth) {
+      scrollPosition = scrollController.position.maxScrollExtent;
+    }
+    scrollController.jumpTo(scrollPosition);
+  }
+
+  void updatePlayPosition(Duration position) {
+    state = state.copyWith(playPosition: position);
+  }
+}
+
+@riverpod
+class TrimmerSavedStart extends _$TrimmerSavedStart {
+  @override
+  Duration build() => Duration.zero;
+
+  void set(Duration value) => state = value;
+}
+
+@riverpod
+class TrimmerSavedEnd extends _$TrimmerSavedEnd {
+  @override
+  Duration build() => Duration.zero;
+
+  void set(Duration value) => state = value;
+}
+
+class VideoTrimmer extends ConsumerWidget {
   final NormalVideoResource videoResource;
+
+  const VideoTrimmer({super.key, required this.videoResource});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final videoController = useMemoized(
-      () => VideoPlayerController.file(videoResource.file),
-      [videoResource.file.path], // 重建依赖
-    );
-    final chewieController = useState<ChewieController?>(null);
-    final isInitialized = useState(false);
-
-    final isPlaying = useState(false);
-    final playPosition = useState(Duration.zero);
-    final cutStart = useState(Duration.zero);
-    final cutEnd = useState(videoResource.duration);
-
-    final scrollController = useScrollController();
-    var trimmerWidth = 0.0;
-    final stepValueIndex = useState(0);
-
-    final videoResourceWidth = useState(0.0);
-    final startPosition = useState(0.0);
-    final endPosition = useState(0.0);
-    final actualEndPosition = useState(0.0);
-    final actualStartPosition = useState(0.0);
-
-    // late int minimumStepIndex;
-    final minimumStepIndex = useState(0);
-    final lastStepValueIndex = useState(0);
-
-    final changing = useState(false);
-
-    useEffect(() {
-      bool mounted = true;
-
-      Future<void> initVideo() async {
-        await videoController.initialize();
-        if (!mounted) return;
-
-        chewieController.value = ChewieController(
-          videoPlayerController: videoController,
-          autoPlay: false,
-          looping: false,
-          showControls: false,
-        );
-
-        isInitialized.value = true;
-        videoController.addListener(() async {
-          isPlaying.value = videoController.value.isPlaying;
-          if (!changing.value) {
-            final position = videoController.value.position;
-            if (position < cutStart.value || position > cutEnd.value) {
-              await videoController.pause();
-              isPlaying.value = false;
-              await videoController.seekTo(cutStart.value);
-              playPosition.value = cutStart.value;
-            } else {
-              playPosition.value = position;
-            }
-          }
-        });
-      }
-
-      void getDefaultStepValueIndex() {
-        final duration = videoResource.duration.inMicroseconds;
-        const scale = 50;
-        if (duration < _scaleValueList.first * scale) {
-          stepValueIndex.value = 0;
-        } else if (duration > _scaleValueList.last * scale) {
-          stepValueIndex.value = _scaleValueList.length - 1;
-        } else {
-          for (var i = 0; i < _scaleValueList.length - 1; i++) {
-            if (duration >= (_scaleValueList[i] * scale) &&
-                duration < (_scaleValueList[i + 1] * 50)) {
-              stepValueIndex.value = i;
-              break;
-            }
-          }
-        }
-      }
-
-      void initSize() {
-        getDefaultStepValueIndex();
-        videoResourceWidth.value = (videoResource.duration.inMicroseconds /
-                        (_scaleValueList[stepValueIndex.value]) +
-                    1)
-                .round() *
-            _stepWidth;
-        endPosition.value = videoResourceWidth.value;
-        actualEndPosition.value = videoResourceWidth.value;
-        minimumStepIndex.value = stepValueIndex.value;
-        lastStepValueIndex.value = stepValueIndex.value;
-      }
-
-      initVideo();
-      initSize();
-
-      return () {
-        mounted = false;
-        videoController.dispose();
-        chewieController.value?.dispose();
-      };
-    }, [videoResource.file.path]);
-
-    void scrollToMarker(Duration position) {
-      final positionInMicroseconds = position.inMicroseconds;
-      final positionInStep = positionInMicroseconds /
-          _scaleValueList[stepValueIndex.value] *
-          _stepWidth;
-      var scrollPosition = positionInStep - trimmerWidth / 2;
-      if (scrollPosition < 0) {
-        scrollPosition = 0;
-      } else if (scrollPosition > videoResourceWidth.value - trimmerWidth) {
-        scrollPosition = scrollController.position.maxScrollExtent;
-      }
-      scrollController.jumpTo(scrollPosition);
-    }
-
-    void updateSize() {
-      videoResourceWidth.value = (videoResource.duration.inMicroseconds /
-                      (_scaleValueList[stepValueIndex.value]) +
-                  1)
-              .round() *
-          _stepWidth;
-      double scrollFactor = 1;
-      // print('stepValueIndex: ${stepValueIndex.value}');
-      if (lastStepValueIndex.value > stepValueIndex.value) {
-        // _zoomIn();
-        final ration = stepValueIndex.value.isOdd ? 5 : 2;
-        for (var i = 0;
-            i < lastStepValueIndex.value - stepValueIndex.value;
-            i++) {
-          actualStartPosition.value = actualStartPosition.value * ration;
-          startPosition.value =
-              (actualStartPosition.value / _stepWidth).round() * _stepWidth;
-          actualEndPosition.value = actualEndPosition.value * ration;
-          endPosition.value =
-              (actualEndPosition.value / _stepWidth).round() * _stepWidth;
-          if (endPosition.value > videoResourceWidth.value) {
-            endPosition.value = videoResourceWidth.value;
-            actualEndPosition.value = videoResourceWidth.value;
-          }
-        }
-        scrollFactor = (1 * ration).toDouble();
-      } else if (lastStepValueIndex.value < stepValueIndex.value) {
-        // _zoomOut();
-        final ration = stepValueIndex.value.isOdd ? 2 : 5;
-        for (var i = 0;
-            i < stepValueIndex.value - lastStepValueIndex.value;
-            i++) {
-          actualStartPosition.value = actualStartPosition.value / ration;
-          startPosition.value =
-              (actualStartPosition.value / _stepWidth).round() * _stepWidth;
-          actualEndPosition.value = actualEndPosition.value / ration;
-          endPosition.value =
-              (actualEndPosition.value / _stepWidth).round() * _stepWidth;
-        }
-        scrollFactor = 1 / ration;
-      }
-      if (endPosition.value - startPosition.value < _thumbBetweenDistance) {
-        // 距离过近，向左或者向右扩展
-        if (actualEndPosition.value + _thumbBetweenDistance <
-            videoResourceWidth.value) {
-          actualEndPosition.value =
-              actualStartPosition.value + _thumbBetweenDistance;
-          endPosition.value =
-              (actualEndPosition.value / _stepWidth).round() * _stepWidth;
-        } else if (actualStartPosition.value - _thumbBetweenDistance > 0) {
-          actualStartPosition.value =
-              actualEndPosition.value - _thumbBetweenDistance;
-          startPosition.value =
-              (actualStartPosition.value / _stepWidth).round() * _stepWidth;
-        }
-      }
-      scrollController.jumpTo(scrollController.position.pixels * scrollFactor);
-      // print(
-      //     'start: ${startPosition.value}, end: ${endPosition.value}, width: $videoResourceWidth');
-      lastStepValueIndex.value = stepValueIndex.value;
-    }
-
-    void zoomIn() {
-      if (stepValueIndex.value > 0) {
-        stepValueIndex.value--;
-        updateSize();
-      }
-    }
-
-    void zoomOut() {
-      if (stepValueIndex.value < minimumStepIndex.value) {
-        stepValueIndex.value++;
-        updateSize();
-      }
-    }
-
-    void edgeScroll(double position, bool increase, bool isLeft) {
-      if (increase) {
-        if (kDebugMode) {
-          print(
-              'scroll to right, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
-        }
-        var offset = 0.0;
-        if (isLeft) {
-          offset = -10;
-        }
-        if (position >
-            trimmerWidth +
-                scrollController.position.pixels -
-                DesignValues.mediumPadding +
-                offset) {
-          scrollController.jumpTo(
-              position - trimmerWidth + DesignValues.mediumPadding - offset);
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-              'scroll to left, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
-        }
-        var offset = 0.0;
-        if (!isLeft) {
-          offset = -10;
-        }
-        if (position < scrollController.position.pixels - offset) {
-          scrollController.jumpTo(position + offset);
-        }
-      }
-    }
-
-    Future<void> onDragLeft(DragUpdateDetails details) async {
-      actualStartPosition.value = (actualStartPosition.value + details.delta.dx)
-          .clamp(0.0, endPosition.value - _thumbBetweenDistance);
-      startPosition.value =
-          (actualStartPosition.value / _stepWidth).round() * _stepWidth;
-      cutStart.value = Duration(
-          microseconds: (startPosition.value /
-                  _stepWidth *
-                  _scaleValueList[stepValueIndex.value])
-              .round());
-      playPosition.value = cutStart.value;
-      await videoController.seekTo(cutStart.value);
-      edgeScroll(startPosition.value, details.delta.dx > 0, true);
-    }
-
-    Future<void> onDragRight(DragUpdateDetails details) async {
-      actualEndPosition.value = (actualEndPosition.value + details.delta.dx)
-          .clamp(startPosition.value + _thumbBetweenDistance,
-              videoResourceWidth.value);
-      endPosition.value =
-          (actualEndPosition.value / _stepWidth).round() * _stepWidth;
-      cutEnd.value = Duration(
-          microseconds: (endPosition.value /
-                  _stepWidth *
-                  _scaleValueList[stepValueIndex.value])
-              .round());
-      if (cutEnd.value > videoResource.duration) {
-        cutEnd.value = videoResource.duration;
-      }
-      await videoController.seekTo(cutEnd.value);
-      edgeScroll(endPosition.value, details.delta.dx > 0, false);
-    }
-
-    void onDragStart(DragStartDetails details) {
-      changing.value = true;
-    }
-
-    Future<void> onDragEnd(DragEndDetails details) async {
-      changing.value = false;
-      playPosition.value = cutStart.value;
-      ref.read(trimmerSavedStart.notifier).state = cutStart.value;
-      ref.read(trimmerSavedEnd.notifier).state = cutEnd.value;
-      await videoController.seekTo(cutStart.value);
-    }
+    final state =
+    ref.watch(_videoTrimmerControllerProvider(videoResource));
+    final controller = ref.read(
+        _videoTrimmerControllerProvider(videoResource).notifier);
 
     return Column(
       children: [
@@ -346,8 +485,8 @@ class VideoTrimmer extends HookConsumerWidget {
             child: ClipRRect(
           borderRadius:
               BorderRadius.all(Radius.circular(DesignValues.smallBorderRadius)),
-          child: isInitialized.value
-              ? Chewie(controller: chewieController.value!)
+          child: state.isInitialized
+              ? Chewie(controller: controller.chewieController)
               : const Center(
                   child: CircularProgressIndicator(
                   color: ColorDark.primary,
@@ -365,7 +504,8 @@ class VideoTrimmer extends HookConsumerWidget {
                 CustomIconButton(
                   iconData: Icons.chevron_left,
                   onPressed: () {
-                    scrollToMarker(cutStart.value);
+                    // scrollToMarker(cutStart.value);
+                    controller.scrollToMarker(state.cutStart);
                   },
                   iconSize: 36,
                   buttonSize: 48,
@@ -374,12 +514,13 @@ class VideoTrimmer extends HookConsumerWidget {
                   iconColor: ColorDark.text0,
                 ),
                 CustomIconButton(
-                  iconData: isPlaying.value ? Icons.pause : Icons.play_arrow,
+                  iconData: state.isPlaying ? Icons.pause : Icons.play_arrow,
                   onPressed: () {
-                    if (isPlaying.value) {
-                      videoController.pause();
+                    if (state.isPlaying) {
+                      // videoController.pause();
+                      controller.videoController.pause();
                     } else {
-                      videoController.play();
+                      controller.videoController.play();
                     }
                   },
                   iconSize: 36,
@@ -391,7 +532,7 @@ class VideoTrimmer extends HookConsumerWidget {
                 CustomIconButton(
                   iconData: Icons.chevron_right,
                   onPressed: () {
-                    scrollToMarker(cutEnd.value);
+                    controller.scrollToMarker(state.cutEnd);
                   },
                   iconSize: 36,
                   buttonSize: 48,
@@ -414,9 +555,9 @@ class VideoTrimmer extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _FormattedTimeText(
-                        duration: cutStart.value, color: ColorDark.tertiary),
+                        duration: state.cutStart, color: ColorDark.tertiary),
                     _FormattedTimeText(
-                        duration: cutEnd.value, color: ColorDark.tertiary),
+                        duration: state.cutEnd, color: ColorDark.tertiary),
                   ],
                 ),
               ),
@@ -429,15 +570,16 @@ class VideoTrimmer extends HookConsumerWidget {
                     inactiveTrackColor: ColorDark.primaryDisabled,
                   ),
                   child: Slider(
-                    value: playPosition.value.inMicroseconds.toDouble(),
-                    // value: 29109050,
-                    min: cutStart.value.inMicroseconds.toDouble(),
-                    max: cutEnd.value.inMicroseconds.toDouble(),
+                    value: state.playPosition.inMicroseconds.toDouble(),
+                    min: state.cutStart.inMicroseconds.toDouble(),
+                    max: state.cutEnd.inMicroseconds.toDouble(),
                     onChanged: (value) async {
-                      playPosition.value =
-                          Duration(microseconds: value.round());
-                      await videoController.pause();
-                      await videoController
+                      // controller.playPosition =
+                      //     Duration(microseconds: value.round());
+                      controller.updatePlayPosition(
+                          Duration(microseconds: value.round()));
+                      await controller.videoController.pause();
+                      await controller.videoController
                           .seekTo(Duration(microseconds: value.round()));
                     },
                   ),
@@ -449,10 +591,10 @@ class VideoTrimmer extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _FormattedTimeText(
-                        duration: cutEnd.value - cutStart.value,
+                        duration: state.cutEnd - state.cutStart,
                         color: ColorDark.primary),
                     _FormattedTimeText(
-                        duration: playPosition.value,
+                        duration: state.playPosition,
                         color: ColorDark.secondary),
                   ],
                 ),
@@ -464,7 +606,8 @@ class VideoTrimmer extends HookConsumerWidget {
           height: DesignValues.mediumPadding,
         ),
         LayoutBuilder(builder: (context, constraints) {
-          trimmerWidth = constraints.maxWidth - 2 * DesignValues.smallPadding;
+          // trimmerWidth = constraints.maxWidth - 2 * DesignValues.smallPadding;
+          controller.setTrimmerWidth(constraints.maxWidth - 2 * DesignValues.smallPadding);
           return MouseRegion(
             child: Listener(
               onPointerSignal: (event) {
@@ -472,9 +615,9 @@ class VideoTrimmer extends HookConsumerWidget {
                   if (HardwareKeyboard.instance.isMetaPressed ||
                       HardwareKeyboard.instance.isControlPressed) {
                     if (event.scrollDelta.dy > 0) {
-                      zoomOut();
+                      controller.zoomOut();
                     } else {
-                      zoomIn();
+                      controller.zoomIn();
                     }
                   }
                 }
@@ -489,16 +632,16 @@ class VideoTrimmer extends HookConsumerWidget {
                         height: 80,
                         color: ColorDark.bg2,
                         child: RawScrollbar(
-                          controller: scrollController,
+                          controller: controller.scrollController,
                           thumbVisibility: true,
                           thickness: 8,
                           child: Padding(
                             padding: EdgeInsets.all(DesignValues.mediumPadding),
                             child: SingleChildScrollView(
-                                controller: scrollController,
+                                controller: controller.scrollController,
                                 scrollDirection: Axis.horizontal,
                                 child: SizedBox(
-                                  width: videoResourceWidth.value,
+                                  width: state.videoResourceWidth,
                                   child: Stack(
                                     children: [
                                       ClipRRect(
@@ -506,13 +649,13 @@ class VideoTrimmer extends HookConsumerWidget {
                                             DesignValues.smallBorderRadius),
                                         child: Container(
                                           color: ColorDark.primary,
-                                          width: videoResourceWidth.value,
+                                          width: state.videoResourceWidth,
                                         ),
                                       ),
                                       Positioned(
-                                        left: startPosition.value,
-                                        right: videoResourceWidth.value -
-                                            endPosition.value,
+                                        left: state.startPosition,
+                                        right: state.videoResourceWidth -
+                                            state.endPosition,
                                         child: ClipRRect(
                                           borderRadius: BorderRadius.circular(
                                               DesignValues.smallBorderRadius),
@@ -537,20 +680,20 @@ class VideoTrimmer extends HookConsumerWidget {
                                               children: [
                                                 GestureDetector(
                                                   onHorizontalDragUpdate:
-                                                      onDragLeft,
+                                                      controller.onDragLeft,
                                                   onHorizontalDragStart:
-                                                      onDragStart,
+                                                      controller.onDragStart,
                                                   onHorizontalDragEnd:
-                                                      onDragEnd,
+                                                      controller.onDragEnd,
                                                   child: _TrimmerDragHandler(),
                                                 ),
                                                 GestureDetector(
                                                   onHorizontalDragUpdate:
-                                                      onDragRight,
+                                                      controller.onDragRight,
                                                   onHorizontalDragStart:
-                                                      onDragStart,
+                                                      controller.onDragStart,
                                                   onHorizontalDragEnd:
-                                                      onDragEnd,
+                                                      controller.onDragEnd,
                                                   child: _TrimmerDragHandler(),
                                                 ),
                                               ],

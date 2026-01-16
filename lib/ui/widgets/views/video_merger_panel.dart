@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/video_export_dialog.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 
+import '../../../providers/media_resources_provider.dart';
 import '../buttons/custom_icon_button.dart';
 import 'main_panel.dart';
 
@@ -106,7 +106,9 @@ class VideoMergerPanel extends ConsumerWidget {
             CustomIconButton(
                 iconData: Icons.arrow_back_ios_new,
                 onPressed: () {
-                  ref.read(isMergingStateProvider.notifier).state = false;
+                  ref
+                      .read(mediaResourcesProvider.notifier)
+                      .setIsMerging(false);
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,

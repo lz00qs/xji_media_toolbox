@@ -22,7 +22,7 @@ final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
     id: const obx_int.IdUid(2, 5066807561326805015),
     name: 'TranscodePreset',
-    lastPropertyId: const obx_int.IdUid(9, 3123510047051500198),
+    lastPropertyId: const obx_int.IdUid(10, 8677287095305570475),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
@@ -68,14 +68,14 @@ final _entities = <obx_int.ModelEntity>[
         flags: 0,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(8, 6947592021971297063),
-        name: 'ffmpegPreset',
+        id: const obx_int.IdUid(9, 3123510047051500198),
+        name: 'lutId',
         type: 6,
         flags: 0,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(9, 3123510047051500198),
-        name: 'lutId',
+        id: const obx_int.IdUid(10, 8677287095305570475),
+        name: 'ffmpegPreset',
         type: 6,
         flags: 0,
       ),
@@ -171,6 +171,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       3004389153049693201,
       3288320502769605509,
       6600177316668141755,
+      6947592021971297063,
     ],
     retiredRelationUids: const [],
     modelVersion: 5,
@@ -189,7 +190,7 @@ obx_int.ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (TranscodePreset object, fb.Builder fbb) {
         final nameOffset = fbb.writeString(object.name);
-        fbb.startTable(10);
+        fbb.startTable(11);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, nameOffset);
         fbb.addBool(2, object.useInputResolution);
@@ -197,8 +198,8 @@ obx_int.ModelDefinition getObjectBoxModel() {
         fbb.addInt64(4, object.width);
         fbb.addInt64(5, object.height);
         fbb.addInt64(6, object.crf);
-        fbb.addInt64(7, object.ffmpegPreset);
         fbb.addInt64(8, object.lutId);
+        fbb.addInt64(9, object.ffmpegPreset);
         fbb.finish(fbb.endTable());
         return object.id;
       },
@@ -226,13 +227,13 @@ obx_int.ModelDefinition getObjectBoxModel() {
           ..width = const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)
           ..height = const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
           ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
+          ..lutId = const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0)
           ..ffmpegPreset = const fb.Int64Reader().vTableGet(
             buffer,
             rootOffset,
-            18,
+            22,
             0,
-          )
-          ..lutId = const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
+          );
 
         return object;
       },
@@ -313,13 +314,13 @@ class TranscodePreset_ {
     _entities[0].properties[6],
   );
 
-  /// See [TranscodePreset.ffmpegPreset].
-  static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePreset>(
+  /// See [TranscodePreset.lutId].
+  static final lutId = obx.QueryIntegerProperty<TranscodePreset>(
     _entities[0].properties[7],
   );
 
-  /// See [TranscodePreset.lutId].
-  static final lutId = obx.QueryIntegerProperty<TranscodePreset>(
+  /// See [TranscodePreset.ffmpegPreset].
+  static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePreset>(
     _entities[0].properties[8],
   );
 }

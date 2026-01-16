@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../providers/media_resources_provider.dart';
 import '../../design_tokens.dart';
 import 'custom_dual_option_dialog.dart';
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../models/settings.dart';
+import '../../../providers/media_resources_provider.dart';
+import '../../../providers/settings_provider.dart';
 import '../../design_tokens.dart';
 import 'custom_dual_option_dialog.dart';
 
@@ -11,9 +12,10 @@ class MediaResourcesSortDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sortType =
-        ref.watch(settingsProvider.select((value) => value.sortType));
+        ref.watch(settingsProvider.select((s) => s.value?.sortType)) ??
+            SortType.name;
     final sortAsc =
-        ref.watch(settingsProvider.select((value) => value.sortAsc));
+        ref.watch(settingsProvider.select((s) => s.value?.sortAsc)) ?? false;
     return CustomDualOptionDialog(
         width: 400,
         height: 320,
@@ -26,7 +28,8 @@ class MediaResourcesSortDialog extends ConsumerWidget {
           ref
               .read(mediaResourcesProvider.notifier)
               .sortResources(sortType: sortType, sortAsc: sortAsc);
-          ref.read(settingsProvider.notifier).saveSettings();
+          ref.read(settingsProvider.notifier).setSortType(sortType);
+          ref.read(settingsProvider.notifier).setSortAsc(sortAsc);
           Navigator.of(context).pop();
         },
         child: Column(

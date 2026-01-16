@@ -4,18 +4,157 @@ import 'dart:math';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/multi_select_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/dialogs/settings_dialog.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_trimmer.dart';
 import '../../../models/media_resource.dart';
 import '../../../models/settings.dart';
+import '../../../providers/media_resources_provider.dart';
+import '../../../providers/settings_provider.dart';
+import '../../../providers/task_manager_provider.dart';
 import '../../../utils/media_resources_utils.dart';
 import 'custom_dual_option_dialog.dart';
 import '../buttons/custom_icon_button.dart';
 import '../../design_tokens.dart';
+
+part 'video_export_dialog.g.dart';
+
+class _VideoExportDialogState {
+  final bool useSameDirectory;
+  final String selectedDirectory;
+  final String outputFileName;
+  final bool isOutputPathValid;
+  final bool useInputEncodeSettings;
+  final int transcodePresetId;
+
+  const _VideoExportDialogState({
+    required this.useSameDirectory,
+    required this.selectedDirectory,
+    required this.outputFileName,
+    required this.isOutputPathValid,
+    required this.useInputEncodeSettings,
+    required this.transcodePresetId,
+  });
+
+  _VideoExportDialogState copyWith({
+    bool? useSameDirectory,
+    String? selectedDirectory,
+    String? outputFileName,
+    bool? isOutputPathValid,
+    bool? useInputEncodeSettings,
+    int? transcodePresetId,
+  }) {
+    return _VideoExportDialogState(
+      useSameDirectory: useSameDirectory ?? this.useSameDirectory,
+      selectedDirectory: selectedDirectory ?? this.selectedDirectory,
+      outputFileName: outputFileName ?? this.outputFileName,
+      isOutputPathValid: isOutputPathValid ?? this.isOutputPathValid,
+      useInputEncodeSettings:
+          useInputEncodeSettings ?? this.useInputEncodeSettings,
+      transcodePresetId: transcodePresetId ?? this.transcodePresetId,
+    );
+  }
+}
+
+@riverpod
+class _VideoExportDialogController extends _$VideoExportDialogController {
+  late final TextEditingController outputFileNameController;
+  late final TextEditingController selectedDirectoryController;
+  late NormalVideoResource videoResource;
+
+  @override
+  _VideoExportDialogState build() {
+    // final isMerging = ref.watch(mediaResourcesProvider).isMerging;
+    final mediaState = ref.watch(mediaResourcesProvider);
+    final settings = ref.watch(settingsProvider);
+
+    if (mediaState.isMerging) {
+      videoResource =
+          mediaState.selectedResources.first as NormalVideoResource;
+    } else {
+      videoResource =
+          mediaState.resources[mediaState.currentIndex]
+              as NormalVideoResource;
+    }
+
+    final defaultName = _getDefaultOutputFileName(videoResource.name);
+
+    outputFileNameController = TextEditingController(text: defaultName);
+    selectedDirectoryController = TextEditingController();
+
+    outputFileNameController.addListener(_recalculatePath);
+    selectedDirectoryController.addListener(_recalculatePath);
+
+    ref.onDispose(() {
+      outputFileNameController.dispose();
+      selectedDirectoryController.dispose();
+    });
+
+    return _VideoExportDialogState(
+      useSameDirectory: true,
+      selectedDirectory: '',
+      outputFileName: defaultName,
+      isOutputPathValid: !_fileExists(defaultName, true, ''),
+      useInputEncodeSettings: false,
+      transcodePresetId: settings.value?.defaultTranscodePresetId ?? 0,
+    );
+  }
+
+  void toggleUseSameDirectory() {
+    state = state.copyWith(
+      useSameDirectory: !state.useSameDirectory,
+    );
+    _recalculatePath();
+  }
+
+  void toggleUseInputEncodeSettings() {
+    state = state.copyWith(
+      useInputEncodeSettings: !state.useInputEncodeSettings,
+    );
+  }
+
+  void setPreset(int id) {
+    state = state.copyWith(transcodePresetId: id);
+  }
+
+  void setSelectedDirectory(String dir) {
+    selectedDirectoryController.text = dir;
+    state = state.copyWith(selectedDirectory: dir);
+    _recalculatePath();
+  }
+
+  void _recalculatePath() {
+    final exists = _fileExists(
+      outputFileNameController.text,
+      state.useSameDirectory,
+      selectedDirectoryController.text,
+    );
+
+    state = state.copyWith(
+      outputFileName: outputFileNameController.text,
+      selectedDirectory: selectedDirectoryController.text,
+      isOutputPathValid: !exists,
+    );
+  }
+
+  bool _fileExists(
+    String name,
+    bool useSameDir,
+    String customDir,
+  ) {
+    final dir = useSameDir ? videoResource.file.parent.path : customDir;
+    return isFileExist('$dir/$name.MP4');
+  }
+
+// @override
+// void dispose() {
+//   outputFileNameController.dispose();
+//   selectedDirectoryController.dispose();
+//   super.dispose();
+// }
+}
 
 String _getDefaultOutputFileName(String originalFileName) {
   final lastDotIndex = originalFileName.lastIndexOf('.');
@@ -34,19 +173,24 @@ Duration _getOutputDuration(
     required WidgetRef ref}) {
   var duration = const Duration(seconds: 0);
   if (isMerging) {
-    for (final element in ref.watch(
-        mediaResourcesProvider.select((state) => state.selectedResources))) {
+    for (final element in ref.watch(mediaResourcesProvider
+        .select((state) => state.selectedResources))) {
       final videoResource = element as NormalVideoResource;
       duration += videoResource.duration;
     }
   } else {
     if (isEditing) {
-      duration = ref.watch(trimmerSavedEnd) - ref.watch(trimmerSavedStart);
+      duration = ref.watch(trimmerSavedEndProvider) - ref.watch(trimmerSavedEndProvider);
     } else {
-      if (ref.watch(mediaResourcesProvider
-          .select((state) => state.resources.isNotEmpty))) {
+      if (ref.watch(mediaResourcesProvider.select((state) {
+        if (state.resources.isNotEmpty == true) {
+          return true;
+        }
+        return false;
+      }))) {
         final videoResource = ref.watch(mediaResourcesProvider.select((state) =>
-            state.resources[state.currentIndex] as NormalVideoResource));
+            state.resources[state.currentIndex]
+                as NormalVideoResource));
         duration = videoResource.duration;
       }
     }
@@ -103,62 +247,20 @@ class _MergeFileListView extends StatelessWidget {
   }
 }
 
-class VideoExportDialog extends HookConsumerWidget {
+class VideoExportDialog extends ConsumerWidget {
   const VideoExportDialog({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMerging = ref.watch(isMergingStateProvider);
-    final isEditing =
-        ref.watch(mediaResourcesProvider.select((state) => state.isEditing));
+    final state = ref.watch(_videoExportDialogControllerProvider);
+    final controller = ref.read(_videoExportDialogControllerProvider.notifier);
 
-    late final NormalVideoResource videoResource;
+    final isMerging = ref.watch(mediaResourcesProvider.select((m) => m.isMerging));
+    final isEditing = ref.watch(
+      mediaResourcesProvider.select((s) => s.isEditing),
+    );
 
-    if (isMerging) {
-      videoResource = ref.watch(mediaResourcesProvider.select(
-          (state) => state.selectedResources[0] as NormalVideoResource));
-    } else {
-      if (ref.watch(mediaResourcesProvider
-          .select((state) => state.resources.isNotEmpty))) {
-        videoResource = ref.watch(mediaResourcesProvider.select((state) =>
-            state.resources[state.currentIndex] as NormalVideoResource));
-      }
-    }
-
-    final useSameDirectory = useState(true);
-    final selectedDirectory = useState('');
-    final outputFileName =
-        useState(_getDefaultOutputFileName(videoResource.name));
-    final isOutputPathValid = useState(!isFileExist(
-        '${videoResource.file.parent.path}/${outputFileName.value}.MP4'));
-    final useInputEncodeSettings = useState(false);
-    final transcodePresetIndex = useState(ref.watch(
-        settingsProvider.select((state) => state.defaultTranscodePresetId)));
-
-    final outputFileNameTextEditingController =
-        useTextEditingController(text: outputFileName.value);
-
-    useEffect(() {
-      outputFileNameTextEditingController.addListener(() {
-        outputFileName.value = outputFileNameTextEditingController.text;
-        isOutputPathValid.value = !isFileExist(
-            '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
-            '/${outputFileName.value}.MP4');
-      });
-      return null;
-    }, []);
-
-    final selectedDirectoryTextController = useTextEditingController(text: '');
-
-    useEffect(() {
-      selectedDirectoryTextController.addListener(() {
-        selectedDirectory.value = selectedDirectoryTextController.text;
-        isOutputPathValid.value = !isFileExist(
-            '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
-            '/${outputFileName.value}.MP4');
-      });
-      return null;
-    }, []);
+    final videoResource = controller.videoResource;
 
     return CustomDualOptionDialog(
         width: 480,
@@ -166,22 +268,31 @@ class VideoExportDialog extends HookConsumerWidget {
         title: 'Export',
         option1: 'Cancel',
         option2: 'Export',
-        disableOption2: !isOutputPathValid.value,
+        // disableOption2: !isOutputPathValid.value,
+        disableOption2: !state.isOutputPathValid,
         onOption1Pressed: () {
           Navigator.pop(context);
         },
         onOption2Pressed: () async {
-          if (isOutputPathValid.value) {
+          if (state.isOutputPathValid) {
+            // final outputFilePath =
+            //     '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
+            //     '/${outputFileName.value}.MP4';
             final outputFilePath =
-                '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
-                '/${outputFileName.value}.MP4';
-            final preset = ref.watch(settingsProvider.select((state) =>
-                state.transcodingPresets.firstWhere(
-                    (element) => element.id == transcodePresetIndex.value)));
+                '${state.useSameDirectory ? videoResource.file.parent.path : state.selectedDirectory}'
+                '/${state.outputFileName}.MP4';
+            // final preset = ref.watch(settingsProvider.select((state) =>
+            //     state.transcodingPresets.firstWhere(
+            //         (element) => element.id == transcodePresetIndex.value)));
+            final preset = ref.watch(settingsProvider.select((s) => s
+                    .value?.transcodingPresets
+                    .firstWhere((e) => e.id == state.transcodePresetId))) ??
+                TranscodePreset()
+              ..id = 0;
             if (isMerging) {
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
-                  '${videoResource.file.parent.path}/.${outputFileName.value}_'
+                  '${videoResource.file.parent.path}/.${state.outputFileName}_'
                   '${_get4DigitRandomString()}.txt';
               final inputFilesTxtFile = File(inputFilesTxtPath);
               if (inputFilesTxtFile.existsSync()) {
@@ -189,7 +300,7 @@ class VideoExportDialog extends HookConsumerWidget {
               }
               inputFilesTxtFile.writeAsStringSync(ref
                   .watch(mediaResourcesProvider
-                      .select((state) => state.selectedResources))
+                      .select((m) => m.selectedResources))
                   .map((e) => 'file \'${e.file.path}\'')
                   .join('\n'));
               ffmpegArgs.add('-f');
@@ -202,13 +313,13 @@ class VideoExportDialog extends HookConsumerWidget {
               ffmpegArgs.add(videoResource.file.path);
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('1');
-              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
+              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
                 ffmpegArgs.add('-vf');
                 ffmpegArgs.add(
-                    "lut3d='${ref.watch(settingsProvider.select((state) => state.luts.firstWhere((element) => element.id == preset.lutId))).path}'");
+                    "lut3d='${ref.watch(settingsProvider.select((s) => s.value?.luts.firstWhere((element) => element.id == preset.lutId)))?.path ?? ''}'");
               }
               ffmpegArgs.add('-c:v');
-              if (useInputEncodeSettings.value == false) {
+              if (state.useInputEncodeSettings == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
                 if (preset.useHevc) {
                   ffmpegArgs.add('-tag:v');
@@ -235,7 +346,7 @@ class VideoExportDialog extends HookConsumerWidget {
                 }
               }
               final task = VideoTask(
-                name: '${outputFileName.value}.MP4',
+                name: '${state.outputFileName}.MP4',
                 status: VideoTaskStatus.waiting,
                 type: VideoTaskType.merge,
                 ffmpegArgs: ffmpegArgs,
@@ -252,13 +363,12 @@ class VideoExportDialog extends HookConsumerWidget {
               final List<String> ffmpegArgs = [];
               ffmpegArgs.add('-i');
               ffmpegArgs.add(videoResource.file.path);
-              if (useInputEncodeSettings.value == false && preset.lutId != 0) {
-                final lutPath = ref
-                    .watch(settingsProvider.select(
-                      (state) =>
-                          state.luts.firstWhere((e) => e.id == preset.lutId),
-                    ))
-                    .path;
+              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
+                final lutPath = ref.watch(settingsProvider.select((s) =>
+                    s.value?.luts
+                        .firstWhere((e) => e.id == preset.lutId)
+                        .path ??
+                    ''));
 
                 ffmpegArgs.add('-vf');
                 ffmpegArgs.add(
@@ -266,7 +376,7 @@ class VideoExportDialog extends HookConsumerWidget {
                 );
               }
               ffmpegArgs.add('-c:v');
-              if (useInputEncodeSettings.value == false) {
+              if (state.useInputEncodeSettings == false) {
                 ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
                 if (preset.useHevc) {
                   ffmpegArgs.add('-tag:v');
@@ -289,15 +399,15 @@ class VideoExportDialog extends HookConsumerWidget {
 
               if (isEditing) {
                 ffmpegArgs.add('-ss');
-                ffmpegArgs.add(ref.watch(trimmerSavedStart).toString());
+                ffmpegArgs.add(ref.watch(trimmerSavedStartProvider).toString());
                 ffmpegArgs.add('-to');
-                ffmpegArgs.add(ref.watch(trimmerSavedEnd).toString());
+                ffmpegArgs.add(ref.watch(trimmerSavedEndProvider).toString());
               }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
               ffmpegArgs.add(outputFilePath);
               final task = VideoTask(
-                name: '${outputFileName.value}.MP4',
+                name: '${state.outputFileName}.MP4',
                 status: VideoTaskStatus.waiting,
                 type: isEditing ? VideoTaskType.trim : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
@@ -319,14 +429,15 @@ class VideoExportDialog extends HookConsumerWidget {
             children: [
               CustomDialogCheckBoxWithText(
                   text: 'Use the same directory as source',
-                  value: useSameDirectory.value,
+                  value: state.useSameDirectory,
                   onPressed: () {
-                    useSameDirectory.value = !useSameDirectory.value;
+                    // useSameDirectory.value = !useSameDirectory.value;
+                    controller.toggleUseSameDirectory();
                   }),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
-              useSameDirectory.value
+              state.useSameDirectory
                   ? const SizedBox()
                   : CustomDialogIconButtonWithText(
                       iconData: Icons.folder_open,
@@ -335,14 +446,15 @@ class VideoExportDialog extends HookConsumerWidget {
                         final result =
                             await FilePicker.platform.getDirectoryPath();
                         if (result != null) {
-                          selectedDirectory.value = result;
-                          selectedDirectoryTextController.text = result;
+                          // selectedDirectory.value = result;
+                          // selectedDirectoryTextController.text = result;
+                          controller.setSelectedDirectory(result);
                         }
                       }),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
-              useSameDirectory.value
+              state.useSameDirectory
                   ? const SizedBox()
                   : Theme(
                       data: Theme.of(context).copyWith(
@@ -352,7 +464,8 @@ class VideoExportDialog extends HookConsumerWidget {
                       child: TextField(
                         readOnly: true,
                         cursorColor: ColorDark.text1,
-                        controller: selectedDirectoryTextController,
+                        // controller: selectedDirectoryTextController,
+                        controller: controller.selectedDirectoryController,
                         style: SemiTextStyles.header6ENRegular
                             .copyWith(color: ColorDark.text0),
                         decoration: dialogInputDecoration,
@@ -374,7 +487,8 @@ class VideoExportDialog extends HookConsumerWidget {
                                 .withAlpha((0.8 * 255).round()))),
                     child: TextField(
                       cursorColor: ColorDark.text1,
-                      controller: outputFileNameTextEditingController,
+                      // controller: outputFileNameTextEditingController,
+                      controller: controller.outputFileNameController,
                       style: SemiTextStyles.header5ENRegular
                           .copyWith(color: ColorDark.text0),
                       decoration: dialogInputDecoration.copyWith(
@@ -383,7 +497,8 @@ class VideoExportDialog extends HookConsumerWidget {
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text1),
                           ),
-                          errorText: isOutputPathValid.value
+                          // errorText: isOutputPathValid.value
+                          errorText: state.isOutputPathValid
                               ? null
                               : 'File already exists',
                           errorMaxLines: 3),
@@ -394,15 +509,14 @@ class VideoExportDialog extends HookConsumerWidget {
               ),
               CustomDialogCheckBoxWithText(
                   text: 'Use the same encodings as source',
-                  value: useInputEncodeSettings.value,
+                  value: state.useInputEncodeSettings,
                   onPressed: () {
-                    useInputEncodeSettings.value =
-                        !useInputEncodeSettings.value;
+                    controller.toggleUseInputEncodeSettings();
                   }),
               SizedBox(
                 height: DesignValues.mediumPadding,
               ),
-              useInputEncodeSettings.value
+              state.useInputEncodeSettings
                   ? const SizedBox()
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -414,21 +528,22 @@ class VideoExportDialog extends HookConsumerWidget {
                           children: [
                             DropdownButton<int>(
                               isExpanded: false,
-                              value: transcodePresetIndex.value,
+                              // value: transcodePresetIndex.value,
+                              value: state.transcodePresetId,
                               focusColor: ColorDark.defaultActive,
                               dropdownColor: ColorDark.bg2,
                               style: SemiTextStyles.header5ENRegular
                                   .copyWith(color: ColorDark.text0),
                               items: ref
-                                  .watch(settingsProvider.select((state) =>
-                                      state.transcodingPresets
-                                          .map((e) => DropdownMenuItem<int>(
-                                              value: e.id, child: Text(e.name)))
-                                          .toList()))
-                                  .toList(),
+                                  .watch(settingsProvider.select((s) => s
+                                      .value?.transcodingPresets
+                                      .map((e) => DropdownMenuItem<int>(
+                                          value: e.id, child: Text(e.name)))
+                                      .toList()))
+                                  ?.toList(),
                               onChanged: (value) {
                                 if (value != null) {
-                                  transcodePresetIndex.value = value;
+                                  controller.setPreset(value);
                                 }
                               },
                             ),
@@ -472,77 +587,85 @@ class VideoExportDialog extends HookConsumerWidget {
                       .toString()),
               _OutputInfoItem(
                   keyText: 'Output resolution:',
-                  valueText: useInputEncodeSettings.value
+                  valueText: state.useInputEncodeSettings
                       ? '${videoResource.width}x${videoResource.height}'
-                      : ref
-                              .watch(settingsProvider.select((state) => state
-                                  .transcodingPresets
-                                  .firstWhere((element) =>
-                                      element.id ==
-                                      transcodePresetIndex.value)))
-                              .useInputResolution
+                      : (ref
+                                  .watch(settingsProvider.select((s) => s
+                                      .value?.transcodingPresets
+                                      .firstWhere((element) =>
+                                          element.id ==
+                                          state.transcodePresetId)))
+                                  ?.useInputResolution ??
+                              false)
                           ? '${videoResource.width}x${videoResource.height}'
-                          : '${ref.watch(settingsProvider.select((state) => state.transcodingPresets.firstWhere((element) => element.id == transcodePresetIndex.value))).width}x${ref.watch(settingsProvider.select((state) => state.transcodingPresets.firstWhere((element) => element.id == transcodePresetIndex.value))).height}'),
+                          : '${ref.watch(settingsProvider.select((s) => s.value?.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId)))?.width}x${ref.watch(settingsProvider.select((s) => s.value?.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId)))?.height}'),
               _OutputInfoItem(
                 keyText: 'Output codec:',
-                valueText: useInputEncodeSettings.value
+                valueText: state.useInputEncodeSettings
                     ? videoResource.isHevc
                         ? 'H.265'
                         : 'H.264'
                     : ref
-                            .watch(settingsProvider.select((state) =>
-                                state.transcodingPresets.firstWhere((element) =>
-                                    element.id == transcodePresetIndex.value)))
-                            .useHevc
+                                .watch(settingsProvider.select((s) => s
+                                    .value?.transcodingPresets
+                                    .firstWhere((element) =>
+                                        element.id == state.transcodePresetId)))
+                                ?.useHevc ??
+                            false
                         ? 'H.265'
                         : 'H.264',
               ),
-              useInputEncodeSettings.value
+              state.useInputEncodeSettings
                   ? const SizedBox()
                   : _OutputInfoItem(
                       keyText: 'Output CRF:',
-                      valueText: ref
-                          .watch(settingsProvider.select((state) =>
-                              state.transcodingPresets.firstWhere((element) =>
-                                  element.id == transcodePresetIndex.value)))
-                          .crf
+                      valueText: (ref
+                                  .watch(settingsProvider.select((s) => s
+                                      .value?.transcodingPresets
+                                      .firstWhere((element) =>
+                                          element.id ==
+                                          state.transcodePresetId)))
+                                  ?.crf ??
+                              23)
                           .toString(),
                     ),
-              useInputEncodeSettings.value
+              state.useInputEncodeSettings
                   ? const SizedBox()
                   : _OutputInfoItem(
                       keyText: 'Output FFMPEG preset:',
-                      valueText: FFmpegPreset.values[ref
-                              .watch(settingsProvider.select((state) => state
-                                  .transcodingPresets
-                                  .firstWhere((element) =>
-                                      element.id ==
-                                      transcodePresetIndex.value)))
-                              .ffmpegPreset]
+                      valueText: FFmpegPreset.values[(ref
+                                  .watch(settingsProvider.select((s) => s
+                                      .value?.transcodingPresets
+                                      .firstWhere((element) =>
+                                          element.id ==
+                                          state.transcodePresetId)))
+                                  ?.ffmpegPreset) ??
+                              FFmpegPreset.ultrafast.index]
                           .toString()
                           .split('.')
                           .last),
               // Output LUT:
-              useInputEncodeSettings.value
+              state.useInputEncodeSettings
                   ? const SizedBox()
                   : _OutputInfoItem(
                       keyText: 'Output LUT:',
                       valueText: ref
-                          .watch(settingsProvider.select((state) => state.luts
-                              .firstWhere(
-                                  (element) =>
-                                      element.id ==
-                                      ref
-                                          .watch(settingsProvider.select(
-                                              (state) => state
-                                                  .transcodingPresets
-                                                  .firstWhere((element) =>
-                                                      element.id ==
-                                                      transcodePresetIndex
-                                                          .value)))
-                                          .lutId,
-                                  orElse: () => Lut()..name = "None")))
-                          .name),
+                              .watch(settingsProvider.select((s) =>
+                                  s.value?.luts.firstWhere(
+                                      (element) =>
+                                          element.id ==
+                                          ref
+                                              .watch(settingsProvider.select(
+                                                  (s) => s
+                                                      .value?.transcodingPresets
+                                                      .firstWhere((element) =>
+                                                          element.id ==
+                                                          state
+                                                              .transcodePresetId)))
+                                              ?.lutId,
+                                      orElse: () => Lut()..name = "None")))
+                              ?.name ??
+                          "None"),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
@@ -558,9 +681,10 @@ class VideoExportDialog extends HookConsumerWidget {
                 Expanded(
                     child: _MergeFileListView(
                   videoResources: ref.watch(mediaResourcesProvider.select(
-                    (state) => state.selectedResources
-                        .map((element) => element as NormalVideoResource)
-                        .toList(),
+                    (s) =>
+                        s.selectedResources
+                            .map((element) => element as NormalVideoResource)
+                            .toList(),
                   )),
                 )),
             ]));

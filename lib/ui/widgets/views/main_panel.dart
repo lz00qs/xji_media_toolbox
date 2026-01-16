@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/photo_panel.dart';
 import 'package:xji_footage_toolbox/ui/widgets/views/video_panel.dart';
+import '../../../providers/media_resources_provider.dart';
 import '../buttons/custom_icon_button.dart';
 import '../dialogs/media_resource_delete_dialog.dart';
 import '../dialogs/media_resource_rename_dialog.dart';
@@ -37,8 +38,10 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
           iconData: Icons.drive_file_rename_outline_rounded,
           onPressed: () async {
             // await Get.dialog(const MediaResourceRenameDialog());
-            final mediaResourcesLength = ref.watch(mediaResourcesProvider
-                .select((value) => value.resources.length));
+            // final mediaResourcesLength = ref.watch(mediaResourcesProvider
+            //     .select((value) => value.resources.length));
+
+            final mediaResourcesLength = ref.watch(mediaResourcesProvider.select((m) => m.resources.length));
             if (mediaResourcesLength == 0) {
               return;
             }
@@ -47,10 +50,12 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
             final currentIndex = ref.watch(
                 mediaResourcesProvider.select((value) => value.currentIndex));
             final mediaResource = mediaResources[currentIndex];
-            // await showDialog(context: context, builder: (BuildContext context){
-            //   return MediaResourceRenameDialog(mediaResource: mediaResource);
-            // });
+            await showDialog(context: context, builder: (BuildContext context){
+              return MediaResourceRenameDialog(mediaResource: mediaResource);
+            });
             if (mediaResource.isAeb) {
+              if (!context.mounted) return;
+
               await showDialog(
                   context: context,
                   builder: (BuildContext context) => MediaResourceRenameDialog(
@@ -59,6 +64,8 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
                               ref.watch(mediaResourcesProvider
                                   .select((value) => value.currentAebIndex))]));
             } else {
+              if (!context.mounted) return;
+
               await showDialog(
                   context: context,
                   builder: (BuildContext context) =>

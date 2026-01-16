@@ -25,6 +25,7 @@ mixin _$VideoTask {
   File? get logFile;
   Duration get eta;
   Process? get process;
+  CancelToken get cancelToken;
 
   /// Create a copy of VideoTask
   /// with the given fields replaced by the non-null parameter values.
@@ -52,7 +53,9 @@ mixin _$VideoTask {
             const DeepCollectionEquality().equals(other.tempFiles, tempFiles) &&
             (identical(other.logFile, logFile) || other.logFile == logFile) &&
             (identical(other.eta, eta) || other.eta == eta) &&
-            (identical(other.process, process) || other.process == process));
+            (identical(other.process, process) || other.process == process) &&
+            (identical(other.cancelToken, cancelToken) ||
+                other.cancelToken == cancelToken));
   }
 
   @override
@@ -68,11 +71,12 @@ mixin _$VideoTask {
       const DeepCollectionEquality().hash(tempFiles),
       logFile,
       eta,
-      process);
+      process,
+      cancelToken);
 
   @override
   String toString() {
-    return 'VideoTask(name: $name, status: $status, type: $type, ffmpegArgs: $ffmpegArgs, duration: $duration, progress: $progress, outputFile: $outputFile, tempFiles: $tempFiles, logFile: $logFile, eta: $eta, process: $process)';
+    return 'VideoTask(name: $name, status: $status, type: $type, ffmpegArgs: $ffmpegArgs, duration: $duration, progress: $progress, outputFile: $outputFile, tempFiles: $tempFiles, logFile: $logFile, eta: $eta, process: $process, cancelToken: $cancelToken)';
   }
 }
 

@@ -1,38 +1,12 @@
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-final resizablePanelStateProvider = StateNotifierProvider<ResizablePanelStateNotifier, ResizablePanelState>((ref) {
-  return ResizablePanelStateNotifier();
-});
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class ResizablePanelState {
-  final double leftPanelWidth;
-  final double topLeftHeight;
+part 'resizable_panel_state.freezed.dart';
 
-  ResizablePanelState({
-    required this.leftPanelWidth,
-    required this.topLeftHeight,
-  });
-
-  ResizablePanelState copyWith({
-    double? leftPanelWidth,
-    double? topLeftHeight,
-  }) {
-    return ResizablePanelState(
-      leftPanelWidth: leftPanelWidth ?? this.leftPanelWidth,
-      topLeftHeight: topLeftHeight ?? this.topLeftHeight,
-    );
-  }
-}
-
-class ResizablePanelStateNotifier extends StateNotifier<ResizablePanelState> {
-  ResizablePanelStateNotifier()
-      : super(ResizablePanelState(leftPanelWidth: 324, topLeftHeight: 400));
-
-  void setLeftPanelWidth(double width) {
-    state = state.copyWith(leftPanelWidth: width);
-  }
-
-  void setTopLeftHeight(double height) {
-    state = state.copyWith(topLeftHeight: height);
-  }
+@freezed
+abstract class ResizablePanelState with _$ResizablePanelState {
+  const factory ResizablePanelState({
+    required double leftPanelWidth,
+    required double topLeftHeight,
+  }) = _ResizablePanelState;
 }
