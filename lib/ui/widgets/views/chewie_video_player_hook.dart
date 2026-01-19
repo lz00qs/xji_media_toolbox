@@ -34,6 +34,7 @@ class _ChewieVideoPlayerState {
 class _ChewieVideoPlayerController
     extends _$ChewieVideoPlayerController {
   late final VideoPlayerController _videoController;
+  late final ChewieController _chewieController;
 
   @override
   _ChewieVideoPlayerState build({
@@ -46,7 +47,7 @@ class _ChewieVideoPlayerController
 
     ref.onDispose(() {
       _videoController.dispose();
-      state.chewieController?.dispose();
+      _chewieController.dispose();
     });
 
     return const _ChewieVideoPlayerState(
@@ -58,7 +59,7 @@ class _ChewieVideoPlayerController
   Future<void> _init(File videoFile, bool showControls) async {
     await _videoController.initialize();
 
-    final chewieController = ChewieController(
+    _chewieController = ChewieController(
       videoPlayerController: _videoController,
       autoPlay: false,
       looping: false,
@@ -67,7 +68,7 @@ class _ChewieVideoPlayerController
 
     state = state.copyWith(
       isInitialized: true,
-      chewieController: chewieController,
+      chewieController: _chewieController,
     );
   }
 }
@@ -105,61 +106,3 @@ class ChewieVideoPlayer extends ConsumerWidget {
     );
   }
 }
-
-// class ChewieVideoPlayerHook extends HookWidget {
-//   final File videoFile;
-//   final bool showControls;
-//
-//   const ChewieVideoPlayerHook({
-//     super.key,
-//     required this.videoFile,
-//     this.showControls = true,
-//   });
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     final videoController = useMemoized(
-//       () => VideoPlayerController.file(videoFile),
-//       [videoFile.path], // 重建依赖
-//     );
-//     final chewieController = useState<ChewieController?>(null);
-//     final isInitialized = useState(false);
-//
-//     useEffect(() {
-//       bool mounted = true;
-//
-//       Future<void> init() async {
-//         await videoController.initialize();
-//         if (!mounted) return;
-//
-//         chewieController.value = ChewieController(
-//           videoPlayerController: videoController,
-//           autoPlay: false,
-//           looping: false,
-//           showControls: showControls,
-//         );
-//
-//         isInitialized.value = true;
-//       }
-//
-//       init();
-//
-//       return () {
-//         mounted = false;
-//         videoController.dispose();
-//         chewieController.value?.dispose();
-//       };
-//     }, [videoFile.path]);
-//
-//     return ClipRRect(
-//       borderRadius:
-//           BorderRadius.all(Radius.circular(DesignValues.smallBorderRadius)),
-//       child: isInitialized.value
-//           ? Chewie(controller: chewieController.value!)
-//           : const Center(
-//               child: CircularProgressIndicator(
-//               color: ColorDark.primary,
-//             )),
-//     );
-//   }
-// }
