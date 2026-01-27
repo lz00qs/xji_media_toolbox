@@ -10,8 +10,7 @@ class LoadingMediaResourcesPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loadProgress = ref.watch(mediaResourcesProvider
-            .select((state) => state.loadProgress)) ??
-        0;
+            .select((state) => state.loadProgress));
     return Scaffold(
         body: Container(
       color: ColorDark.bg1,

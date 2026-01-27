@@ -50,12 +50,7 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
             final currentIndex = ref.watch(
                 mediaResourcesProvider.select((value) => value.currentIndex));
             final mediaResource = mediaResources[currentIndex];
-            await showDialog(context: context, builder: (BuildContext context){
-              return MediaResourceRenameDialog(mediaResource: mediaResource);
-            });
             if (mediaResource.isAeb) {
-              if (!context.mounted) return;
-
               await showDialog(
                   context: context,
                   builder: (BuildContext context) => MediaResourceRenameDialog(
@@ -64,8 +59,6 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
                               ref.watch(mediaResourcesProvider
                                   .select((value) => value.currentAebIndex))]));
             } else {
-              if (!context.mounted) return;
-
               await showDialog(
                   context: context,
                   builder: (BuildContext context) =>
