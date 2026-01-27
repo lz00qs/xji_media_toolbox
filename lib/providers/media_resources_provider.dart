@@ -71,9 +71,9 @@ class MediaResourcesNotifier extends _$MediaResourcesNotifier {
 
   void removeResource({required MediaResource resource}) {
     if (resource.isAeb) {
-      final aebResource = resource as AebPhotoResource;
-      for (final aebResource in aebResource.aebResources) {
-        if (deleteMediaResource(mediaResource: aebResource) != 0) {
+      final aebPhoto = resource as AebPhotoResource;
+      for (final sub in aebPhoto.aebResources) {
+        if (deleteMediaResource(mediaResource: sub) != 0) {
           return;
         }
       }
@@ -82,14 +82,28 @@ class MediaResourcesNotifier extends _$MediaResourcesNotifier {
         return;
       }
     }
-    if (state.resources.indexOf(resource) == state.currentIndex) {
-      if (state.currentIndex == state.resources.length - 1) {
-        state = state.copyWith(currentIndex: state.currentIndex - 1);
+
+    final resources = List<MediaResource>.from(state.resources);
+    final selectedResources =
+    List<MediaResource>.from(state.selectedResources);
+
+    final removedIndex = resources.indexOf(resource);
+
+    resources.remove(resource);
+    selectedResources.remove(resource);
+
+    int currentIndex = state.currentIndex;
+    if (removedIndex == state.currentIndex) {
+      if (currentIndex >= resources.length) {
+        currentIndex = resources.length - 1;
       }
     }
+
     state = state.copyWith(
-        resources: state.resources..remove(resource),
-        selectedResources: state.selectedResources..remove(resource));
+      resources: resources,
+      selectedResources: selectedResources,
+      currentIndex: currentIndex,
+    );
   }
 
   void renameResource(
