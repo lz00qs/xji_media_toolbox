@@ -1031,8 +1031,9 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                 Expanded(child: DropdownButton<Lut>(
                   value: ref.watch(settingsProvider.select((s){
                     final luts = s.value?.luts;
-                    if (luts != null && luts.isNotEmpty && luts.length > state.lutId) {
-                      return luts[state.lutId];
+                    if (luts != null && luts.isNotEmpty && state.lutId != 0) {
+                      return luts
+                          .firstWhere((element) => element.id == state.lutId, orElse: () => noneLut);
                     }
                     return noneLut;
                   })),
