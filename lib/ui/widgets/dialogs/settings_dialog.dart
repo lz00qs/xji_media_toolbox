@@ -967,8 +967,7 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                         .copyWith(color: ColorDark.text0),
                     decoration: dialogInputDecoration.copyWith(
                         errorText: state.isNameValid
-                            ? 'Name is required'
-                            : null),
+                            ? null : 'Name is required'),
                   )),
             ),
             SizedBox(
