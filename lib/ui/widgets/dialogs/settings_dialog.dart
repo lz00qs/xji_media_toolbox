@@ -485,7 +485,14 @@ class _EditLutController extends _$EditLutController {
 
   @override
   _EditLutState build(Lut? lut) {
-    _lut = lut ?? Lut();
+    if (lut == null) {
+      _lut = Lut();
+    } else {
+      _lut = Lut()
+        ..id = lut.id
+        ..name = lut.name
+        ..path = lut.path;
+    }
 
     nameController = TextEditingController(text: _lut.name);
     pathScrollController = ScrollController();
@@ -693,7 +700,22 @@ class _EditTranscodePresetController
 
   @override
   _EditTranscodePresetState build(TranscodePreset? preset) {
-    _preset = preset ?? TranscodePreset();
+    if (preset == null) {
+      _preset = TranscodePreset();
+    } else {
+      _preset = TranscodePreset()
+        ..id = preset.id
+        ..name = preset.name
+        ..useInputResolution = preset.useInputResolution
+        ..useHevc = preset.useHevc
+        ..width = preset.width
+        ..height = preset.height
+        ..crf = preset.crf
+        ..ffmpegPreset = preset.ffmpegPreset
+        ..lutId = preset.lutId;
+    }
+
+
 
     nameController =
         TextEditingController(text: _preset.name);
