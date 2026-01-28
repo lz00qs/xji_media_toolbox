@@ -43,18 +43,17 @@ class SettingsDialog extends ConsumerWidget {
     // 只为初始化 / 生命周期
     ref.watch(_settingsDialogControllerProvider);
 
-    final uiNotifier =
-    ref.read(_settingsDialogControllerProvider.notifier);
+    final uiNotifier = ref.read(_settingsDialogControllerProvider.notifier);
 
     final outputPresetScrollController =
         uiNotifier.outputPresetScrollController;
     final lutScrollController = uiNotifier.lutScrollController;
 
-    final transcodingPresets =
-        ref.watch(settingsProvider.select((s) => s.value?.transcodingPresets ?? []));
+    final transcodingPresets = ref.watch(
+        settingsProvider.select((s) => s.value?.transcodingPresets ?? []));
     final luts = ref.watch(settingsProvider.select((s) => s.value?.luts ?? []));
-    final isDebugMode =
-        ref.watch(settingsProvider.select((s) => s.value?.isDebugMode ?? false));
+    final isDebugMode = ref
+        .watch(settingsProvider.select((s) => s.value?.isDebugMode ?? false));
     final appVersion =
         ref.watch(settingsProvider.select((s) => s.value?.appVersion ?? ''));
     return CustomDualOptionDialog(
@@ -557,8 +556,7 @@ class _EditLutDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(_editLutControllerProvider(lut));
-    final controller =
-    ref.read(_editLutControllerProvider(lut).notifier);
+    final controller = ref.read(_editLutControllerProvider(lut).notifier);
 
     return CustomDualOptionDialog(
       width: 480,
@@ -587,7 +585,7 @@ class _EditLutDialog extends ConsumerWidget {
               data: Theme.of(context).copyWith(
                 textSelectionTheme: TextSelectionThemeData(
                   selectionColor:
-                  ColorDark.blue5.withAlpha((0.8 * 255).round()),
+                      ColorDark.blue5.withAlpha((0.8 * 255).round()),
                 ),
               ),
               child: TextField(
@@ -597,13 +595,11 @@ class _EditLutDialog extends ConsumerWidget {
                 style: SemiTextStyles.header5ENRegular
                     .copyWith(color: ColorDark.text0),
                 decoration: dialogInputDecoration.copyWith(
-                  errorText:
-                  state.isNameValid ? null : 'Name is required',
+                  errorText: state.isNameValid ? null : 'Name is required',
                 ),
               ),
             ),
           ),
-
           if (lut == null) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -638,7 +634,6 @@ class _EditLutDialog extends ConsumerWidget {
   }
 }
 
-
 class _EditTranscodePresetState {
   final String name;
   final bool useInputResolution;
@@ -661,9 +656,13 @@ class _EditTranscodePresetState {
   });
 
   bool get isNameValid => name.isNotEmpty;
+
   bool get isWidthValid => width > 0;
+
   bool get isHeightValid => height > 0;
+
   bool get isCrfValid => crf > 0 && crf < 52;
+
   _EditTranscodePresetState copyWith({
     String? name,
     bool? useInputResolution,
@@ -676,8 +675,7 @@ class _EditTranscodePresetState {
   }) {
     return _EditTranscodePresetState(
       name: name ?? this.name,
-      useInputResolution:
-      useInputResolution ?? this.useInputResolution,
+      useInputResolution: useInputResolution ?? this.useInputResolution,
       width: width ?? this.width,
       height: height ?? this.height,
       crf: crf ?? this.crf,
@@ -689,8 +687,7 @@ class _EditTranscodePresetState {
 }
 
 @riverpod
-class _EditTranscodePresetController
-    extends _$EditTranscodePresetController {
+class _EditTranscodePresetController extends _$EditTranscodePresetController {
   late final TranscodePreset _preset;
 
   late final TextEditingController nameController;
@@ -715,16 +712,10 @@ class _EditTranscodePresetController
         ..lutId = preset.lutId;
     }
 
-
-
-    nameController =
-        TextEditingController(text: _preset.name);
-    widthController =
-        TextEditingController(text: _preset.width.toString());
-    heightController =
-        TextEditingController(text: _preset.height.toString());
-    crfController =
-        TextEditingController(text: _preset.crf.toString());
+    nameController = TextEditingController(text: _preset.name);
+    widthController = TextEditingController(text: _preset.width.toString());
+    heightController = TextEditingController(text: _preset.height.toString());
+    crfController = TextEditingController(text: _preset.crf.toString());
 
     nameController.addListener(_onNameChanged);
     widthController.addListener(_onWidthChanged);
@@ -816,12 +807,13 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state =
-    ref.watch(_editTranscodePresetControllerProvider(preset));
+    final state = ref.watch(_editTranscodePresetControllerProvider(preset));
     final controller =
-    ref.read(_editTranscodePresetControllerProvider(preset).notifier);
+        ref.read(_editTranscodePresetControllerProvider(preset).notifier);
 
-    final noneLut = Lut()..id = 0 ..name = 'None';
+    final noneLut = Lut()
+      ..id = 0
+      ..name = 'None';
 
     return CustomDualOptionDialog(
         width: 480,
@@ -858,8 +850,8 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                     style: SemiTextStyles.header5ENRegular
                         .copyWith(color: ColorDark.text0),
                     decoration: dialogInputDecoration.copyWith(
-                        errorText: state.isNameValid
-                            ? null : 'Name is required'),
+                        errorText:
+                            state.isNameValid ? null : 'Name is required'),
                   )),
             ),
             SizedBox(
@@ -1006,9 +998,9 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                       .copyWith(color: ColorDark.text0),
                   items: FFmpegPreset.values
                       .map((e) => DropdownMenuItem<FFmpegPreset>(
-                    value: e,
-                    child: Text(e.name),
-                  ))
+                            value: e,
+                            child: Text(e.name),
+                          ))
                       .toList(),
                   onChanged: (value) {
                     if (value != null) {
@@ -1028,12 +1020,14 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                 SizedBox(
                   width: DesignValues.largePadding,
                 ),
-                Expanded(child: DropdownButton<Lut>(
-                  value: ref.watch(settingsProvider.select((s){
+                Expanded(
+                    child: DropdownButton<Lut>(
+                  value: ref.watch(settingsProvider.select((s) {
                     final luts = s.value?.luts;
                     if (luts != null && luts.isNotEmpty && state.lutId != 0) {
-                      return luts
-                          .firstWhere((element) => element.id == state.lutId, orElse: () => noneLut);
+                      return luts.firstWhere(
+                          (element) => element.id == state.lutId,
+                          orElse: () => noneLut);
                     }
                     return noneLut;
                   })),
@@ -1048,12 +1042,15 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
                       value: noneLut,
                       child: Text(noneLut.name),
                     ),
-                    ...ref.watch(settingsProvider.select((s) => s.value?.luts ?? [])).map(
+                    ...ref
+                        .watch(
+                            settingsProvider.select((s) => s.value?.luts ?? []))
+                        .map(
                           (e) => DropdownMenuItem<Lut>(
-                        value: e,
-                        child: Text(e.name),
-                      ),
-                    ),
+                            value: e,
+                            child: Text(e.name),
+                          ),
+                        ),
                   ],
                   onChanged: (value) {
                     if (value == null) return;
