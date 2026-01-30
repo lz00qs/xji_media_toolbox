@@ -20,7 +20,7 @@ final class MediaResourcesNotifierProvider
           argument: null,
           retry: null,
           name: r'mediaResourcesProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -42,7 +42,7 @@ final class MediaResourcesNotifierProvider
 }
 
 String _$mediaResourcesNotifierHash() =>
-    r'584db050a26a2d0a9e5fd20cced2c9c314853ef3';
+    r'f6c726319f75ed4825c1c1c4db46c9021ca52996';
 
 abstract class _$MediaResourcesNotifier extends $Notifier<MediaResources> {
   MediaResources build();

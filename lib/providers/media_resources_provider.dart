@@ -6,7 +6,7 @@ import '../utils/media_resources_utils.dart';
 
 part 'media_resources_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class MediaResourcesNotifier extends _$MediaResourcesNotifier {
   @override
   MediaResources build() {

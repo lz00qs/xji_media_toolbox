@@ -111,7 +111,7 @@ final class _EditLutControllerProvider
 }
 
 String _$_editLutControllerHash() =>
-    r'14ded9550d529eeca57ef1c0d1f491ee0ded0f97';
+    r'91157d870b461b2db4e5ee8070eed873c1f295a6';
 
 final class _EditLutControllerFamily extends $Family
     with
@@ -211,7 +211,7 @@ final class _EditTranscodePresetControllerProvider extends $NotifierProvider<
 }
 
 String _$_editTranscodePresetControllerHash() =>
-    r'6ce593e3dbace22d8712c517e7d58aff197bcd7b';
+    r'dced4cd0daa72db27aee229b716d40924aa23c5b';
 
 final class _EditTranscodePresetControllerFamily extends $Family
     with

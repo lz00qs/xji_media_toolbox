@@ -66,7 +66,6 @@ class _VideoExportDialogController extends _$VideoExportDialogController {
 
   @override
   _VideoExportDialogState build() {
-    // final isMerging = ref.watch(mediaResourcesProvider).isMerging;
     final mediaState = ref.watch(mediaResourcesProvider);
     final settings = ref.watch(settingsProvider);
 
@@ -83,14 +82,15 @@ class _VideoExportDialogController extends _$VideoExportDialogController {
 
     outputFileNameController = TextEditingController(text: defaultName);
     selectedDirectoryController = TextEditingController();
+    //
+    // outputFileNameController.addListener(_recalculatePath);
+    // selectedDirectoryController.addListener(_recalculatePath);
 
-    outputFileNameController.addListener(_recalculatePath);
-    selectedDirectoryController.addListener(_recalculatePath);
+    // ref.onDispose(() {
+    //   outputFileNameController.dispose();
+    //   selectedDirectoryController.dispose();
+    // });
 
-    ref.onDispose(() {
-      outputFileNameController.dispose();
-      selectedDirectoryController.dispose();
-    });
 
     return _VideoExportDialogState(
       useSameDirectory: true,
@@ -105,8 +105,8 @@ class _VideoExportDialogController extends _$VideoExportDialogController {
   void toggleUseSameDirectory() {
     state = state.copyWith(
       useSameDirectory: !state.useSameDirectory,
+      isOutputPathValid: !_fileExists(state.outputFileName, !state.useSameDirectory, state.selectedDirectory),
     );
-    _recalculatePath();
   }
 
   void toggleUseInputEncodeSettings() {
@@ -120,23 +120,11 @@ class _VideoExportDialogController extends _$VideoExportDialogController {
   }
 
   void setSelectedDirectory(String dir) {
-    selectedDirectoryController.text = dir;
-    state = state.copyWith(selectedDirectory: dir);
-    _recalculatePath();
+    state = state.copyWith(selectedDirectory: dir, isOutputPathValid: !_fileExists(state.outputFileName, state.useSameDirectory, dir));
   }
 
-  void _recalculatePath() {
-    final exists = _fileExists(
-      outputFileNameController.text,
-      state.useSameDirectory,
-      selectedDirectoryController.text,
-    );
-
-    state = state.copyWith(
-      outputFileName: outputFileNameController.text,
-      selectedDirectory: selectedDirectoryController.text,
-      isOutputPathValid: !exists,
-    );
+  void setOutputFileName(String name) {
+    state = state.copyWith(outputFileName: name, isOutputPathValid: !_fileExists(name, state.useSameDirectory, state.selectedDirectory));
   }
 
   bool _fileExists(
@@ -147,13 +135,6 @@ class _VideoExportDialogController extends _$VideoExportDialogController {
     final dir = useSameDir ? videoResource.file.parent.path : customDir;
     return isFileExist('$dir/$name.MP4');
   }
-
-// @override
-// void dispose() {
-//   outputFileNameController.dispose();
-//   selectedDirectoryController.dispose();
-//   super.dispose();
-// }
 }
 
 String _getDefaultOutputFileName(String originalFileName) {
@@ -275,15 +256,9 @@ class VideoExportDialog extends ConsumerWidget {
         },
         onOption2Pressed: () async {
           if (state.isOutputPathValid) {
-            // final outputFilePath =
-            //     '${useSameDirectory.value ? videoResource.file.parent.path : selectedDirectory.value}'
-            //     '/${outputFileName.value}.MP4';
             final outputFilePath =
                 '${state.useSameDirectory ? videoResource.file.parent.path : state.selectedDirectory}'
                 '/${state.outputFileName}.MP4';
-            // final preset = ref.watch(settingsProvider.select((state) =>
-            //     state.transcodingPresets.firstWhere(
-            //         (element) => element.id == transcodePresetIndex.value)));
             final preset = ref.watch(settingsProvider.select((s) => s
                     .value?.transcodingPresets
                     .firstWhere((e) => e.id == state.transcodePresetId))) ??
@@ -446,8 +421,6 @@ class VideoExportDialog extends ConsumerWidget {
                         final result =
                             await FilePicker.platform.getDirectoryPath();
                         if (result != null) {
-                          // selectedDirectory.value = result;
-                          // selectedDirectoryTextController.text = result;
                           controller.setSelectedDirectory(result);
                         }
                       }),
@@ -464,7 +437,6 @@ class VideoExportDialog extends ConsumerWidget {
                       child: TextField(
                         readOnly: true,
                         cursorColor: ColorDark.text1,
-                        // controller: selectedDirectoryTextController,
                         controller: controller.selectedDirectoryController,
                         style: SemiTextStyles.header6ENRegular
                             .copyWith(color: ColorDark.text0),
@@ -489,6 +461,9 @@ class VideoExportDialog extends ConsumerWidget {
                       cursorColor: ColorDark.text1,
                       // controller: outputFileNameTextEditingController,
                       controller: controller.outputFileNameController,
+                      onChanged: (value) {
+                        controller.setOutputFileName(value);
+                      },
                       style: SemiTextStyles.header5ENRegular
                           .copyWith(color: ColorDark.text0),
                       decoration: dialogInputDecoration.copyWith(
@@ -497,7 +472,6 @@ class VideoExportDialog extends ConsumerWidget {
                             style: SemiTextStyles.header5ENRegular
                                 .copyWith(color: ColorDark.text1),
                           ),
-                          // errorText: isOutputPathValid.value
                           errorText: state.isOutputPathValid
                               ? null
                               : 'File already exists',

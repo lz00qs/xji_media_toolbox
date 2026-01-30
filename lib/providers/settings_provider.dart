@@ -14,7 +14,7 @@ import '../service/log_service.dart';
 
 part 'settings_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
   late final ObjectBox _objectBox;
   late final SharedPreferences _prefs;
@@ -44,6 +44,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     if (!defaultTranscodePresetIdValid) {
       defaultTranscodePresetId = transcodingPresets.first.id;
     }
+
+
+
     var luts = _objectBox.lutBox.getAll();
     final sortType = SortType.values[_prefs.getInt(sortTypePrefKey)?? 0];
     final sortAsc = _prefs.getBool(sortOderPrefKey)?? true;

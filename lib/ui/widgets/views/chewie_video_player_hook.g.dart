@@ -65,7 +65,7 @@ final class _ChewieVideoPlayerControllerProvider extends $NotifierProvider<
 }
 
 String _$_chewieVideoPlayerControllerHash() =>
-    r'2b6ba62070bfb14f8b20d88a5378791208a812dc';
+    r'108900b60e4e8870037717917446cc99400219d4';
 
 final class _ChewieVideoPlayerControllerFamily extends $Family
     with
