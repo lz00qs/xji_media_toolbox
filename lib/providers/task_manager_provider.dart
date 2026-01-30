@@ -10,7 +10,7 @@ import '../utils/toast.dart';
 
 part 'task_manager_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TaskManager extends _$TaskManager {
   var _isProcessing = false;
 

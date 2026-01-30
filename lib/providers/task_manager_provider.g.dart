@@ -20,7 +20,7 @@ final class TaskManagerProvider
           argument: null,
           retry: null,
           name: r'taskManagerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -41,7 +41,7 @@ final class TaskManagerProvider
   }
 }
 
-String _$taskManagerHash() => r'56543a53342abb03a3c6310fbb8e63096c1266ed';
+String _$taskManagerHash() => r'e6d58eab4b359cb48573759b79e7f7303063ed4a';
 
 abstract class _$TaskManager extends $Notifier<List<VideoTask>> {
   List<VideoTask> build();
