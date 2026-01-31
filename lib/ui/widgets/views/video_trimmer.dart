@@ -129,14 +129,11 @@ class _VideoTrimmerState {
       stepValueIndex: stepValueIndex ?? this.stepValueIndex,
       minimumStepIndex: minimumStepIndex ?? this.minimumStepIndex,
       lastStepValueIndex: lastStepValueIndex ?? this.lastStepValueIndex,
-      videoResourceWidth:
-      videoResourceWidth ?? this.videoResourceWidth,
+      videoResourceWidth: videoResourceWidth ?? this.videoResourceWidth,
       startPosition: startPosition ?? this.startPosition,
       endPosition: endPosition ?? this.endPosition,
-      actualStartPosition:
-      actualStartPosition ?? this.actualStartPosition,
-      actualEndPosition:
-      actualEndPosition ?? this.actualEndPosition,
+      actualStartPosition: actualStartPosition ?? this.actualStartPosition,
+      actualEndPosition: actualEndPosition ?? this.actualEndPosition,
     );
   }
 }
@@ -151,8 +148,7 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
 
   @override
   _VideoTrimmerState build(NormalVideoResource videoResource) {
-    videoController =
-        VideoPlayerController.file(videoResource.file);
+    videoController = VideoPlayerController.file(videoResource.file);
 
     _init(videoResource);
 
@@ -235,9 +231,7 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
       }
     }
 
-    final width =
-        (duration / _scaleValueList[index] + 1).round() *
-            _stepWidth;
+    final width = (duration / _scaleValueList[index] + 1).round() * _stepWidth;
 
     state = state.copyWith(
       stepValueIndex: index,
@@ -255,49 +249,98 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
 
   void zoomIn() {
     if (state.stepValueIndex > 0) {
-      state = state.copyWith(
-          stepValueIndex: state.stepValueIndex - 1);
+      state = state.copyWith(stepValueIndex: state.stepValueIndex - 1);
       _updateScale();
     }
   }
 
   void zoomOut() {
     if (state.stepValueIndex < state.minimumStepIndex) {
-      state = state.copyWith(
-          stepValueIndex: state.stepValueIndex + 1);
+      state = state.copyWith(stepValueIndex: state.stepValueIndex + 1);
       _updateScale();
     }
   }
 
   void _updateScale() {
-    final videoWidth =
-        (videoController.value.duration.inMicroseconds /
-            _scaleValueList[state.stepValueIndex] +
-            1)
-            .round() *
-            _stepWidth;
-
     state = state.copyWith(
-      videoResourceWidth: videoWidth,
-      lastStepValueIndex: state.stepValueIndex,
+      videoResourceWidth: (videoResource.duration.inMicroseconds /
+                      (_scaleValueList[state.stepValueIndex]) +
+                  1)
+              .round() *
+          _stepWidth,
     );
+    double scrollFactor = 1;
+    // print('stepValueIndex: ${stepValueIndex.value}');
+    if (state.lastStepValueIndex > state.stepValueIndex) {
+      // _zoomIn();
+      final ration = state.stepValueIndex.isOdd ? 5 : 2;
+      for (var i = 0;
+          i < state.lastStepValueIndex - state.stepValueIndex;
+          i++) {
+        state = state.copyWith(
+          actualStartPosition: state.actualStartPosition * ration,
+          startPosition:
+              (state.actualStartPosition * ration).round().toDouble(),
+          actualEndPosition: state.actualEndPosition * ration,
+          endPosition: (state.actualEndPosition * ration).round().toDouble(),
+        );
+      }
+      scrollFactor = (1 * ration).toDouble();
+    } else if (state.lastStepValueIndex < state.stepValueIndex) {
+      // _zoomOut();
+      final ration = state.stepValueIndex.isOdd ? 2 : 5;
+      for (var i = 0;
+          i < state.stepValueIndex - state.lastStepValueIndex;
+          i++) {
+        state = state.copyWith(
+          actualStartPosition: state.actualStartPosition / ration,
+          startPosition:
+              (state.actualStartPosition / ration).round().toDouble(),
+          actualEndPosition: state.actualEndPosition / ration,
+          endPosition: (state.actualEndPosition / ration).round().toDouble(),
+        );
+      }
+      scrollFactor = 1 / ration;
+    }
+    if (state.endPosition - state.startPosition < _thumbBetweenDistance) {
+      // 距离过近，向左或者向右扩展
+      if (state.actualEndPosition + _thumbBetweenDistance <
+          state.videoResourceWidth) {
+        state = state.copyWith(
+          actualEndPosition: state.actualStartPosition + _thumbBetweenDistance,
+          endPosition:
+              (state.actualEndPosition + _thumbBetweenDistance / _stepWidth)
+                      .round() *
+                  _stepWidth,
+        );
+      } else if (state.actualStartPosition - _thumbBetweenDistance > 0) {
+        state = state.copyWith(
+          actualStartPosition: state.actualEndPosition - _thumbBetweenDistance,
+          startPosition:
+              (state.actualStartPosition - _thumbBetweenDistance / _stepWidth)
+                      .round() *
+                  _stepWidth,
+        );
+      }
+    }
+    scrollController.jumpTo(scrollController.position.pixels * scrollFactor);
+    // print(
+    //     'start: ${startPosition.value}, end: ${endPosition.value}, width: $videoResourceWidth');
+    state = state.copyWith(lastStepValueIndex: state.stepValueIndex);
   }
 
   Future<void> dragLeft(double dx) async {
-    final newActual =
-    (state.actualStartPosition + dx).clamp(
+    final newActual = (state.actualStartPosition + dx).clamp(
       0.0,
       state.endPosition - _thumbBetweenDistance,
     );
 
-    final snapped =
-        (newActual / _stepWidth).round() * _stepWidth;
+    final snapped = (newActual / _stepWidth).round() * _stepWidth;
 
     final cut = Duration(
-        microseconds: (snapped /
-            _stepWidth *
-            _scaleValueList[state.stepValueIndex])
-            .round());
+        microseconds:
+            (snapped / _stepWidth * _scaleValueList[state.stepValueIndex])
+                .round());
 
     state = state.copyWith(
       actualStartPosition: newActual,
@@ -310,20 +353,17 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
   }
 
   Future<void> dragRight(double dx) async {
-    final newActual =
-    (state.actualEndPosition + dx).clamp(
+    final newActual = (state.actualEndPosition + dx).clamp(
       state.startPosition + _thumbBetweenDistance,
       state.videoResourceWidth,
     );
 
-    final snapped =
-        (newActual / _stepWidth).round() * _stepWidth;
+    final snapped = (newActual / _stepWidth).round() * _stepWidth;
 
     var cut = Duration(
-        microseconds: (snapped /
-            _stepWidth *
-            _scaleValueList[state.stepValueIndex])
-            .round());
+        microseconds:
+            (snapped / _stepWidth * _scaleValueList[state.stepValueIndex])
+                .round());
 
     if (cut > videoController.value.duration) {
       cut = videoController.value.duration;
@@ -381,18 +421,20 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
     // startPosition.value =
     //     (actualStartPosition.value / _stepWidth).round() * _stepWidth;
     state = state.copyWith(
-      startPosition: (state.actualStartPosition / _stepWidth).round() * _stepWidth,
+      startPosition:
+          (state.actualStartPosition / _stepWidth).round() * _stepWidth,
     );
     // cutStart.value = Duration(
     //     microseconds: (startPosition.value /
     //         _stepWidth *
     //         _scaleValueList[stepValueIndex.value])
     //         .round());
-    state = state.copyWith(cutStart: Duration(
-          microseconds: (state.startPosition /
-              _stepWidth *
-              _scaleValueList[state.stepValueIndex])
-              .round()));
+    state = state.copyWith(
+        cutStart: Duration(
+            microseconds: (state.startPosition /
+                    _stepWidth *
+                    _scaleValueList[state.stepValueIndex])
+                .round()));
     state = state.copyWith(playPosition: state.cutStart);
     await videoController.seekTo(state.cutStart);
     edgeScroll(state.startPosition, details.delta.dx > 0, true);
@@ -400,18 +442,19 @@ class _VideoTrimmerController extends _$VideoTrimmerController {
 
   Future<void> onDragRight(DragUpdateDetails details) async {
     state = state.copyWith(
-      actualEndPosition: (state.actualEndPosition + details.delta.dx)
-          .clamp(state.startPosition + _thumbBetweenDistance,
+      actualEndPosition: (state.actualEndPosition + details.delta.dx).clamp(
+          state.startPosition + _thumbBetweenDistance,
           state.videoResourceWidth),
     );
     state = state.copyWith(
       endPosition: (state.actualEndPosition / _stepWidth).round() * _stepWidth,
     );
-    state = state.copyWith(cutEnd: Duration(
-        microseconds: (state.endPosition /
-            _stepWidth *
-            _scaleValueList[state.stepValueIndex])
-            .round()));
+    state = state.copyWith(
+        cutEnd: Duration(
+            microseconds: (state.endPosition /
+                    _stepWidth *
+                    _scaleValueList[state.stepValueIndex])
+                .round()));
     if (state.cutEnd > videoResource.duration) {
       state = state.copyWith(cutEnd: videoResource.duration);
     }
@@ -474,10 +517,9 @@ class VideoTrimmer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state =
-    ref.watch(_videoTrimmerControllerProvider(videoResource));
-    final controller = ref.read(
-        _videoTrimmerControllerProvider(videoResource).notifier);
+    final state = ref.watch(_videoTrimmerControllerProvider(videoResource));
+    final controller =
+        ref.read(_videoTrimmerControllerProvider(videoResource).notifier);
 
     return Column(
       children: [
@@ -607,7 +649,8 @@ class VideoTrimmer extends ConsumerWidget {
         ),
         LayoutBuilder(builder: (context, constraints) {
           // trimmerWidth = constraints.maxWidth - 2 * DesignValues.smallPadding;
-          controller.setTrimmerWidth(constraints.maxWidth - 2 * DesignValues.smallPadding);
+          controller.setTrimmerWidth(
+              constraints.maxWidth - 2 * DesignValues.smallPadding);
           return MouseRegion(
             child: Listener(
               onPointerSignal: (event) {
