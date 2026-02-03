@@ -1,0 +1,96 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:5162699864130156089",
+      "lastPropertyId": "3:6601187259294871195",
+      "name": "LutEntity",
+      "properties": [
+        {
+          "id": "1:364815542115076735",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1860016567442931836",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:6601187259294871195",
+          "name": "path",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:861634889113588943",
+      "lastPropertyId": "9:1475639453115891263",
+      "name": "TranscodePresetEntity",
+      "properties": [
+        {
+          "id": "1:5302371603178907509",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:100872938759865647",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:7629311416350919528",
+          "name": "useInputResolution",
+          "type": 1
+        },
+        {
+          "id": "4:9088356150905908196",
+          "name": "useHevc",
+          "type": 1
+        },
+        {
+          "id": "5:3080943635677551975",
+          "name": "width",
+          "type": 6
+        },
+        {
+          "id": "6:4477828335932855036",
+          "name": "height",
+          "type": 6
+        },
+        {
+          "id": "7:6840697723068384424",
+          "name": "crf",
+          "type": 6
+        },
+        {
+          "id": "8:5109910272413641115",
+          "name": "ffmpegPreset",
+          "type": 6
+        },
+        {
+          "id": "9:1475639453115891263",
+          "name": "lutId",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:861634889113588943",
+  "lastIndexId": "0:0",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}

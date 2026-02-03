@@ -6,6 +6,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:fvp/fvp.dart' as fvp;
 
+
 // todo:
 // 1. 修正所有不在 build 中的 ref.watch 调用
 // 2. 使用 freezed 生成 state
@@ -40,7 +41,7 @@ Future<void> main() async {
   //
   // final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
-  // await ObjectBox.create();
+  await ObjectBox.create();
 
   runApp(
     ToastificationWrapper(child: ProviderScope(child: MaterialApp(
