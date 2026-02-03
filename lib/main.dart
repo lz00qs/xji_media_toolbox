@@ -5,6 +5,8 @@ import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:fvp/fvp.dart' as fvp;
+import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
+import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
 
 // todo:
@@ -39,14 +41,14 @@ Future<void> main() async {
   //   LogService.isDebug = true;
   // }
   //
-  // final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
+  final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
   await ObjectBox.create();
 
   runApp(
     ToastificationWrapper(child: ProviderScope(child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: MyApp(isFFmpegAvailable: false),
+          home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
         )))
   );
 }
@@ -60,24 +62,25 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // final isLoading =
     //     ref.watch(mediaResourcesProvider.select((state) => state.isLoading));
-    //
-    // return Scaffold(
-    //   endDrawer: const TaskDrawer(),
-    //   body: Center(
-    //     child: Column(
-    //       children: [
-    //         const MainPageAppBar(),
-    //         Expanded(
-    //             // child: ResizablePanel(),)
-    //             child: isFFmpegAvailable
-    //                 ? isLoading
-    //                     ? const LoadingMediaResourcesPage()
-    //                     : MainPage(mainRef: ref)
-    //                 : const FFmpegNotAvailablePage())
-    //       ],
-    //     ),
-    //   ),
-    // );
+
+    return Scaffold(
+      // endDrawer: const TaskDrawer(),
+      body: Center(
+        child: Column(
+          children: [
+            const MainPageAppBar(),
+            Expanded(child: SizedBox())
+            // Expanded(
+            //     // child: ResizablePanel(),)
+            //     child: isFFmpegAvailable
+            //         ? isLoading
+            //             ? const LoadingMediaResourcesPage()
+            //             : MainPage(mainRef: ref)
+            //         : const FFmpegNotAvailablePage())
+          ],
+        ),
+      ),
+    );
     return SizedBox();
   }
 }
