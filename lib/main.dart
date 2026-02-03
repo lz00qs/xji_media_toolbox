@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
@@ -8,6 +7,7 @@ import 'package:fvp/fvp.dart' as fvp;
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
+import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
 
 // todo:
 // 1. 修正所有不在 build 中的 ref.watch 调用
@@ -45,12 +45,17 @@ Future<void> main() async {
 
   await ObjectBox.create();
 
-  runApp(
-    ToastificationWrapper(child: ProviderScope(child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
-        )))
-  );
+  final container = ProviderContainer();
+
+  await container.read(settingsProvider.notifier).initSettings();
+
+  runApp(ToastificationWrapper(
+      child: UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
+          ))));
 }
 
 class MyApp extends ConsumerWidget {
@@ -81,6 +86,5 @@ class MyApp extends ConsumerWidget {
         ),
       ),
     );
-    return SizedBox();
   }
 }
