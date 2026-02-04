@@ -177,15 +177,16 @@ class SettingsDialog extends StatelessWidget {
                     style: SemiTextStyles.header5ENRegular
                         .copyWith(color: ColorDark.text1)),
                 const Spacer(),
-                // Switch(
-                //   value: isDebugMode,
-                //   onChanged: (value) {
-                //     ref.read(settingsProvider.notifier).setIsDebugMode(value);
-                //     // todo: log service
-                //   },
-                //   activeTrackColor: ColorDark.blue5,
-                //   activeThumbColor: ColorDark.white,
-                // )
+                Consumer(builder: (context, ref, child) {
+                  return Switch(
+                    value: ref.watch(settingsProvider).isDebugMode,
+                    onChanged: (value) {
+                      ref.read(settingsProvider.notifier).setIsDebugMode(value);
+                    },
+                    activeTrackColor: ColorDark.blue5,
+                    activeThumbColor: ColorDark.white,
+                  );
+                })
               ],
             ),
             SizedBox(
