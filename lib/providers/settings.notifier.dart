@@ -23,7 +23,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     return Settings();
   }
 
-  Future<void>initSettings()async {
+  Future<void> initSettings() async {
     _objectBox = ObjectBox.instance;
     var transcodingPresets = _objectBox.transcodePresetBox.getAll();
     if (transcodingPresets.isEmpty) {
@@ -50,8 +50,8 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     var luts = _objectBox.lutBox.getAll().map((e) => e.toModel()).toList();
 
-    final sortType = SortType.values[_prefs.getInt(sortTypePrefKey)?? 0];
-    final sortAsc = _prefs.getBool(sortOderPrefKey)?? true;
+    final sortType = SortType.values[_prefs.getInt(sortTypePrefKey) ?? 0];
+    final sortAsc = _prefs.getBool(sortOderPrefKey) ?? true;
     final cpuThreads = Platform.numberOfProcessors;
     final appVersion = await PackageInfo.fromPlatform();
 
@@ -80,16 +80,23 @@ class SettingsNotifier extends _$SettingsNotifier {
     _prefs.setInt(defaultTranscodePresetIndexPrefKey, id);
   }
 
+  void addTranscodePreset(TranscodePreset preset) {
+    _objectBox.transcodePresetBox.put(preset.toEntity());
+    state = state.copyWith(
+      transcodingPresets: [...state.transcodingPresets, preset],
+    );
+  }
+
   void removeTranscodePreset(int id) {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
       Toast.error('Transcode Preset not found');
-      return ;
+      return;
     }
 
     if (state.transcodingPresets.length == 1) {
       Toast.error('Cannot delete the last Transcode Preset');
-      return ;
+      return;
     }
 
     _objectBox.transcodePresetBox.remove(id);
@@ -102,5 +109,14 @@ class SettingsNotifier extends _$SettingsNotifier {
     if (state.defaultTranscodePresetId == id) {
       setDefaultTranscodePreset(state.transcodingPresets.first.id);
     }
+  }
+
+  void updateTranscodePreset(TranscodePreset preset) {
+    _objectBox.transcodePresetBox.put(preset.toEntity());
+    state = state.copyWith(
+      transcodingPresets: state.transcodingPresets
+          .map((p) => p.id == preset.id ? preset : p)
+          .toList(),
+    );
   }
 }

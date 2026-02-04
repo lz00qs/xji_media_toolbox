@@ -3,12 +3,12 @@ import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 import '../buttons/custom_icon_button.dart';
 
-class CustomDialogCheckBoxWithText extends StatelessWidget {
+class DialogCheckBoxWithText extends StatelessWidget {
   final String text;
   final bool value;
   final VoidCallback onPressed;
 
-  const CustomDialogCheckBoxWithText(
+  const DialogCheckBoxWithText(
       {super.key,
         required this.text,
         required this.value,
