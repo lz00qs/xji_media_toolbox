@@ -197,9 +197,11 @@ class SettingsDialog extends StatelessWidget {
                     style: SemiTextStyles.header5ENRegular
                         .copyWith(color: ColorDark.text1)),
                 const Spacer(),
-                // Text(appVersion,
-                //     style: SemiTextStyles.header5ENRegular
-                //         .copyWith(color: ColorDark.text0)),
+                Consumer(builder: (context, ref, child) {
+                  return Text(ref.watch(settingsProvider).appVersion,
+                      style: SemiTextStyles.header5ENRegular
+                          .copyWith(color: ColorDark.text0));
+                }),
               ],
             ),
             SizedBox(
