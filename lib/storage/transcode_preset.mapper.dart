@@ -3,6 +3,7 @@ import 'transcode_preset.entity.dart';
 
 extension TranscodePresetMapper on TranscodePresetEntity {
   TranscodePreset toModel() => TranscodePreset(
+        id: id,
         name: name,
         useInputResolution: useInputResolution,
         useHevc: useHevc,
@@ -16,6 +17,7 @@ extension TranscodePresetMapper on TranscodePresetEntity {
 
 extension TranscodePresetEntityMapper on TranscodePreset {
   TranscodePresetEntity toEntity() => TranscodePresetEntity(
+        id: id,
         name: name,
         useInputResolution: useInputResolution,
         useHevc: useHevc,

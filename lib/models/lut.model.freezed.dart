@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$Lut {
+  int get id;
   String get name;
   String get path;
 
@@ -29,16 +30,17 @@ mixin _$Lut {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Lut &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.path, path) || other.path == path));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, path);
+  int get hashCode => Object.hash(runtimeType, id, name, path);
 
   @override
   String toString() {
-    return 'Lut(name: $name, path: $path)';
+    return 'Lut(id: $id, name: $name, path: $path)';
   }
 }
 
@@ -46,7 +48,7 @@ mixin _$Lut {
 abstract mixin class $LutCopyWith<$Res> {
   factory $LutCopyWith(Lut value, $Res Function(Lut) _then) = _$LutCopyWithImpl;
   @useResult
-  $Res call({String name, String path});
+  $Res call({int id, String name, String path});
 }
 
 /// @nodoc
@@ -61,10 +63,15 @@ class _$LutCopyWithImpl<$Res> implements $LutCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? path = null,
   }) {
     return _then(_self.copyWith(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -170,13 +177,13 @@ extension LutPatterns on Lut {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String name, String path)? $default, {
+    TResult Function(int id, String name, String path)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _Lut() when $default != null:
-        return $default(_that.name, _that.path);
+        return $default(_that.id, _that.name, _that.path);
       case _:
         return orElse();
     }
@@ -197,12 +204,12 @@ extension LutPatterns on Lut {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String name, String path) $default,
+    TResult Function(int id, String name, String path) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Lut():
-        return $default(_that.name, _that.path);
+        return $default(_that.id, _that.name, _that.path);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -222,12 +229,12 @@ extension LutPatterns on Lut {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String name, String path)? $default,
+    TResult? Function(int id, String name, String path)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _Lut() when $default != null:
-        return $default(_that.name, _that.path);
+        return $default(_that.id, _that.name, _that.path);
       case _:
         return null;
     }
@@ -237,8 +244,11 @@ extension LutPatterns on Lut {
 /// @nodoc
 
 class _Lut implements Lut {
-  const _Lut({this.name = 'Default', this.path = ''});
+  const _Lut({this.id = 0, this.name = 'Default', this.path = ''});
 
+  @override
+  @JsonKey()
+  final int id;
   @override
   @JsonKey()
   final String name;
@@ -259,16 +269,17 @@ class _Lut implements Lut {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _Lut &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.path, path) || other.path == path));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, path);
+  int get hashCode => Object.hash(runtimeType, id, name, path);
 
   @override
   String toString() {
-    return 'Lut(name: $name, path: $path)';
+    return 'Lut(id: $id, name: $name, path: $path)';
   }
 }
 
@@ -278,7 +289,7 @@ abstract mixin class _$LutCopyWith<$Res> implements $LutCopyWith<$Res> {
       __$LutCopyWithImpl;
   @override
   @useResult
-  $Res call({String name, String path});
+  $Res call({int id, String name, String path});
 }
 
 /// @nodoc
@@ -293,10 +304,15 @@ class __$LutCopyWithImpl<$Res> implements _$LutCopyWith<$Res> {
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? path = null,
   }) {
     return _then(_Lut(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable

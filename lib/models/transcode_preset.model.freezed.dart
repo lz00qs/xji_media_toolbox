@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$TranscodePreset {
+  int get id;
   String get name;
   bool get useInputResolution;
   bool get useHevc;
@@ -36,6 +37,7 @@ mixin _$TranscodePreset {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is TranscodePreset &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.useInputResolution, useInputResolution) ||
                 other.useInputResolution == useInputResolution) &&
@@ -49,12 +51,12 @@ mixin _$TranscodePreset {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, useInputResolution,
+  int get hashCode => Object.hash(runtimeType, id, name, useInputResolution,
       useHevc, width, height, crf, ffmpegPreset, lutId);
 
   @override
   String toString() {
-    return 'TranscodePreset(name: $name, useInputResolution: $useInputResolution, useHevc: $useHevc, width: $width, height: $height, crf: $crf, ffmpegPreset: $ffmpegPreset, lutId: $lutId)';
+    return 'TranscodePreset(id: $id, name: $name, useInputResolution: $useInputResolution, useHevc: $useHevc, width: $width, height: $height, crf: $crf, ffmpegPreset: $ffmpegPreset, lutId: $lutId)';
   }
 }
 
@@ -65,7 +67,8 @@ abstract mixin class $TranscodePresetCopyWith<$Res> {
       _$TranscodePresetCopyWithImpl;
   @useResult
   $Res call(
-      {String name,
+      {int id,
+      String name,
       bool useInputResolution,
       bool useHevc,
       int width,
@@ -88,6 +91,7 @@ class _$TranscodePresetCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? useInputResolution = null,
     Object? useHevc = null,
@@ -98,6 +102,10 @@ class _$TranscodePresetCopyWithImpl<$Res>
     Object? lutId = null,
   }) {
     return _then(_self.copyWith(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable
@@ -228,6 +236,7 @@ extension TranscodePresetPatterns on TranscodePreset {
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
     TResult Function(
+            int id,
             String name,
             bool useInputResolution,
             bool useHevc,
@@ -243,6 +252,7 @@ extension TranscodePresetPatterns on TranscodePreset {
     switch (_that) {
       case _TranscodePreset() when $default != null:
         return $default(
+            _that.id,
             _that.name,
             _that.useInputResolution,
             _that.useHevc,
@@ -272,6 +282,7 @@ extension TranscodePresetPatterns on TranscodePreset {
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
     TResult Function(
+            int id,
             String name,
             bool useInputResolution,
             bool useHevc,
@@ -286,6 +297,7 @@ extension TranscodePresetPatterns on TranscodePreset {
     switch (_that) {
       case _TranscodePreset():
         return $default(
+            _that.id,
             _that.name,
             _that.useInputResolution,
             _that.useHevc,
@@ -314,6 +326,7 @@ extension TranscodePresetPatterns on TranscodePreset {
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
     TResult? Function(
+            int id,
             String name,
             bool useInputResolution,
             bool useHevc,
@@ -328,6 +341,7 @@ extension TranscodePresetPatterns on TranscodePreset {
     switch (_that) {
       case _TranscodePreset() when $default != null:
         return $default(
+            _that.id,
             _that.name,
             _that.useInputResolution,
             _that.useHevc,
@@ -346,7 +360,8 @@ extension TranscodePresetPatterns on TranscodePreset {
 
 class _TranscodePreset implements TranscodePreset {
   const _TranscodePreset(
-      {this.name = 'Custom',
+      {this.id = 0,
+      this.name = 'Custom',
       this.useInputResolution = true,
       this.useHevc = true,
       this.width = 3840,
@@ -355,6 +370,9 @@ class _TranscodePreset implements TranscodePreset {
       this.ffmpegPreset = FFmpegPreset.medium,
       this.lutId = 0});
 
+  @override
+  @JsonKey()
+  final int id;
   @override
   @JsonKey()
   final String name;
@@ -393,6 +411,7 @@ class _TranscodePreset implements TranscodePreset {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _TranscodePreset &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.useInputResolution, useInputResolution) ||
                 other.useInputResolution == useInputResolution) &&
@@ -406,12 +425,12 @@ class _TranscodePreset implements TranscodePreset {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, useInputResolution,
+  int get hashCode => Object.hash(runtimeType, id, name, useInputResolution,
       useHevc, width, height, crf, ffmpegPreset, lutId);
 
   @override
   String toString() {
-    return 'TranscodePreset(name: $name, useInputResolution: $useInputResolution, useHevc: $useHevc, width: $width, height: $height, crf: $crf, ffmpegPreset: $ffmpegPreset, lutId: $lutId)';
+    return 'TranscodePreset(id: $id, name: $name, useInputResolution: $useInputResolution, useHevc: $useHevc, width: $width, height: $height, crf: $crf, ffmpegPreset: $ffmpegPreset, lutId: $lutId)';
   }
 }
 
@@ -424,7 +443,8 @@ abstract mixin class _$TranscodePresetCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String name,
+      {int id,
+      String name,
       bool useInputResolution,
       bool useHevc,
       int width,
@@ -447,6 +467,7 @@ class __$TranscodePresetCopyWithImpl<$Res>
   @override
   @pragma('vm:prefer-inline')
   $Res call({
+    Object? id = null,
     Object? name = null,
     Object? useInputResolution = null,
     Object? useHevc = null,
@@ -457,6 +478,10 @@ class __$TranscodePresetCopyWithImpl<$Res>
     Object? lutId = null,
   }) {
     return _then(_TranscodePreset(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as int,
       name: null == name
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable

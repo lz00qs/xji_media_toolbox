@@ -9,9 +9,8 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
-// import '../../utils/media_resources_utils.dart';
 import 'buttons/custom_icon_button.dart';
-// import 'dialogs/settings_dialog.dart';
+import 'dialogs/settings_dialog.dart';
 
 part 'main_page_app_bar.g.dart';
 
@@ -59,7 +58,7 @@ class _WinBarActionButton extends StatelessWidget {
       focusColor: ColorDark.defaultActive,
       style: ButtonStyle(
         minimumSize:
-        WidgetStateProperty.all<Size>(const Size(_buttonSize, _buttonSize)),
+            WidgetStateProperty.all<Size>(const Size(_buttonSize, _buttonSize)),
         padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
             const EdgeInsets.all(0)),
       ),
@@ -100,9 +99,11 @@ class _MacMainPageAppBar extends ConsumerWidget {
                   return;
                 }
                 onPressed = true;
-                // await showDialog(context: context, builder: (BuildContext context) {
-                //   return const SettingsDialog();
-                // });
+                await showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const SettingsDialog();
+                    });
                 onPressed = false;
               }),
           const Spacer(),
@@ -187,16 +188,16 @@ class _WinMainPageAppBar extends ConsumerWidget {
             width: DesignValues.mediumPadding,
           ),
           _WinBarActionButton(
-              icon: isMaximizedState
-                  ? Mdi.window_restore
-                  : Mdi.window_maximize,
+              icon: isMaximizedState ? Mdi.window_restore : Mdi.window_maximize,
               onPressed: () {
                 if (isMaximizedState) {
                   WindowManager.instance.restore();
                 } else {
                   WindowManager.instance.maximize();
                 }
-                ref.read(_isMaximizedStateProvider.notifier).setState(!isMaximizedState);
+                ref
+                    .read(_isMaximizedStateProvider.notifier)
+                    .setState(!isMaximizedState);
               }),
           SizedBox(
             width: DesignValues.mediumPadding,
@@ -222,8 +223,8 @@ class MainPageAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DragToMoveArea(
         child: Container(
-          color: ColorDark.bg4,
-          child: Platform.isMacOS ? _MacMainPageAppBar() : _WinMainPageAppBar(),
-        ));
+      color: ColorDark.bg4,
+      child: Platform.isMacOS ? _MacMainPageAppBar() : _WinMainPageAppBar(),
+    ));
   }
 }

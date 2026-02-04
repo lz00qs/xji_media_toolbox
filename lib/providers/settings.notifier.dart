@@ -4,6 +4,7 @@ import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xji_footage_toolbox/storage/transcode_preset.mapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
 import '../models/settings.model.dart';
@@ -63,5 +64,43 @@ class SettingsNotifier extends _$SettingsNotifier {
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
     );
+  }
+
+  bool _transcodePresetExists(int id) {
+    return state.transcodingPresets.any((preset) => preset.id == id);
+  }
+
+  void setDefaultTranscodePreset(int id) {
+    // 检查 id 是否存在
+    if (!_transcodePresetExists(id)) {
+      Toast.error('Transcode Preset not found');
+      return;
+    }
+    state = state.copyWith(defaultTranscodePresetId: id);
+    _prefs.setInt(defaultTranscodePresetIndexPrefKey, id);
+  }
+
+  void removeTranscodePreset(int id) {
+    // 检查 id 是否存在
+    if (!_transcodePresetExists(id)) {
+      Toast.error('Transcode Preset not found');
+      return ;
+    }
+
+    if (state.transcodingPresets.length == 1) {
+      Toast.error('Cannot delete the last Transcode Preset');
+      return ;
+    }
+
+    _objectBox.transcodePresetBox.remove(id);
+    state = state.copyWith(
+      transcodingPresets: state.transcodingPresets
+          .where((element) => element.id != id)
+          .toList(),
+    );
+
+    if (state.defaultTranscodePresetId == id) {
+      setDefaultTranscodePreset(state.transcodingPresets.first.id);
+    }
   }
 }

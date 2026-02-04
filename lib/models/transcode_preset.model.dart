@@ -17,6 +17,7 @@ enum FFmpegPreset {
 @freezed
 abstract class TranscodePreset with _$TranscodePreset {
   const factory TranscodePreset({
+    @Default(0) int id,
     @Default('Custom') String name,
     @Default(true) bool useInputResolution,
     @Default(true) bool useHevc,
