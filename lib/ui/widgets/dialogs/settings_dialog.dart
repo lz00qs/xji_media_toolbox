@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -113,58 +114,60 @@ class SettingsDialog extends StatelessWidget {
                 SizedBox(
                   width: DesignValues.smallPadding,
                 ),
-                CustomIconButton(
-                    iconData: Icons.add_circle_outline,
-                    onPressed: () async {
-                      // final oLut = await showDialog(
-                      //     context: context,
-                      //     builder: (context) {
-                      //       return _EditLutDialog(lut: null);
-                      //     });
-                      // if (oLut != null) {
-                      //   ref.read(settingsProvider.notifier).addLut(oLut);
-                      // }
-                    },
-                    iconSize: DesignValues.mediumIconSize,
-                    buttonSize: 28,
-                    hoverColor: ColorDark.defaultHover,
-                    focusColor: ColorDark.defaultActive,
-                    iconColor: ColorDark.text0),
+                Consumer(builder: (context, ref, child) {
+                  return CustomIconButton(
+                      iconData: Icons.add_circle_outline,
+                      onPressed: () async {
+                        final result = await showDialog(
+                            context: context,
+                            builder: (context) {
+                              return _EditLutDialog(lut: Lut());
+                            });
+                        if (result != null) {
+                          ref.read(settingsProvider.notifier).addLut(result);
+                        }
+                      },
+                      iconSize: DesignValues.mediumIconSize,
+                      buttonSize: 28,
+                      hoverColor: ColorDark.defaultHover,
+                      focusColor: ColorDark.defaultActive,
+                      iconColor: ColorDark.text0);
+                }),
               ],
             ),
             SizedBox(
               height: DesignValues.ultraSmallPadding,
             ),
-            // ClipRRect(
-            //   borderRadius:
-            //   BorderRadius.circular(DesignValues.smallBorderRadius),
-            //   child: Container(
-            //     color: ColorDark.bg3,
-            //     height: 120,
-            //     child: Padding(
-            //       padding: EdgeInsets.only(
-            //           top: DesignValues.ultraSmallPadding,
-            //           bottom: DesignValues.ultraSmallPadding,
-            //           left: DesignValues.ultraSmallPadding),
-            //       child: RawScrollbar(
-            //         thickness: DesignValues.smallPadding,
-            //         trackVisibility: false,
-            //         thumbVisibility: true,
-            //         radius: Radius.circular(DesignValues.smallBorderRadius),
-            //         controller: lutScrollController,
-            //         child: Consumer(builder: (context, ref, child) {
-            //           return ListView.builder(
-            //               controller: lutScrollController,
-            //               itemCount: luts.length,
-            //               // itemCount: 1,
-            //               itemBuilder: (context, index) {
-            //                 return _LutItem(lut: luts[index]);
-            //               });
-            //         }),
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            ClipRRect(
+              borderRadius:
+                  BorderRadius.circular(DesignValues.smallBorderRadius),
+              child: Container(
+                color: ColorDark.bg3,
+                height: 120,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: DesignValues.ultraSmallPadding,
+                      bottom: DesignValues.ultraSmallPadding,
+                      left: DesignValues.ultraSmallPadding),
+                  child: RawScrollbar(
+                    thickness: DesignValues.smallPadding,
+                    trackVisibility: false,
+                    thumbVisibility: true,
+                    radius: Radius.circular(DesignValues.smallBorderRadius),
+                    controller: lutScrollController,
+                    child: Consumer(builder: (context, ref, child) {
+                      final luts = ref.watch(settingsProvider).luts;
+                      return ListView.builder(
+                          controller: lutScrollController,
+                          itemCount: luts.length,
+                          itemBuilder: (context, index) {
+                            return _LutItem(lut: luts[index]);
+                          });
+                    }),
+                  ),
+                ),
+              ),
+            ),
             SizedBox(
               height: DesignValues.largePadding,
             ),
@@ -314,95 +317,98 @@ class _PresetItem extends ConsumerWidget {
   }
 }
 
-//
-// class _LutItem extends ConsumerWidget {
-//   final Lut lut;
-//
-//   const _LutItem({required this.lut});
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     // final isDefaultLut = ref.watch(settingsProvider
-//     //     .select((value) => value.defaultLutId == lut.id));
-//     return SizedBox(
-//       height: 37,
-//       child: Row(
-//         children: [
-//           Expanded(
-//               child: Column(
-//                 children: [
-//                   Expanded(
-//                       child: Row(
-//                         mainAxisAlignment: MainAxisAlignment.start,
-//                         children: [
-//                           SizedBox(
-//                             width: DesignValues.smallPadding,
-//                           ),
-//                           Expanded(
-//                               child: Text(lut.name,
-//                                   style: SemiTextStyles.header5ENRegular.copyWith(
-//                                       color: ColorDark.text0,
-//                                       overflow: TextOverflow.ellipsis))),
-//                           _ItemButton(
-//                               iconData: Icons.edit,
-//                               onPressed: () async {
-//                                 final oLut = await showDialog(
-//                                     context: context,
-//                                     builder: (context) {
-//                                       return _EditLutDialog(lut: lut);
-//                                     });
-//                                 if (oLut != null) {
-//                                   ref.read(settingsProvider.notifier).updateLut(oLut);
-//                                 }
-//                               }),
-//                           SizedBox(
-//                             width: DesignValues.mediumPadding,
-//                           ),
-//                           _ItemButton(
-//                               iconData: Icons.delete,
-//                               onPressed: () async {
-//                                 await showDialog(
-//                                     context: context,
-//                                     builder: (BuildContext context) {
-//                                       return CustomDualOptionDialog(
-//                                           width: 400,
-//                                           height: 240,
-//                                           title: 'Delete',
-//                                           option1: 'Delete',
-//                                           option2: 'Cancel',
-//                                           onOption1Pressed: () {
-//                                             ref
-//                                                 .read(settingsProvider.notifier)
-//                                                 .removeLut(lut.id);
-//                                             Navigator.of(context).pop();
-//                                           },
-//                                           onOption2Pressed: () {
-//                                             Navigator.of(context).pop();
-//                                           },
-//                                           child: Text(
-//                                               'Are you sure you want to delete this lut?',
-//                                               style: SemiTextStyles.header5ENRegular
-//                                                   .copyWith(color: ColorDark.text0)));
-//                                     });
-//                               }),
-//                         ],
-//                       )),
-//                   const Divider(
-//                     color: ColorDark.border,
-//                     thickness: 1,
-//                     height: 1,
-//                   ),
-//                 ],
-//               )),
-//           SizedBox(
-//             width: DesignValues.smallPadding,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
-//
+class _LutItem extends StatelessWidget {
+  final Lut lut;
+
+  const _LutItem({required this.lut});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 37,
+      child: Row(
+        children: [
+          Expanded(
+              child: Column(
+            children: [
+              Expanded(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: DesignValues.smallPadding,
+                  ),
+                  Expanded(
+                      child: Text(lut.name,
+                          style: SemiTextStyles.header5ENRegular.copyWith(
+                              color: ColorDark.text0,
+                              overflow: TextOverflow.ellipsis))),
+                  Consumer(builder: (context, ref, child) {
+                    return _ItemButton(
+                        iconData: Icons.edit,
+                        onPressed: () async {
+                          final result = await showDialog(
+                              context: context,
+                              builder: (context) {
+                                return _EditLutDialog(lut: lut);
+                              });
+                          if (result != null) {
+                            ref
+                                .read(settingsProvider.notifier)
+                                .updateLut(result);
+                          }
+                        });
+                  }),
+                  SizedBox(
+                    width: DesignValues.mediumPadding,
+                  ),
+                  _ItemButton(
+                      iconData: Icons.delete,
+                      onPressed: () async {
+                        await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Consumer(builder: (context, ref, child) {
+                                return DualOptionDialog(
+                                    width: 400,
+                                    height: 240,
+                                    title: 'Delete',
+                                    option1: 'Delete',
+                                    option2: 'Cancel',
+                                    onOption1Pressed: () {
+                                      ref
+                                          .read(settingsProvider.notifier)
+                                          .removeLut(lut.id);
+                                      Navigator.of(context).pop();
+                                    },
+                                    onOption2Pressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text(
+                                        'Are you sure you want to delete this lut?',
+                                        style: SemiTextStyles.header5ENRegular
+                                            .copyWith(color: ColorDark.text0)));
+                              });
+                            });
+                      }),
+                ],
+              )),
+              const Divider(
+                color: ColorDark.border,
+                thickness: 1,
+                height: 1,
+              ),
+            ],
+          )),
+          SizedBox(
+            width: DesignValues.smallPadding,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ItemButton extends StatelessWidget {
   final IconData iconData;
   final VoidCallback onPressed;
@@ -421,187 +427,138 @@ class _ItemButton extends StatelessWidget {
         iconColor: ColorDark.text0);
   }
 }
-//
-// class _EditLutState {
-//   final String name;
-//   final String path;
-//
-//   const _EditLutState({
-//     required this.name,
-//     required this.path,
-//   });
-//
-//   bool get isNameValid => name.isNotEmpty;
-//
-//   _EditLutState copyWith({
-//     String? name,
-//     String? path,
-//   }) {
-//     return _EditLutState(
-//       name: name ?? this.name,
-//       path: path ?? this.path,
-//     );
-//   }
-// }
-//
-// @riverpod
-// class _EditLutController extends _$EditLutController {
-//   late final TextEditingController nameController;
-//   late final ScrollController pathScrollController;
-//
-//   late final Lut _lut;
-//
-//   @override
-//   _EditLutState build(Lut? lut) {
-//     if (lut == null) {
-//       _lut = Lut();
-//     } else {
-//       _lut = Lut()
-//         ..id = lut.id
-//         ..name = lut.name
-//         ..path = lut.path;
-//     }
-//
-//     nameController = TextEditingController(text: _lut.name);
-//     pathScrollController = ScrollController();
-//
-//     void nameListener() {
-//       final text = nameController.text;
-//       if (text != state.name) {
-//         _lut.name = text;
-//         state = state.copyWith(name: text);
-//       }
-//     }
-//
-//     nameController.addListener(nameListener);
-//
-//     ref.onDispose(() {
-//       nameController.removeListener(nameListener);
-//       nameController.dispose();
-//       pathScrollController.dispose();
-//     });
-//
-//     return _EditLutState(
-//       name: _lut.name,
-//       path: _lut.path,
-//     );
-//   }
-//
-//   /// 选择 lut 文件（仅新建时使用）
-//   Future<void> pickLutFile() async {
-//     final result = await FilePicker.platform.pickFiles(
-//       type: FileType.custom,
-//       allowedExtensions: ['cube'],
-//     );
-//     if (result == null) return;
-//
-//     final path = result.files.single.path!;
-//     var name = path.split('/').last;
-//     name = name.substring(0, name.length - 5);
-//     if (name.length > 24) {
-//       name = name.substring(0, 24);
-//     }
-//
-//     _lut
-//       ..path = path
-//       ..name = name;
-//
-//     nameController.text = name;
-//
-//     state = state.copyWith(
-//       name: name,
-//       path: path,
-//     );
-//   }
-//
-//   Lut get result => _lut;
-// }
-//
-// class _EditLutDialog extends ConsumerWidget {
-//   final Lut? lut;
-//
-//   const _EditLutDialog({required this.lut});
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     final state = ref.watch(_editLutControllerProvider(lut));
-//     final controller = ref.read(_editLutControllerProvider(lut).notifier);
-//
-//     return CustomDualOptionDialog(
-//       width: 480,
-//       height: 320,
-//       title: lut == null ? 'Add Lut' : 'Edit Lut',
-//       option1: 'Cancel',
-//       option2: lut == null ? 'Add' : 'Save',
-//       disableOption2: !state.isNameValid,
-//       onOption1Pressed: () {
-//         Navigator.of(context).pop();
-//       },
-//       onOption2Pressed: () {
-//         Navigator.of(context).pop(controller.result);
-//       },
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Text(
-//             'Lut name',
-//             style: SemiTextStyles.header5ENRegular
-//                 .copyWith(color: ColorDark.text1),
-//           ),
-//           SizedBox(
-//             height: 72,
-//             child: Theme(
-//               data: Theme.of(context).copyWith(
-//                 textSelectionTheme: TextSelectionThemeData(
-//                   selectionColor:
-//                   ColorDark.blue5.withAlpha((0.8 * 255).round()),
-//                 ),
-//               ),
-//               child: TextField(
-//                 maxLength: 24,
-//                 controller: controller.nameController,
-//                 cursorColor: ColorDark.text1,
-//                 style: SemiTextStyles.header5ENRegular
-//                     .copyWith(color: ColorDark.text0),
-//                 decoration: dialogInputDecoration.copyWith(
-//                   errorText: state.isNameValid ? null : 'Name is required',
-//                 ),
-//               ),
-//             ),
-//           ),
-//           if (lut == null) ...[
-//             Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 Text(
-//                   'Select lut file',
-//                   style: SemiTextStyles.header5ENRegular
-//                       .copyWith(color: ColorDark.text1),
-//                 ),
-//                 _ItemButton(
-//                   iconData: Icons.folder_open,
-//                   onPressed: controller.pickLutFile,
-//                 ),
-//               ],
-//             ),
-//             Scrollbar(
-//               controller: controller.pathScrollController,
-//               child: SingleChildScrollView(
-//                 controller: controller.pathScrollController,
-//                 scrollDirection: Axis.horizontal,
-//                 child: Text(
-//                   state.path.split('/').last,
-//                   style: SemiTextStyles.header5ENRegular
-//                       .copyWith(color: ColorDark.text0),
-//                 ),
-//               ),
-//             ),
-//           ],
-//         ],
-//       ),
-//     );
-//   }
-// }
+
+@riverpod
+class _EditLutDialogNotifier extends _$EditLutDialogNotifier {
+  final ScrollController pathScrollController = ScrollController();
+  late final TextEditingController nameController;
+
+  @override
+  Lut build(Lut lut) {
+    nameController = TextEditingController(text: lut.name);
+    nameController.addListener(() {
+      final v = nameController.text;
+      state = state.copyWith(name: v);
+    });
+    return Lut(id: lut.id, name: lut.name, path: lut.path);
+  }
+
+  Future<void> pickLutFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['cube'],
+    );
+    if (result == null) return;
+
+    final path = result.files.single.path!;
+    var name = path.split('/').last;
+    name = name.substring(0, name.length - 5);
+    if (name.length > 24) {
+      name = name.substring(0, 24);
+    }
+
+    if (state.name.isEmpty) {
+      state = state.copyWith(
+        name: name,
+        path: path,
+      );
+    } else {
+      state = state.copyWith(
+        path: path,
+      );
+    }
+  }
+
+  bool get isNameValid => state.name.isNotEmpty;
+
+  bool get isPathValid => state.path.isNotEmpty;
+}
+
+class _EditLutDialog extends ConsumerWidget {
+  final Lut lut;
+
+  const _EditLutDialog({required this.lut});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final item = ref.watch(_editLutDialogProvider(lut));
+    final notifier = ref.read(_editLutDialogProvider(lut).notifier);
+    final isAdd = lut.id == 0;
+    return DualOptionDialog(
+      width: 480,
+      height: 320,
+      title: isAdd ? 'Add Lut' : 'Edit Lut',
+      option1: 'Cancel',
+      option2: isAdd ? 'Add' : 'Save',
+      disableOption2: !notifier.isNameValid || !notifier.isPathValid,
+      onOption1Pressed: () {
+        Navigator.of(context).pop();
+      },
+      onOption2Pressed: () {
+        Navigator.of(context).pop(item);
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Lut name',
+            style: SemiTextStyles.header5ENRegular
+                .copyWith(color: ColorDark.text1),
+          ),
+          SizedBox(
+            height: 72,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor:
+                      ColorDark.blue5.withAlpha((0.8 * 255).round()),
+                ),
+              ),
+              child: TextField(
+                maxLength: 24,
+                controller: notifier.nameController,
+                cursorColor: ColorDark.text1,
+                style: SemiTextStyles.header5ENRegular
+                    .copyWith(color: ColorDark.text0),
+                decoration: dialogInputDecoration.copyWith(
+                  errorText: notifier.isNameValid ? null : 'Name is required',
+                ),
+              ),
+            ),
+          ),
+          if (isAdd) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select lut file',
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text1),
+                ),
+                _ItemButton(
+                  iconData: Icons.folder_open,
+                  onPressed: notifier.pickLutFile,
+                ),
+              ],
+            ),
+            Scrollbar(
+              controller: notifier.pathScrollController,
+              child: SingleChildScrollView(
+                controller: notifier.pathScrollController,
+                scrollDirection: Axis.horizontal,
+                child: Text(
+                  item.path.split('/').last,
+                  style: SemiTextStyles.header5ENRegular
+                      .copyWith(color: ColorDark.text0),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 @riverpod
 class _EditTranscodePresetDialogNotifier
