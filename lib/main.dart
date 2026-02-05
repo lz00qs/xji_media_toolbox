@@ -6,6 +6,7 @@ import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
+import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
@@ -75,7 +76,12 @@ class MyApp extends ConsumerWidget {
         child: Column(
           children: [
             const MainPageAppBar(),
-            Expanded(child: const FFmpegNotAvailablePage())
+            // Expanded(child: const FFmpegNotAvailablePage())
+            Expanded(
+                child: ResizablePanel(
+                    mediaResourcesListPanel: SizedBox(),
+                    mediaResourceInfoPanel: SizedBox(),
+                    mainPanel: SizedBox()))
             // Expanded(
             //     // child: ResizablePanel(),)
             //     child: isFFmpegAvailable
