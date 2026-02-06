@@ -42,7 +42,7 @@ final class _ResizablePanelNotifierProvider
 }
 
 String _$_resizablePanelNotifierHash() =>
-    r'36e61ed024fd3ff7d87219f7b1d15c7119fe2443';
+    r'459b47aaf0926eb5ef5050821e75b4643dc1f486';
 
 abstract class _$ResizablePanelNotifier extends $Notifier<ResizablePanelState> {
   ResizablePanelState build();
