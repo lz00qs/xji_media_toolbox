@@ -146,21 +146,32 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
   void setAebIndex(int index) {
     if (state.resources[state.currentIndex] is AebPhotoResource) {
-      if (index < (state.resources[state.currentIndex] as AebPhotoResource).aebResources.length) {
+      if (index <
+          (state.resources[state.currentIndex] as AebPhotoResource)
+              .aebResources
+              .length) {
         state = state.copyWith(aebIndex: index);
       }
     }
   }
 
   void increaseCurrentAebIndex() {
-    if (state.aebIndex < (state.resources[state.currentIndex] as AebPhotoResource).aebResources.length - 1) {
-      setAebIndex(state.aebIndex + 1);
+    if (state.resources[state.currentIndex] is AebPhotoResource) {
+      if (state.aebIndex <
+          (state.resources[state.currentIndex] as AebPhotoResource)
+                  .aebResources
+                  .length -
+              1) {
+        setAebIndex(state.aebIndex + 1);
+      }
     }
   }
 
   void decreaseCurrentAebIndex() {
-    if (state.aebIndex > 0) {
-      setAebIndex(state.aebIndex - 1);
+    if (state.resources[state.currentIndex] is AebPhotoResource) {
+      if (state.aebIndex > 0) {
+        setAebIndex(state.aebIndex - 1);
+      }
     }
   }
 
