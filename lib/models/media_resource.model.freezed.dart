@@ -21,8 +21,11 @@ mixin _$MediaResource {
   int get sizeInBytes;
   DateTime get creationTime;
   int get sequence;
-  String get thumbFile;
+  File get thumbFile;
   bool get hide;
+
+  /// 错误信息
+  Map<int, List<String>> get errors;
 
   /// Create a copy of MediaResource
   /// with the given fields replaced by the non-null parameter values.
@@ -49,16 +52,27 @@ mixin _$MediaResource {
                 other.sequence == sequence) &&
             (identical(other.thumbFile, thumbFile) ||
                 other.thumbFile == thumbFile) &&
-            (identical(other.hide, hide) || other.hide == hide));
+            (identical(other.hide, hide) || other.hide == hide) &&
+            const DeepCollectionEquality().equals(other.errors, errors));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, file, width, height,
-      sizeInBytes, creationTime, sequence, thumbFile, hide);
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      file,
+      width,
+      height,
+      sizeInBytes,
+      creationTime,
+      sequence,
+      thumbFile,
+      hide,
+      const DeepCollectionEquality().hash(errors));
 
   @override
   String toString() {
-    return 'MediaResource(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide)';
+    return 'MediaResource(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors)';
   }
 }
 
@@ -76,8 +90,9 @@ abstract mixin class $MediaResourceCopyWith<$Res> {
       int sizeInBytes,
       DateTime creationTime,
       int sequence,
-      String thumbFile,
-      bool hide});
+      File thumbFile,
+      bool hide,
+      Map<int, List<String>> errors});
 }
 
 /// @nodoc
@@ -102,6 +117,7 @@ class _$MediaResourceCopyWithImpl<$Res>
     Object? sequence = null,
     Object? thumbFile = null,
     Object? hide = null,
+    Object? errors = null,
   }) {
     return _then(_self.copyWith(
       name: null == name
@@ -135,11 +151,15 @@ class _$MediaResourceCopyWithImpl<$Res>
       thumbFile: null == thumbFile
           ? _self.thumbFile
           : thumbFile // ignore: cast_nullable_to_non_nullable
-              as String,
+              as File,
       hide: null == hide
           ? _self.hide
           : hide // ignore: cast_nullable_to_non_nullable
               as bool,
+      errors: null == errors
+          ? _self.errors
+          : errors // ignore: cast_nullable_to_non_nullable
+              as Map<int, List<String>>,
     ));
   }
 }
@@ -261,8 +281,9 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
-            bool hide)?
+            File thumbFile,
+            bool hide,
+            Map<int, List<String>> errors)?
         photo,
     TResult Function(
             String name,
@@ -272,9 +293,11 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            int evBias)?
+            Map<int, List<String>> errors,
+            String evBias,
+            List<AebPhotoResource> aebResources)?
         aebPhoto,
     TResult Function(
             String name,
@@ -284,9 +307,12 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            Duration duration)?
+            Map<int, List<String>> errors,
+            Duration duration,
+            double frameRate,
+            bool isHevc)?
         video,
     required TResult orElse(),
   }) {
@@ -302,7 +328,8 @@ extension MediaResourcePatterns on MediaResource {
             _that.creationTime,
             _that.sequence,
             _that.thumbFile,
-            _that.hide);
+            _that.hide,
+            _that.errors);
       case AebPhotoResource() when aebPhoto != null:
         return aebPhoto(
             _that.name,
@@ -314,7 +341,9 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.evBias);
+            _that.errors,
+            _that.evBias,
+            _that.aebResources);
       case VideoResource() when video != null:
         return video(
             _that.name,
@@ -326,7 +355,10 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.duration);
+            _that.errors,
+            _that.duration,
+            _that.frameRate,
+            _that.isHevc);
       case _:
         return orElse();
     }
@@ -355,8 +387,9 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
-            bool hide)
+            File thumbFile,
+            bool hide,
+            Map<int, List<String>> errors)
         photo,
     required TResult Function(
             String name,
@@ -366,9 +399,11 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            int evBias)
+            Map<int, List<String>> errors,
+            String evBias,
+            List<AebPhotoResource> aebResources)
         aebPhoto,
     required TResult Function(
             String name,
@@ -378,9 +413,12 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            Duration duration)
+            Map<int, List<String>> errors,
+            Duration duration,
+            double frameRate,
+            bool isHevc)
         video,
   }) {
     final _that = this;
@@ -395,7 +433,8 @@ extension MediaResourcePatterns on MediaResource {
             _that.creationTime,
             _that.sequence,
             _that.thumbFile,
-            _that.hide);
+            _that.hide,
+            _that.errors);
       case AebPhotoResource():
         return aebPhoto(
             _that.name,
@@ -407,7 +446,9 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.evBias);
+            _that.errors,
+            _that.evBias,
+            _that.aebResources);
       case VideoResource():
         return video(
             _that.name,
@@ -419,7 +460,10 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.duration);
+            _that.errors,
+            _that.duration,
+            _that.frameRate,
+            _that.isHevc);
     }
   }
 
@@ -445,8 +489,9 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
-            bool hide)?
+            File thumbFile,
+            bool hide,
+            Map<int, List<String>> errors)?
         photo,
     TResult? Function(
             String name,
@@ -456,9 +501,11 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            int evBias)?
+            Map<int, List<String>> errors,
+            String evBias,
+            List<AebPhotoResource> aebResources)?
         aebPhoto,
     TResult? Function(
             String name,
@@ -468,9 +515,12 @@ extension MediaResourcePatterns on MediaResource {
             int sizeInBytes,
             DateTime creationTime,
             int sequence,
-            String thumbFile,
+            File thumbFile,
             bool hide,
-            Duration duration)?
+            Map<int, List<String>> errors,
+            Duration duration,
+            double frameRate,
+            bool isHevc)?
         video,
   }) {
     final _that = this;
@@ -485,7 +535,8 @@ extension MediaResourcePatterns on MediaResource {
             _that.creationTime,
             _that.sequence,
             _that.thumbFile,
-            _that.hide);
+            _that.hide,
+            _that.errors);
       case AebPhotoResource() when aebPhoto != null:
         return aebPhoto(
             _that.name,
@@ -497,7 +548,9 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.evBias);
+            _that.errors,
+            _that.evBias,
+            _that.aebResources);
       case VideoResource() when video != null:
         return video(
             _that.name,
@@ -509,7 +562,10 @@ extension MediaResourcePatterns on MediaResource {
             _that.sequence,
             _that.thumbFile,
             _that.hide,
-            _that.duration);
+            _that.errors,
+            _that.duration,
+            _that.frameRate,
+            _that.isHevc);
       case _:
         return null;
     }
@@ -528,8 +584,10 @@ class PhotoResource extends MediaResource {
       required this.creationTime,
       required this.sequence,
       required this.thumbFile,
-      this.hide = false})
-      : super._();
+      this.hide = false,
+      final Map<int, List<String>> errors = const {}})
+      : _errors = errors,
+        super._();
 
   @override
   final String name;
@@ -546,10 +604,22 @@ class PhotoResource extends MediaResource {
   @override
   final int sequence;
   @override
-  final String thumbFile;
+  final File thumbFile;
   @override
   @JsonKey()
   final bool hide;
+
+  /// 错误信息
+  final Map<int, List<String>> _errors;
+
+  /// 错误信息
+  @override
+  @JsonKey()
+  Map<int, List<String>> get errors {
+    if (_errors is EqualUnmodifiableMapView) return _errors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_errors);
+  }
 
   /// Create a copy of MediaResource
   /// with the given fields replaced by the non-null parameter values.
@@ -576,16 +646,27 @@ class PhotoResource extends MediaResource {
                 other.sequence == sequence) &&
             (identical(other.thumbFile, thumbFile) ||
                 other.thumbFile == thumbFile) &&
-            (identical(other.hide, hide) || other.hide == hide));
+            (identical(other.hide, hide) || other.hide == hide) &&
+            const DeepCollectionEquality().equals(other._errors, _errors));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, file, width, height,
-      sizeInBytes, creationTime, sequence, thumbFile, hide);
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      file,
+      width,
+      height,
+      sizeInBytes,
+      creationTime,
+      sequence,
+      thumbFile,
+      hide,
+      const DeepCollectionEquality().hash(_errors));
 
   @override
   String toString() {
-    return 'MediaResource.photo(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide)';
+    return 'MediaResource.photo(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors)';
   }
 }
 
@@ -605,8 +686,9 @@ abstract mixin class $PhotoResourceCopyWith<$Res>
       int sizeInBytes,
       DateTime creationTime,
       int sequence,
-      String thumbFile,
-      bool hide});
+      File thumbFile,
+      bool hide,
+      Map<int, List<String>> errors});
 }
 
 /// @nodoc
@@ -631,6 +713,7 @@ class _$PhotoResourceCopyWithImpl<$Res>
     Object? sequence = null,
     Object? thumbFile = null,
     Object? hide = null,
+    Object? errors = null,
   }) {
     return _then(PhotoResource(
       name: null == name
@@ -664,11 +747,15 @@ class _$PhotoResourceCopyWithImpl<$Res>
       thumbFile: null == thumbFile
           ? _self.thumbFile
           : thumbFile // ignore: cast_nullable_to_non_nullable
-              as String,
+              as File,
       hide: null == hide
           ? _self.hide
           : hide // ignore: cast_nullable_to_non_nullable
               as bool,
+      errors: null == errors
+          ? _self._errors
+          : errors // ignore: cast_nullable_to_non_nullable
+              as Map<int, List<String>>,
     ));
   }
 }
@@ -686,8 +773,12 @@ class AebPhotoResource extends MediaResource {
       required this.sequence,
       required this.thumbFile,
       this.hide = false,
-      required this.evBias})
-      : super._();
+      final Map<int, List<String>> errors = const {},
+      required this.evBias,
+      required final List<AebPhotoResource> aebResources})
+      : _errors = errors,
+        _aebResources = aebResources,
+        super._();
 
   @override
   final String name;
@@ -704,13 +795,31 @@ class AebPhotoResource extends MediaResource {
   @override
   final int sequence;
   @override
-  final String thumbFile;
+  final File thumbFile;
   @override
   @JsonKey()
   final bool hide;
 
+  /// 错误信息
+  final Map<int, List<String>> _errors;
+
+  /// 错误信息
+  @override
+  @JsonKey()
+  Map<int, List<String>> get errors {
+    if (_errors is EqualUnmodifiableMapView) return _errors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_errors);
+  }
+
   /// aeb 特有
-  final int evBias;
+  final String evBias;
+  final List<AebPhotoResource> _aebResources;
+  List<AebPhotoResource> get aebResources {
+    if (_aebResources is EqualUnmodifiableListView) return _aebResources;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_aebResources);
+  }
 
   /// Create a copy of MediaResource
   /// with the given fields replaced by the non-null parameter values.
@@ -738,16 +847,31 @@ class AebPhotoResource extends MediaResource {
             (identical(other.thumbFile, thumbFile) ||
                 other.thumbFile == thumbFile) &&
             (identical(other.hide, hide) || other.hide == hide) &&
-            (identical(other.evBias, evBias) || other.evBias == evBias));
+            const DeepCollectionEquality().equals(other._errors, _errors) &&
+            (identical(other.evBias, evBias) || other.evBias == evBias) &&
+            const DeepCollectionEquality()
+                .equals(other._aebResources, _aebResources));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, file, width, height,
-      sizeInBytes, creationTime, sequence, thumbFile, hide, evBias);
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      file,
+      width,
+      height,
+      sizeInBytes,
+      creationTime,
+      sequence,
+      thumbFile,
+      hide,
+      const DeepCollectionEquality().hash(_errors),
+      evBias,
+      const DeepCollectionEquality().hash(_aebResources));
 
   @override
   String toString() {
-    return 'MediaResource.aebPhoto(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, evBias: $evBias)';
+    return 'MediaResource.aebPhoto(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors, evBias: $evBias, aebResources: $aebResources)';
   }
 }
 
@@ -767,9 +891,11 @@ abstract mixin class $AebPhotoResourceCopyWith<$Res>
       int sizeInBytes,
       DateTime creationTime,
       int sequence,
-      String thumbFile,
+      File thumbFile,
       bool hide,
-      int evBias});
+      Map<int, List<String>> errors,
+      String evBias,
+      List<AebPhotoResource> aebResources});
 }
 
 /// @nodoc
@@ -794,7 +920,9 @@ class _$AebPhotoResourceCopyWithImpl<$Res>
     Object? sequence = null,
     Object? thumbFile = null,
     Object? hide = null,
+    Object? errors = null,
     Object? evBias = null,
+    Object? aebResources = null,
   }) {
     return _then(AebPhotoResource(
       name: null == name
@@ -828,15 +956,23 @@ class _$AebPhotoResourceCopyWithImpl<$Res>
       thumbFile: null == thumbFile
           ? _self.thumbFile
           : thumbFile // ignore: cast_nullable_to_non_nullable
-              as String,
+              as File,
       hide: null == hide
           ? _self.hide
           : hide // ignore: cast_nullable_to_non_nullable
               as bool,
+      errors: null == errors
+          ? _self._errors
+          : errors // ignore: cast_nullable_to_non_nullable
+              as Map<int, List<String>>,
       evBias: null == evBias
           ? _self.evBias
           : evBias // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
+      aebResources: null == aebResources
+          ? _self._aebResources
+          : aebResources // ignore: cast_nullable_to_non_nullable
+              as List<AebPhotoResource>,
     ));
   }
 }
@@ -854,8 +990,12 @@ class VideoResource extends MediaResource {
       required this.sequence,
       required this.thumbFile,
       this.hide = false,
-      required this.duration})
-      : super._();
+      final Map<int, List<String>> errors = const {},
+      required this.duration,
+      required this.frameRate,
+      required this.isHevc})
+      : _errors = errors,
+        super._();
 
   @override
   final String name;
@@ -872,13 +1012,27 @@ class VideoResource extends MediaResource {
   @override
   final int sequence;
   @override
-  final String thumbFile;
+  final File thumbFile;
   @override
   @JsonKey()
   final bool hide;
 
+  /// 错误信息
+  final Map<int, List<String>> _errors;
+
+  /// 错误信息
+  @override
+  @JsonKey()
+  Map<int, List<String>> get errors {
+    if (_errors is EqualUnmodifiableMapView) return _errors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_errors);
+  }
+
   /// video 特有
   final Duration duration;
+  final double frameRate;
+  final bool isHevc;
 
   /// Create a copy of MediaResource
   /// with the given fields replaced by the non-null parameter values.
@@ -906,17 +1060,34 @@ class VideoResource extends MediaResource {
             (identical(other.thumbFile, thumbFile) ||
                 other.thumbFile == thumbFile) &&
             (identical(other.hide, hide) || other.hide == hide) &&
+            const DeepCollectionEquality().equals(other._errors, _errors) &&
             (identical(other.duration, duration) ||
-                other.duration == duration));
+                other.duration == duration) &&
+            (identical(other.frameRate, frameRate) ||
+                other.frameRate == frameRate) &&
+            (identical(other.isHevc, isHevc) || other.isHevc == isHevc));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, name, file, width, height,
-      sizeInBytes, creationTime, sequence, thumbFile, hide, duration);
+  int get hashCode => Object.hash(
+      runtimeType,
+      name,
+      file,
+      width,
+      height,
+      sizeInBytes,
+      creationTime,
+      sequence,
+      thumbFile,
+      hide,
+      const DeepCollectionEquality().hash(_errors),
+      duration,
+      frameRate,
+      isHevc);
 
   @override
   String toString() {
-    return 'MediaResource.video(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, duration: $duration)';
+    return 'MediaResource.video(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors, duration: $duration, frameRate: $frameRate, isHevc: $isHevc)';
   }
 }
 
@@ -936,9 +1107,12 @@ abstract mixin class $VideoResourceCopyWith<$Res>
       int sizeInBytes,
       DateTime creationTime,
       int sequence,
-      String thumbFile,
+      File thumbFile,
       bool hide,
-      Duration duration});
+      Map<int, List<String>> errors,
+      Duration duration,
+      double frameRate,
+      bool isHevc});
 }
 
 /// @nodoc
@@ -963,7 +1137,10 @@ class _$VideoResourceCopyWithImpl<$Res>
     Object? sequence = null,
     Object? thumbFile = null,
     Object? hide = null,
+    Object? errors = null,
     Object? duration = null,
+    Object? frameRate = null,
+    Object? isHevc = null,
   }) {
     return _then(VideoResource(
       name: null == name
@@ -997,15 +1174,27 @@ class _$VideoResourceCopyWithImpl<$Res>
       thumbFile: null == thumbFile
           ? _self.thumbFile
           : thumbFile // ignore: cast_nullable_to_non_nullable
-              as String,
+              as File,
       hide: null == hide
           ? _self.hide
           : hide // ignore: cast_nullable_to_non_nullable
               as bool,
+      errors: null == errors
+          ? _self._errors
+          : errors // ignore: cast_nullable_to_non_nullable
+              as Map<int, List<String>>,
       duration: null == duration
           ? _self.duration
           : duration // ignore: cast_nullable_to_non_nullable
               as Duration,
+      frameRate: null == frameRate
+          ? _self.frameRate
+          : frameRate // ignore: cast_nullable_to_non_nullable
+              as double,
+      isHevc: null == isHevc
+          ? _self.isHevc
+          : isHevc // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

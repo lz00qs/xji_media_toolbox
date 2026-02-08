@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
@@ -7,10 +8,10 @@ import 'package:fvp/fvp.dart' as fvp;
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
-import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
+import 'package:xji_footage_toolbox/utils/logger.dart';
 
 // todo:
 // 1. 修正所有不在 build 中的 ref.watch 调用
@@ -40,9 +41,10 @@ Future<void> main() async {
     'platforms': ['windows']
   }); // only these platforms will use this plugin implementation
 
-  // if (kDebugMode) {
-  //   LogService.isDebug = true;
-  // }
+  if (kDebugMode) {
+    Logger.setLogLevel(LogLevel.debug);
+    Logger.debug('Debug mode enabled');
+  }
   //
   final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 

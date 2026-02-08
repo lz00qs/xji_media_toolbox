@@ -13,7 +13,7 @@ part of 'settings.model.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$Settings {
+mixin _$Settings implements DiagnosticableTreeMixin {
   List<TranscodePreset> get transcodingPresets;
   List<Lut> get luts;
   int get defaultTranscodePresetId;
@@ -29,6 +29,21 @@ mixin _$Settings {
   @pragma('vm:prefer-inline')
   $SettingsCopyWith<Settings> get copyWith =>
       _$SettingsCopyWithImpl<Settings>(this as Settings, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'Settings'))
+      ..add(DiagnosticsProperty('transcodingPresets', transcodingPresets))
+      ..add(DiagnosticsProperty('luts', luts))
+      ..add(DiagnosticsProperty(
+          'defaultTranscodePresetId', defaultTranscodePresetId))
+      ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
+      ..add(DiagnosticsProperty('appVersion', appVersion))
+      ..add(DiagnosticsProperty('sortType', sortType))
+      ..add(DiagnosticsProperty('sortAsc', sortAsc))
+      ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -65,7 +80,7 @@ mixin _$Settings {
       isDebugMode);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
   }
 }
@@ -354,7 +369,7 @@ extension SettingsPatterns on Settings {
 
 /// @nodoc
 
-class _Settings implements Settings {
+class _Settings with DiagnosticableTreeMixin implements Settings {
   const _Settings(
       {final List<TranscodePreset> transcodingPresets =
           const <TranscodePreset>[],
@@ -364,7 +379,7 @@ class _Settings implements Settings {
       this.appVersion = '0.0.0',
       this.sortType = SortType.name,
       this.sortAsc = true,
-      this.isDebugMode = false})
+      this.isDebugMode = kDebugMode})
       : _transcodingPresets = transcodingPresets,
         _luts = luts;
 
@@ -415,6 +430,21 @@ class _Settings implements Settings {
       __$SettingsCopyWithImpl<_Settings>(this, _$identity);
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'Settings'))
+      ..add(DiagnosticsProperty('transcodingPresets', transcodingPresets))
+      ..add(DiagnosticsProperty('luts', luts))
+      ..add(DiagnosticsProperty(
+          'defaultTranscodePresetId', defaultTranscodePresetId))
+      ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
+      ..add(DiagnosticsProperty('appVersion', appVersion))
+      ..add(DiagnosticsProperty('sortType', sortType))
+      ..add(DiagnosticsProperty('sortAsc', sortAsc))
+      ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
+  }
+
+  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
@@ -449,7 +479,7 @@ class _Settings implements Settings {
       isDebugMode);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
   }
 }

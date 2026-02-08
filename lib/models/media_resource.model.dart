@@ -5,7 +5,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'media_resource.model.freezed.dart';
 
 @freezed
-@freezed
 sealed class MediaResource with _$MediaResource {
   const MediaResource._(); // 允许写通用 getter / 方法
 
@@ -18,8 +17,10 @@ sealed class MediaResource with _$MediaResource {
     required int sizeInBytes,
     required DateTime creationTime,
     required int sequence,
-    required String thumbFile,
+    required File thumbFile,
     @Default(false) bool hide,
+    /// 错误信息
+    @Default({}) Map<int, List<String>> errors,
   }) = PhotoResource;
 
   /// AEB 照片
@@ -31,11 +32,14 @@ sealed class MediaResource with _$MediaResource {
     required int sizeInBytes,
     required DateTime creationTime,
     required int sequence,
-    required String thumbFile,
+    required File thumbFile,
     @Default(false) bool hide,
+    /// 错误信息
+    @Default({}) Map<int, List<String>> errors,
 
     /// aeb 特有
-    required int evBias,
+    required String evBias,
+    required List<AebPhotoResource> aebResources,
   }) = AebPhotoResource;
 
   /// 视频
@@ -47,10 +51,14 @@ sealed class MediaResource with _$MediaResource {
     required int sizeInBytes,
     required DateTime creationTime,
     required int sequence,
-    required String thumbFile,
+    required File thumbFile,
     @Default(false) bool hide,
+    /// 错误信息
+    @Default({}) Map<int, List<String>> errors,
 
     /// video 特有
     required Duration duration,
+    required double frameRate,
+    required bool isHevc,
   }) = VideoResource;
 }

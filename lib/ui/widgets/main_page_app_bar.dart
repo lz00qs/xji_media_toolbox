@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,6 +8,7 @@ import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:iconify_flutter/icons/mdi.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:window_manager/window_manager.dart';
+import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 import 'buttons/custom_icon_button.dart';
@@ -70,6 +72,7 @@ class _MacMainPageAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var onPressed = false;
+    final mediaResourcesNotifier = ref.read(mediaResourcesStateProvider.notifier);
     return SizedBox(
       height: DesignValues.appBarHeight,
       child: Row(
@@ -87,6 +90,11 @@ class _MacMainPageAppBar extends ConsumerWidget {
                 }
                 onPressed = true;
                 // await openMediaResourcesFolder(ref: ref);
+                final selectedDirectory = await FilePicker.platform.getDirectoryPath();
+                if (selectedDirectory != null)
+                  {
+                    await mediaResourcesNotifier.loadMediaResourcesFromDir(selectedDirectory);
+                  }
                 onPressed = false;
               }),
           SizedBox(

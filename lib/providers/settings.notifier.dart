@@ -6,7 +6,7 @@ import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:xji_footage_toolbox/storage/transcode_preset.mapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:xji_footage_toolbox/utils/log.dart';
+import 'package:xji_footage_toolbox/utils/logger.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
@@ -77,7 +77,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   void setDefaultTranscodePreset(int id) {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
-      Log.severe('Transcode Preset not found: $id');
+      Logger.warn('Transcode Preset not found: $id');
       Toast.error('Transcode Preset not found');
       return;
     }
@@ -95,13 +95,13 @@ class SettingsNotifier extends _$SettingsNotifier {
   void removeTranscodePreset(int id) {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
-      Log.severe('Transcode Preset not found: $id');
+      Logger.warn('Transcode Preset not found: $id');
       Toast.error('Transcode Preset not found');
       return;
     }
 
     if (state.transcodingPresets.length == 1) {
-      Log.severe('Cannot delete the last Transcode Preset: $id');
+      Logger.warn('Cannot delete the last Transcode Preset: $id');
       Toast.error('Cannot delete the last Transcode Preset');
       return;
     }
@@ -136,13 +136,13 @@ class SettingsNotifier extends _$SettingsNotifier {
     final id = _objectBox.lutBox.put(lut.toEntity());
     var oLut = _objectBox.lutBox.get(id);
     if (oLut == null) {
-      Log.severe('LUT not found: $id');
+      Logger.warn('LUT not found: $id');
       Toast.error('LUT not found');
       return;
     }
     final srcFile = File(lut.path);
     if (!srcFile.existsSync()) {
-      Log.severe('LUT file not found: ${lut.path}');
+      Logger.warn('LUT file not found: ${lut.path}');
       Toast.error('LUT file not found');
       _objectBox.lutBox.remove(id);
       return;
@@ -163,7 +163,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     targetFile = await srcFile.copy(targetFile.path);
 
     if (!targetFile.existsSync()) {
-      Log.severe('LUT file copy failed: ${targetFile.path}');
+      Logger.warn('LUT file copy failed: ${targetFile.path}');
       Toast.error('LUT file copy failed');
       _objectBox.lutBox.remove(id);
       return;
@@ -180,13 +180,13 @@ class SettingsNotifier extends _$SettingsNotifier {
   void removeLut(int lutId) {
     // 检查 id 是否存在
     if (!_lutExists(lutId)) {
-      Log.severe('LUT not found: $lutId');
+      Logger.warn('LUT not found: $lutId');
       Toast.error('LUT not found');
       return;
     }
     final lut = _objectBox.lutBox.get(lutId);
     if (lut == null) {
-      Log.severe('LUT not found: $lutId');
+      Logger.warn('LUT not found: $lutId');
       Toast.error('LUT not found');
       return;
     }
@@ -218,7 +218,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   void setIsDebugMode(bool value) {
-    Log.isDebug = value;
+    Logger.setLogLevel(value ? LogLevel.debug : LogLevel.info);
     state = state.copyWith(isDebugMode: value);
   }
 }

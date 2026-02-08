@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:xji_footage_toolbox/models/lut.model.dart';
 import 'package:xji_footage_toolbox/models/transcode_preset.model.dart';
@@ -16,6 +17,6 @@ abstract class Settings with _$Settings {
     @Default('0.0.0') String appVersion,
     @Default(SortType.name) SortType sortType,
     @Default(true) bool sortAsc,
-    @Default(false) bool isDebugMode,
+    @Default(kDebugMode) bool isDebugMode,
   }) = _Settings;
 }

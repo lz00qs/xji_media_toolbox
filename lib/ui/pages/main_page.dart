@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
 
+import '../../providers/media_resources_state.notifier.dart';
 import '../widgets/buttons/main_panel_button.dart';
+import 'loading_media_resources_page.dart';
 
 // import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
 // import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
@@ -57,13 +57,15 @@ class _MainPageNotEmpty extends ConsumerWidget {
   }
 }
 
-class MainPage extends StatelessWidget {
+class MainPage extends ConsumerWidget {
   const MainPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return _MainPageEmpty();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResourcesState = ref.watch(mediaResourcesStateProvider);
+    return mediaResourcesState.isLoading
+        ? LoadingMediaResourcesPage()
+        : _MainPageEmpty();
   }
 }
 
