@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/ui/panels/photo_viewer_panel.dart';
+import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
@@ -150,7 +151,7 @@ class MainPanel extends StatelessWidget {
         return AebPhotoViewerPanel(photoResource: resource as AebPhotoResource);
       case VideoResource():
         // TODO: Handle this case.
-        return SizedBox();
+        return VideoPanel(resource: resource);
     }
   }
 }
