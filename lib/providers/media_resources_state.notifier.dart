@@ -132,6 +132,38 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     }
   }
 
+  void increaseCurrentIndex() {
+    if (state.currentIndex < state.resources.length - 1) {
+      setCurrentIndex(state.currentIndex + 1);
+    }
+  }
+
+  void decreaseCurrentIndex() {
+    if (state.currentIndex > 0) {
+      setCurrentIndex(state.currentIndex - 1);
+    }
+  }
+
+  void setAebIndex(int index) {
+    if (state.resources[state.currentIndex] is AebPhotoResource) {
+      if (index < (state.resources[state.currentIndex] as AebPhotoResource).aebResources.length) {
+        state = state.copyWith(aebIndex: index);
+      }
+    }
+  }
+
+  void increaseCurrentAebIndex() {
+    if (state.aebIndex < (state.resources[state.currentIndex] as AebPhotoResource).aebResources.length - 1) {
+      setAebIndex(state.aebIndex + 1);
+    }
+  }
+
+  void decreaseCurrentAebIndex() {
+    if (state.aebIndex > 0) {
+      setAebIndex(state.aebIndex - 1);
+    }
+  }
+
   void clearSelectedResources() {
     state = state.copyWith(selectedResources: []);
   }
