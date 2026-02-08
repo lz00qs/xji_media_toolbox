@@ -8,6 +8,7 @@ import '../../models/media_resource.model.dart';
 import '../../providers/media_resources_state.notifier.dart';
 import '../../providers/settings.notifier.dart';
 import '../buttons/main_panel_button.dart';
+import '../panels/main_panel.dart';
 import '../panels/media_resource_info_panel.dart';
 import '../panels/media_resources_list_panel.dart';
 import '../resizable_panel.dart';
@@ -100,7 +101,9 @@ class _MainPageNotEmpty extends ConsumerWidget {
               mediaResourceInfoPanel: currentMediaResource != null
                   ? MediaResourceInfoPanel(mediaResource: currentMediaResource)
                   : SizedBox(),
-              mainPanel: SizedBox(),
+              mainPanel: currentMediaResource != null
+                  ? MainPanel(resource: currentMediaResource)
+                  : SizedBox(),
             )));
   }
 }
