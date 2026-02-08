@@ -4,12 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
-import 'package:xji_footage_toolbox/ui/widgets/dialogs/dual_option_dialog.dart';
 
 import '../../../models/lut.model.dart';
 import '../../../models/transcode_preset.model.dart';
-import '../../design_tokens.dart';
 import '../buttons/custom_icon_button.dart';
+import '../design_tokens.dart';
+import 'dual_option_dialog.dart';
 
 part 'settings_dialog.g.dart';
 

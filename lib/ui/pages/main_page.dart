@@ -7,10 +7,10 @@ import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 import '../../models/media_resource.model.dart';
 import '../../providers/media_resources_state.notifier.dart';
 import '../../providers/settings.notifier.dart';
-import '../widgets/buttons/main_panel_button.dart';
-import '../widgets/panels/media_resource_info_panel.dart';
-import '../widgets/panels/media_resources_list_panel.dart';
-import '../widgets/resizable_panel.dart';
+import '../buttons/main_panel_button.dart';
+import '../panels/media_resource_info_panel.dart';
+import '../panels/media_resources_list_panel.dart';
+import '../resizable_panel.dart';
 import 'loading_media_resources_page.dart';
 
 final _mainPageNotEmptyFocusNode = FocusNode();

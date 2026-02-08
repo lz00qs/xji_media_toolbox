@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../models/settings.model.dart';
-import '../../design_tokens.dart';
+import '../design_tokens.dart';
 import 'dual_option_dialog.dart';
 
 part 'media_resources_sort_dialog.g.dart';

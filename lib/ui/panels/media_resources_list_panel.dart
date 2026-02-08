@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
-import 'package:xji_footage_toolbox/ui/widgets/buttons/custom_icon_button.dart';
 
 import '../../../models/media_resource.model.dart';
 import '../../../utils/format.dart';
-import '../../design_tokens.dart';
+
+import '../buttons/custom_icon_button.dart';
+import '../design_tokens.dart';
 import '../dialogs/media_resources_sort_dialog.dart';
 
 const _listWidgetHeight = 73.0;
