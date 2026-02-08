@@ -6,10 +6,10 @@ import '../design_tokens.dart';
 import '../photo_viewer.dart';
 import 'main_panel.dart';
 
-class PhotoViewPanel extends StatelessWidget {
+class PhotoViewerPanel extends StatelessWidget {
   final File photoFile;
 
-  const PhotoViewPanel({super.key, required this.photoFile});
+  const PhotoViewerPanel({super.key, required this.photoFile});
 
   @override
   Widget build(BuildContext context) {

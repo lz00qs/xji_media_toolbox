@@ -143,7 +143,7 @@ class MainPanel extends StatelessWidget {
     switch (resource) {
       case PhotoResource():
         // TODO: Handle this case.
-        return PhotoViewPanel(photoFile: resource.file);
+        return PhotoViewerPanel(photoFile: resource.file);
       case AebPhotoResource():
         // TODO: Handle this case.
         return SizedBox();
