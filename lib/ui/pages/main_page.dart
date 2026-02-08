@@ -1,9 +1,13 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
 import '../../providers/media_resources_state.notifier.dart';
+import '../../providers/settings.notifier.dart';
 import '../widgets/buttons/main_panel_button.dart';
+import '../widgets/panels/media_resources_list_panel.dart';
+import '../widgets/resizable_panel.dart';
 import 'loading_media_resources_page.dart';
 
 // import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
@@ -16,9 +20,11 @@ import 'loading_media_resources_page.dart';
 
 final _mediaResourcesListPanelFocusNode = FocusNode();
 
-class _MainPageEmpty extends StatelessWidget {
+class _MainPageEmpty extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResourcesNotifier =
+        ref.watch(mediaResourcesStateProvider.notifier);
     var onPressed = false;
     return Container(
       height: double.infinity,
@@ -32,7 +38,13 @@ class _MainPageEmpty extends StatelessWidget {
                 return;
               }
               onPressed = true;
-              // await openMediaResourcesFolder(ref: ref);
+              final selectedDirectory =
+                  await FilePicker.platform.getDirectoryPath();
+              if (selectedDirectory != null) {
+                await mediaResourcesNotifier
+                    .loadMediaResourcesFromDir(selectedDirectory, false,
+                        ref.watch(settingsProvider).cpuThreads, ref.watch(settingsProvider).sort);
+              }
               onPressed = false;
             }),
       ),
@@ -45,15 +57,16 @@ class _MainPageNotEmpty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SizedBox();
-    // return ResizablePanel(
-    //   mediaResourcesListPanel: MediaResourcesListPanel(),
-    //   mediaResourceInfoPanel: MediaResourceInfoPanel(),
-    //   mainPanel: ref.watch(mediaResourcesProvider
-    //       .select((state) => state.isMultipleSelection))
-    //       ? MultiSelectPanel()
-    //       : MainPanel(),
-    // );
+    return ResizablePanel(
+      mediaResourcesListPanel: MediaResourcesListPanel(),
+      mediaResourceInfoPanel: SizedBox(),
+      // mediaResourceInfoPanel: MediaResourceInfoPanel(),
+      mainPanel: SizedBox(),
+      // mainPanel: ref.watch(mediaResourcesProvider
+      //     .select((state) => state.isMultipleSelection))
+      //     ? MultiSelectPanel()
+      //     : MainPanel(),
+    );
   }
 }
 
@@ -65,7 +78,9 @@ class MainPage extends ConsumerWidget {
     final mediaResourcesState = ref.watch(mediaResourcesStateProvider);
     return mediaResourcesState.isLoading
         ? LoadingMediaResourcesPage()
-        : _MainPageEmpty();
+        : mediaResourcesState.resources.isEmpty
+            ? _MainPageEmpty()
+            : _MainPageNotEmpty();
   }
 }
 

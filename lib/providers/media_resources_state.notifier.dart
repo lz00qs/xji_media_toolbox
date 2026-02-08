@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
 import 'package:image/image.dart';
 
@@ -29,13 +27,18 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     return MediaResourcesState();
   }
 
+  void toggleIsMultipleSelection() {
+    state = state.copyWith(isMultipleSelection: !state.isMultipleSelection);
+  }
+
   void _clearState() {
     state = MediaResourcesState();
     _mediaResourcesCount = 0;
     _processedMediaResourcesCount = 0;
   }
 
-  Future<void> loadMediaResourcesFromDir(String resourcesPath) async {
+  Future<void> loadMediaResourcesFromDir(
+      String resourcesPath, bool isDebugMode, int cpuThreads, Sort sort) async {
     _clearState();
     state = state.copyWith(
       isLoading: true,
@@ -46,7 +49,7 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
       _clearState();
       return;
     }
-    if (ref.read(settingsProvider).isDebugMode) {
+    if (isDebugMode) {
       await Logger.enableFileOutput('$resourcesPath/$logFolderName');
     }
 
@@ -69,23 +72,25 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     Logger.debug('videos: ${videos.length}');
 
     processedPhotos = await _multiThreadProcess(
-        mediaResourceFiles: photos, processFunc: _photoResourceProcess);
+        mediaResourceFiles: photos,
+        processFunc: _photoResourceProcess,
+        cpuThreads: cpuThreads);
     processedPhotos.sort((a, b) => a.name.compareTo(b.name));
     processedPhotos = await _analyzeAebFootage(processedPhotos);
     Logger.debug('processedPhotos: ${processedPhotos.length}');
     Logger.debug('Photo processTime: ${stopwatch.elapsedMilliseconds}ms');
 
     processedVideos = await _multiThreadProcess(
-        mediaResourceFiles: videos, processFunc: _videoResourceProcess);
+        mediaResourceFiles: videos,
+        processFunc: _videoResourceProcess,
+        cpuThreads: cpuThreads);
     Logger.debug('processedVideos: ${processedVideos.length}');
     Logger.debug('Video processTime: ${stopwatch.elapsedMilliseconds}ms');
 
     final mediaResources = [...processedPhotos, ...processedVideos];
 
-    final sortType =
-        ref.watch(settingsProvider.select((settings) => settings.sortType));
-    final sortAsc =
-        ref.watch(settingsProvider.select((settings) => settings.sortAsc));
+    final sortType = sort.sortType;
+    final sortAsc = sort.sortAsc;
 
     switch (sortType) {
       case SortType.name:
@@ -118,12 +123,62 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     );
   }
 
+  void setCurrentIndex(int index) {
+    state = state.copyWith(currentIndex: index);
+  }
+
+  void clearSelectedResources() {
+    state = state.copyWith(selectedResources: []);
+  }
+
+  void addSelectedResource(MediaResource mediaResource) {
+    state = state.copyWith(
+      selectedResources: [...state.selectedResources, mediaResource],
+    );
+  }
+
+  void removeSelectedResource(MediaResource mediaResource) {
+    state = state.copyWith(
+      selectedResources: state.selectedResources..remove(mediaResource),
+    );
+  }
+
+  void sortMediaResources(Sort sort) {
+    final resources = state.resources.toList();
+
+    switch (sort.sortType) {
+      case SortType.name:
+        // state.resources.sort((a, b) =>
+        //     sort.sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+        resources.sort((a, b) =>
+            sort.sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
+        break;
+      case SortType.date:
+        resources.sort((a, b) => sort.sortAsc
+            ? a.creationTime.compareTo(b.creationTime)
+            : b.creationTime.compareTo(a.creationTime));
+        break;
+      case SortType.size:
+        resources.sort((a, b) => sort.sortAsc
+            ? a.sizeInBytes.compareTo(b.sizeInBytes)
+            : b.sizeInBytes.compareTo(a.sizeInBytes));
+        break;
+      case SortType.sequence:
+        resources.sort((a, b) => sort.sortAsc
+            ? a.sequence.compareTo(b.sequence)
+            : b.sequence.compareTo(a.sequence));
+        break;
+    }
+    state = state.copyWith(resources: resources);
+  }
+
   Future<List<MediaResource>> _multiThreadProcess(
       {required List<File> mediaResourceFiles,
       required Future<MediaResource?> Function(File mediaResourceFile)
-          processFunc}) async {
+          processFunc,
+      required int cpuThreads}) async {
     final mediaResources = <MediaResource>[];
-    final pool = _Pool(ref.watch(settingsProvider).cpuThreads);
+    final pool = _Pool(cpuThreads);
     final tasks = mediaResourceFiles.map((file) {
       return pool.run(() async {
         final mediaResource = await processFunc(file);

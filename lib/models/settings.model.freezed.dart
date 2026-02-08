@@ -13,14 +13,330 @@ part of 'settings.model.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$Sort implements DiagnosticableTreeMixin {
+  SortType get sortType;
+  bool get sortAsc;
+
+  /// Create a copy of Sort
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SortCopyWith<Sort> get copyWith =>
+      _$SortCopyWithImpl<Sort>(this as Sort, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'Sort'))
+      ..add(DiagnosticsProperty('sortType', sortType))
+      ..add(DiagnosticsProperty('sortAsc', sortAsc));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is Sort &&
+            (identical(other.sortType, sortType) ||
+                other.sortType == sortType) &&
+            (identical(other.sortAsc, sortAsc) || other.sortAsc == sortAsc));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, sortType, sortAsc);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Sort(sortType: $sortType, sortAsc: $sortAsc)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $SortCopyWith<$Res> {
+  factory $SortCopyWith(Sort value, $Res Function(Sort) _then) =
+      _$SortCopyWithImpl;
+  @useResult
+  $Res call({SortType sortType, bool sortAsc});
+}
+
+/// @nodoc
+class _$SortCopyWithImpl<$Res> implements $SortCopyWith<$Res> {
+  _$SortCopyWithImpl(this._self, this._then);
+
+  final Sort _self;
+  final $Res Function(Sort) _then;
+
+  /// Create a copy of Sort
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? sortType = null,
+    Object? sortAsc = null,
+  }) {
+    return _then(_self.copyWith(
+      sortType: null == sortType
+          ? _self.sortType
+          : sortType // ignore: cast_nullable_to_non_nullable
+              as SortType,
+      sortAsc: null == sortAsc
+          ? _self.sortAsc
+          : sortAsc // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [Sort].
+extension SortPatterns on Sort {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_Sort value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _Sort() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_Sort value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Sort():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_Sort value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Sort() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(SortType sortType, bool sortAsc)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _Sort() when $default != null:
+        return $default(_that.sortType, _that.sortAsc);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(SortType sortType, bool sortAsc) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Sort():
+        return $default(_that.sortType, _that.sortAsc);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(SortType sortType, bool sortAsc)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _Sort() when $default != null:
+        return $default(_that.sortType, _that.sortAsc);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _Sort with DiagnosticableTreeMixin implements Sort {
+  const _Sort({this.sortType = SortType.name, this.sortAsc = true});
+
+  @override
+  @JsonKey()
+  final SortType sortType;
+  @override
+  @JsonKey()
+  final bool sortAsc;
+
+  /// Create a copy of Sort
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$SortCopyWith<_Sort> get copyWith =>
+      __$SortCopyWithImpl<_Sort>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'Sort'))
+      ..add(DiagnosticsProperty('sortType', sortType))
+      ..add(DiagnosticsProperty('sortAsc', sortAsc));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _Sort &&
+            (identical(other.sortType, sortType) ||
+                other.sortType == sortType) &&
+            (identical(other.sortAsc, sortAsc) || other.sortAsc == sortAsc));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, sortType, sortAsc);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'Sort(sortType: $sortType, sortAsc: $sortAsc)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$SortCopyWith<$Res> implements $SortCopyWith<$Res> {
+  factory _$SortCopyWith(_Sort value, $Res Function(_Sort) _then) =
+      __$SortCopyWithImpl;
+  @override
+  @useResult
+  $Res call({SortType sortType, bool sortAsc});
+}
+
+/// @nodoc
+class __$SortCopyWithImpl<$Res> implements _$SortCopyWith<$Res> {
+  __$SortCopyWithImpl(this._self, this._then);
+
+  final _Sort _self;
+  final $Res Function(_Sort) _then;
+
+  /// Create a copy of Sort
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? sortType = null,
+    Object? sortAsc = null,
+  }) {
+    return _then(_Sort(
+      sortType: null == sortType
+          ? _self.sortType
+          : sortType // ignore: cast_nullable_to_non_nullable
+              as SortType,
+      sortAsc: null == sortAsc
+          ? _self.sortAsc
+          : sortAsc // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$Settings implements DiagnosticableTreeMixin {
   List<TranscodePreset> get transcodingPresets;
   List<Lut> get luts;
   int get defaultTranscodePresetId;
   int get cpuThreads;
-  String get appVersion;
-  SortType get sortType;
-  bool get sortAsc;
+  String get appVersion; // @Default(SortType.name) SortType sortType,
+// @Default(true) bool sortAsc,
+  Sort get sort;
   bool get isDebugMode;
 
   /// Create a copy of Settings
@@ -40,8 +356,7 @@ mixin _$Settings implements DiagnosticableTreeMixin {
           'defaultTranscodePresetId', defaultTranscodePresetId))
       ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
       ..add(DiagnosticsProperty('appVersion', appVersion))
-      ..add(DiagnosticsProperty('sortType', sortType))
-      ..add(DiagnosticsProperty('sortAsc', sortAsc))
+      ..add(DiagnosticsProperty('sort', sort))
       ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
   }
 
@@ -60,9 +375,7 @@ mixin _$Settings implements DiagnosticableTreeMixin {
                 other.cpuThreads == cpuThreads) &&
             (identical(other.appVersion, appVersion) ||
                 other.appVersion == appVersion) &&
-            (identical(other.sortType, sortType) ||
-                other.sortType == sortType) &&
-            (identical(other.sortAsc, sortAsc) || other.sortAsc == sortAsc) &&
+            (identical(other.sort, sort) || other.sort == sort) &&
             (identical(other.isDebugMode, isDebugMode) ||
                 other.isDebugMode == isDebugMode));
   }
@@ -75,13 +388,12 @@ mixin _$Settings implements DiagnosticableTreeMixin {
       defaultTranscodePresetId,
       cpuThreads,
       appVersion,
-      sortType,
-      sortAsc,
+      sort,
       isDebugMode);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode)';
   }
 }
 
@@ -96,9 +408,10 @@ abstract mixin class $SettingsCopyWith<$Res> {
       int defaultTranscodePresetId,
       int cpuThreads,
       String appVersion,
-      SortType sortType,
-      bool sortAsc,
+      Sort sort,
       bool isDebugMode});
+
+  $SortCopyWith<$Res> get sort;
 }
 
 /// @nodoc
@@ -118,8 +431,7 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
     Object? defaultTranscodePresetId = null,
     Object? cpuThreads = null,
     Object? appVersion = null,
-    Object? sortType = null,
-    Object? sortAsc = null,
+    Object? sort = null,
     Object? isDebugMode = null,
   }) {
     return _then(_self.copyWith(
@@ -143,19 +455,25 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
           ? _self.appVersion
           : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      sortType: null == sortType
-          ? _self.sortType
-          : sortType // ignore: cast_nullable_to_non_nullable
-              as SortType,
-      sortAsc: null == sortAsc
-          ? _self.sortAsc
-          : sortAsc // ignore: cast_nullable_to_non_nullable
-              as bool,
+      sort: null == sort
+          ? _self.sort
+          : sort // ignore: cast_nullable_to_non_nullable
+              as Sort,
       isDebugMode: null == isDebugMode
           ? _self.isDebugMode
           : isDebugMode // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
+  }
+
+  /// Create a copy of Settings
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $SortCopyWith<$Res> get sort {
+    return $SortCopyWith<$Res>(_self.sort, (value) {
+      return _then(_self.copyWith(sort: value));
+    });
   }
 }
 
@@ -258,8 +576,7 @@ extension SettingsPatterns on Settings {
             int defaultTranscodePresetId,
             int cpuThreads,
             String appVersion,
-            SortType sortType,
-            bool sortAsc,
+            Sort sort,
             bool isDebugMode)?
         $default, {
     required TResult orElse(),
@@ -273,8 +590,7 @@ extension SettingsPatterns on Settings {
             _that.defaultTranscodePresetId,
             _that.cpuThreads,
             _that.appVersion,
-            _that.sortType,
-            _that.sortAsc,
+            _that.sort,
             _that.isDebugMode);
       case _:
         return orElse();
@@ -302,8 +618,7 @@ extension SettingsPatterns on Settings {
             int defaultTranscodePresetId,
             int cpuThreads,
             String appVersion,
-            SortType sortType,
-            bool sortAsc,
+            Sort sort,
             bool isDebugMode)
         $default,
   ) {
@@ -316,8 +631,7 @@ extension SettingsPatterns on Settings {
             _that.defaultTranscodePresetId,
             _that.cpuThreads,
             _that.appVersion,
-            _that.sortType,
-            _that.sortAsc,
+            _that.sort,
             _that.isDebugMode);
       case _:
         throw StateError('Unexpected subclass');
@@ -344,8 +658,7 @@ extension SettingsPatterns on Settings {
             int defaultTranscodePresetId,
             int cpuThreads,
             String appVersion,
-            SortType sortType,
-            bool sortAsc,
+            Sort sort,
             bool isDebugMode)?
         $default,
   ) {
@@ -358,8 +671,7 @@ extension SettingsPatterns on Settings {
             _that.defaultTranscodePresetId,
             _that.cpuThreads,
             _that.appVersion,
-            _that.sortType,
-            _that.sortAsc,
+            _that.sort,
             _that.isDebugMode);
       case _:
         return null;
@@ -377,8 +689,7 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
       this.defaultTranscodePresetId = 0,
       this.cpuThreads = 1,
       this.appVersion = '0.0.0',
-      this.sortType = SortType.name,
-      this.sortAsc = true,
+      this.sort = const Sort(),
       this.isDebugMode = kDebugMode})
       : _transcodingPresets = transcodingPresets,
         _luts = luts;
@@ -411,12 +722,11 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
   @override
   @JsonKey()
   final String appVersion;
+// @Default(SortType.name) SortType sortType,
+// @Default(true) bool sortAsc,
   @override
   @JsonKey()
-  final SortType sortType;
-  @override
-  @JsonKey()
-  final bool sortAsc;
+  final Sort sort;
   @override
   @JsonKey()
   final bool isDebugMode;
@@ -439,8 +749,7 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
           'defaultTranscodePresetId', defaultTranscodePresetId))
       ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
       ..add(DiagnosticsProperty('appVersion', appVersion))
-      ..add(DiagnosticsProperty('sortType', sortType))
-      ..add(DiagnosticsProperty('sortAsc', sortAsc))
+      ..add(DiagnosticsProperty('sort', sort))
       ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
   }
 
@@ -459,9 +768,7 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
                 other.cpuThreads == cpuThreads) &&
             (identical(other.appVersion, appVersion) ||
                 other.appVersion == appVersion) &&
-            (identical(other.sortType, sortType) ||
-                other.sortType == sortType) &&
-            (identical(other.sortAsc, sortAsc) || other.sortAsc == sortAsc) &&
+            (identical(other.sort, sort) || other.sort == sort) &&
             (identical(other.isDebugMode, isDebugMode) ||
                 other.isDebugMode == isDebugMode));
   }
@@ -474,13 +781,12 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
       defaultTranscodePresetId,
       cpuThreads,
       appVersion,
-      sortType,
-      sortAsc,
+      sort,
       isDebugMode);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sortType: $sortType, sortAsc: $sortAsc, isDebugMode: $isDebugMode)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode)';
   }
 }
 
@@ -497,9 +803,11 @@ abstract mixin class _$SettingsCopyWith<$Res>
       int defaultTranscodePresetId,
       int cpuThreads,
       String appVersion,
-      SortType sortType,
-      bool sortAsc,
+      Sort sort,
       bool isDebugMode});
+
+  @override
+  $SortCopyWith<$Res> get sort;
 }
 
 /// @nodoc
@@ -519,8 +827,7 @@ class __$SettingsCopyWithImpl<$Res> implements _$SettingsCopyWith<$Res> {
     Object? defaultTranscodePresetId = null,
     Object? cpuThreads = null,
     Object? appVersion = null,
-    Object? sortType = null,
-    Object? sortAsc = null,
+    Object? sort = null,
     Object? isDebugMode = null,
   }) {
     return _then(_Settings(
@@ -544,19 +851,25 @@ class __$SettingsCopyWithImpl<$Res> implements _$SettingsCopyWith<$Res> {
           ? _self.appVersion
           : appVersion // ignore: cast_nullable_to_non_nullable
               as String,
-      sortType: null == sortType
-          ? _self.sortType
-          : sortType // ignore: cast_nullable_to_non_nullable
-              as SortType,
-      sortAsc: null == sortAsc
-          ? _self.sortAsc
-          : sortAsc // ignore: cast_nullable_to_non_nullable
-              as bool,
+      sort: null == sort
+          ? _self.sort
+          : sort // ignore: cast_nullable_to_non_nullable
+              as Sort,
       isDebugMode: null == isDebugMode
           ? _self.isDebugMode
           : isDebugMode // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
+  }
+
+  /// Create a copy of Settings
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $SortCopyWith<$Res> get sort {
+    return $SortCopyWith<$Res>(_self.sort, (value) {
+      return _then(_self.copyWith(sort: value));
+    });
   }
 }
 

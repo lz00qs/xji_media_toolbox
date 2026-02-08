@@ -11,6 +11,7 @@ import 'package:window_manager/window_manager.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
+import '../../providers/settings.notifier.dart';
 import 'buttons/custom_icon_button.dart';
 import 'dialogs/settings_dialog.dart';
 
@@ -93,7 +94,8 @@ class _MacMainPageAppBar extends ConsumerWidget {
                 final selectedDirectory = await FilePicker.platform.getDirectoryPath();
                 if (selectedDirectory != null)
                   {
-                    await mediaResourcesNotifier.loadMediaResourcesFromDir(selectedDirectory);
+                    await mediaResourcesNotifier.loadMediaResourcesFromDir(selectedDirectory, false,
+                        ref.watch(settingsProvider).cpuThreads, ref.watch(settingsProvider).sort);
                   }
                 onPressed = false;
               }),

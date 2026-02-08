@@ -63,8 +63,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       transcodingPresets: transcodingPresets.map((e) => e.toModel()).toList(),
       defaultTranscodePresetId: defaultTranscodePresetId,
       luts: luts,
-      sortType: sortType,
-      sortAsc: sortAsc,
+      sort: Sort(sortType: sortType, sortAsc: sortAsc),
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
     );
@@ -220,5 +219,11 @@ class SettingsNotifier extends _$SettingsNotifier {
   void setIsDebugMode(bool value) {
     Logger.setLogLevel(value ? LogLevel.debug : LogLevel.info);
     state = state.copyWith(isDebugMode: value);
+  }
+
+  void setSort(Sort sort) {
+    state = state.copyWith(sort: sort);
+    _prefs.setInt(sortTypePrefKey, sort.sortType.index);
+    _prefs.setBool(sortOderPrefKey, sort.sortAsc);
   }
 }
