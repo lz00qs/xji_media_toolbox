@@ -10,6 +10,7 @@ abstract class MediaResourcesState with _$MediaResourcesState {
     @Default(false) bool isLoading,
     @Default(<MediaResource>[]) List<MediaResource> resources,
     @Default(0) int currentIndex,
+    @Default(0) int aebIndex,
     @Default(0.0) double loadProgress,
     @Default(false) bool isMultipleSelection,
     @Default(<MediaResource>[]) List<MediaResource> selectedResources,

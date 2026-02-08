@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
 
+import '../../models/media_resource.model.dart';
 import '../../providers/media_resources_state.notifier.dart';
 import '../../providers/settings.notifier.dart';
 import '../widgets/buttons/main_panel_button.dart';
+import '../widgets/panels/media_resource_info_panel.dart';
 import '../widgets/panels/media_resources_list_panel.dart';
 import '../widgets/resizable_panel.dart';
 import 'loading_media_resources_page.dart';
@@ -41,9 +43,11 @@ class _MainPageEmpty extends ConsumerWidget {
               final selectedDirectory =
                   await FilePicker.platform.getDirectoryPath();
               if (selectedDirectory != null) {
-                await mediaResourcesNotifier
-                    .loadMediaResourcesFromDir(selectedDirectory, false,
-                        ref.watch(settingsProvider).cpuThreads, ref.watch(settingsProvider).sort);
+                await mediaResourcesNotifier.loadMediaResourcesFromDir(
+                    selectedDirectory,
+                    false,
+                    ref.watch(settingsProvider).cpuThreads,
+                    ref.watch(settingsProvider).sort);
               }
               onPressed = false;
             }),
@@ -57,10 +61,20 @@ class _MainPageNotEmpty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    MediaResource? currentMediaResource;
+    currentMediaResource = ref.watch(mediaResourcesStateProvider.select((s) =>
+        s.resources.length > s.currentIndex
+            ? s.resources[s.currentIndex]
+            : null));
+    if (currentMediaResource is AebPhotoResource) {
+      currentMediaResource = currentMediaResource.aebResources[
+          ref.watch(mediaResourcesStateProvider.select((s) => s.aebIndex))];
+    }
     return ResizablePanel(
       mediaResourcesListPanel: MediaResourcesListPanel(),
-      mediaResourceInfoPanel: SizedBox(),
-      // mediaResourceInfoPanel: MediaResourceInfoPanel(),
+      mediaResourceInfoPanel: currentMediaResource != null
+          ? MediaResourceInfoPanel(mediaResource: currentMediaResource)
+          : SizedBox(),
       mainPanel: SizedBox(),
       // mainPanel: ref.watch(mediaResourcesProvider
       //     .select((state) => state.isMultipleSelection))
@@ -81,6 +95,7 @@ class MainPage extends ConsumerWidget {
         : mediaResourcesState.resources.isEmpty
             ? _MainPageEmpty()
             : _MainPageNotEmpty();
+    // return _MainPageNotEmpty();
   }
 }
 

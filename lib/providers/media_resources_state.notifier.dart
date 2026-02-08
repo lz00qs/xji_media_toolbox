@@ -124,7 +124,12 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   void setCurrentIndex(int index) {
-    state = state.copyWith(currentIndex: index);
+    if (index < state.resources.length) {
+      state = state.copyWith(currentIndex: index);
+      if (state.resources[index] is AebPhotoResource) {
+        state = state.copyWith(aebIndex: 0);
+      }
+    }
   }
 
   void clearSelectedResources() {

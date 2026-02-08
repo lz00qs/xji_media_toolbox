@@ -334,8 +334,7 @@ mixin _$Settings implements DiagnosticableTreeMixin {
   List<Lut> get luts;
   int get defaultTranscodePresetId;
   int get cpuThreads;
-  String get appVersion; // @Default(SortType.name) SortType sortType,
-// @Default(true) bool sortAsc,
+  String get appVersion;
   Sort get sort;
   bool get isDebugMode;
 
@@ -722,8 +721,6 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
   @override
   @JsonKey()
   final String appVersion;
-// @Default(SortType.name) SortType sortType,
-// @Default(true) bool sortAsc,
   @override
   @JsonKey()
   final Sort sort;
