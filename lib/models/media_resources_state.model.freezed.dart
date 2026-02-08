@@ -16,8 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$MediaResourcesState {
   bool get isLoading;
   List<MediaResource> get resources;
-  int get currentIndex;
-  int get aebIndex;
+  int get currentResourceIndex;
+  int get currentAebIndex;
   double get loadProgress;
   bool get isMultipleSelection;
   List<MediaResource> get selectedResources;
@@ -39,10 +39,10 @@ mixin _$MediaResourcesState {
             (identical(other.isLoading, isLoading) ||
                 other.isLoading == isLoading) &&
             const DeepCollectionEquality().equals(other.resources, resources) &&
-            (identical(other.currentIndex, currentIndex) ||
-                other.currentIndex == currentIndex) &&
-            (identical(other.aebIndex, aebIndex) ||
-                other.aebIndex == aebIndex) &&
+            (identical(other.currentResourceIndex, currentResourceIndex) ||
+                other.currentResourceIndex == currentResourceIndex) &&
+            (identical(other.currentAebIndex, currentAebIndex) ||
+                other.currentAebIndex == currentAebIndex) &&
             (identical(other.loadProgress, loadProgress) ||
                 other.loadProgress == loadProgress) &&
             (identical(other.isMultipleSelection, isMultipleSelection) ||
@@ -58,8 +58,8 @@ mixin _$MediaResourcesState {
       runtimeType,
       isLoading,
       const DeepCollectionEquality().hash(resources),
-      currentIndex,
-      aebIndex,
+      currentResourceIndex,
+      currentAebIndex,
       loadProgress,
       isMultipleSelection,
       const DeepCollectionEquality().hash(selectedResources),
@@ -67,7 +67,7 @@ mixin _$MediaResourcesState {
 
   @override
   String toString() {
-    return 'MediaResourcesState(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, aebIndex: $aebIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, resourcesPath: $resourcesPath)';
+    return 'MediaResourcesState(isLoading: $isLoading, resources: $resources, currentResourceIndex: $currentResourceIndex, currentAebIndex: $currentAebIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, resourcesPath: $resourcesPath)';
   }
 }
 
@@ -80,8 +80,8 @@ abstract mixin class $MediaResourcesStateCopyWith<$Res> {
   $Res call(
       {bool isLoading,
       List<MediaResource> resources,
-      int currentIndex,
-      int aebIndex,
+      int currentResourceIndex,
+      int currentAebIndex,
       double loadProgress,
       bool isMultipleSelection,
       List<MediaResource> selectedResources,
@@ -103,8 +103,8 @@ class _$MediaResourcesStateCopyWithImpl<$Res>
   $Res call({
     Object? isLoading = null,
     Object? resources = null,
-    Object? currentIndex = null,
-    Object? aebIndex = null,
+    Object? currentResourceIndex = null,
+    Object? currentAebIndex = null,
     Object? loadProgress = null,
     Object? isMultipleSelection = null,
     Object? selectedResources = null,
@@ -119,13 +119,13 @@ class _$MediaResourcesStateCopyWithImpl<$Res>
           ? _self.resources
           : resources // ignore: cast_nullable_to_non_nullable
               as List<MediaResource>,
-      currentIndex: null == currentIndex
-          ? _self.currentIndex
-          : currentIndex // ignore: cast_nullable_to_non_nullable
+      currentResourceIndex: null == currentResourceIndex
+          ? _self.currentResourceIndex
+          : currentResourceIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      aebIndex: null == aebIndex
-          ? _self.aebIndex
-          : aebIndex // ignore: cast_nullable_to_non_nullable
+      currentAebIndex: null == currentAebIndex
+          ? _self.currentAebIndex
+          : currentAebIndex // ignore: cast_nullable_to_non_nullable
               as int,
       loadProgress: null == loadProgress
           ? _self.loadProgress
@@ -243,8 +243,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
     TResult Function(
             bool isLoading,
             List<MediaResource> resources,
-            int currentIndex,
-            int aebIndex,
+            int currentResourceIndex,
+            int currentAebIndex,
             double loadProgress,
             bool isMultipleSelection,
             List<MediaResource> selectedResources,
@@ -258,8 +258,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
         return $default(
             _that.isLoading,
             _that.resources,
-            _that.currentIndex,
-            _that.aebIndex,
+            _that.currentResourceIndex,
+            _that.currentAebIndex,
             _that.loadProgress,
             _that.isMultipleSelection,
             _that.selectedResources,
@@ -287,8 +287,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
     TResult Function(
             bool isLoading,
             List<MediaResource> resources,
-            int currentIndex,
-            int aebIndex,
+            int currentResourceIndex,
+            int currentAebIndex,
             double loadProgress,
             bool isMultipleSelection,
             List<MediaResource> selectedResources,
@@ -301,8 +301,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
         return $default(
             _that.isLoading,
             _that.resources,
-            _that.currentIndex,
-            _that.aebIndex,
+            _that.currentResourceIndex,
+            _that.currentAebIndex,
             _that.loadProgress,
             _that.isMultipleSelection,
             _that.selectedResources,
@@ -329,8 +329,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
     TResult? Function(
             bool isLoading,
             List<MediaResource> resources,
-            int currentIndex,
-            int aebIndex,
+            int currentResourceIndex,
+            int currentAebIndex,
             double loadProgress,
             bool isMultipleSelection,
             List<MediaResource> selectedResources,
@@ -343,8 +343,8 @@ extension MediaResourcesStatePatterns on MediaResourcesState {
         return $default(
             _that.isLoading,
             _that.resources,
-            _that.currentIndex,
-            _that.aebIndex,
+            _that.currentResourceIndex,
+            _that.currentAebIndex,
             _that.loadProgress,
             _that.isMultipleSelection,
             _that.selectedResources,
@@ -361,8 +361,8 @@ class _MediaResourcesState implements MediaResourcesState {
   const _MediaResourcesState(
       {this.isLoading = false,
       final List<MediaResource> resources = const <MediaResource>[],
-      this.currentIndex = 0,
-      this.aebIndex = 0,
+      this.currentResourceIndex = 0,
+      this.currentAebIndex = 0,
       this.loadProgress = 0.0,
       this.isMultipleSelection = false,
       final List<MediaResource> selectedResources = const <MediaResource>[],
@@ -384,10 +384,10 @@ class _MediaResourcesState implements MediaResourcesState {
 
   @override
   @JsonKey()
-  final int currentIndex;
+  final int currentResourceIndex;
   @override
   @JsonKey()
-  final int aebIndex;
+  final int currentAebIndex;
   @override
   @JsonKey()
   final double loadProgress;
@@ -426,10 +426,10 @@ class _MediaResourcesState implements MediaResourcesState {
                 other.isLoading == isLoading) &&
             const DeepCollectionEquality()
                 .equals(other._resources, _resources) &&
-            (identical(other.currentIndex, currentIndex) ||
-                other.currentIndex == currentIndex) &&
-            (identical(other.aebIndex, aebIndex) ||
-                other.aebIndex == aebIndex) &&
+            (identical(other.currentResourceIndex, currentResourceIndex) ||
+                other.currentResourceIndex == currentResourceIndex) &&
+            (identical(other.currentAebIndex, currentAebIndex) ||
+                other.currentAebIndex == currentAebIndex) &&
             (identical(other.loadProgress, loadProgress) ||
                 other.loadProgress == loadProgress) &&
             (identical(other.isMultipleSelection, isMultipleSelection) ||
@@ -445,8 +445,8 @@ class _MediaResourcesState implements MediaResourcesState {
       runtimeType,
       isLoading,
       const DeepCollectionEquality().hash(_resources),
-      currentIndex,
-      aebIndex,
+      currentResourceIndex,
+      currentAebIndex,
       loadProgress,
       isMultipleSelection,
       const DeepCollectionEquality().hash(_selectedResources),
@@ -454,7 +454,7 @@ class _MediaResourcesState implements MediaResourcesState {
 
   @override
   String toString() {
-    return 'MediaResourcesState(isLoading: $isLoading, resources: $resources, currentIndex: $currentIndex, aebIndex: $aebIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, resourcesPath: $resourcesPath)';
+    return 'MediaResourcesState(isLoading: $isLoading, resources: $resources, currentResourceIndex: $currentResourceIndex, currentAebIndex: $currentAebIndex, loadProgress: $loadProgress, isMultipleSelection: $isMultipleSelection, selectedResources: $selectedResources, resourcesPath: $resourcesPath)';
   }
 }
 
@@ -469,8 +469,8 @@ abstract mixin class _$MediaResourcesStateCopyWith<$Res>
   $Res call(
       {bool isLoading,
       List<MediaResource> resources,
-      int currentIndex,
-      int aebIndex,
+      int currentResourceIndex,
+      int currentAebIndex,
       double loadProgress,
       bool isMultipleSelection,
       List<MediaResource> selectedResources,
@@ -492,8 +492,8 @@ class __$MediaResourcesStateCopyWithImpl<$Res>
   $Res call({
     Object? isLoading = null,
     Object? resources = null,
-    Object? currentIndex = null,
-    Object? aebIndex = null,
+    Object? currentResourceIndex = null,
+    Object? currentAebIndex = null,
     Object? loadProgress = null,
     Object? isMultipleSelection = null,
     Object? selectedResources = null,
@@ -508,13 +508,13 @@ class __$MediaResourcesStateCopyWithImpl<$Res>
           ? _self._resources
           : resources // ignore: cast_nullable_to_non_nullable
               as List<MediaResource>,
-      currentIndex: null == currentIndex
-          ? _self.currentIndex
-          : currentIndex // ignore: cast_nullable_to_non_nullable
+      currentResourceIndex: null == currentResourceIndex
+          ? _self.currentResourceIndex
+          : currentResourceIndex // ignore: cast_nullable_to_non_nullable
               as int,
-      aebIndex: null == aebIndex
-          ? _self.aebIndex
-          : aebIndex // ignore: cast_nullable_to_non_nullable
+      currentAebIndex: null == currentAebIndex
+          ? _self.currentAebIndex
+          : currentAebIndex // ignore: cast_nullable_to_non_nullable
               as int,
       loadProgress: null == loadProgress
           ? _self.loadProgress

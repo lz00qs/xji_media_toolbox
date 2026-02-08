@@ -6,6 +6,7 @@ import 'package:xji_footage_toolbox/ui/panels/photo_viewer_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
+import 'aeb_photo_viewer_panel.dart';
 
 class MainPanelSideBarControlButtons extends ConsumerWidget {
   const MainPanelSideBarControlButtons({super.key});
@@ -77,7 +78,7 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
           onPressed: () {
             ref
                 .read(mediaResourcesStateProvider.notifier)
-                .decreaseCurrentIndex();
+                .decreaseCurrentResourceIndex();
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,
@@ -93,7 +94,7 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
           onPressed: () {
             ref
                 .read(mediaResourcesStateProvider.notifier)
-                .increaseCurrentIndex();
+                .increaseCurrentResourceIndex();
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,
@@ -146,7 +147,7 @@ class MainPanel extends StatelessWidget {
         return PhotoViewerPanel(photoFile: resource.file);
       case AebPhotoResource():
         // TODO: Handle this case.
-        return SizedBox();
+        return AebPhotoViewerPanel(photoResource: resource as AebPhotoResource);
       case VideoResource():
         // TODO: Handle this case.
         return SizedBox();

@@ -199,7 +199,7 @@ class _MediaResourceListWidget extends ConsumerWidget {
             } else {
               ref
                   .read(mediaResourcesStateProvider.notifier)
-                  .setCurrentIndex(index);
+                  .setCurrentResourceIndex(index);
             }
           },
           child: ClipRRect(
@@ -386,7 +386,7 @@ class MediaResourcesListPanel extends ConsumerWidget {
     final mediaResources = ref
         .watch(mediaResourcesStateProvider.select((value) => value.resources));
     final currentIndex = ref.watch(
-        mediaResourcesStateProvider.select((value) => value.currentIndex));
+        mediaResourcesStateProvider.select((value) => value.currentResourceIndex));
     final isMultipleSelection = ref.watch(mediaResourcesStateProvider
         .select((value) => value.isMultipleSelection));
     final mediaResourcesLength = ref.watch(

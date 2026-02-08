@@ -55,14 +55,16 @@ class _MainPageNotEmpty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    MediaResource? currentMediaResource;
-    currentMediaResource = ref.watch(mediaResourcesStateProvider.select((s) =>
-        s.resources.length > s.currentIndex
-            ? s.resources[s.currentIndex]
+    final currentMediaResource = ref.watch(mediaResourcesStateProvider.select(
+        (s) => s.resources.length > s.currentResourceIndex
+            ? s.resources[s.currentResourceIndex]
             : null));
+    AebPhotoResource? currentAebResource = null;
     if (currentMediaResource is AebPhotoResource) {
-      currentMediaResource = currentMediaResource.aebResources[
-          ref.watch(mediaResourcesStateProvider.select((s) => s.aebIndex))];
+      currentAebResource = ref.watch(mediaResourcesStateProvider.select((s) =>
+          currentMediaResource.aebResources.length > s.currentAebIndex
+              ? currentMediaResource.aebResources[s.currentAebIndex]
+              : null));
     }
     return FocusScope(
         canRequestFocus: true,
@@ -76,12 +78,12 @@ class _MainPageNotEmpty extends ConsumerWidget {
                   case LogicalKeyboardKey.arrowUp:
                     ref
                         .read(mediaResourcesStateProvider.notifier)
-                        .decreaseCurrentIndex();
+                        .decreaseCurrentResourceIndex();
                     break;
                   case LogicalKeyboardKey.arrowDown:
                     ref
                         .read(mediaResourcesStateProvider.notifier)
-                        .increaseCurrentIndex();
+                        .increaseCurrentResourceIndex();
                     break;
                   case LogicalKeyboardKey.arrowLeft:
                     ref
@@ -99,7 +101,8 @@ class _MainPageNotEmpty extends ConsumerWidget {
             child: ResizablePanel(
               mediaResourcesListPanel: MediaResourcesListPanel(),
               mediaResourceInfoPanel: currentMediaResource != null
-                  ? MediaResourceInfoPanel(mediaResource: currentMediaResource)
+                  ? MediaResourceInfoPanel(
+                      mediaResource: currentAebResource ?? currentMediaResource)
                   : SizedBox(),
               mainPanel: currentMediaResource != null
                   ? MainPanel(resource: currentMediaResource)

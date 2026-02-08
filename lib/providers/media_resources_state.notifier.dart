@@ -123,54 +123,54 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     );
   }
 
-  void setCurrentIndex(int index) {
+  void setCurrentResourceIndex(int index) {
     if (index < state.resources.length) {
-      state = state.copyWith(currentIndex: index);
+      state = state.copyWith(currentResourceIndex: index);
       if (state.resources[index] is AebPhotoResource) {
-        state = state.copyWith(aebIndex: 0);
+        state = state.copyWith(currentAebIndex: 0);
       }
     }
   }
 
-  void increaseCurrentIndex() {
-    if (state.currentIndex < state.resources.length - 1) {
-      setCurrentIndex(state.currentIndex + 1);
+  void increaseCurrentResourceIndex() {
+    if (state.currentResourceIndex < state.resources.length - 1) {
+      setCurrentResourceIndex(state.currentResourceIndex + 1);
     }
   }
 
-  void decreaseCurrentIndex() {
-    if (state.currentIndex > 0) {
-      setCurrentIndex(state.currentIndex - 1);
+  void decreaseCurrentResourceIndex() {
+    if (state.currentResourceIndex > 0) {
+      setCurrentResourceIndex(state.currentResourceIndex - 1);
     }
   }
 
-  void setAebIndex(int index) {
-    if (state.resources[state.currentIndex] is AebPhotoResource) {
+  void setCurrentAebIndex(int index) {
+    if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
       if (index <
-          (state.resources[state.currentIndex] as AebPhotoResource)
+          (state.resources[state.currentResourceIndex] as AebPhotoResource)
               .aebResources
               .length) {
-        state = state.copyWith(aebIndex: index);
+        state = state.copyWith(currentAebIndex: index);
       }
     }
   }
 
   void increaseCurrentAebIndex() {
-    if (state.resources[state.currentIndex] is AebPhotoResource) {
-      if (state.aebIndex <
-          (state.resources[state.currentIndex] as AebPhotoResource)
+    if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
+      if (state.currentAebIndex <
+          (state.resources[state.currentResourceIndex] as AebPhotoResource)
                   .aebResources
                   .length -
               1) {
-        setAebIndex(state.aebIndex + 1);
+        setCurrentAebIndex(state.currentAebIndex + 1);
       }
     }
   }
 
   void decreaseCurrentAebIndex() {
-    if (state.resources[state.currentIndex] is AebPhotoResource) {
-      if (state.aebIndex > 0) {
-        setAebIndex(state.aebIndex - 1);
+    if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
+      if (state.currentAebIndex > 0) {
+        setCurrentAebIndex(state.currentAebIndex - 1);
       }
     }
   }
