@@ -151,7 +151,7 @@ class MainPanel extends StatelessWidget {
         return AebPhotoViewerPanel(photoResource: resource as AebPhotoResource);
       case VideoResource():
         // TODO: Handle this case.
-        return VideoPanel(resource: resource);
+        return VideoPanel(resource: resource as VideoResource);
     }
   }
 }

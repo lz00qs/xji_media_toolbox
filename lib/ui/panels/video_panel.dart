@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_player_panel.dart';
+import 'package:xji_footage_toolbox/ui/panels/video_trimmer_panel.dart';
 
 part 'video_panel.g.dart';
 
@@ -13,14 +14,15 @@ class VideoPanelState extends _$VideoPanelState {
 }
 
 class VideoPanel extends ConsumerWidget {
-  final MediaResource resource;
+  final VideoResource resource;
 
   const VideoPanel({super.key, required this.resource});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return VideoPlayerPanel(
-      videoFile: resource.file,
-    );
+    // return VideoPlayerPanel(
+    //   videoFile: resource.file,
+    // );
+    return VideoTrimmerPanel(resource: resource);
   }
 }
