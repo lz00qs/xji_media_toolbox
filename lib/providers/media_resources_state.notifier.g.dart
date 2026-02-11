@@ -42,7 +42,7 @@ final class MediaResourcesStateNotifierProvider extends $NotifierProvider<
 }
 
 String _$mediaResourcesStateNotifierHash() =>
-    r'2ec0e5131743b78f1f9f0ec676dc2d57a23c11ff';
+    r'3e365feab09ec8448c3154302ba11a315e04fb9b';
 
 abstract class _$MediaResourcesStateNotifier
     extends $Notifier<MediaResourcesState> {

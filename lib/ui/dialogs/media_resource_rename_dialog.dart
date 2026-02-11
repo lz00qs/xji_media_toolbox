@@ -14,24 +14,12 @@ part 'media_resource_rename_dialog.g.dart';
 const _fileExistErrorText = 'File already exists';
 const _invalidNameErrorText = 'Invalid name';
 
-// class _RenameDialogState {
-//   final bool isNewNameValid;
-//   final String errorText;
-//
-//   const _RenameDialogState({this.isNewNameValid = true, this.errorText = ''});
-//
-//   _RenameDialogState copyWith({bool? isNewNameValid, String? errorText}) {
-//     return _RenameDialogState(
-//       isNewNameValid: isNewNameValid ?? this.isNewNameValid,
-//       errorText: errorText ?? this.errorText,
-//     );
-//   }
-// }
-
 @freezed
 abstract class _RenameDialogState with _$RenameDialogState {
   const factory _RenameDialogState({
+    // ignore: unused_element_parameter
     @Default(false) bool isNewNameValid,
+    // ignore: unused_element_parameter
     @Default(_fileExistErrorText) String errorText,
   }) = __RenameDialogState;
 }
@@ -103,10 +91,6 @@ class MediaResourceRenameDialog extends ConsumerWidget {
       option2: 'Cancel',
       disableOption1: !state.isNewNameValid,
       onOption1Pressed: () {
-        // ref.read(mediaResourcesProvider.notifier).renameResource(
-        //   resource: mediaResource,
-        //   newName: '${controller.text}.$ext',
-        // );
         Navigator.of(context).pop(controller.text);
       },
       onOption2Pressed: () {

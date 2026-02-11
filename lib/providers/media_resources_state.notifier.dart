@@ -197,8 +197,6 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
     switch (sort.sortType) {
       case SortType.name:
-        // state.resources.sort((a, b) =>
-        //     sort.sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
         resources.sort((a, b) =>
             sort.sortAsc ? a.name.compareTo(b.name) : b.name.compareTo(a.name));
         break;
@@ -324,23 +322,6 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     final mediaResourceIndex = state.resources.indexOf(mediaResource);
     if (mediaResourceIndex != -1) {
       final ext = mediaResource.file.path.split('.').last;
-      // final newPath = '${mediaResource.file.parent.path}/$newName.$ext';
-      // try {
-      //   await mediaResource.file.rename(newPath);
-      // } catch (e) {
-      //   Logger.error(
-      //       'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
-      //   Toast.error(
-      //       'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
-      //   return;
-      // }
-      // state = state.copyWith(
-      //   resources: [
-      //     ...state.resources.sublist(0, mediaResourceIndex),
-      //     mediaResource.copyWith(file: File(newPath)),
-      //     ...state.resources.sublist(mediaResourceIndex + 1)
-      //   ],
-      // );
       switch (mediaResource) {
         case PhotoResource():
         case VideoResource():
@@ -351,7 +332,7 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
               resources: [
                 ...state.resources.sublist(0, mediaResourceIndex),
                 mediaResource.copyWith(
-                  name: newName,
+                  name: '$newName.$ext',
                   file: File('${mediaResource.file.parent.path}/$newName.$ext'),
                   thumbFile: (mediaResource is PhotoResource)
                       ? File('${mediaResource.file.parent.path}/$newName.$ext')
@@ -371,11 +352,11 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
           final List<AebPhotoResource> newAebResources = [];
           for (final aebResource in mediaResource.aebResources) {
             try {
-              final aebNewName = '${newName}_${aebResource.evBias}';
+              final aebNewName = '${newName}_AEB_${aebResource.evBias}';
               await aebResource.file
                   .rename('${aebResource.file.parent.path}/$aebNewName.$ext');
               newAebResources.add(aebResource.copyWith(
-                  name: aebNewName,
+                  name: '$aebNewName.$ext',
                   file:
                       File('${aebResource.file.parent.path}/$aebNewName.$ext'),
                   thumbFile: File(
@@ -403,6 +384,16 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     if (state.currentResourceIndex != -1) {
       await _renameResource(
           state.resources[state.currentResourceIndex], newName);
+    }
+  }
+
+  Future<void> addAebSuffixToCurrentAebFilesName() async {
+    if (state.currentResourceIndex != -1) {
+      final mediaResource = state.resources[state.currentResourceIndex];
+      if (mediaResource is AebPhotoResource) {
+        await renameCurrentMediaResource(mediaResource.name
+            .substring(0, mediaResource.name.lastIndexOf('.')));
+      }
     }
   }
 }

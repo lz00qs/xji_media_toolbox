@@ -5,6 +5,7 @@ import '../../models/media_resource.model.dart';
 import '../../providers/media_resources_state.notifier.dart';
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
+import '../dialogs/aeb_add_suffix_dialog.dart';
 import '../photo_viewer.dart';
 import 'main_panel.dart';
 import 'media_resources_list_panel.dart';
@@ -102,13 +103,13 @@ class _AebPhotoThumbnailList extends StatelessWidget {
   }
 }
 
-class AebPhotoViewerPanel extends StatelessWidget {
+class AebPhotoViewerPanel extends ConsumerWidget {
   final AebPhotoResource photoResource;
 
   const AebPhotoViewerPanel({super.key, required this.photoResource});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -202,10 +203,16 @@ class AebPhotoViewerPanel extends StatelessWidget {
             CustomIconButton(
                 iconData: Icons.upload,
                 onPressed: () async {
-                  // await showDialog(
-                  //     context: context, builder: (BuildContext context) {
-                  //   return AebAddSuffixDialog();
-                  // });
+                  final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AebAddSuffixDialog();
+                      });
+                  if (result == true) {
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .addAebSuffixToCurrentAebFilesName();
+                  }
                 },
                 iconSize: DesignValues.mediumIconSize,
                 buttonSize: DesignValues.appBarHeight,
