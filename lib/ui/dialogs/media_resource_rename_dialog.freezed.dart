@@ -14,8 +14,9 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RenameDialogState {
-// ignore: unused_element_parameter
-  bool get isNewNameValid; // ignore: unused_element_parameter
+  // ignore: unused_element_parameter
+  bool get isNewNameValid;
+  // ignore: unused_element_parameter
   String get errorText;
 
   /// Create a copy of _RenameDialogState
