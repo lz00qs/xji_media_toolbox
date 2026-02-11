@@ -1,0 +1,95 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:xji_footage_toolbox/models/media_resource.model.dart';
+import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
+import '../buttons/main_panel_button.dart';
+import '../design_tokens.dart';
+
+class _DeleteButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _DeleteButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    var isPressed = false;
+    return MainPanelButton(
+        iconData: Icons.delete,
+        onPressed: () async {
+          if (isPressed) {
+            return;
+          }
+          isPressed = true;
+          onPressed();
+          isPressed = false;
+        });
+  }
+}
+
+class _MergeVideoButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _MergeVideoButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    var isPressed = false;
+    return MainPanelButton(
+        iconData: Icons.merge_type,
+        onPressed: () async {
+          if (isPressed) {
+            return;
+          }
+          isPressed = true;
+          onPressed();
+          isPressed = false;
+        });
+  }
+}
+
+class MultiSelectPanel extends ConsumerWidget {
+  const MultiSelectPanel({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final containPhotos = ref.watch(mediaResourcesStateProvider.select(
+        (state) => state.selectedResources
+            .any((element) => element is! VideoResource)));
+    final selectedResourcesIsEmpty = ref.watch(mediaResourcesStateProvider
+        .select((state) => state.selectedResources.isEmpty));
+    return Center(
+      child: selectedResourcesIsEmpty
+          ? Text('Select some resources first!',
+              style: SemiTextStyles.header4ENRegular
+                  .copyWith(color: ColorDark.text0))
+          : containPhotos
+              ? _DeleteButton(onPressed: () async {
+                  // await showDialog(
+                  //     context: context,
+                  //     builder: (BuildContext context) {
+                  //       return const MediaResourceDeleteDialog();
+                  //     });
+                })
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _DeleteButton(onPressed: () async {
+                      // await showDialog(
+                      //     context: context,
+                      //     builder: (BuildContext context) {
+                      //       return const MediaResourceDeleteDialog();
+                      //     });
+                    }),
+                    const SizedBox(
+                      width: 64,
+                    ),
+                    _MergeVideoButton(onPressed: () {
+                      // ref
+                      //     .read(mediaResourcesProvider.notifier)
+                      //     .setIsMerging(true);
+                    })
+                  ],
+                ),
+    );
+  }
+}

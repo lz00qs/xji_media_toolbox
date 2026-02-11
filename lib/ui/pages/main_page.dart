@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
+import 'package:xji_footage_toolbox/ui/panels/multi_select_panel.dart';
 
 import '../../models/media_resource.model.dart';
 import '../../providers/media_resources_state.notifier.dart';
@@ -59,13 +60,15 @@ class _MainPageNotEmpty extends ConsumerWidget {
         (s) => s.resources.length > s.currentResourceIndex
             ? s.resources[s.currentResourceIndex]
             : null));
-    AebPhotoResource? currentAebResource = null;
+    AebPhotoResource? currentAebResource;
     if (currentMediaResource is AebPhotoResource) {
       currentAebResource = ref.watch(mediaResourcesStateProvider.select((s) =>
           currentMediaResource.aebResources.length > s.currentAebIndex
               ? currentMediaResource.aebResources[s.currentAebIndex]
               : null));
     }
+    final isMultipleSelection = ref.watch(
+        mediaResourcesStateProvider.select((s) => s.isMultipleSelection));
     return FocusScope(
         canRequestFocus: true,
         autofocus: true,
@@ -105,7 +108,9 @@ class _MainPageNotEmpty extends ConsumerWidget {
                       mediaResource: currentAebResource ?? currentMediaResource)
                   : SizedBox(),
               mainPanel: currentMediaResource != null
-                  ? MainPanel(resource: currentMediaResource)
+                  ? isMultipleSelection
+                      ? MultiSelectPanel()
+                      : MainPanel(resource: currentMediaResource)
                   : SizedBox(),
             )));
   }
