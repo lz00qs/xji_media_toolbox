@@ -627,7 +627,7 @@ class _VideoTrimmerPanelStateNotifier extends _$VideoTrimmerPanelStateNotifier {
       videoPlayerController: _videoController,
       autoPlay: false,
       looping: false,
-      showControls: true,
+      showControls: false,
     );
     ref.onDispose(() async {
       await _videoController.dispose();
