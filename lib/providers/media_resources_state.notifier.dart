@@ -187,7 +187,9 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
   void removeSelectedResource(MediaResource mediaResource) {
     state = state.copyWith(
-      selectedResources: state.selectedResources..remove(mediaResource),
+      selectedResources: state.selectedResources
+          .where((e) => e != mediaResource)
+          .toList(),
     );
   }
 
