@@ -183,66 +183,88 @@ class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
               .round() *
           _stepWidth,
     );
-    print('videoWidth: ${state.videoWidth} | scale: ${_scaleValueList[state.stepValueIndex]}');
+
     double scrollFactor = 1;
-    // print('stepValueIndex: ${stepValueIndex.value}');
+    const int zoomInRationOdd = 5;
+    const int zoomInRationEven = 2;
+
     if (state.lastStepValueIndex > state.stepValueIndex) {
-      // _zoomIn();
-      final ration = state.stepValueIndex.isOdd ? 5 : 2;
+      final ration =
+          state.stepValueIndex.isOdd ? zoomInRationOdd : zoomInRationEven;
       for (var i = 0;
           i < state.lastStepValueIndex - state.stepValueIndex;
           i++) {
         state = state.copyWith(
           actualStartPosition: state.actualStartPosition * ration,
-          startPosition:
-              (state.actualStartPosition * ration).round().toDouble(),
           actualEndPosition: state.actualEndPosition * ration,
-          endPosition: (state.actualEndPosition * ration).round().toDouble(),
         );
+        _updatePositions(state.cutEnd.inMicroseconds ==
+            (resource as VideoResource).duration.inMicroseconds);
+        if (state.endPosition > state.videoWidth) {
+          state = state.copyWith(
+            endPosition: state.videoWidth,
+            actualEndPosition: state.videoWidth,
+          );
+        }
       }
-      scrollFactor = (1 * ration).toDouble();
+      scrollFactor = ration.toDouble();
     } else if (state.lastStepValueIndex < state.stepValueIndex) {
-      // _zoomOut();
-      final ration = state.stepValueIndex.isOdd ? 2 : 5;
+      final ration =
+          state.stepValueIndex.isOdd ? zoomInRationEven : zoomInRationOdd;
       for (var i = 0;
           i < state.stepValueIndex - state.lastStepValueIndex;
           i++) {
         state = state.copyWith(
           actualStartPosition: state.actualStartPosition / ration,
-          startPosition:
-              (state.actualStartPosition / ration).round().toDouble(),
           actualEndPosition: state.actualEndPosition / ration,
-          endPosition: (state.actualEndPosition / ration).round().toDouble(),
         );
+        _updatePositions(state.cutEnd.inMicroseconds ==
+            (resource as VideoResource).duration.inMicroseconds);
       }
       scrollFactor = 1 / ration;
     }
+
     if (state.endPosition - state.startPosition < _thumbBetweenDistance) {
-      // 距离过近，向左或者向右扩展
       if (state.actualEndPosition + _thumbBetweenDistance < state.videoWidth) {
         state = state.copyWith(
           actualEndPosition: state.actualStartPosition + _thumbBetweenDistance,
-          endPosition:
-              (state.actualEndPosition + _thumbBetweenDistance / _stepWidth)
-                      .round() *
-                  _stepWidth,
         );
+        _updatePositions(state.cutEnd.inMicroseconds ==
+            (resource as VideoResource).duration.inMicroseconds);
       } else if (state.actualStartPosition - _thumbBetweenDistance > 0) {
         state = state.copyWith(
           actualStartPosition: state.actualEndPosition - _thumbBetweenDistance,
-          startPosition:
-              (state.actualStartPosition - _thumbBetweenDistance / _stepWidth)
-                      .round() *
-                  _stepWidth,
         );
+        _updatePositions(state.cutEnd.inMicroseconds ==
+            (resource as VideoResource).duration.inMicroseconds);
       }
     }
-    scrollController.jumpTo(scrollController.position.pixels * scrollFactor);
-    // print(
-    //     'start: ${startPosition.value}, end: ${endPosition.value}, width: $videoResourceWidth');
+
+    scrollController.jumpTo(
+      (scrollController.position.pixels +
+                  trimmerWidth / 2 -
+                  DesignValues.mediumPadding) *
+              scrollFactor -
+          trimmerWidth / 2 +
+          DesignValues.mediumPadding,
+    );
+
     state = state.copyWith(lastStepValueIndex: state.stepValueIndex);
-    print(state);
-    print('TrimmerWidth: $trimmerWidth');
+  }
+
+  void _updatePositions(bool isEndFull) {
+    if (kDebugMode) {
+      print(
+        'update positions, isEndFull: $isEndFull, actualStartPosition: ${state.actualStartPosition}, actualEndPosition: ${state.actualEndPosition}');
+    }
+    state = state.copyWith(
+      startPosition:
+          (state.actualStartPosition / _stepWidth).round() * _stepWidth,
+      // endPosition: (state.actualEndPosition / _stepWidth).round() * _stepWidth,
+      endPosition: isEndFull
+          ? state.videoWidth
+          : (state.actualEndPosition / _stepWidth).round() * _stepWidth,
+    );
   }
 
   void zoomIn() {
