@@ -318,6 +318,93 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
       await _deleteResource(mediaResource);
     }
   }
+
+  Future<void> _renameResource(
+      MediaResource mediaResource, String newName) async {
+    final mediaResourceIndex = state.resources.indexOf(mediaResource);
+    if (mediaResourceIndex != -1) {
+      final ext = mediaResource.file.path.split('.').last;
+      // final newPath = '${mediaResource.file.parent.path}/$newName.$ext';
+      // try {
+      //   await mediaResource.file.rename(newPath);
+      // } catch (e) {
+      //   Logger.error(
+      //       'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
+      //   Toast.error(
+      //       'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
+      //   return;
+      // }
+      // state = state.copyWith(
+      //   resources: [
+      //     ...state.resources.sublist(0, mediaResourceIndex),
+      //     mediaResource.copyWith(file: File(newPath)),
+      //     ...state.resources.sublist(mediaResourceIndex + 1)
+      //   ],
+      // );
+      switch (mediaResource) {
+        case PhotoResource():
+        case VideoResource():
+          try {
+            await mediaResource.file
+                .rename('${mediaResource.file.parent.path}/$newName.$ext');
+            state = state.copyWith(
+              resources: [
+                ...state.resources.sublist(0, mediaResourceIndex),
+                mediaResource.copyWith(
+                  name: newName,
+                  file: File('${mediaResource.file.parent.path}/$newName.$ext'),
+                  thumbFile: (mediaResource is PhotoResource)
+                      ? File('${mediaResource.file.parent.path}/$newName.$ext')
+                      : mediaResource.thumbFile,
+                ),
+                ...state.resources.sublist(mediaResourceIndex + 1)
+              ],
+            );
+          } catch (e) {
+            Logger.error(
+                'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
+            Toast.error(
+                'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e');
+          }
+          break;
+        case AebPhotoResource():
+          final List<AebPhotoResource> newAebResources = [];
+          for (final aebResource in mediaResource.aebResources) {
+            try {
+              final aebNewName = '${newName}_${aebResource.evBias}';
+              await aebResource.file
+                  .rename('${aebResource.file.parent.path}/$aebNewName.$ext');
+              newAebResources.add(aebResource.copyWith(
+                  name: aebNewName,
+                  file:
+                      File('${aebResource.file.parent.path}/$aebNewName.$ext'),
+                  thumbFile: File(
+                      '${aebResource.file.parent.path}/$aebNewName.$ext')));
+            } catch (e) {
+              Logger.error(
+                  'Rename media resource ${aebResource.file.uri.pathSegments.last} to $newName failed: $e');
+              Toast.error(
+                  'Rename media resource ${aebResource.file.uri.pathSegments.last} to $newName failed: $e');
+            }
+          }
+          state = state.copyWith(
+            resources: [
+              ...state.resources.sublist(0, mediaResourceIndex),
+              newAebResources.first.copyWith(aebResources: newAebResources),
+              ...state.resources.sublist(mediaResourceIndex + 1)
+            ],
+          );
+          break;
+      }
+    }
+  }
+
+  Future<void> renameCurrentMediaResource(String newName) async {
+    if (state.currentResourceIndex != -1) {
+      await _renameResource(
+          state.resources[state.currentResourceIndex], newName);
+    }
+  }
 }
 
 void _prepareThumbnailFolder(String mediaResourcesPath) {

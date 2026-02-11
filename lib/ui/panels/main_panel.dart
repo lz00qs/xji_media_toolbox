@@ -8,6 +8,7 @@ import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
 import '../dialogs/media_resource_delete_dialog.dart';
+import '../dialogs/media_resource_rename_dialog.dart';
 import 'aeb_photo_viewer_panel.dart';
 
 class MainPanelSideBarControlButtons extends ConsumerWidget {
@@ -24,9 +25,13 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
           onPressed: () async {
             final result = await showDialog<bool>(
                 context: context,
-                builder: (BuildContext context) => MediaResourceDeleteDialog(mediaResourcesLength: 1,));
+                builder: (BuildContext context) => MediaResourceDeleteDialog(
+                      mediaResourcesLength: 1,
+                    ));
             if (result == true) {
-              await ref.read(mediaResourcesStateProvider.notifier).deleteCurrentMediaResource();
+              await ref
+                  .read(mediaResourcesStateProvider.notifier)
+                  .deleteCurrentMediaResource();
             }
           },
           iconSize: DesignValues.mediumIconSize,
@@ -41,33 +46,18 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
         CustomIconButton(
           iconData: Icons.drive_file_rename_outline_rounded,
           onPressed: () async {
-            // await Get.dialog(const MediaResourceRenameDialog());
-            // final mediaResourcesLength = ref.watch(mediaResourcesProvider
-            //     .select((value) => value.resources.length));
-            //
-            // final mediaResourcesLength = ref.watch(mediaResourcesProvider.select((m) => m.resources.length));
-            // if (mediaResourcesLength == 0) {
-            //   return;
-            // }
-            // final mediaResources = ref.watch(
-            //     mediaResourcesProvider.select((value) => value.resources));
-            // final currentIndex = ref.watch(
-            //     mediaResourcesProvider.select((value) => value.currentIndex));
-            // final mediaResource = mediaResources[currentIndex];
-            // if (mediaResource.isAeb) {
-            //   await showDialog(
-            //       context: context,
-            //       builder: (BuildContext context) => MediaResourceRenameDialog(
-            //           mediaResource:
-            //           (mediaResource as AebPhotoResource).aebResources[
-            //           ref.watch(mediaResourcesProvider
-            //               .select((value) => value.currentAebIndex))]));
-            // } else {
-            //   await showDialog(
-            //       context: context,
-            //       builder: (BuildContext context) =>
-            //           MediaResourceRenameDialog(mediaResource: mediaResource));
-            // }
+            final newName = await showDialog<String>(
+                context: context,
+                builder: (BuildContext context) => MediaResourceRenameDialog(
+                    mediaResource:
+                        ref.watch(mediaResourcesStateProvider).resources[ref
+                            .watch(mediaResourcesStateProvider)
+                            .currentResourceIndex]));
+            if (newName != null && newName != '') {
+              await ref
+                  .read(mediaResourcesStateProvider.notifier)
+                  .renameCurrentMediaResource(newName);
+            }
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,
