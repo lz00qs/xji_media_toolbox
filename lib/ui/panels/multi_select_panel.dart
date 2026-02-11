@@ -6,6 +6,7 @@ import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dar
 import 'package:xji_footage_toolbox/ui/panels/video_merger_panel.dart';
 import '../buttons/main_panel_button.dart';
 import '../design_tokens.dart';
+import '../dialogs/media_resource_delete_dialog.dart';
 
 part 'multi_select_panel.g.dart';
 
@@ -78,11 +79,20 @@ class MultiSelectPanel extends ConsumerWidget {
                   .copyWith(color: ColorDark.text0))
           : containPhotos
               ? _DeleteButton(onPressed: () async {
-                  // await showDialog(
-                  //     context: context,
-                  //     builder: (BuildContext context) {
-                  //       return const MediaResourceDeleteDialog();
-                  //     });
+                  final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) =>
+                          MediaResourceDeleteDialog(
+                            mediaResourcesLength: ref
+                                .watch(mediaResourcesStateProvider)
+                                .selectedResources
+                                .length,
+                          ));
+                  if (result == true) {
+                    await ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .deleteSelectedMediaResources();
+                  }
                 })
               : ref.watch(isMergingProvider)
                   ? VideoMergerPanel()
@@ -90,11 +100,20 @@ class MultiSelectPanel extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _DeleteButton(onPressed: () async {
-                          // await showDialog(
-                          //     context: context,
-                          //     builder: (BuildContext context) {
-                          //       return const MediaResourceDeleteDialog();
-                          //     });
+                          final result = await showDialog<bool>(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  MediaResourceDeleteDialog(
+                                    mediaResourcesLength: ref
+                                        .watch(mediaResourcesStateProvider)
+                                        .selectedResources
+                                        .length,
+                                  ));
+                          if (result == true) {
+                            await ref
+                                .read(mediaResourcesStateProvider.notifier)
+                                .deleteSelectedMediaResources();
+                          }
                         }),
                         const SizedBox(
                           width: 64,

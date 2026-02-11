@@ -7,6 +7,7 @@ import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
+import '../dialogs/media_resource_delete_dialog.dart';
 import 'aeb_photo_viewer_panel.dart';
 
 class MainPanelSideBarControlButtons extends ConsumerWidget {
@@ -21,9 +22,12 @@ class MainPanelSideBarControlButtons extends ConsumerWidget {
         CustomIconButton(
           iconData: Icons.delete,
           onPressed: () async {
-            // await showDialog(
-            //     context: context,
-            //     builder: (BuildContext context) => MediaResourceDeleteDialog());
+            final result = await showDialog<bool>(
+                context: context,
+                builder: (BuildContext context) => MediaResourceDeleteDialog(mediaResourcesLength: 1,));
+            if (result == true) {
+              await ref.read(mediaResourcesStateProvider.notifier).deleteCurrentMediaResource();
+            }
           },
           iconSize: DesignValues.mediumIconSize,
           buttonSize: DesignValues.appBarHeight,

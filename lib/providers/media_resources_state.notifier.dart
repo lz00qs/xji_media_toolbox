@@ -187,9 +187,8 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
   void removeSelectedResource(MediaResource mediaResource) {
     state = state.copyWith(
-      selectedResources: state.selectedResources
-          .where((e) => e != mediaResource)
-          .toList(),
+      selectedResources:
+          state.selectedResources.where((e) => e != mediaResource).toList(),
     );
   }
 
@@ -256,6 +255,68 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
     final item = updated.removeAt(oldIndex);
     updated.insert(newIndex, item);
     state = state.copyWith(selectedResources: updated);
+  }
+
+  Future<void> _deleteResource(MediaResource mediaResource) async {
+    final mediaResourceIndex = state.resources.indexOf(mediaResource);
+    if (mediaResourceIndex != -1) {
+      if (mediaResourceIndex == state.currentResourceIndex) {
+        if (mediaResourceIndex != 0 &&
+            (mediaResourceIndex == state.resources.length - 1)) {
+          setCurrentResourceIndex(state.currentResourceIndex - 1);
+        }
+      }
+      state = state.copyWith(
+        resources: state.resources.where((e) => e != mediaResource).toList(),
+      );
+      switch (mediaResource) {
+        case PhotoResource():
+        case VideoResource():
+          try {
+            await mediaResource.file.delete();
+          } catch (e) {
+            Logger.error(
+                'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e');
+            Toast.error(
+                'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e');
+          }
+          if (mediaResource is VideoResource) {
+            try {
+              await mediaResource.thumbFile.delete();
+            } catch (e) {
+              Logger.error(
+                  'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e');
+              Toast.error(
+                  'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e');
+            }
+          }
+          break;
+        case AebPhotoResource():
+          for (final aebResource in mediaResource.aebResources) {
+            try {
+              await aebResource.file.delete();
+            } catch (e) {
+              Logger.error(
+                  'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e');
+              Toast.error(
+                  'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e');
+            }
+          }
+          break;
+      }
+    }
+  }
+
+  Future<void> deleteCurrentMediaResource() async {
+    if (state.currentResourceIndex != -1) {
+      await _deleteResource(state.resources[state.currentResourceIndex]);
+    }
+  }
+
+  Future<void> deleteSelectedMediaResources() async {
+    for (final mediaResource in state.selectedResources) {
+      await _deleteResource(mediaResource);
+    }
   }
 }
 
