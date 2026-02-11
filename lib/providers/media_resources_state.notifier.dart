@@ -248,6 +248,15 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
     return mediaResources;
   }
+
+  void reorderSelectedResources(
+      {required int oldIndex, required int newIndex}) {
+    if (oldIndex < newIndex) newIndex -= 1;
+    final updated = [...(state.selectedResources)];
+    final item = updated.removeAt(oldIndex);
+    updated.insert(newIndex, item);
+    state = state.copyWith(selectedResources: updated);
+  }
 }
 
 void _prepareThumbnailFolder(String mediaResourcesPath) {

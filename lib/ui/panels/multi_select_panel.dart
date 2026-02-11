@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
+import 'package:xji_footage_toolbox/ui/panels/video_merger_panel.dart';
 import '../buttons/main_panel_button.dart';
 import '../design_tokens.dart';
+
+part 'multi_select_panel.g.dart';
 
 class _DeleteButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -47,6 +51,16 @@ class _MergeVideoButton extends StatelessWidget {
   }
 }
 
+@riverpod
+class IsMergingNotifier extends _$IsMergingNotifier {
+  @override
+  bool build() => false;
+
+  void toggle() {
+    state = !state;
+  }
+}
+
 class MultiSelectPanel extends ConsumerWidget {
   const MultiSelectPanel({super.key});
 
@@ -70,26 +84,26 @@ class MultiSelectPanel extends ConsumerWidget {
                   //       return const MediaResourceDeleteDialog();
                   //     });
                 })
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _DeleteButton(onPressed: () async {
-                      // await showDialog(
-                      //     context: context,
-                      //     builder: (BuildContext context) {
-                      //       return const MediaResourceDeleteDialog();
-                      //     });
-                    }),
-                    const SizedBox(
-                      width: 64,
+              : ref.watch(isMergingProvider)
+                  ? VideoMergerPanel()
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _DeleteButton(onPressed: () async {
+                          // await showDialog(
+                          //     context: context,
+                          //     builder: (BuildContext context) {
+                          //       return const MediaResourceDeleteDialog();
+                          //     });
+                        }),
+                        const SizedBox(
+                          width: 64,
+                        ),
+                        _MergeVideoButton(onPressed: () {
+                          ref.read(isMergingProvider.notifier).toggle();
+                        })
+                      ],
                     ),
-                    _MergeVideoButton(onPressed: () {
-                      // ref
-                      //     .read(mediaResourcesProvider.notifier)
-                      //     .setIsMerging(true);
-                    })
-                  ],
-                ),
     );
   }
 }
