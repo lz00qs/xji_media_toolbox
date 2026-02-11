@@ -9,28 +9,28 @@ part of 'video_panel.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 
-@ProviderFor(VideoPanelState)
-final videoPanelStateProvider = VideoPanelStateProvider._();
+@ProviderFor(VideoPanelNotifier)
+final videoPanelProvider = VideoPanelNotifierProvider._();
 
-final class VideoPanelStateProvider
-    extends $NotifierProvider<VideoPanelState, bool> {
-  VideoPanelStateProvider._()
+final class VideoPanelNotifierProvider
+    extends $NotifierProvider<VideoPanelNotifier, bool> {
+  VideoPanelNotifierProvider._()
       : super(
           from: null,
           argument: null,
           retry: null,
-          name: r'videoPanelStateProvider',
+          name: r'videoPanelProvider',
           isAutoDispose: true,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
 
   @override
-  String debugGetCreateSourceHash() => _$videoPanelStateHash();
+  String debugGetCreateSourceHash() => _$videoPanelNotifierHash();
 
   @$internal
   @override
-  VideoPanelState create() => VideoPanelState();
+  VideoPanelNotifier create() => VideoPanelNotifier();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(bool value) {
@@ -41,9 +41,10 @@ final class VideoPanelStateProvider
   }
 }
 
-String _$videoPanelStateHash() => r'29642c62d803de79e134777d09ac29ccff840a1a';
+String _$videoPanelNotifierHash() =>
+    r'd772dcb666c0f38aecfb71604416165b9dcf8dc8';
 
-abstract class _$VideoPanelState extends $Notifier<bool> {
+abstract class _$VideoPanelNotifier extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override

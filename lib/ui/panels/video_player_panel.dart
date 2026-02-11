@@ -6,6 +6,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
@@ -92,7 +93,7 @@ class VideoPlayerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.cut,
                     onPressed: () async {
-                      // ref.read(mediaResourcesProvider.notifier).setIsEditing(true);
+                      ref.read(videoPanelProvider.notifier).toggle();
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,

@@ -13,7 +13,7 @@ part of 'video_trimmer_panel.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$VideoTrimmerState {
+mixin _$VideoTrimmerState implements DiagnosticableTreeMixin {
   bool get isPlaying;
   bool get isChanging;
   Duration get playPosition;
@@ -35,6 +35,25 @@ mixin _$VideoTrimmerState {
   $VideoTrimmerStateCopyWith<VideoTrimmerState> get copyWith =>
       _$VideoTrimmerStateCopyWithImpl<VideoTrimmerState>(
           this as VideoTrimmerState, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'VideoTrimmerState'))
+      ..add(DiagnosticsProperty('isPlaying', isPlaying))
+      ..add(DiagnosticsProperty('isChanging', isChanging))
+      ..add(DiagnosticsProperty('playPosition', playPosition))
+      ..add(DiagnosticsProperty('cutStart', cutStart))
+      ..add(DiagnosticsProperty('cutEnd', cutEnd))
+      ..add(DiagnosticsProperty('stepValueIndex', stepValueIndex))
+      ..add(DiagnosticsProperty('minimumStepIndex', minimumStepIndex))
+      ..add(DiagnosticsProperty('lastStepValueIndex', lastStepValueIndex))
+      ..add(DiagnosticsProperty('videoWidth', videoWidth))
+      ..add(DiagnosticsProperty('startPosition', startPosition))
+      ..add(DiagnosticsProperty('endPosition', endPosition))
+      ..add(DiagnosticsProperty('actualStartPosition', actualStartPosition))
+      ..add(DiagnosticsProperty('actualEndPosition', actualEndPosition));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -86,7 +105,7 @@ mixin _$VideoTrimmerState {
       actualEndPosition);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
   }
 }
@@ -437,7 +456,9 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
 
 /// @nodoc
 
-class _VideoTrimmerState implements VideoTrimmerState {
+class _VideoTrimmerState
+    with DiagnosticableTreeMixin
+    implements VideoTrimmerState {
   const _VideoTrimmerState(
       {this.isPlaying = false,
       this.isChanging = false,
@@ -502,6 +523,25 @@ class _VideoTrimmerState implements VideoTrimmerState {
       __$VideoTrimmerStateCopyWithImpl<_VideoTrimmerState>(this, _$identity);
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'VideoTrimmerState'))
+      ..add(DiagnosticsProperty('isPlaying', isPlaying))
+      ..add(DiagnosticsProperty('isChanging', isChanging))
+      ..add(DiagnosticsProperty('playPosition', playPosition))
+      ..add(DiagnosticsProperty('cutStart', cutStart))
+      ..add(DiagnosticsProperty('cutEnd', cutEnd))
+      ..add(DiagnosticsProperty('stepValueIndex', stepValueIndex))
+      ..add(DiagnosticsProperty('minimumStepIndex', minimumStepIndex))
+      ..add(DiagnosticsProperty('lastStepValueIndex', lastStepValueIndex))
+      ..add(DiagnosticsProperty('videoWidth', videoWidth))
+      ..add(DiagnosticsProperty('startPosition', startPosition))
+      ..add(DiagnosticsProperty('endPosition', endPosition))
+      ..add(DiagnosticsProperty('actualStartPosition', actualStartPosition))
+      ..add(DiagnosticsProperty('actualEndPosition', actualEndPosition));
+  }
+
+  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
@@ -551,7 +591,7 @@ class _VideoTrimmerState implements VideoTrimmerState {
       actualEndPosition);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return 'VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
   }
 }
@@ -665,7 +705,7 @@ class __$VideoTrimmerStateCopyWithImpl<$Res>
 }
 
 /// @nodoc
-mixin _$VideoTrimmerPanelState {
+mixin _$VideoTrimmerPanelState implements DiagnosticableTreeMixin {
   ChewieController? get chewieController;
   VideoPlayerController? get videoPlayerController;
 
@@ -676,6 +716,15 @@ mixin _$VideoTrimmerPanelState {
   _$VideoTrimmerPanelStateCopyWith<_VideoTrimmerPanelState> get copyWith =>
       __$VideoTrimmerPanelStateCopyWithImpl<_VideoTrimmerPanelState>(
           this as _VideoTrimmerPanelState, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', '_VideoTrimmerPanelState'))
+      ..add(DiagnosticsProperty('chewieController', chewieController))
+      ..add(
+          DiagnosticsProperty('videoPlayerController', videoPlayerController));
+  }
 
   @override
   bool operator ==(Object other) {
@@ -693,7 +742,7 @@ mixin _$VideoTrimmerPanelState {
       Object.hash(runtimeType, chewieController, videoPlayerController);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return '_VideoTrimmerPanelState(chewieController: $chewieController, videoPlayerController: $videoPlayerController)';
   }
 }
@@ -903,7 +952,9 @@ extension _VideoTrimmerPanelStatePatterns on _VideoTrimmerPanelState {
 
 /// @nodoc
 
-class __VideoTrimmerPanelState implements _VideoTrimmerPanelState {
+class __VideoTrimmerPanelState
+    with DiagnosticableTreeMixin
+    implements _VideoTrimmerPanelState {
   const __VideoTrimmerPanelState(
       {this.chewieController = null, this.videoPlayerController = null});
 
@@ -924,6 +975,15 @@ class __VideoTrimmerPanelState implements _VideoTrimmerPanelState {
           this, _$identity);
 
   @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', '_VideoTrimmerPanelState'))
+      ..add(DiagnosticsProperty('chewieController', chewieController))
+      ..add(
+          DiagnosticsProperty('videoPlayerController', videoPlayerController));
+  }
+
+  @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
@@ -939,7 +999,7 @@ class __VideoTrimmerPanelState implements _VideoTrimmerPanelState {
       Object.hash(runtimeType, chewieController, videoPlayerController);
 
   @override
-  String toString() {
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
     return '_VideoTrimmerPanelState(chewieController: $chewieController, videoPlayerController: $videoPlayerController)';
   }
 }

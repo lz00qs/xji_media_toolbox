@@ -8,9 +8,13 @@ import 'package:xji_footage_toolbox/ui/panels/video_trimmer_panel.dart';
 part 'video_panel.g.dart';
 
 @riverpod
-class VideoPanelState extends _$VideoPanelState {
+class VideoPanelNotifier extends _$VideoPanelNotifier {
   @override
   bool build() => false;
+
+  void toggle() {
+    state = !state;
+  }
 }
 
 class VideoPanel extends ConsumerWidget {
@@ -20,9 +24,9 @@ class VideoPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // return VideoPlayerPanel(
-    //   videoFile: resource.file,
-    // );
-    return VideoTrimmerPanel(resource: resource);
+    final showTrimmer = ref.watch(videoPanelProvider);
+    return showTrimmer
+        ? VideoTrimmerPanel(resource: resource)
+        : VideoPlayerPanel(videoFile: resource.file);
   }
 }

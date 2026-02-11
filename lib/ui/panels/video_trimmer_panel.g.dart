@@ -64,7 +64,7 @@ final class VideoTrimmerStateNotifierProvider
 }
 
 String _$videoTrimmerStateNotifierHash() =>
-    r'b3f35f7da106e22297ce73538cfe4acc797b5b7d';
+    r'f7515a16cbc965beb4ee4c7b728ba86cd90b5dfb';
 
 final class VideoTrimmerStateNotifierFamily extends $Family
     with
@@ -175,7 +175,7 @@ final class _VideoTrimmerPanelStateNotifierProvider
 }
 
 String _$_videoTrimmerPanelStateNotifierHash() =>
-    r'9bd75805560ca9aeb475d928a62e35ebd3209ac2';
+    r'1d9c6873d30ede596c9eb970176ad5658e3c7a4d';
 
 final class _VideoTrimmerPanelStateNotifierFamily extends $Family
     with

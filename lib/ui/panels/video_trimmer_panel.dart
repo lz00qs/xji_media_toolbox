@@ -10,6 +10,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
+import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
@@ -697,6 +698,7 @@ class VideoTrimmerPanel extends ConsumerWidget {
                     iconData: Icons.arrow_back_ios_new,
                     onPressed: () async {
                       // ref.read(mediaResourcesProvider.notifier).setIsEditing(false);
+                      ref.read(videoPanelProvider.notifier).toggle();
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,
