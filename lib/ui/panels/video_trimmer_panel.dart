@@ -12,8 +12,11 @@ import 'package:video_player/video_player.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
+import '../../models/video_task.dart';
+import '../../providers/task_scheduler.dart';
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
+import '../dialogs/video_export_dialog.dart';
 import 'main_panel.dart';
 
 part 'video_trimmer_panel.freezed.dart';
@@ -631,7 +634,6 @@ class _VideoTrimmer extends ConsumerWidget {
   }
 }
 
-
 @freezed
 abstract class VideoCutState with _$VideoCutState {
   const factory VideoCutState({
@@ -648,8 +650,7 @@ class VideoCutNotifier extends _$VideoCutNotifier {
   void setCutStart(Duration cutStart) =>
       state = state.copyWith(cutStart: cutStart);
 
-  void setCutEnd(Duration cutEnd) =>
-      state = state.copyWith(cutEnd: cutEnd);
+  void setCutEnd(Duration cutEnd) => state = state.copyWith(cutEnd: cutEnd);
 }
 
 @freezed
@@ -736,11 +737,17 @@ class VideoTrimmerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.upload,
                     onPressed: () async {
-                      // showDialog(
-                      //     context: context,
-                      //     builder: (BuildContext context) {
-                      //       return VideoExportDialog();
-                      //     });
+                      final task = await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return VideoExportDialog(
+                              videoResource: resource,
+                              taskType: VideoTaskType.transcode,
+                            );
+                          });
+                      if (task != null) {
+                        ref.read(taskSchedulerProvider.notifier).addTask(task);
+                      }
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,
