@@ -10,6 +10,7 @@ import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
+import '../../providers/task_scheduler.dart';
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
 import '../dialogs/video_export_dialog.dart';
@@ -109,7 +110,7 @@ class VideoPlayerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.upload,
                     onPressed: () async {
-                      await showDialog(
+                      final task = await showDialog(
                           context: context,
                           builder: (BuildContext context) {
                             return VideoExportDialog(
@@ -117,6 +118,11 @@ class VideoPlayerPanel extends ConsumerWidget {
                               taskType: VideoTaskType.transcode,
                             );
                           });
+                      if (task != null) {
+                        ref
+                            .read(taskSchedulerProvider.notifier)
+                            .addTask(task);
+                      }
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,

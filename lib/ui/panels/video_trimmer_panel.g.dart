@@ -63,7 +63,7 @@ final class _VideoTrimmerNotifierProvider
 }
 
 String _$_videoTrimmerNotifierHash() =>
-    r'7c38ee3867982b6e635f48cbdcee11ca34e0c3ee';
+    r'358cbd8e9d1f933fd48aacd0cf02b6676b0ee8e5';
 
 final class _VideoTrimmerNotifierFamily extends $Family
     with
@@ -160,7 +160,7 @@ final class VideoCutNotifierProvider
   }
 }
 
-String _$videoCutNotifierHash() => r'874f1e1a2ac72d262e1c630aabc5c8a3f953ef12';
+String _$videoCutNotifierHash() => r'fffc7c73700bf4305743acd4c96d0742d415a053';
 
 abstract class _$VideoCutNotifier extends $Notifier<VideoCutState> {
   VideoCutState build();

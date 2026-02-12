@@ -64,7 +64,7 @@ final class _VideoExportDialogNotifierProvider extends $NotifierProvider<
 }
 
 String _$_videoExportDialogNotifierHash() =>
-    r'9f08f93ac99567e9a9653a771ff71b78c4628ab6';
+    r'3d92fced1cc2af8aa3a37a3bd00cff101b6797be';
 
 final class _VideoExportDialogNotifierFamily extends $Family
     with

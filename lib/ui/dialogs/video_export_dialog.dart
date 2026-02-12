@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -244,148 +246,135 @@ class VideoExportDialog extends ConsumerWidget {
           Navigator.pop(context);
         },
         onOption2Pressed: () async {
-          // if (state.isOutputPathValid) {
-          //   final outputFilePath =
-          //       '${state.useSameDirectory ? videoResource.file.parent.path : state.selectedDirectory}'
-          //       '/${state.outputFileName}.MP4';
-          //   final preset = ref.watch(settingsProvider.select((s) => s
-          //           .value?.transcodingPresets
-          //           .firstWhere((e) => e.id == state.transcodePresetId))) ??
-          //       TranscodePreset()
-          //     ..id = 0;
-          //   if (isMerging) {
-          //     final List<String> ffmpegArgs = [];
-          //     final inputFilesTxtPath =
-          //         '${videoResource.file.parent.path}/.${state.outputFileName}_'
-          //         '${_get4DigitRandomString()}.txt';
-          //     final inputFilesTxtFile = File(inputFilesTxtPath);
-          //     if (inputFilesTxtFile.existsSync()) {
-          //       inputFilesTxtFile.deleteSync();
-          //     }
-          //     inputFilesTxtFile.writeAsStringSync(ref
-          //         .watch(
-          //             mediaResourcesProvider.select((m) => m.selectedResources))
-          //         .map((e) => 'file \'${e.file.path}\'')
-          //         .join('\n'));
-          //     ffmpegArgs.add('-f');
-          //     ffmpegArgs.add('concat');
-          //     ffmpegArgs.add('-safe');
-          //     ffmpegArgs.add('0');
-          //     ffmpegArgs.add('-i');
-          //     ffmpegArgs.add(inputFilesTxtPath);
-          //     ffmpegArgs.add('-i');
-          //     ffmpegArgs.add(videoResource.file.path);
-          //     ffmpegArgs.add('-map_metadata');
-          //     ffmpegArgs.add('1');
-          //     if (state.useInputEncodeSettings == false && preset.lutId != 0) {
-          //       ffmpegArgs.add('-vf');
-          //       ffmpegArgs.add(
-          //           "lut3d='${ref.watch(settingsProvider.select((s) => s.value?.luts.firstWhere((element) => element.id == preset.lutId)))?.path ?? ''}'");
-          //     }
-          //     ffmpegArgs.add('-c:v');
-          //     if (state.useInputEncodeSettings == false) {
-          //       ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
-          //       if (preset.useHevc) {
-          //         ffmpegArgs.add('-tag:v');
-          //         ffmpegArgs.add('hvc1');
-          //       }
-          //       ffmpegArgs.add('-crf');
-          //       ffmpegArgs.add(preset.crf.toString());
-          //       ffmpegArgs.add('-preset');
-          //       ffmpegArgs.add(FFmpegPreset.values[preset.ffmpegPreset]
-          //           .toString()
-          //           .split('.')
-          //           .last);
-          //       if (preset.useInputResolution == false) {
-          //         ffmpegArgs.add('-vf');
-          //         ffmpegArgs.add('scale=${preset.width}:${preset.height}');
-          //       }
-          //     } else {
-          //       ffmpegArgs.add('copy');
-          //     }
-          //     ffmpegArgs.add(outputFilePath);
-          //     for (final arg in ffmpegArgs) {
-          //       if (kDebugMode) {
-          //         print(arg);
-          //       }
-          //     }
-          //     final task = VideoTask(
-          //       name: '${state.outputFileName}.MP4',
-          //       status: VideoTaskStatus.waiting,
-          //       type: VideoTaskType.merge,
-          //       ffmpegArgs: ffmpegArgs,
-          //       duration: _getOutputDuration(
-          //           isMerging: true, isEditing: isEditing, ref: ref),
-          //       progress: 0.0,
-          //       outputFile: File(outputFilePath),
-          //       tempFiles: [inputFilesTxtFile],
-          //       eta: Duration(),
-          //     );
-          //     ref.read(taskManagerProvider.notifier).addTask(task);
-          //   } else {
-          //     // Export single file
-          //     final List<String> ffmpegArgs = [];
-          //     ffmpegArgs.add('-i');
-          //     ffmpegArgs.add(videoResource.file.path);
-          //     if (state.useInputEncodeSettings == false && preset.lutId != 0) {
-          //       final lutPath = ref.watch(settingsProvider.select((s) =>
-          //           s.value?.luts
-          //               .firstWhere((e) => e.id == preset.lutId)
-          //               .path ??
-          //           ''));
-          //
-          //       ffmpegArgs.add('-vf');
-          //       ffmpegArgs.add(
-          //         'lut3d=$lutPath,format=yuv420p10le',
-          //       );
-          //     }
-          //     ffmpegArgs.add('-c:v');
-          //     if (state.useInputEncodeSettings == false) {
-          //       ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
-          //       if (preset.useHevc) {
-          //         ffmpegArgs.add('-tag:v');
-          //         ffmpegArgs.add('hvc1');
-          //       }
-          //       ffmpegArgs.add('-crf');
-          //       ffmpegArgs.add(preset.crf.toString());
-          //       ffmpegArgs.add('-preset');
-          //       ffmpegArgs.add(FFmpegPreset.values[preset.ffmpegPreset]
-          //           .toString()
-          //           .split('.')
-          //           .last);
-          //       if (preset.useInputResolution == false) {
-          //         ffmpegArgs.add('-vf');
-          //         ffmpegArgs.add('scale=${preset.width}:${preset.height}');
-          //       }
-          //     } else {
-          //       ffmpegArgs.add('copy');
-          //     }
-          //
-          //     if (isEditing) {
-          //       ffmpegArgs.add('-ss');
-          //       ffmpegArgs.add(ref.watch(trimmerSavedStartProvider).toString());
-          //       ffmpegArgs.add('-to');
-          //       ffmpegArgs.add(ref.watch(trimmerSavedEndProvider).toString());
-          //     }
-          //     ffmpegArgs.add('-map_metadata');
-          //     ffmpegArgs.add('0');
-          //     ffmpegArgs.add(outputFilePath);
-          //     final task = VideoTask(
-          //       name: '${state.outputFileName}.MP4',
-          //       status: VideoTaskStatus.waiting,
-          //       type: isEditing ? VideoTaskType.trim : VideoTaskType.transcode,
-          //       ffmpegArgs: ffmpegArgs,
-          //       duration: _getOutputDuration(
-          //           isMerging: false, isEditing: isEditing, ref: ref),
-          //       progress: 0.0,
-          //       outputFile: File(outputFilePath),
-          //       tempFiles: [],
-          //       eta: Duration(),
-          //     );
-          //     ref.read(taskManagerProvider.notifier).addTask(task);
-          //   }
-          //   Navigator.pop(context);
-          // }
+          if (state.isOutputPathValid) {
+            final outputFilePath =
+                '${state.useSameDirectory ? videoResource.file.parent.path : state.selectedDirectory}'
+                '/${state.outputFileName}.MP4';
+            final preset = ref.watch(settingsProvider.select((s) => s
+                .transcodingPresets
+                .firstWhere((e) => e.id == state.transcodePresetId)));
+            if (taskType == VideoTaskType.merge) {
+              final List<String> ffmpegArgs = [];
+              final inputFilesTxtPath =
+                  '${videoResource.file.parent.path}/.${state.outputFileName}_'
+                  '${_get4DigitRandomString()}.txt';
+              final inputFilesTxtFile = File(inputFilesTxtPath);
+              if (inputFilesTxtFile.existsSync()) {
+                inputFilesTxtFile.deleteSync();
+              }
+              inputFilesTxtFile.writeAsStringSync(ref
+                  .watch(mediaResourcesStateProvider
+                      .select((m) => m.selectedResources))
+                  .map((e) => 'file \'${e.file.path}\'')
+                  .join('\n'));
+              ffmpegArgs.add('-f');
+              ffmpegArgs.add('concat');
+              ffmpegArgs.add('-safe');
+              ffmpegArgs.add('0');
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(inputFilesTxtPath);
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(videoResource.file.path);
+              ffmpegArgs.add('-map_metadata');
+              ffmpegArgs.add('1');
+              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                    "lut3d='${ref.watch(settingsProvider.select((s) => s.luts.firstWhere((element) => element.id == preset.lutId))).path}'");
+              }
+              ffmpegArgs.add('-c:v');
+              if (state.useInputEncodeSettings == false) {
+                ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
+                if (preset.useHevc) {
+                  ffmpegArgs.add('-tag:v');
+                  ffmpegArgs.add('hvc1');
+                }
+                ffmpegArgs.add('-crf');
+                ffmpegArgs.add(preset.crf.toString());
+                ffmpegArgs.add('-preset');
+                ffmpegArgs.add(preset.ffmpegPreset.toString().split('.').last);
+                if (preset.useInputResolution == false) {
+                  ffmpegArgs.add('-vf');
+                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                }
+              } else {
+                ffmpegArgs.add('copy');
+              }
+              ffmpegArgs.add(outputFilePath);
+              for (final arg in ffmpegArgs) {
+                if (kDebugMode) {
+                  print(arg);
+                }
+              }
+              final task = VideoTask(
+                name: '${state.outputFileName}.MP4',
+                status: VideoTaskStatus.waiting,
+                type: VideoTaskType.merge,
+                ffmpegArgs: ffmpegArgs,
+                duration: _getOutputDuration(taskType: taskType, ref: ref),
+                progress: 0.0,
+                outputPath: outputFilePath,
+                tempFilePaths: [inputFilesTxtPath],
+                logPath: ref.watch(settingsProvider
+                    .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
+              );
+              Navigator.of(context).pop(task);
+            } else {
+              // Export single file
+              final List<String> ffmpegArgs = [];
+              ffmpegArgs.add('-i');
+              ffmpegArgs.add(videoResource.file.path);
+              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
+                final lutPath = ref.watch(settingsProvider.select((s) =>
+                    s.luts.firstWhere((e) => e.id == preset.lutId).path));
+
+                ffmpegArgs.add('-vf');
+                ffmpegArgs.add(
+                  'lut3d=$lutPath,format=yuv420p10le',
+                );
+              }
+              ffmpegArgs.add('-c:v');
+              if (state.useInputEncodeSettings == false) {
+                ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
+                if (preset.useHevc) {
+                  ffmpegArgs.add('-tag:v');
+                  ffmpegArgs.add('hvc1');
+                }
+                ffmpegArgs.add('-crf');
+                ffmpegArgs.add(preset.crf.toString());
+                ffmpegArgs.add('-preset');
+                ffmpegArgs.add(preset.ffmpegPreset.toString().split('.').last);
+                if (preset.useInputResolution == false) {
+                  ffmpegArgs.add('-vf');
+                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
+                }
+              } else {
+                ffmpegArgs.add('copy');
+              }
+
+              if (taskType == VideoTaskType.trim) {
+                ffmpegArgs.add('-ss');
+                ffmpegArgs.add(ref.watch(videoCutProvider).cutStart.toString());
+                ffmpegArgs.add('-to');
+                ffmpegArgs.add(ref.watch(videoCutProvider).cutEnd.toString());
+              }
+              ffmpegArgs.add('-map_metadata');
+              ffmpegArgs.add('0');
+              ffmpegArgs.add(outputFilePath);
+              final task = VideoTask(
+                name: '${state.outputFileName}.MP4',
+                status: VideoTaskStatus.waiting,
+                type: VideoTaskType.merge,
+                ffmpegArgs: ffmpegArgs,
+                duration: _getOutputDuration(taskType: taskType, ref: ref),
+                progress: 0.0,
+                outputPath: outputFilePath,
+                logPath: ref.watch(settingsProvider
+                    .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
+              );
+              Navigator.of(context).pop(task);
+            }
+          }
         },
         child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -590,7 +579,7 @@ class VideoExportDialog extends ConsumerWidget {
                       valueText: ref.watch(settingsProvider.select((s) => s
                           .transcodingPresets
                           .firstWhere((e) => e.id == state.transcodePresetId)
-                          .name
+                          .ffmpegPreset
                           .toString()
                           .split('.')
                           .last))),

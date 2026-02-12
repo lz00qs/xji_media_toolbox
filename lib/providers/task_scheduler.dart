@@ -8,7 +8,7 @@ import 'package:xji_footage_toolbox/utils/logger.dart';
 
 part 'task_scheduler.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
   Process? _currentProcess;
   bool _isRunning = false;
@@ -17,28 +17,8 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
   List<VideoTask> build() => [];
 
   // 添加任务
-  void addTask({
-    required VideoTaskType type,
-    required String name,
-    required List<String> arguments,
-    required String outputPath,
-    required List<String> tempFilePaths,
-    required String logPath,
-  }) {
-    final task = VideoTask(
-      id: const Uuid().v4(),
-      type: type,
-      name: name,
-      status: VideoTaskStatus.waiting,
-      progress: 0,
-      eta: Duration.zero,
-      ffmpegArgs: arguments,
-      outputPath: outputPath,
-      tempFilePaths: tempFilePaths,
-      logPath: logPath,
-    );
-
-    state = [...state, task];
+  void addTask(VideoTask task) {
+    state = [...state, task.copyWith(id: const Uuid().v4())];
     _tryStartNext();
   }
 
@@ -83,7 +63,11 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
         _updateTask(task.id,
             (t) => t.copyWith(status: VideoTaskStatus.finished, progress: 1));
       } else {
-        _updateTask(task.id, (t) => t.copyWith(status: VideoTaskStatus.failed));
+        if (!(state.firstWhere((e) => e.id == task.id).status ==
+            VideoTaskStatus.canceled)) {
+          _updateTask(
+              task.id, (t) => t.copyWith(status: VideoTaskStatus.failed));
+        }
         await _cleanupFiles(task);
       }
     } catch (e) {

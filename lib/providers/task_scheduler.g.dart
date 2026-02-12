@@ -20,7 +20,7 @@ final class TaskSchedulerNotifierProvider
           argument: null,
           retry: null,
           name: r'taskSchedulerProvider',
-          isAutoDispose: true,
+          isAutoDispose: false,
           dependencies: null,
           $allTransitiveDependencies: null,
         );
@@ -42,7 +42,7 @@ final class TaskSchedulerNotifierProvider
 }
 
 String _$taskSchedulerNotifierHash() =>
-    r'1e2d2b9c2e7e17cb607cbd92c00a1470aa7eea23';
+    r'be2ee2206a0d589cf645cedae9b71fb11af3e468';
 
 abstract class _$TaskSchedulerNotifier extends $Notifier<List<VideoTask>> {
   List<VideoTask> build();
