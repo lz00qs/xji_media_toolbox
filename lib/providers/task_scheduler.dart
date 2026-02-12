@@ -133,6 +133,7 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
   // 解析 FFmpeg 输出（示例）
   void _listenProgress(String taskId, Process process) {
     process.stderr.transform(SystemEncoding().decoder).listen((line) {
+      Logger.debug(line);
       _appendToLogFile(state.firstWhere((t) => t.id == taskId).logPath, line);
 
       if (line.contains('encoded')) {
@@ -176,9 +177,7 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
                       .round());
               _updateTask(taskId, (t) => t.copyWith(eta: eta));
             }
-          } catch (e) {
-            print('Error parsing log: $e');
-          }
+          } catch (_) {}
         }
       }
     });
