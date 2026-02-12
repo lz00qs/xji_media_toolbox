@@ -27,6 +27,6 @@ class VideoPanel extends ConsumerWidget {
     final showTrimmer = ref.watch(videoPanelProvider);
     return showTrimmer
         ? VideoTrimmerPanel(resource: resource)
-        : VideoPlayerPanel(videoFile: resource.file);
+        : VideoPlayerPanel(videoResource: resource);
   }
 }

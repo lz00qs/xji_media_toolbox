@@ -42,7 +42,7 @@ final class TaskSchedulerNotifierProvider
 }
 
 String _$taskSchedulerNotifierHash() =>
-    r'b1511b699f77f8103e497edf77eb2eacaf75eecf';
+    r'1e2d2b9c2e7e17cb607cbd92c00a1470aa7eea23';
 
 abstract class _$TaskSchedulerNotifier extends $Notifier<List<VideoTask>> {
   List<VideoTask> build();

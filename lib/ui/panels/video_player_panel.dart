@@ -6,10 +6,13 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:chewie/chewie.dart';
 import 'package:video_player/video_player.dart';
+import 'package:xji_footage_toolbox/models/media_resource.model.dart';
+import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_panel.dart';
 
 import '../buttons/custom_icon_button.dart';
 import '../design_tokens.dart';
+import '../dialogs/video_export_dialog.dart';
 import 'main_panel.dart';
 
 part 'video_player_panel.freezed.dart';
@@ -51,15 +54,15 @@ class _VideoPlayerPanelStateNotifier extends _$VideoPlayerPanelStateNotifier {
 class VideoPlayerPanel extends ConsumerWidget {
   const VideoPlayerPanel({
     super.key,
-    required this.videoFile,
+    required this.videoResource,
   });
 
-  final File videoFile;
+  final VideoResource videoResource;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final videoPlayerPanelStateAsync =
-        ref.watch(_videoPlayerPanelStateProvider(videoFile: videoFile));
+    final videoPlayerPanelStateAsync = ref
+        .watch(_videoPlayerPanelStateProvider(videoFile: videoResource.file));
     return videoPlayerPanelStateAsync.when(
       data: (data) {
         // return ClipRRect(
@@ -106,11 +109,14 @@ class VideoPlayerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.upload,
                     onPressed: () async {
-                      // await showDialog(
-                      //     context: context,
-                      //     builder: (BuildContext context) {
-                      //       return VideoExportDialog();
-                      //     });
+                      await showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return VideoExportDialog(
+                              videoResource: videoResource,
+                              taskType: VideoTaskType.transcode,
+                            );
+                          });
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,

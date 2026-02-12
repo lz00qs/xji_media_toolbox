@@ -28,18 +28,18 @@ mixin _$VideoTrimmerState implements DiagnosticableTreeMixin {
   double get actualStartPosition;
   double get actualEndPosition;
 
-  /// Create a copy of VideoTrimmerState
+  /// Create a copy of _VideoTrimmerState
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  $VideoTrimmerStateCopyWith<VideoTrimmerState> get copyWith =>
-      _$VideoTrimmerStateCopyWithImpl<VideoTrimmerState>(
-          this as VideoTrimmerState, _$identity);
+  _$VideoTrimmerStateCopyWith<_VideoTrimmerState> get copyWith =>
+      __$VideoTrimmerStateCopyWithImpl<_VideoTrimmerState>(
+          this as _VideoTrimmerState, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
-      ..add(DiagnosticsProperty('type', 'VideoTrimmerState'))
+      ..add(DiagnosticsProperty('type', '_VideoTrimmerState'))
       ..add(DiagnosticsProperty('isPlaying', isPlaying))
       ..add(DiagnosticsProperty('isChanging', isChanging))
       ..add(DiagnosticsProperty('playPosition', playPosition))
@@ -59,7 +59,7 @@ mixin _$VideoTrimmerState implements DiagnosticableTreeMixin {
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is VideoTrimmerState &&
+            other is _VideoTrimmerState &&
             (identical(other.isPlaying, isPlaying) ||
                 other.isPlaying == isPlaying) &&
             (identical(other.isChanging, isChanging) ||
@@ -106,15 +106,15 @@ mixin _$VideoTrimmerState implements DiagnosticableTreeMixin {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
+    return '_VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
   }
 }
 
 /// @nodoc
-abstract mixin class $VideoTrimmerStateCopyWith<$Res> {
-  factory $VideoTrimmerStateCopyWith(
-          VideoTrimmerState value, $Res Function(VideoTrimmerState) _then) =
-      _$VideoTrimmerStateCopyWithImpl;
+abstract mixin class _$VideoTrimmerStateCopyWith<$Res> {
+  factory _$VideoTrimmerStateCopyWith(
+          _VideoTrimmerState value, $Res Function(_VideoTrimmerState) _then) =
+      __$VideoTrimmerStateCopyWithImpl;
   @useResult
   $Res call(
       {bool isPlaying,
@@ -133,14 +133,14 @@ abstract mixin class $VideoTrimmerStateCopyWith<$Res> {
 }
 
 /// @nodoc
-class _$VideoTrimmerStateCopyWithImpl<$Res>
-    implements $VideoTrimmerStateCopyWith<$Res> {
-  _$VideoTrimmerStateCopyWithImpl(this._self, this._then);
+class __$VideoTrimmerStateCopyWithImpl<$Res>
+    implements _$VideoTrimmerStateCopyWith<$Res> {
+  __$VideoTrimmerStateCopyWithImpl(this._self, this._then);
 
-  final VideoTrimmerState _self;
-  final $Res Function(VideoTrimmerState) _then;
+  final _VideoTrimmerState _self;
+  final $Res Function(_VideoTrimmerState) _then;
 
-  /// Create a copy of VideoTrimmerState
+  /// Create a copy of _VideoTrimmerState
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
@@ -216,8 +216,8 @@ class _$VideoTrimmerStateCopyWithImpl<$Res>
   }
 }
 
-/// Adds pattern-matching-related methods to [VideoTrimmerState].
-extension VideoTrimmerStatePatterns on VideoTrimmerState {
+/// Adds pattern-matching-related methods to [_VideoTrimmerState].
+extension _VideoTrimmerStatePatterns on _VideoTrimmerState {
   /// A variant of `map` that fallback to returning `orElse`.
   ///
   /// It is equivalent to doing:
@@ -232,12 +232,12 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
 
   @optionalTypeArgs
   TResult maybeMap<TResult extends Object?>(
-    TResult Function(_VideoTrimmerState value)? $default, {
+    TResult Function(__VideoTrimmerState value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState() when $default != null:
+      case __VideoTrimmerState() when $default != null:
         return $default(_that);
       case _:
         return orElse();
@@ -259,11 +259,11 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
 
   @optionalTypeArgs
   TResult map<TResult extends Object?>(
-    TResult Function(_VideoTrimmerState value) $default,
+    TResult Function(__VideoTrimmerState value) $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState():
+      case __VideoTrimmerState():
         return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
@@ -284,11 +284,11 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
 
   @optionalTypeArgs
   TResult? mapOrNull<TResult extends Object?>(
-    TResult? Function(_VideoTrimmerState value)? $default,
+    TResult? Function(__VideoTrimmerState value)? $default,
   ) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState() when $default != null:
+      case __VideoTrimmerState() when $default != null:
         return $default(_that);
       case _:
         return null;
@@ -328,7 +328,7 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
   }) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState() when $default != null:
+      case __VideoTrimmerState() when $default != null:
         return $default(
             _that.isPlaying,
             _that.isChanging,
@@ -381,7 +381,7 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
   ) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState():
+      case __VideoTrimmerState():
         return $default(
             _that.isPlaying,
             _that.isChanging,
@@ -433,7 +433,7 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
   ) {
     final _that = this;
     switch (_that) {
-      case _VideoTrimmerState() when $default != null:
+      case __VideoTrimmerState() when $default != null:
         return $default(
             _that.isPlaying,
             _that.isChanging,
@@ -456,10 +456,10 @@ extension VideoTrimmerStatePatterns on VideoTrimmerState {
 
 /// @nodoc
 
-class _VideoTrimmerState
+class __VideoTrimmerState
     with DiagnosticableTreeMixin
-    implements VideoTrimmerState {
-  const _VideoTrimmerState(
+    implements _VideoTrimmerState {
+  const __VideoTrimmerState(
       {this.isPlaying = false,
       this.isChanging = false,
       this.playPosition = Duration.zero,
@@ -514,18 +514,18 @@ class _VideoTrimmerState
   @JsonKey()
   final double actualEndPosition;
 
-  /// Create a copy of VideoTrimmerState
+  /// Create a copy of _VideoTrimmerState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @JsonKey(includeFromJson: false, includeToJson: false)
   @pragma('vm:prefer-inline')
-  _$VideoTrimmerStateCopyWith<_VideoTrimmerState> get copyWith =>
-      __$VideoTrimmerStateCopyWithImpl<_VideoTrimmerState>(this, _$identity);
+  _$_VideoTrimmerStateCopyWith<__VideoTrimmerState> get copyWith =>
+      __$_VideoTrimmerStateCopyWithImpl<__VideoTrimmerState>(this, _$identity);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
-      ..add(DiagnosticsProperty('type', 'VideoTrimmerState'))
+      ..add(DiagnosticsProperty('type', '_VideoTrimmerState'))
       ..add(DiagnosticsProperty('isPlaying', isPlaying))
       ..add(DiagnosticsProperty('isChanging', isChanging))
       ..add(DiagnosticsProperty('playPosition', playPosition))
@@ -545,7 +545,7 @@ class _VideoTrimmerState
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _VideoTrimmerState &&
+            other is __VideoTrimmerState &&
             (identical(other.isPlaying, isPlaying) ||
                 other.isPlaying == isPlaying) &&
             (identical(other.isChanging, isChanging) ||
@@ -592,16 +592,16 @@ class _VideoTrimmerState
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
+    return '_VideoTrimmerState(isPlaying: $isPlaying, isChanging: $isChanging, playPosition: $playPosition, cutStart: $cutStart, cutEnd: $cutEnd, stepValueIndex: $stepValueIndex, minimumStepIndex: $minimumStepIndex, lastStepValueIndex: $lastStepValueIndex, videoWidth: $videoWidth, startPosition: $startPosition, endPosition: $endPosition, actualStartPosition: $actualStartPosition, actualEndPosition: $actualEndPosition)';
   }
 }
 
 /// @nodoc
-abstract mixin class _$VideoTrimmerStateCopyWith<$Res>
-    implements $VideoTrimmerStateCopyWith<$Res> {
-  factory _$VideoTrimmerStateCopyWith(
-          _VideoTrimmerState value, $Res Function(_VideoTrimmerState) _then) =
-      __$VideoTrimmerStateCopyWithImpl;
+abstract mixin class _$_VideoTrimmerStateCopyWith<$Res>
+    implements _$VideoTrimmerStateCopyWith<$Res> {
+  factory _$_VideoTrimmerStateCopyWith(
+          __VideoTrimmerState value, $Res Function(__VideoTrimmerState) _then) =
+      __$_VideoTrimmerStateCopyWithImpl;
   @override
   @useResult
   $Res call(
@@ -621,14 +621,14 @@ abstract mixin class _$VideoTrimmerStateCopyWith<$Res>
 }
 
 /// @nodoc
-class __$VideoTrimmerStateCopyWithImpl<$Res>
-    implements _$VideoTrimmerStateCopyWith<$Res> {
-  __$VideoTrimmerStateCopyWithImpl(this._self, this._then);
+class __$_VideoTrimmerStateCopyWithImpl<$Res>
+    implements _$_VideoTrimmerStateCopyWith<$Res> {
+  __$_VideoTrimmerStateCopyWithImpl(this._self, this._then);
 
-  final _VideoTrimmerState _self;
-  final $Res Function(_VideoTrimmerState) _then;
+  final __VideoTrimmerState _self;
+  final $Res Function(__VideoTrimmerState) _then;
 
-  /// Create a copy of VideoTrimmerState
+  /// Create a copy of _VideoTrimmerState
   /// with the given fields replaced by the non-null parameter values.
   @override
   @pragma('vm:prefer-inline')
@@ -647,7 +647,7 @@ class __$VideoTrimmerStateCopyWithImpl<$Res>
     Object? actualStartPosition = null,
     Object? actualEndPosition = null,
   }) {
-    return _then(_VideoTrimmerState(
+    return _then(__VideoTrimmerState(
       isPlaying: null == isPlaying
           ? _self.isPlaying
           : isPlaying // ignore: cast_nullable_to_non_nullable
@@ -700,6 +700,329 @@ class __$VideoTrimmerStateCopyWithImpl<$Res>
           ? _self.actualEndPosition
           : actualEndPosition // ignore: cast_nullable_to_non_nullable
               as double,
+    ));
+  }
+}
+
+/// @nodoc
+mixin _$VideoCutState implements DiagnosticableTreeMixin {
+  Duration get cutStart;
+  Duration get cutEnd;
+
+  /// Create a copy of VideoCutState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $VideoCutStateCopyWith<VideoCutState> get copyWith =>
+      _$VideoCutStateCopyWithImpl<VideoCutState>(
+          this as VideoCutState, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'VideoCutState'))
+      ..add(DiagnosticsProperty('cutStart', cutStart))
+      ..add(DiagnosticsProperty('cutEnd', cutEnd));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is VideoCutState &&
+            (identical(other.cutStart, cutStart) ||
+                other.cutStart == cutStart) &&
+            (identical(other.cutEnd, cutEnd) || other.cutEnd == cutEnd));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, cutStart, cutEnd);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'VideoCutState(cutStart: $cutStart, cutEnd: $cutEnd)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $VideoCutStateCopyWith<$Res> {
+  factory $VideoCutStateCopyWith(
+          VideoCutState value, $Res Function(VideoCutState) _then) =
+      _$VideoCutStateCopyWithImpl;
+  @useResult
+  $Res call({Duration cutStart, Duration cutEnd});
+}
+
+/// @nodoc
+class _$VideoCutStateCopyWithImpl<$Res>
+    implements $VideoCutStateCopyWith<$Res> {
+  _$VideoCutStateCopyWithImpl(this._self, this._then);
+
+  final VideoCutState _self;
+  final $Res Function(VideoCutState) _then;
+
+  /// Create a copy of VideoCutState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? cutStart = null,
+    Object? cutEnd = null,
+  }) {
+    return _then(_self.copyWith(
+      cutStart: null == cutStart
+          ? _self.cutStart
+          : cutStart // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      cutEnd: null == cutEnd
+          ? _self.cutEnd
+          : cutEnd // ignore: cast_nullable_to_non_nullable
+              as Duration,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [VideoCutState].
+extension VideoCutStatePatterns on VideoCutState {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VideoCutState value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_VideoCutState value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VideoCutState value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(Duration cutStart, Duration cutEnd)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState() when $default != null:
+        return $default(_that.cutStart, _that.cutEnd);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(Duration cutStart, Duration cutEnd) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState():
+        return $default(_that.cutStart, _that.cutEnd);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(Duration cutStart, Duration cutEnd)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _VideoCutState() when $default != null:
+        return $default(_that.cutStart, _that.cutEnd);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _VideoCutState with DiagnosticableTreeMixin implements VideoCutState {
+  const _VideoCutState(
+      {this.cutStart = Duration.zero, this.cutEnd = Duration.zero});
+
+  @override
+  @JsonKey()
+  final Duration cutStart;
+  @override
+  @JsonKey()
+  final Duration cutEnd;
+
+  /// Create a copy of VideoCutState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VideoCutStateCopyWith<_VideoCutState> get copyWith =>
+      __$VideoCutStateCopyWithImpl<_VideoCutState>(this, _$identity);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties
+      ..add(DiagnosticsProperty('type', 'VideoCutState'))
+      ..add(DiagnosticsProperty('cutStart', cutStart))
+      ..add(DiagnosticsProperty('cutEnd', cutEnd));
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VideoCutState &&
+            (identical(other.cutStart, cutStart) ||
+                other.cutStart == cutStart) &&
+            (identical(other.cutEnd, cutEnd) || other.cutEnd == cutEnd));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, cutStart, cutEnd);
+
+  @override
+  String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
+    return 'VideoCutState(cutStart: $cutStart, cutEnd: $cutEnd)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VideoCutStateCopyWith<$Res>
+    implements $VideoCutStateCopyWith<$Res> {
+  factory _$VideoCutStateCopyWith(
+          _VideoCutState value, $Res Function(_VideoCutState) _then) =
+      __$VideoCutStateCopyWithImpl;
+  @override
+  @useResult
+  $Res call({Duration cutStart, Duration cutEnd});
+}
+
+/// @nodoc
+class __$VideoCutStateCopyWithImpl<$Res>
+    implements _$VideoCutStateCopyWith<$Res> {
+  __$VideoCutStateCopyWithImpl(this._self, this._then);
+
+  final _VideoCutState _self;
+  final $Res Function(_VideoCutState) _then;
+
+  /// Create a copy of VideoCutState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? cutStart = null,
+    Object? cutEnd = null,
+  }) {
+    return _then(_VideoCutState(
+      cutStart: null == cutStart
+          ? _self.cutStart
+          : cutStart // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      cutEnd: null == cutEnd
+          ? _self.cutEnd
+          : cutEnd // ignore: cast_nullable_to_non_nullable
+              as Duration,
     ));
   }
 }

@@ -72,8 +72,8 @@ String _getFormattedTime(Duration duration) {
 }
 
 @freezed
-abstract class VideoTrimmerState with _$VideoTrimmerState {
-  const factory VideoTrimmerState({
+abstract class _VideoTrimmerState with _$VideoTrimmerState {
+  const factory _VideoTrimmerState({
     @Default(false) bool isPlaying,
     @Default(false) bool isChanging,
     @Default(Duration.zero) Duration playPosition,
@@ -87,19 +87,19 @@ abstract class VideoTrimmerState with _$VideoTrimmerState {
     @Default(0.0) double endPosition,
     @Default(0.0) double actualStartPosition,
     @Default(0.0) double actualEndPosition,
-  }) = _VideoTrimmerState;
+  }) = __VideoTrimmerState;
 }
 
 @riverpod
-class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
+class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
   var trimmerWidth = 0.0;
   final scrollController = ScrollController();
 
   @override
-  VideoTrimmerState build(
+  _VideoTrimmerState build(
       MediaResource resource, VideoPlayerController videoPlayerController) {
     if (resource is! VideoResource) {
-      return VideoTrimmerState();
+      return _VideoTrimmerState();
     }
 
     var initialStepValueIndex = 0;
@@ -138,7 +138,10 @@ class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
       }
     });
 
-    return VideoTrimmerState(
+    ref.read(videoCutProvider.notifier).setCutEnd(resource.duration);
+    ref.read(videoCutProvider.notifier).setCutStart(Duration.zero);
+
+    return _VideoTrimmerState(
         isPlaying: false,
         isChanging: false,
         playPosition: Duration.zero,
@@ -256,7 +259,7 @@ class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
   void _updatePositions(bool isEndFull) {
     if (kDebugMode) {
       print(
-        'update positions, isEndFull: $isEndFull, actualStartPosition: ${state.actualStartPosition}, actualEndPosition: ${state.actualEndPosition}');
+          'update positions, isEndFull: $isEndFull, actualStartPosition: ${state.actualStartPosition}, actualEndPosition: ${state.actualEndPosition}');
     }
     state = state.copyWith(
       startPosition:
@@ -336,6 +339,7 @@ class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
                     _scaleValueList[state.stepValueIndex])
                 .round()));
     state = state.copyWith(playPosition: state.cutStart);
+    ref.read(videoCutProvider.notifier).setCutStart(state.cutStart);
     await videoPlayerController.seekTo(state.cutStart);
     edgeScroll(state.startPosition, details.delta.dx > 0, true);
   }
@@ -357,6 +361,7 @@ class VideoTrimmerStateNotifier extends _$VideoTrimmerStateNotifier {
     if (state.cutEnd > videoPlayerController.value.duration) {
       state = state.copyWith(cutEnd: videoPlayerController.value.duration);
     }
+    ref.read(videoCutProvider.notifier).setCutEnd(state.cutEnd);
     await videoPlayerController.seekTo(state.cutEnd);
     edgeScroll(state.endPosition, details.delta.dx > 0, false);
   }
@@ -385,11 +390,10 @@ class _VideoTrimmer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref
-        .watch(videoTrimmerStateProvider(videoResource, videoPlayerController));
+    final state =
+        ref.watch(_videoTrimmerProvider(videoResource, videoPlayerController));
     final notifier = ref.watch(
-        videoTrimmerStateProvider(videoResource, videoPlayerController)
-            .notifier);
+        _videoTrimmerProvider(videoResource, videoPlayerController).notifier);
 
     return Column(
       children: [
@@ -625,6 +629,27 @@ class _VideoTrimmer extends ConsumerWidget {
       ],
     );
   }
+}
+
+
+@freezed
+abstract class VideoCutState with _$VideoCutState {
+  const factory VideoCutState({
+    @Default(Duration.zero) Duration cutStart,
+    @Default(Duration.zero) Duration cutEnd,
+  }) = _VideoCutState;
+}
+
+@riverpod
+class VideoCutNotifier extends _$VideoCutNotifier {
+  @override
+  VideoCutState build() => VideoCutState();
+
+  void setCutStart(Duration cutStart) =>
+      state = state.copyWith(cutStart: cutStart);
+
+  void setCutEnd(Duration cutEnd) =>
+      state = state.copyWith(cutEnd: cutEnd);
 }
 
 @freezed
