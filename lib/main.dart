@@ -8,6 +8,7 @@ import 'package:fvp/fvp.dart' as fvp;
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/main_page_app_bar.dart';
+import 'package:xji_footage_toolbox/ui/task_drawer.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
@@ -74,7 +75,7 @@ class MyApp extends ConsumerWidget {
     //     ref.watch(mediaResourcesProvider.select((state) => state.isLoading));
 
     return Scaffold(
-      // endDrawer: const TaskDrawer(),
+      endDrawer: const TaskDrawer(),
       body: Center(
         child: Column(
           children: [
