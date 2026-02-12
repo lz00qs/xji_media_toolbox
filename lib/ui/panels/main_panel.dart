@@ -138,13 +138,15 @@ class MainPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (resource) {
       case PhotoResource():
-        // TODO: Handle this case.
         return PhotoViewerPanel(photoFile: resource.file);
       case AebPhotoResource():
-        // TODO: Handle this case.
-        return AebPhotoViewerPanel(photoResource: resource as AebPhotoResource);
+        if ((resource as AebPhotoResource).aebResources.length < 2) {
+          return PhotoViewerPanel(photoFile: resource.file);
+        } else {
+          return AebPhotoViewerPanel(
+              photoResource: resource as AebPhotoResource);
+        }
       case VideoResource():
-        // TODO: Handle this case.
         return VideoPanel(resource: resource as VideoResource);
     }
   }
