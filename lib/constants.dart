@@ -23,3 +23,4 @@ const String parseAebEndError = "Parse AEB end error";
 const String defaultTranscodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
 const String sortTypePrefKey = 'sortType';
 const String sortOderPrefKey = 'sortOrder';
+const String exportCmdOnlyPrefKey = 'exportCmdOnly';

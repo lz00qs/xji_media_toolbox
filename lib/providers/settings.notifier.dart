@@ -54,6 +54,7 @@ class SettingsNotifier extends _$SettingsNotifier {
 
     var luts = _objectBox.lutBox.getAll().map((e) => e.toModel()).toList();
 
+    final exportCmdOnly = _prefs.getBool(exportCmdOnlyPrefKey) ?? false;
     final sortType = SortType.values[_prefs.getInt(sortTypePrefKey) ?? 0];
     final sortAsc = _prefs.getBool(sortOderPrefKey) ?? true;
     final cpuThreads = Platform.numberOfProcessors;
@@ -66,6 +67,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       sort: Sort(sortType: sortType, sortAsc: sortAsc),
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
+      exportCmdOnly: exportCmdOnly,
     );
   }
 
@@ -229,5 +231,6 @@ class SettingsNotifier extends _$SettingsNotifier {
 
   void setExportCmdOnly(bool value) {
     state = state.copyWith(exportCmdOnly: value);
+    _prefs.setBool(exportCmdOnlyPrefKey, value);
   }
 }
