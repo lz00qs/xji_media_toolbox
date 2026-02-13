@@ -226,4 +226,8 @@ class SettingsNotifier extends _$SettingsNotifier {
     _prefs.setInt(sortTypePrefKey, sort.sortType.index);
     _prefs.setBool(sortOderPrefKey, sort.sortAsc);
   }
+
+  void setExportCmdOnly(bool value) {
+    state = state.copyWith(exportCmdOnly: value);
+  }
 }

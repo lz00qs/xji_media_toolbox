@@ -63,7 +63,7 @@ final class _VideoTrimmerNotifierProvider
 }
 
 String _$_videoTrimmerNotifierHash() =>
-    r'358cbd8e9d1f933fd48aacd0cf02b6676b0ee8e5';
+    r'8dbcdb728d8e6b5132b6a0549ffac907b628afce';
 
 final class _VideoTrimmerNotifierFamily extends $Family
     with

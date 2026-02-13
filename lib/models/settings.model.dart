@@ -25,5 +25,6 @@ abstract class Settings with _$Settings {
     @Default('0.0.0') String appVersion,
     @Default(Sort()) Sort sort,
     @Default(kDebugMode) bool isDebugMode,
+    @Default(false) bool exportCmdOnly,
   }) = _Settings;
 }

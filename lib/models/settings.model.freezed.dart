@@ -337,6 +337,7 @@ mixin _$Settings implements DiagnosticableTreeMixin {
   String get appVersion;
   Sort get sort;
   bool get isDebugMode;
+  bool get exportCmdOnly;
 
   /// Create a copy of Settings
   /// with the given fields replaced by the non-null parameter values.
@@ -356,7 +357,8 @@ mixin _$Settings implements DiagnosticableTreeMixin {
       ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
       ..add(DiagnosticsProperty('appVersion', appVersion))
       ..add(DiagnosticsProperty('sort', sort))
-      ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
+      ..add(DiagnosticsProperty('isDebugMode', isDebugMode))
+      ..add(DiagnosticsProperty('exportCmdOnly', exportCmdOnly));
   }
 
   @override
@@ -376,7 +378,9 @@ mixin _$Settings implements DiagnosticableTreeMixin {
                 other.appVersion == appVersion) &&
             (identical(other.sort, sort) || other.sort == sort) &&
             (identical(other.isDebugMode, isDebugMode) ||
-                other.isDebugMode == isDebugMode));
+                other.isDebugMode == isDebugMode) &&
+            (identical(other.exportCmdOnly, exportCmdOnly) ||
+                other.exportCmdOnly == exportCmdOnly));
   }
 
   @override
@@ -388,11 +392,12 @@ mixin _$Settings implements DiagnosticableTreeMixin {
       cpuThreads,
       appVersion,
       sort,
-      isDebugMode);
+      isDebugMode,
+      exportCmdOnly);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode, exportCmdOnly: $exportCmdOnly)';
   }
 }
 
@@ -408,7 +413,8 @@ abstract mixin class $SettingsCopyWith<$Res> {
       int cpuThreads,
       String appVersion,
       Sort sort,
-      bool isDebugMode});
+      bool isDebugMode,
+      bool exportCmdOnly});
 
   $SortCopyWith<$Res> get sort;
 }
@@ -432,6 +438,7 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
     Object? appVersion = null,
     Object? sort = null,
     Object? isDebugMode = null,
+    Object? exportCmdOnly = null,
   }) {
     return _then(_self.copyWith(
       transcodingPresets: null == transcodingPresets
@@ -461,6 +468,10 @@ class _$SettingsCopyWithImpl<$Res> implements $SettingsCopyWith<$Res> {
       isDebugMode: null == isDebugMode
           ? _self.isDebugMode
           : isDebugMode // ignore: cast_nullable_to_non_nullable
+              as bool,
+      exportCmdOnly: null == exportCmdOnly
+          ? _self.exportCmdOnly
+          : exportCmdOnly // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }
@@ -576,7 +587,8 @@ extension SettingsPatterns on Settings {
             int cpuThreads,
             String appVersion,
             Sort sort,
-            bool isDebugMode)?
+            bool isDebugMode,
+            bool exportCmdOnly)?
         $default, {
     required TResult orElse(),
   }) {
@@ -590,7 +602,8 @@ extension SettingsPatterns on Settings {
             _that.cpuThreads,
             _that.appVersion,
             _that.sort,
-            _that.isDebugMode);
+            _that.isDebugMode,
+            _that.exportCmdOnly);
       case _:
         return orElse();
     }
@@ -618,7 +631,8 @@ extension SettingsPatterns on Settings {
             int cpuThreads,
             String appVersion,
             Sort sort,
-            bool isDebugMode)
+            bool isDebugMode,
+            bool exportCmdOnly)
         $default,
   ) {
     final _that = this;
@@ -631,7 +645,8 @@ extension SettingsPatterns on Settings {
             _that.cpuThreads,
             _that.appVersion,
             _that.sort,
-            _that.isDebugMode);
+            _that.isDebugMode,
+            _that.exportCmdOnly);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -658,7 +673,8 @@ extension SettingsPatterns on Settings {
             int cpuThreads,
             String appVersion,
             Sort sort,
-            bool isDebugMode)?
+            bool isDebugMode,
+            bool exportCmdOnly)?
         $default,
   ) {
     final _that = this;
@@ -671,7 +687,8 @@ extension SettingsPatterns on Settings {
             _that.cpuThreads,
             _that.appVersion,
             _that.sort,
-            _that.isDebugMode);
+            _that.isDebugMode,
+            _that.exportCmdOnly);
       case _:
         return null;
     }
@@ -689,7 +706,8 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
       this.cpuThreads = 1,
       this.appVersion = '0.0.0',
       this.sort = const Sort(),
-      this.isDebugMode = kDebugMode})
+      this.isDebugMode = kDebugMode,
+      this.exportCmdOnly = false})
       : _transcodingPresets = transcodingPresets,
         _luts = luts;
 
@@ -727,6 +745,9 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
   @override
   @JsonKey()
   final bool isDebugMode;
+  @override
+  @JsonKey()
+  final bool exportCmdOnly;
 
   /// Create a copy of Settings
   /// with the given fields replaced by the non-null parameter values.
@@ -747,7 +768,8 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
       ..add(DiagnosticsProperty('cpuThreads', cpuThreads))
       ..add(DiagnosticsProperty('appVersion', appVersion))
       ..add(DiagnosticsProperty('sort', sort))
-      ..add(DiagnosticsProperty('isDebugMode', isDebugMode));
+      ..add(DiagnosticsProperty('isDebugMode', isDebugMode))
+      ..add(DiagnosticsProperty('exportCmdOnly', exportCmdOnly));
   }
 
   @override
@@ -767,7 +789,9 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
                 other.appVersion == appVersion) &&
             (identical(other.sort, sort) || other.sort == sort) &&
             (identical(other.isDebugMode, isDebugMode) ||
-                other.isDebugMode == isDebugMode));
+                other.isDebugMode == isDebugMode) &&
+            (identical(other.exportCmdOnly, exportCmdOnly) ||
+                other.exportCmdOnly == exportCmdOnly));
   }
 
   @override
@@ -779,11 +803,12 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
       cpuThreads,
       appVersion,
       sort,
-      isDebugMode);
+      isDebugMode,
+      exportCmdOnly);
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode, exportCmdOnly: $exportCmdOnly)';
   }
 }
 
@@ -801,7 +826,8 @@ abstract mixin class _$SettingsCopyWith<$Res>
       int cpuThreads,
       String appVersion,
       Sort sort,
-      bool isDebugMode});
+      bool isDebugMode,
+      bool exportCmdOnly});
 
   @override
   $SortCopyWith<$Res> get sort;
@@ -826,6 +852,7 @@ class __$SettingsCopyWithImpl<$Res> implements _$SettingsCopyWith<$Res> {
     Object? appVersion = null,
     Object? sort = null,
     Object? isDebugMode = null,
+    Object? exportCmdOnly = null,
   }) {
     return _then(_Settings(
       transcodingPresets: null == transcodingPresets
@@ -855,6 +882,10 @@ class __$SettingsCopyWithImpl<$Res> implements _$SettingsCopyWith<$Res> {
       isDebugMode: null == isDebugMode
           ? _self.isDebugMode
           : isDebugMode // ignore: cast_nullable_to_non_nullable
+              as bool,
+      exportCmdOnly: null == exportCmdOnly
+          ? _self.exportCmdOnly
+          : exportCmdOnly // ignore: cast_nullable_to_non_nullable
               as bool,
     ));
   }

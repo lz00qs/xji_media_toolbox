@@ -22,7 +22,7 @@ class SettingsDialog extends StatelessWidget {
     final ScrollController lutScrollController = ScrollController();
     return DualOptionDialog(
         width: 480,
-        height: 640,
+        height: 680,
         title: 'Settings',
         option1: '',
         option2: 'Close',
@@ -174,7 +174,7 @@ class SettingsDialog extends StatelessWidget {
             Row(
               children: [
                 Text('Debug Mode:',
-                    style: SemiTextStyles.header5ENRegular
+                    style: SemiTextStyles.header4ENRegular
                         .copyWith(color: ColorDark.text1)),
                 const Spacer(),
                 Consumer(builder: (context, ref, child) {
@@ -190,17 +190,38 @@ class SettingsDialog extends StatelessWidget {
               ],
             ),
             SizedBox(
+              height: DesignValues.ultraSmallPadding,
+            ),
+            Row(
+              children: [
+                Text('Export Command Only:',
+                    style: SemiTextStyles.header4ENRegular
+                        .copyWith(color: ColorDark.text1)),
+                const Spacer(),
+                Consumer(builder: (context, ref, child) {
+                  return Switch(
+                    value: ref.watch(settingsProvider).exportCmdOnly,
+                    onChanged: (value) {
+                      ref.read(settingsProvider.notifier).setExportCmdOnly(value);
+                    },
+                    activeTrackColor: ColorDark.blue5,
+                    activeThumbColor: ColorDark.white,
+                  );
+                })
+              ],
+            ),
+            SizedBox(
               height: DesignValues.smallPadding,
             ),
             Row(
               children: [
                 Text('Version:',
-                    style: SemiTextStyles.header5ENRegular
+                    style: SemiTextStyles.header4ENRegular
                         .copyWith(color: ColorDark.text1)),
                 const Spacer(),
                 Consumer(builder: (context, ref, child) {
                   return Text(ref.watch(settingsProvider).appVersion,
-                      style: SemiTextStyles.header5ENRegular
+                      style: SemiTextStyles.header4ENRegular
                           .copyWith(color: ColorDark.text0));
                 }),
               ],
@@ -211,11 +232,11 @@ class SettingsDialog extends StatelessWidget {
             Row(
               children: [
                 Text('Author:',
-                    style: SemiTextStyles.header5ENRegular
+                    style: SemiTextStyles.header4ENRegular
                         .copyWith(color: ColorDark.text1)),
                 const Spacer(),
                 Text('lz00qs',
-                    style: SemiTextStyles.header5ENRegular
+                    style: SemiTextStyles.header4ENRegular
                         .copyWith(color: ColorDark.text0)),
               ],
             ),
