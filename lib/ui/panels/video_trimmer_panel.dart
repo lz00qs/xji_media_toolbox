@@ -126,7 +126,7 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
         (duration / (_scaleValueList[initialStepValueIndex]) + 1).round() *
             _stepWidth;
 
-    videoPlayerController.addListener(() async {
+    Future<void> listener() async {
       state = state.copyWith(isPlaying: videoPlayerController.value.isPlaying);
       if (!state.isChanging) {
         final position = videoPlayerController.value.position;
@@ -139,10 +139,16 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
           state = state.copyWith(playPosition: position);
         }
       }
-    });
+    }
+
+    videoPlayerController.addListener(listener);
 
     ref.read(videoCutProvider.notifier).setCutEnd(resource.duration);
     ref.read(videoCutProvider.notifier).setCutStart(Duration.zero);
+
+    ref.onDispose(() {
+      videoPlayerController.removeListener(listener);
+    });
 
     return _VideoTrimmerState(
         isPlaying: false,
