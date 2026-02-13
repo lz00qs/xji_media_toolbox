@@ -143,9 +143,6 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
 
     videoPlayerController.addListener(listener);
 
-    ref.read(videoCutProvider.notifier).setCutEnd(resource.duration);
-    ref.read(videoCutProvider.notifier).setCutStart(Duration.zero);
-
     ref.onDispose(() {
       videoPlayerController.removeListener(listener);
     });
@@ -336,11 +333,6 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
       startPosition:
           (state.actualStartPosition / _stepWidth).round() * _stepWidth,
     );
-    // cutStart.value = Duration(
-    //     microseconds: (startPosition.value /
-    //         _stepWidth *
-    //         _scaleValueList[stepValueIndex.value])
-    //         .round());
     state = state.copyWith(
         cutStart: Duration(
             microseconds: (state.startPosition /
@@ -403,6 +395,7 @@ class _VideoTrimmer extends ConsumerWidget {
         ref.watch(_videoTrimmerProvider(videoResource, videoPlayerController));
     final notifier = ref.watch(
         _videoTrimmerProvider(videoResource, videoPlayerController).notifier);
+    ref.watch(videoCutProvider);
 
     return Column(
       children: [
@@ -705,11 +698,6 @@ class VideoTrimmerPanel extends ConsumerWidget {
         ref.watch(_videoTrimmerPanelStateProvider(videoFile: resource.file));
     return state.when(
       data: (data) {
-        // _VideoTrimmer(
-        //   chewieController: data.chewieController!,
-        //   videoResource: resource,
-        //   videoPlayerController: data.videoPlayerController!,
-        // );
         return Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
@@ -748,7 +736,7 @@ class VideoTrimmerPanel extends ConsumerWidget {
                           builder: (BuildContext context) {
                             return VideoExportDialog(
                               videoResource: resource,
-                              taskType: VideoTaskType.transcode,
+                              taskType: VideoTaskType.trim,
                             );
                           });
                       if (task != null) {

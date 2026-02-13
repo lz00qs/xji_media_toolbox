@@ -157,7 +157,17 @@ Duration _getOutputDuration(
       break;
     case VideoTaskType.trim:
       final cutState = ref.watch(videoCutProvider);
-      duration = cutState.cutEnd - cutState.cutStart;
+      if (cutState.cutStart != Duration.zero ||
+          cutState.cutEnd != Duration.zero) {
+        duration = cutState.cutEnd - cutState.cutStart;
+        print('cutStart: ${cutState.cutStart}, cutEnd: ${cutState.cutEnd}');
+      } else {
+        duration = (ref.watch(mediaResourcesStateProvider.select(
+                    (state) => state.resources[state.currentResourceIndex]))
+                as VideoResource)
+            .duration;
+        print('test');
+      }
       break;
     case VideoTaskType.transcode:
       duration = (ref.watch(mediaResourcesStateProvider.select(
