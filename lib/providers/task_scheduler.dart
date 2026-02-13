@@ -189,12 +189,12 @@ Future<void> _cleanupFiles(VideoTask task) async {
     }
   } catch (_) {}
 
-  try {
-    final logFile = File(task.logPath);
-    if (await logFile.exists()) {
-      await logFile.delete();
-    }
-  } catch (_) {}
+  // try {
+  //   final logFile = File(task.logPath);
+  //   if (await logFile.exists()) {
+  //     await logFile.delete();
+  //   }
+  // } catch (_) {}
 
   try {
     for (final tempFilePath in task.tempFilePaths) {

@@ -126,7 +126,7 @@ class VideoMergerPanel extends ConsumerWidget {
                       builder: (BuildContext context) {
                         return VideoExportDialog(
                           videoResource: selectedResources.first,
-                          taskType: VideoTaskType.transcode,
+                          taskType: VideoTaskType.merge,
                         );
                       });
                   if (task != null) {

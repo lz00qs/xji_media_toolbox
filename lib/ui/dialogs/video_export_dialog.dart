@@ -160,13 +160,11 @@ Duration _getOutputDuration(
       if (cutState.cutStart != Duration.zero ||
           cutState.cutEnd != Duration.zero) {
         duration = cutState.cutEnd - cutState.cutStart;
-        print('cutStart: ${cutState.cutStart}, cutEnd: ${cutState.cutEnd}');
       } else {
         duration = (ref.watch(mediaResourcesStateProvider.select(
                     (state) => state.resources[state.currentResourceIndex]))
                 as VideoResource)
             .duration;
-        print('test');
       }
       break;
     case VideoTaskType.transcode:
@@ -363,10 +361,13 @@ class VideoExportDialog extends ConsumerWidget {
               }
 
               if (taskType == VideoTaskType.trim) {
-                ffmpegArgs.add('-ss');
-                ffmpegArgs.add(ref.watch(videoCutProvider).cutStart.toString());
-                ffmpegArgs.add('-to');
-                ffmpegArgs.add(ref.watch(videoCutProvider).cutEnd.toString());
+                final videoCutState = ref.watch(videoCutProvider);
+                if (videoCutState.cutStart != Duration.zero || videoCutState.cutEnd != Duration.zero) {
+                  ffmpegArgs.add('-ss');
+                  ffmpegArgs.add(videoCutState.cutStart.toString());
+                  ffmpegArgs.add('-to');
+                  ffmpegArgs.add(videoCutState.cutEnd.toString());
+                }
               }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
@@ -374,7 +375,8 @@ class VideoExportDialog extends ConsumerWidget {
               final task = VideoTask(
                 name: '${state.outputFileName}.MP4',
                 status: VideoTaskStatus.waiting,
-                type: VideoTaskType.merge,
+                // type: VideoTaskType.trim,
+                type: taskType == VideoTaskType.trim ? VideoTaskType.trim : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(taskType: taskType, ref: ref),
                 progress: 0.0,

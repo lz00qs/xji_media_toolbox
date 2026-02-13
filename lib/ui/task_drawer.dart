@@ -85,17 +85,29 @@ class TaskItem extends ConsumerWidget {
                                     },
                                     padding: EdgeInsets.zero,
                                     icon: const Icon(Icons.cancel_outlined,
-                                        color: ColorDark.warning)),
+                                        color: ColorDark.primary)),
                               );
                             case VideoTaskStatus.finished:
                               return const Icon(Icons.check,
                                   color: ColorDark.success);
                             case VideoTaskStatus.canceled:
-                              return const Icon(Icons.cancel_outlined,
-                                  color: ColorDark.warning);
                             case VideoTaskStatus.failed:
-                              return const Icon(Icons.error,
-                                  color: ColorDark.danger);
+                              return SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: IconButton(
+                                    onPressed: () {
+                                      ref
+                                          .read(taskSchedulerProvider.notifier)
+                                          .rerunTask(videoTask.id);
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    icon: Icon(Icons.refresh,
+                                        color: videoTask.status == VideoTaskStatus.canceled ? ColorDark.text1 : ColorDark.danger)),
+                              );
+                            // case VideoTaskStatus.failed:
+                            //   return const Icon(Icons.error,
+                            //       color: ColorDark.danger);
                             case VideoTaskStatus.waiting:
                               return const Icon(Icons.timer,
                                   color: ColorDark.text1);
@@ -120,7 +132,7 @@ class TaskItem extends ConsumerWidget {
                               return Text('canceled',
                                   style: SemiTextStyles.regularENSemiBold
                                       .copyWith(
-                                          color: ColorDark.warning,
+                                          color: ColorDark.text1,
                                           overflow: TextOverflow.ellipsis));
                             case VideoTaskStatus.failed:
                               return Text('failed',
@@ -180,15 +192,6 @@ class TaskDrawer extends ConsumerWidget {
                       itemBuilder: (BuildContext context, int index) {
                         return TaskItem(videoTask: taskSchedulerState[index]);
                       }))
-              // Expanded(
-              //     child: ListView.builder(
-              //         shrinkWrap: true,
-              //         itemCount: 1,
-              //         itemBuilder: (BuildContext context, int index) {
-              //           return TaskItem(
-              //               videoTask:
-              //                   VideoTask(status: VideoTaskStatus.processing, name: 'test'));
-              //         }))
             ],
           ),
         ));
