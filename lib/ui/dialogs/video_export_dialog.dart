@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'dart:math';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:uuid/uuid.dart';
 import 'package:xji_footage_toolbox/models/lut.model.dart';
 import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/models/settings.model.dart';
@@ -13,6 +13,8 @@ import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/ui/dialogs/settings_dialog.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_trimmer_panel.dart';
+import 'package:xji_footage_toolbox/utils/logger.dart';
+import 'package:xji_footage_toolbox/utils/toast.dart';
 import '../../providers/settings.notifier.dart';
 import '../../utils/tools.dart';
 import '../buttons/custom_icon_button.dart';
@@ -139,10 +141,10 @@ String _getDefaultOutputFileName(String originalFileName) {
   return '${baseName}_OUTPUT';
 }
 
-String _get4DigitRandomString() {
-  final random = Random();
-  return random.nextInt(10000).toString().padLeft(4, '0');
-}
+// String _get4DigitRandomString() {
+//   final random = Random();
+//   return random.nextInt(10000).toString().padLeft(4, '0');
+// }
 
 Duration _getOutputDuration(
     {required VideoTaskType taskType, required WidgetRef ref}) {
@@ -243,6 +245,24 @@ class VideoExportDialog extends ConsumerWidget {
             _getDefaultOutputFileName(videoResource.name))
         .notifier);
 
+    Future<void> exportCmdToFile(String id, String taskName, String random, List<String> ffmpegArgs) async {
+      // 文件名为 taskName_id后的4位随机数
+      final cmdFileName = '${taskName.substring(0, taskName.length - 4)}_$random.txt';
+      final cmdFile = File('${videoResource.file.parent.path}/$cmdFileName');
+      if (cmdFile.existsSync()) {
+        Logger.error('Cmd File $cmdFileName already exists.');
+        Toast.error('Cmd File $cmdFileName already exists.');
+        return;
+      }
+      await cmdFile.create();
+      await cmdFile.writeAsString('ffmpeg ');
+      for (final arg in ffmpegArgs) {
+        await cmdFile.writeAsString('$arg ', mode: FileMode.append);
+      }
+    }
+
+    final exportCmdOnly = ref.watch(settingsProvider).exportCmdOnly;
+
     return DualOptionDialog(
         width: 480,
         height: 680,
@@ -255,9 +275,19 @@ class VideoExportDialog extends ConsumerWidget {
         },
         onOption2Pressed: () async {
           if (state.isOutputPathValid) {
-            final outputFilePath =
-                '${state.useSameDirectory ? videoResource.file.parent.path : state.selectedDirectory}'
-                '/${state.outputFileName}.MP4';
+            final taskId = const Uuid().v4();
+            final random4Digit = taskId.substring(taskId.length - 4);
+            final taskName = '${state.outputFileName}.MP4';
+            late final String outputFilePath;
+            if (exportCmdOnly) {
+              outputFilePath = '${state.outputFileName}.MP4';
+            } else if (state.useSameDirectory) {
+              outputFilePath =
+                  '${videoResource.file.parent.path}/${state.outputFileName}.MP4';
+            } else {
+              outputFilePath =
+                  '${state.selectedDirectory}/${state.outputFileName}.MP4';
+            }
             final preset = ref.watch(settingsProvider.select((s) => s
                 .transcodingPresets
                 .firstWhere((e) => e.id == state.transcodePresetId)));
@@ -265,12 +295,14 @@ class VideoExportDialog extends ConsumerWidget {
               final List<String> ffmpegArgs = [];
               final inputFilesTxtPath =
                   '${videoResource.file.parent.path}/.${state.outputFileName}_'
-                  '${_get4DigitRandomString()}.txt';
+                  '$random4Digit.txt';
               final inputFilesTxtFile = File(inputFilesTxtPath);
               if (inputFilesTxtFile.existsSync()) {
-                inputFilesTxtFile.deleteSync();
+                Logger.error('Input Files Txt File $inputFilesTxtPath already exists.');
+                Toast.error('Input Files Txt File $inputFilesTxtPath already exists.');
+                return;
               }
-              inputFilesTxtFile.writeAsStringSync(ref
+              await inputFilesTxtFile.writeAsString(ref
                   .watch(mediaResourcesStateProvider
                       .select((m) => m.selectedResources))
                   .map((e) => 'file \'${e.file.path}\'')
@@ -279,10 +311,18 @@ class VideoExportDialog extends ConsumerWidget {
               ffmpegArgs.add('concat');
               ffmpegArgs.add('-safe');
               ffmpegArgs.add('0');
-              ffmpegArgs.add('-i');
-              ffmpegArgs.add(inputFilesTxtPath);
-              ffmpegArgs.add('-i');
-              ffmpegArgs.add(videoResource.file.path);
+              // 如果使用 exportCmdOnly，则使用相对路径
+              if (exportCmdOnly) {
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(inputFilesTxtPath.replaceFirst('${videoResource.file.parent.path}/', ''));
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(videoResource.file.path.replaceFirst('${videoResource.file.parent.path}/', ''));
+              } else {
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(inputFilesTxtPath);
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(videoResource.file.path);
+              }
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('1');
               if (state.useInputEncodeSettings == false && preset.lutId != 0) {
@@ -314,9 +354,15 @@ class VideoExportDialog extends ConsumerWidget {
                   print(arg);
                 }
               }
+
+              if (exportCmdOnly) {
+                await exportCmdToFile(taskId, taskName, random4Digit, ffmpegArgs);
+              }
+
               final task = VideoTask(
-                name: '${state.outputFileName}.MP4',
-                status: VideoTaskStatus.waiting,
+                id: taskId,
+                name: taskName,
+                status: exportCmdOnly ? VideoTaskStatus.finished : VideoTaskStatus.waiting,
                 type: VideoTaskType.merge,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(taskType: taskType, ref: ref),
@@ -326,12 +372,19 @@ class VideoExportDialog extends ConsumerWidget {
                 logPath: ref.watch(settingsProvider
                     .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
               );
+              if (!context.mounted) return;
               Navigator.of(context).pop(task);
             } else {
               // Export single file
               final List<String> ffmpegArgs = [];
-              ffmpegArgs.add('-i');
-              ffmpegArgs.add(videoResource.file.path);
+              if (exportCmdOnly) {
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(videoResource.file.path.replaceFirst('${videoResource.file.parent.path}/', ''));
+              }
+              else {
+                ffmpegArgs.add('-i');
+                ffmpegArgs.add(videoResource.file.path);
+              }
               if (state.useInputEncodeSettings == false && preset.lutId != 0) {
                 final lutPath = ref.watch(settingsProvider.select((s) =>
                     s.luts.firstWhere((e) => e.id == preset.lutId).path));
@@ -372,9 +425,15 @@ class VideoExportDialog extends ConsumerWidget {
               ffmpegArgs.add('-map_metadata');
               ffmpegArgs.add('0');
               ffmpegArgs.add(outputFilePath);
+
+              if (exportCmdOnly) {
+                await exportCmdToFile(taskId, taskName, random4Digit, ffmpegArgs);
+              }
+
               final task = VideoTask(
-                name: '${state.outputFileName}.MP4',
-                status: VideoTaskStatus.waiting,
+                id: taskId,
+                name: taskName,
+                status: exportCmdOnly ? VideoTaskStatus.finished : VideoTaskStatus.waiting,
                 // type: VideoTaskType.trim,
                 type: taskType == VideoTaskType.trim ? VideoTaskType.trim : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
@@ -384,6 +443,7 @@ class VideoExportDialog extends ConsumerWidget {
                 logPath: ref.watch(settingsProvider
                     .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
               );
+              if (!context.mounted) return;
               Navigator.of(context).pop(task);
             }
           }
@@ -392,7 +452,7 @@ class VideoExportDialog extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              DialogCheckBoxWithText(
+              exportCmdOnly ? const SizedBox() : DialogCheckBoxWithText(
                   text: 'Use the same directory as source',
                   value: state.useSameDirectory,
                   onPressed: () {

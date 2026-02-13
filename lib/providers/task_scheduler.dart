@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:uuid/uuid.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
@@ -18,7 +17,7 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
 
   // 添加任务
   void addTask(VideoTask task) {
-    state = [...state, task.copyWith(id: const Uuid().v4())];
+    state = [...state, task];
     _tryStartNext();
   }
 
