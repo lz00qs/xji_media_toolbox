@@ -14,69 +14,34 @@ import 'package:objectbox/internal.dart'
 import 'package:objectbox/objectbox.dart' as obx;
 import 'package:objectbox_flutter_libs/objectbox_flutter_libs.dart';
 
-import 'models/settings.dart';
+import 'storage/lut.entity.dart';
+import 'storage/transcode_preset.entity.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 
 final _entities = <obx_int.ModelEntity>[
   obx_int.ModelEntity(
-    id: const obx_int.IdUid(2, 5066807561326805015),
-    name: 'TranscodePreset',
-    lastPropertyId: const obx_int.IdUid(9, 3123510047051500198),
+    id: const obx_int.IdUid(1, 5162699864130156089),
+    name: 'LutEntity',
+    lastPropertyId: const obx_int.IdUid(3, 6601187259294871195),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(1, 1268788478972929064),
+        id: const obx_int.IdUid(1, 364815542115076735),
         name: 'id',
         type: 6,
         flags: 1,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(2, 6604121700459575002),
+        id: const obx_int.IdUid(2, 1860016567442931836),
         name: 'name',
         type: 9,
         flags: 0,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(3, 6806958124699359397),
-        name: 'useInputResolution',
-        type: 1,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(4, 4710756751357513035),
-        name: 'useHevc',
-        type: 1,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(5, 1102421391753766293),
-        name: 'width',
-        type: 6,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(6, 3946286356324700626),
-        name: 'height',
-        type: 6,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(7, 4338324737020365168),
-        name: 'crf',
-        type: 6,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(8, 6947592021971297063),
-        name: 'ffmpegPreset',
-        type: 6,
-        flags: 0,
-      ),
-      obx_int.ModelProperty(
-        id: const obx_int.IdUid(9, 3123510047051500198),
-        name: 'lutId',
-        type: 6,
+        id: const obx_int.IdUid(3, 6601187259294871195),
+        name: 'path',
+        type: 9,
         flags: 0,
       ),
     ],
@@ -84,27 +49,63 @@ final _entities = <obx_int.ModelEntity>[
     backlinks: <obx_int.ModelBacklink>[],
   ),
   obx_int.ModelEntity(
-    id: const obx_int.IdUid(3, 6915199295852249867),
-    name: 'Lut',
-    lastPropertyId: const obx_int.IdUid(3, 1274234915978651286),
+    id: const obx_int.IdUid(2, 861634889113588943),
+    name: 'TranscodePresetEntity',
+    lastPropertyId: const obx_int.IdUid(9, 1475639453115891263),
     flags: 0,
     properties: <obx_int.ModelProperty>[
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(1, 326848679578729628),
+        id: const obx_int.IdUid(1, 5302371603178907509),
         name: 'id',
         type: 6,
         flags: 1,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(2, 4216341812967579692),
+        id: const obx_int.IdUid(2, 100872938759865647),
         name: 'name',
         type: 9,
         flags: 0,
       ),
       obx_int.ModelProperty(
-        id: const obx_int.IdUid(3, 1274234915978651286),
-        name: 'path',
-        type: 9,
+        id: const obx_int.IdUid(3, 7629311416350919528),
+        name: 'useInputResolution',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(4, 9088356150905908196),
+        name: 'useHevc',
+        type: 1,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(5, 3080943635677551975),
+        name: 'width',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(6, 4477828335932855036),
+        name: 'height',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(7, 6840697723068384424),
+        name: 'crf',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(8, 5109910272413641115),
+        name: 'ffmpegPreset',
+        type: 6,
+        flags: 0,
+      ),
+      obx_int.ModelProperty(
+        id: const obx_int.IdUid(9, 1475639453115891263),
+        name: 'lutId',
+        type: 6,
         flags: 0,
       ),
     ],
@@ -150,23 +151,19 @@ Future<obx.Store> openStore({
 /// [obx.Store.new].
 obx_int.ModelDefinition getObjectBoxModel() {
   final model = obx_int.ModelInfo(
+    // If this version is not found, it means that this file was generated
+    // with an older version of the ObjectBox Dart generator.
+    // Please regenerate this file with the current generator version.
+    // Typically, this is done with `dart run build_runner build`.
+    generatorVersion: obx_int.GeneratorVersion.v2025_12_16,
     entities: _entities,
-    lastEntityId: const obx_int.IdUid(3, 6915199295852249867),
+    lastEntityId: const obx_int.IdUid(2, 861634889113588943),
     lastIndexId: const obx_int.IdUid(0, 0),
     lastRelationId: const obx_int.IdUid(0, 0),
     lastSequenceId: const obx_int.IdUid(0, 0),
-    retiredEntityUids: const [6542342576071718515],
+    retiredEntityUids: const [],
     retiredIndexUids: const [],
-    retiredPropertyUids: const [
-      3441272698186930426,
-      2633146971749489003,
-      5469937351195833193,
-      6942609030270405673,
-      2255326580324500820,
-      3004389153049693201,
-      3288320502769605509,
-      6600177316668141755,
-    ],
+    retiredPropertyUids: const [],
     retiredRelationUids: const [],
     modelVersion: 5,
     modelVersionParserMinimum: 5,
@@ -174,15 +171,53 @@ obx_int.ModelDefinition getObjectBoxModel() {
   );
 
   final bindings = <Type, obx_int.EntityDefinition>{
-    TranscodePreset: obx_int.EntityDefinition<TranscodePreset>(
+    LutEntity: obx_int.EntityDefinition<LutEntity>(
       model: _entities[0],
-      toOneRelations: (TranscodePreset object) => [],
-      toManyRelations: (TranscodePreset object) => {},
-      getId: (TranscodePreset object) => object.id,
-      setId: (TranscodePreset object, int id) {
+      toOneRelations: (LutEntity object) => [],
+      toManyRelations: (LutEntity object) => {},
+      getId: (LutEntity object) => object.id,
+      setId: (LutEntity object, int id) {
         object.id = id;
       },
-      objectToFB: (TranscodePreset object, fb.Builder fbb) {
+      objectToFB: (LutEntity object, fb.Builder fbb) {
+        final nameOffset = fbb.writeString(object.name);
+        final pathOffset = fbb.writeString(object.path);
+        fbb.startTable(4);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, nameOffset);
+        fbb.addOffset(2, pathOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (obx.Store store, ByteData fbData) {
+        final buffer = fb.BufferContext(fbData);
+        final rootOffset = buffer.derefObject(0);
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final pathParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 8, '');
+        final object = LutEntity(id: idParam, name: nameParam, path: pathParam);
+
+        return object;
+      },
+    ),
+    TranscodePresetEntity: obx_int.EntityDefinition<TranscodePresetEntity>(
+      model: _entities[1],
+      toOneRelations: (TranscodePresetEntity object) => [],
+      toManyRelations: (TranscodePresetEntity object) => {},
+      getId: (TranscodePresetEntity object) => object.id,
+      setId: (TranscodePresetEntity object, int id) {
+        object.id = id;
+      },
+      objectToFB: (TranscodePresetEntity object, fb.Builder fbb) {
         final nameOffset = fbb.writeString(object.name);
         fbb.startTable(10);
         fbb.addInt64(0, object.id);
@@ -200,68 +235,68 @@ obx_int.ModelDefinition getObjectBoxModel() {
       objectFromFB: (obx.Store store, ByteData fbData) {
         final buffer = fb.BufferContext(fbData);
         final rootOffset = buffer.derefObject(0);
-
-        final object = TranscodePreset()
-          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-          ..name = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '')
-          ..useInputResolution = const fb.BoolReader().vTableGet(
-            buffer,
-            rootOffset,
-            8,
-            false,
-          )
-          ..useHevc = const fb.BoolReader().vTableGet(
-            buffer,
-            rootOffset,
-            10,
-            false,
-          )
-          ..width = const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)
-          ..height = const fb.Int64Reader().vTableGet(buffer, rootOffset, 14, 0)
-          ..crf = const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)
-          ..ffmpegPreset = const fb.Int64Reader().vTableGet(
-            buffer,
-            rootOffset,
-            18,
-            0,
-          )
-          ..lutId = const fb.Int64Reader().vTableGet(buffer, rootOffset, 20, 0);
-
-        return object;
-      },
-    ),
-    Lut: obx_int.EntityDefinition<Lut>(
-      model: _entities[1],
-      toOneRelations: (Lut object) => [],
-      toManyRelations: (Lut object) => {},
-      getId: (Lut object) => object.id,
-      setId: (Lut object, int id) {
-        object.id = id;
-      },
-      objectToFB: (Lut object, fb.Builder fbb) {
-        final nameOffset = fbb.writeString(object.name);
-        final pathOffset = fbb.writeString(object.path);
-        fbb.startTable(4);
-        fbb.addInt64(0, object.id);
-        fbb.addOffset(1, nameOffset);
-        fbb.addOffset(2, pathOffset);
-        fbb.finish(fbb.endTable());
-        return object.id;
-      },
-      objectFromFB: (obx.Store store, ByteData fbData) {
-        final buffer = fb.BufferContext(fbData);
-        final rootOffset = buffer.derefObject(0);
-
-        final object = Lut()
-          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-          ..name = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 6, '')
-          ..path = const fb.StringReader(
-            asciiOptimization: true,
-          ).vTableGet(buffer, rootOffset, 8, '');
+        final idParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          4,
+          0,
+        );
+        final nameParam = const fb.StringReader(
+          asciiOptimization: true,
+        ).vTableGet(buffer, rootOffset, 6, '');
+        final useInputResolutionParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          8,
+          false,
+        );
+        final useHevcParam = const fb.BoolReader().vTableGet(
+          buffer,
+          rootOffset,
+          10,
+          false,
+        );
+        final widthParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          12,
+          0,
+        );
+        final heightParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          14,
+          0,
+        );
+        final crfParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          16,
+          0,
+        );
+        final ffmpegPresetParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          18,
+          0,
+        );
+        final lutIdParam = const fb.Int64Reader().vTableGet(
+          buffer,
+          rootOffset,
+          20,
+          0,
+        );
+        final object = TranscodePresetEntity(
+          id: idParam,
+          name: nameParam,
+          useInputResolution: useInputResolutionParam,
+          useHevc: useHevcParam,
+          width: widthParam,
+          height: heightParam,
+          crf: crfParam,
+          ffmpegPreset: ffmpegPresetParam,
+          lutId: lutIdParam,
+        );
 
         return object;
       },
@@ -271,62 +306,69 @@ obx_int.ModelDefinition getObjectBoxModel() {
   return obx_int.ModelDefinition(model, bindings);
 }
 
-/// [TranscodePreset] entity fields to define ObjectBox queries.
-class TranscodePreset_ {
-  /// See [TranscodePreset.id].
-  static final id = obx.QueryIntegerProperty<TranscodePreset>(
+/// [LutEntity] entity fields to define ObjectBox queries.
+class LutEntity_ {
+  /// See [LutEntity.id].
+  static final id = obx.QueryIntegerProperty<LutEntity>(
     _entities[0].properties[0],
   );
 
-  /// See [TranscodePreset.name].
-  static final name = obx.QueryStringProperty<TranscodePreset>(
+  /// See [LutEntity.name].
+  static final name = obx.QueryStringProperty<LutEntity>(
     _entities[0].properties[1],
   );
 
-  /// See [TranscodePreset.useInputResolution].
-  static final useInputResolution = obx.QueryBooleanProperty<TranscodePreset>(
+  /// See [LutEntity.path].
+  static final path = obx.QueryStringProperty<LutEntity>(
     _entities[0].properties[2],
-  );
-
-  /// See [TranscodePreset.useHevc].
-  static final useHevc = obx.QueryBooleanProperty<TranscodePreset>(
-    _entities[0].properties[3],
-  );
-
-  /// See [TranscodePreset.width].
-  static final width = obx.QueryIntegerProperty<TranscodePreset>(
-    _entities[0].properties[4],
-  );
-
-  /// See [TranscodePreset.height].
-  static final height = obx.QueryIntegerProperty<TranscodePreset>(
-    _entities[0].properties[5],
-  );
-
-  /// See [TranscodePreset.crf].
-  static final crf = obx.QueryIntegerProperty<TranscodePreset>(
-    _entities[0].properties[6],
-  );
-
-  /// See [TranscodePreset.ffmpegPreset].
-  static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePreset>(
-    _entities[0].properties[7],
-  );
-
-  /// See [TranscodePreset.lutId].
-  static final lutId = obx.QueryIntegerProperty<TranscodePreset>(
-    _entities[0].properties[8],
   );
 }
 
-/// [Lut] entity fields to define ObjectBox queries.
-class Lut_ {
-  /// See [Lut.id].
-  static final id = obx.QueryIntegerProperty<Lut>(_entities[1].properties[0]);
+/// [TranscodePresetEntity] entity fields to define ObjectBox queries.
+class TranscodePresetEntity_ {
+  /// See [TranscodePresetEntity.id].
+  static final id = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[0],
+  );
 
-  /// See [Lut.name].
-  static final name = obx.QueryStringProperty<Lut>(_entities[1].properties[1]);
+  /// See [TranscodePresetEntity.name].
+  static final name = obx.QueryStringProperty<TranscodePresetEntity>(
+    _entities[1].properties[1],
+  );
 
-  /// See [Lut.path].
-  static final path = obx.QueryStringProperty<Lut>(_entities[1].properties[2]);
+  /// See [TranscodePresetEntity.useInputResolution].
+  static final useInputResolution =
+      obx.QueryBooleanProperty<TranscodePresetEntity>(
+        _entities[1].properties[2],
+      );
+
+  /// See [TranscodePresetEntity.useHevc].
+  static final useHevc = obx.QueryBooleanProperty<TranscodePresetEntity>(
+    _entities[1].properties[3],
+  );
+
+  /// See [TranscodePresetEntity.width].
+  static final width = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[4],
+  );
+
+  /// See [TranscodePresetEntity.height].
+  static final height = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[5],
+  );
+
+  /// See [TranscodePresetEntity.crf].
+  static final crf = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[6],
+  );
+
+  /// See [TranscodePresetEntity.ffmpegPreset].
+  static final ffmpegPreset = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[7],
+  );
+
+  /// See [TranscodePresetEntity.lutId].
+  static final lutId = obx.QueryIntegerProperty<TranscodePresetEntity>(
+    _entities[1].properties[8],
+  );
 }

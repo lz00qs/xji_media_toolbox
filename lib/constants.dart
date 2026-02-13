@@ -10,10 +10,11 @@ const double macAppBarTitleTextSize = 15.0;
 
 // Errors
 const int parseMediaResourceErrorCode = 0;
+const String parseImageError = "Parse image error";
 const String parseMediaResourceTimeError = "Parse media resource time error";
 const String parseMediaResourceSequenceError =
     "Parse media resource sequence error";
-// const String parseMediaResourceVideoInfoError = "Parse media resource video info error";
+const String parseMediaResourceVideoInfoError = "Parse media resource video info error";
 
 const int parseAebErrorCode = 1;
 const String parseAebStartError = "Parse AEB start error";
@@ -22,3 +23,4 @@ const String parseAebEndError = "Parse AEB end error";
 const String defaultTranscodePresetIndexPrefKey = 'defaultTransCodePresetIndex';
 const String sortTypePrefKey = 'sortType';
 const String sortOderPrefKey = 'sortOrder';
+const String exportCmdOnlyPrefKey = 'exportCmdOnly';

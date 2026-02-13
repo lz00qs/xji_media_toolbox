@@ -1,25 +1,27 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:xji_footage_toolbox/models/media_resource.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:xji_footage_toolbox/ui/design_tokens.dart';
-import 'package:xji_footage_toolbox/ui/widgets/resizable_panel.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/media_resource_info_panel.dart';
-import 'package:xji_footage_toolbox/ui/widgets/views/media_resources_list_panel.dart';
-import '../widgets/buttons/main_panel_button.dart';
-import '../../utils/media_resources_utils.dart';
-import '../widgets/views/main_panel.dart';
-import '../widgets/views/multi_select_panel.dart';
+import 'package:xji_footage_toolbox/ui/panels/multi_select_panel.dart';
 
-final _mediaResourcesListPanelFocusNode = FocusNode();
+import '../../models/media_resource.model.dart';
+import '../../providers/media_resources_state.notifier.dart';
+import '../../providers/settings.notifier.dart';
+import '../buttons/main_panel_button.dart';
+import '../panels/main_panel.dart';
+import '../panels/media_resource_info_panel.dart';
+import '../panels/media_resources_list_panel.dart';
+import '../resizable_panel.dart';
+import 'loading_media_resources_page.dart';
 
-class _MainPageEmpty extends StatelessWidget {
-  final WidgetRef ref;
+final _mainPageNotEmptyFocusNode = FocusNode();
 
-  const _MainPageEmpty({required this.ref});
-
+class _MainPageEmpty extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResourcesNotifier =
+        ref.watch(mediaResourcesStateProvider.notifier);
     var onPressed = false;
     return Container(
       height: double.infinity,
@@ -33,7 +35,15 @@ class _MainPageEmpty extends StatelessWidget {
                 return;
               }
               onPressed = true;
-              await openMediaResourcesFolder(ref: ref);
+              final selectedDirectory =
+                  await FilePicker.platform.getDirectoryPath();
+              if (selectedDirectory != null) {
+                await mediaResourcesNotifier.loadMediaResourcesFromDir(
+                    selectedDirectory,
+                    false,
+                    ref.watch(settingsProvider).cpuThreads,
+                    ref.watch(settingsProvider).sort);
+              }
               onPressed = false;
             }),
       ),
@@ -46,101 +56,76 @@ class _MainPageNotEmpty extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ResizablePanel(
-      mediaResourcesListPanel: MediaResourcesListPanel(),
-      mediaResourceInfoPanel: MediaResourceInfoPanel(),
-      mainPanel: ref.watch(mediaResourcesProvider
-              .select((state) => state.isMultipleSelection))
-          ? MultiSelectPanel()
-          : MainPanel(),
-    );
-  }
-}
-
-class MainPage extends StatelessWidget {
-  final WidgetRef mainRef;
-
-  const MainPage({super.key, required this.mainRef});
-
-  void _increaseCurrentMediaIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resourcesLength = mainRef.watch(
-        mediaResourcesProvider.select((state) => state.resources.length));
-    if (currentIndex < resourcesLength - 1) {
-      mainRef.read(mediaResourcesProvider.notifier).increaseCurrentIndex();
-      mediaResourcesListScrollToIndex(currentIndex + 1, true);
+    final currentMediaResource = ref.watch(mediaResourcesStateProvider.select(
+        (s) => s.resources.length > s.currentResourceIndex
+            ? s.resources[s.currentResourceIndex]
+            : null));
+    AebPhotoResource? currentAebResource;
+    if (currentMediaResource is AebPhotoResource) {
+      currentAebResource = ref.watch(mediaResourcesStateProvider.select((s) =>
+          currentMediaResource.aebResources.length > s.currentAebIndex
+              ? currentMediaResource.aebResources[s.currentAebIndex]
+              : null));
     }
-  }
-
-  void _decreaseCurrentMediaIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    if (currentIndex > 0) {
-      mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentIndex();
-      mediaResourcesListScrollToIndex(currentIndex - 1, false);
-    }
-  }
-
-  void _increaseCurrentAebIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resource = mainRef.watch(mediaResourcesProvider
-        .select((state) => state.resources[currentIndex]));
-    if (resource.isAeb) {
-      mainRef.read(mediaResourcesProvider.notifier).increaseCurrentAebIndex();
-    }
-  }
-
-  void _decreaseCurrentAebIndex() {
-    final currentIndex = mainRef
-        .watch(mediaResourcesProvider.select((state) => state.currentIndex));
-    final resource = mainRef.watch(mediaResourcesProvider
-        .select((state) => state.resources[currentIndex]));
-    if (resource.isAeb) {
-      final currentAebIndex = mainRef.watch(
-          mediaResourcesProvider.select((state) => state.currentAebIndex));
-      if (currentAebIndex > 0) {
-        mainRef.read(mediaResourcesProvider.notifier).decreaseCurrentAebIndex();
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+    final isMultipleSelection = ref.watch(
+        mediaResourcesStateProvider.select((s) => s.isMultipleSelection));
     return FocusScope(
         canRequestFocus: true,
         autofocus: true,
         child: KeyboardListener(
-            focusNode: _mediaResourcesListPanelFocusNode,
+            focusNode: _mainPageNotEmptyFocusNode,
             autofocus: true,
             onKeyEvent: (event) {
               if (event is KeyDownEvent || event is KeyRepeatEvent) {
                 switch (event.logicalKey) {
                   case LogicalKeyboardKey.arrowUp:
-                    _decreaseCurrentMediaIndex();
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .decreaseCurrentResourceIndex();
                     break;
                   case LogicalKeyboardKey.arrowDown:
-                    _increaseCurrentMediaIndex();
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .increaseCurrentResourceIndex();
                     break;
                   case LogicalKeyboardKey.arrowLeft:
-                    _decreaseCurrentAebIndex();
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .decreaseCurrentAebIndex();
                     break;
                   case LogicalKeyboardKey.arrowRight:
-                    _increaseCurrentAebIndex();
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .increaseCurrentAebIndex();
                     break;
                 }
               }
             },
-            child: Consumer(
-                builder: (BuildContext context, WidgetRef ref, Widget? child) {
-              final resourcesIsEmpty = ref.watch(mediaResourcesProvider
-                  .select((state) => state.resources.isEmpty));
-              if (resourcesIsEmpty) {
-                return _MainPageEmpty(ref: mainRef);
-              } else {
-                return const _MainPageNotEmpty();
-              }
-            })));
+            child: ResizablePanel(
+              mediaResourcesListPanel: MediaResourcesListPanel(),
+              mediaResourceInfoPanel: currentMediaResource != null
+                  ? MediaResourceInfoPanel(
+                      mediaResource: currentAebResource ?? currentMediaResource)
+                  : SizedBox(),
+              mainPanel: currentMediaResource != null
+                  ? isMultipleSelection
+                      ? MultiSelectPanel()
+                      : MainPanel(resource: currentMediaResource)
+                  : SizedBox(),
+            )));
+  }
+}
+
+class MainPage extends ConsumerWidget {
+  const MainPage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mediaResourcesState = ref.watch(mediaResourcesStateProvider);
+    return mediaResourcesState.isLoading
+        ? LoadingMediaResourcesPage()
+        : mediaResourcesState.resources.isEmpty
+            ? _MainPageEmpty()
+            : _MainPageNotEmpty();
   }
 }

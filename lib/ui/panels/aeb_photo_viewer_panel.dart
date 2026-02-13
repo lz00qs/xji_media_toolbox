@@ -1,0 +1,227 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../models/media_resource.model.dart';
+import '../../providers/media_resources_state.notifier.dart';
+import '../buttons/custom_icon_button.dart';
+import '../design_tokens.dart';
+import '../dialogs/aeb_add_suffix_dialog.dart';
+import '../photo_viewer.dart';
+import 'main_panel.dart';
+import 'media_resources_list_panel.dart';
+
+final _aebListScrollController = ScrollController();
+
+class _AebPhotoThumbnail extends ConsumerWidget {
+  final AebPhotoResource photoResource;
+  final bool isSelected;
+  final int index;
+
+  const _AebPhotoThumbnail(
+      {required this.photoResource,
+      required this.index,
+      required this.isSelected});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        Expanded(
+            child: GestureDetector(
+          onTap: () {
+            ref
+                .read(mediaResourcesStateProvider.notifier)
+                .setCurrentAebIndex(index);
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(DesignValues.ultraSmallPadding),
+            child: Container(
+              height: 100 - DesignValues.smallPadding,
+              color: isSelected
+                  ? ColorDark.data8.withAlpha((0.7 * 255).round())
+                  : Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: DesignValues.ultraSmallPadding,
+                        left: DesignValues.ultraSmallPadding,
+                        right: DesignValues.ultraSmallPadding),
+                    child: MediaResourceThumbnail(mediaResource: photoResource),
+                  ),
+                  Expanded(
+                      child: Center(
+                    child: Text(photoResource.evBias,
+                        style: SemiTextStyles.regularENRegular.copyWith(
+                            color:
+                                isSelected ? ColorDark.text0 : ColorDark.text1,
+                            overflow: TextOverflow.ellipsis)),
+                  )),
+                ],
+              ),
+            ),
+          ),
+        )),
+        SizedBox(
+          height: DesignValues.smallPadding,
+        ),
+      ],
+    );
+  }
+}
+
+class _AebPhotoThumbnailList extends StatelessWidget {
+  final List<MediaResource> resources;
+
+  const _AebPhotoThumbnailList({required this.resources});
+
+  @override
+  Widget build(BuildContext context) {
+    return RawScrollbar(
+        thickness: DesignValues.smallPadding,
+        trackVisibility: false,
+        thumbVisibility: true,
+        radius: Radius.circular(DesignValues.smallBorderRadius),
+        controller: _aebListScrollController,
+        child: ListView.builder(
+            controller: _aebListScrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: resources.length,
+            itemBuilder: (context, index) {
+              return Consumer(builder:
+                  (BuildContext context, WidgetRef ref, Widget? child) {
+                final currentAebIndex = ref.watch(mediaResourcesStateProvider
+                    .select((state) => state.currentAebIndex));
+                return _AebPhotoThumbnail(
+                    photoResource: resources[index] as AebPhotoResource,
+                    index: index,
+                    isSelected: index == currentAebIndex);
+              });
+            }));
+  }
+}
+
+class AebPhotoViewerPanel extends ConsumerWidget {
+  final AebPhotoResource photoResource;
+
+  const AebPhotoViewerPanel({super.key, required this.photoResource});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Padding(
+              padding: EdgeInsets.all(DesignValues.smallPadding),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(child: Consumer(builder:
+                      (BuildContext context, WidgetRef ref, Widget? child) {
+                    final currentAebIndex = ref.watch(
+                        mediaResourcesStateProvider
+                            .select((state) => state.currentAebIndex));
+                    return PhotoViewer(
+                        photoFile:
+                            photoResource.aebResources[currentAebIndex].file);
+                  })),
+                  Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Consumer(builder: (BuildContext context, WidgetRef ref,
+                            Widget? child) {
+                          return CustomIconButton(
+                            iconData: Icons.chevron_left,
+                            onPressed: () {
+                              ref
+                                  .read(mediaResourcesStateProvider.notifier)
+                                  .decreaseCurrentAebIndex();
+                            },
+                            iconSize: 32,
+                            buttonSize: 48,
+                            hoverColor: ColorDark.defaultHover,
+                            focusColor: ColorDark.defaultActive,
+                            iconColor: ColorDark.text0,
+                          );
+                        }),
+                        SizedBox(
+                          width: DesignValues.largePadding,
+                        ),
+                        Consumer(builder: (BuildContext context, WidgetRef ref,
+                            Widget? child) {
+                          return CustomIconButton(
+                            iconData: Icons.chevron_right,
+                            onPressed: () {
+                              ref
+                                  .read(mediaResourcesStateProvider.notifier)
+                                  .increaseCurrentAebIndex();
+                            },
+                            iconSize: 32,
+                            buttonSize: 48,
+                            hoverColor: ColorDark.defaultHover,
+                            focusColor: ColorDark.defaultActive,
+                            iconColor: ColorDark.text0,
+                          );
+                        })
+                      ],
+                    ),
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.all(
+                        Radius.circular(DesignValues.smallBorderRadius)),
+                    child: Container(
+                      color: ColorDark.bg2,
+                      height: 100,
+                      child: Column(
+                        children: [
+                          Expanded(
+                              child: Padding(
+                            padding: EdgeInsets.only(
+                                left: DesignValues.ultraSmallPadding,
+                                right: DesignValues.ultraSmallPadding,
+                                top: DesignValues.ultraSmallPadding),
+                            child: _AebPhotoThumbnailList(
+                                resources: photoResource.aebResources),
+                          )),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              )),
+        ),
+        MainPanelSideBar(
+          children: [
+            const MainPanelSideBarControlButtons(),
+            SizedBox(
+              height: DesignValues.mediumPadding,
+            ),
+            CustomIconButton(
+                iconData: Icons.upload,
+                onPressed: () async {
+                  final result = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AebAddSuffixDialog();
+                      });
+                  if (result == true) {
+                    ref
+                        .read(mediaResourcesStateProvider.notifier)
+                        .addAebSuffixToCurrentAebFilesName();
+                  }
+                },
+                iconSize: DesignValues.mediumIconSize,
+                buttonSize: DesignValues.appBarHeight,
+                hoverColor: ColorDark.defaultHover,
+                focusColor: ColorDark.defaultActive,
+                iconColor: ColorDark.text0),
+          ],
+        ),
+      ],
+    );
+  }
+}

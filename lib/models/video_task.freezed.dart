@@ -14,17 +14,17 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$VideoTask {
+  String get id;
   String get name;
-  VideoTaskStatus get status;
-  VideoTaskType get type;
-  List<String> get ffmpegArgs;
   Duration get duration;
+  VideoTaskType get type;
+  VideoTaskStatus get status;
   double get progress;
-  File get outputFile;
-  List<File> get tempFiles;
-  File? get logFile;
   Duration get eta;
-  Process? get process;
+  List<String> get ffmpegArgs;
+  String get outputPath;
+  List<String> get tempFilePaths;
+  String get logPath;
 
   /// Create a copy of VideoTask
   /// with the given fields replaced by the non-null parameter values.
@@ -38,41 +38,42 @@ mixin _$VideoTask {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is VideoTask &&
+            (identical(other.id, id) || other.id == id) &&
             (identical(other.name, name) || other.name == name) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.type, type) || other.type == type) &&
-            const DeepCollectionEquality()
-                .equals(other.ffmpegArgs, ffmpegArgs) &&
             (identical(other.duration, duration) ||
                 other.duration == duration) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.status, status) || other.status == status) &&
             (identical(other.progress, progress) ||
                 other.progress == progress) &&
-            (identical(other.outputFile, outputFile) ||
-                other.outputFile == outputFile) &&
-            const DeepCollectionEquality().equals(other.tempFiles, tempFiles) &&
-            (identical(other.logFile, logFile) || other.logFile == logFile) &&
             (identical(other.eta, eta) || other.eta == eta) &&
-            (identical(other.process, process) || other.process == process));
+            const DeepCollectionEquality()
+                .equals(other.ffmpegArgs, ffmpegArgs) &&
+            (identical(other.outputPath, outputPath) ||
+                other.outputPath == outputPath) &&
+            const DeepCollectionEquality()
+                .equals(other.tempFilePaths, tempFilePaths) &&
+            (identical(other.logPath, logPath) || other.logPath == logPath));
   }
 
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      id,
       name,
-      status,
-      type,
-      const DeepCollectionEquality().hash(ffmpegArgs),
       duration,
+      type,
+      status,
       progress,
-      outputFile,
-      const DeepCollectionEquality().hash(tempFiles),
-      logFile,
       eta,
-      process);
+      const DeepCollectionEquality().hash(ffmpegArgs),
+      outputPath,
+      const DeepCollectionEquality().hash(tempFilePaths),
+      logPath);
 
   @override
   String toString() {
-    return 'VideoTask(name: $name, status: $status, type: $type, ffmpegArgs: $ffmpegArgs, duration: $duration, progress: $progress, outputFile: $outputFile, tempFiles: $tempFiles, logFile: $logFile, eta: $eta, process: $process)';
+    return 'VideoTask(id: $id, name: $name, duration: $duration, type: $type, status: $status, progress: $progress, eta: $eta, ffmpegArgs: $ffmpegArgs, outputPath: $outputPath, tempFilePaths: $tempFilePaths, logPath: $logPath)';
   }
 }
 
@@ -82,17 +83,17 @@ abstract mixin class $VideoTaskCopyWith<$Res> {
       _$VideoTaskCopyWithImpl;
   @useResult
   $Res call(
-      {String name,
-      VideoTaskStatus status,
-      VideoTaskType type,
-      List<String> ffmpegArgs,
+      {String id,
+      String name,
       Duration duration,
+      VideoTaskType type,
+      VideoTaskStatus status,
       double progress,
-      File outputFile,
-      List<File> tempFiles,
       Duration eta,
-      File? logFile,
-      Process? process});
+      List<String> ffmpegArgs,
+      String outputPath,
+      List<String> tempFilePaths,
+      String logPath});
 }
 
 /// @nodoc
@@ -107,63 +108,63 @@ class _$VideoTaskCopyWithImpl<$Res> implements $VideoTaskCopyWith<$Res> {
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? id = null,
     Object? name = null,
-    Object? status = null,
-    Object? type = null,
-    Object? ffmpegArgs = null,
     Object? duration = null,
+    Object? type = null,
+    Object? status = null,
     Object? progress = null,
-    Object? outputFile = null,
-    Object? tempFiles = null,
     Object? eta = null,
-    Object? logFile = freezed,
-    Object? process = freezed,
+    Object? ffmpegArgs = null,
+    Object? outputPath = null,
+    Object? tempFilePaths = null,
+    Object? logPath = null,
   }) {
-    return _then(VideoTask(
+    return _then(_self.copyWith(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
       name: null == name
           ? _self.name
           : name // ignore: cast_nullable_to_non_nullable
               as String,
-      status: null == status
-          ? _self.status
-          : status // ignore: cast_nullable_to_non_nullable
-              as VideoTaskStatus,
-      type: null == type
-          ? _self.type
-          : type // ignore: cast_nullable_to_non_nullable
-              as VideoTaskType,
-      ffmpegArgs: null == ffmpegArgs
-          ? _self.ffmpegArgs
-          : ffmpegArgs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       duration: null == duration
           ? _self.duration
           : duration // ignore: cast_nullable_to_non_nullable
               as Duration,
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as VideoTaskType,
+      status: null == status
+          ? _self.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as VideoTaskStatus,
       progress: null == progress
           ? _self.progress
           : progress // ignore: cast_nullable_to_non_nullable
               as double,
-      outputFile: null == outputFile
-          ? _self.outputFile
-          : outputFile // ignore: cast_nullable_to_non_nullable
-              as File,
-      tempFiles: null == tempFiles
-          ? _self.tempFiles
-          : tempFiles // ignore: cast_nullable_to_non_nullable
-              as List<File>,
       eta: null == eta
           ? _self.eta
           : eta // ignore: cast_nullable_to_non_nullable
               as Duration,
-      logFile: freezed == logFile
-          ? _self.logFile
-          : logFile // ignore: cast_nullable_to_non_nullable
-              as File?,
-      process: freezed == process
-          ? _self.process
-          : process // ignore: cast_nullable_to_non_nullable
-              as Process?,
+      ffmpegArgs: null == ffmpegArgs
+          ? _self.ffmpegArgs
+          : ffmpegArgs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      outputPath: null == outputPath
+          ? _self.outputPath
+          : outputPath // ignore: cast_nullable_to_non_nullable
+              as String,
+      tempFilePaths: null == tempFilePaths
+          ? _self.tempFilePaths
+          : tempFilePaths // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      logPath: null == logPath
+          ? _self.logPath
+          : logPath // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -183,11 +184,14 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_VideoTask value)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
+      case _VideoTask() when $default != null:
+        return $default(_that);
       case _:
         return orElse();
     }
@@ -207,9 +211,13 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult map<TResult extends Object?>() {
+  TResult map<TResult extends Object?>(
+    TResult Function(_VideoTask value) $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _VideoTask():
+        return $default(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -228,9 +236,13 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>() {
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_VideoTask value)? $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _VideoTask() when $default != null:
+        return $default(_that);
       case _:
         return null;
     }
@@ -249,11 +261,37 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String name,
+            Duration duration,
+            VideoTaskType type,
+            VideoTaskStatus status,
+            double progress,
+            Duration eta,
+            List<String> ffmpegArgs,
+            String outputPath,
+            List<String> tempFilePaths,
+            String logPath)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
+      case _VideoTask() when $default != null:
+        return $default(
+            _that.id,
+            _that.name,
+            _that.duration,
+            _that.type,
+            _that.status,
+            _that.progress,
+            _that.eta,
+            _that.ffmpegArgs,
+            _that.outputPath,
+            _that.tempFilePaths,
+            _that.logPath);
       case _:
         return orElse();
     }
@@ -273,9 +311,36 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult when<TResult extends Object?>() {
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String name,
+            Duration duration,
+            VideoTaskType type,
+            VideoTaskStatus status,
+            double progress,
+            Duration eta,
+            List<String> ffmpegArgs,
+            String outputPath,
+            List<String> tempFilePaths,
+            String logPath)
+        $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _VideoTask():
+        return $default(
+            _that.id,
+            _that.name,
+            _that.duration,
+            _that.type,
+            _that.status,
+            _that.progress,
+            _that.eta,
+            _that.ffmpegArgs,
+            _that.outputPath,
+            _that.tempFilePaths,
+            _that.logPath);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -294,12 +359,250 @@ extension VideoTaskPatterns on VideoTask {
   /// ```
 
   @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>() {
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String id,
+            String name,
+            Duration duration,
+            VideoTaskType type,
+            VideoTaskStatus status,
+            double progress,
+            Duration eta,
+            List<String> ffmpegArgs,
+            String outputPath,
+            List<String> tempFilePaths,
+            String logPath)?
+        $default,
+  ) {
     final _that = this;
     switch (_that) {
+      case _VideoTask() when $default != null:
+        return $default(
+            _that.id,
+            _that.name,
+            _that.duration,
+            _that.type,
+            _that.status,
+            _that.progress,
+            _that.eta,
+            _that.ffmpegArgs,
+            _that.outputPath,
+            _that.tempFilePaths,
+            _that.logPath);
       case _:
         return null;
     }
+  }
+}
+
+/// @nodoc
+
+class _VideoTask implements VideoTask {
+  const _VideoTask(
+      {this.id = '',
+      this.name = '',
+      this.duration = Duration.zero,
+      this.type = VideoTaskType.transcode,
+      this.status = VideoTaskStatus.waiting,
+      this.progress = 0.0,
+      this.eta = Duration.zero,
+      final List<String> ffmpegArgs = const [],
+      this.outputPath = '',
+      final List<String> tempFilePaths = const [],
+      this.logPath = ''})
+      : _ffmpegArgs = ffmpegArgs,
+        _tempFilePaths = tempFilePaths;
+
+  @override
+  @JsonKey()
+  final String id;
+  @override
+  @JsonKey()
+  final String name;
+  @override
+  @JsonKey()
+  final Duration duration;
+  @override
+  @JsonKey()
+  final VideoTaskType type;
+  @override
+  @JsonKey()
+  final VideoTaskStatus status;
+  @override
+  @JsonKey()
+  final double progress;
+  @override
+  @JsonKey()
+  final Duration eta;
+  final List<String> _ffmpegArgs;
+  @override
+  @JsonKey()
+  List<String> get ffmpegArgs {
+    if (_ffmpegArgs is EqualUnmodifiableListView) return _ffmpegArgs;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_ffmpegArgs);
+  }
+
+  @override
+  @JsonKey()
+  final String outputPath;
+  final List<String> _tempFilePaths;
+  @override
+  @JsonKey()
+  List<String> get tempFilePaths {
+    if (_tempFilePaths is EqualUnmodifiableListView) return _tempFilePaths;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_tempFilePaths);
+  }
+
+  @override
+  @JsonKey()
+  final String logPath;
+
+  /// Create a copy of VideoTask
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$VideoTaskCopyWith<_VideoTask> get copyWith =>
+      __$VideoTaskCopyWithImpl<_VideoTask>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _VideoTask &&
+            (identical(other.id, id) || other.id == id) &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.duration, duration) ||
+                other.duration == duration) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.progress, progress) ||
+                other.progress == progress) &&
+            (identical(other.eta, eta) || other.eta == eta) &&
+            const DeepCollectionEquality()
+                .equals(other._ffmpegArgs, _ffmpegArgs) &&
+            (identical(other.outputPath, outputPath) ||
+                other.outputPath == outputPath) &&
+            const DeepCollectionEquality()
+                .equals(other._tempFilePaths, _tempFilePaths) &&
+            (identical(other.logPath, logPath) || other.logPath == logPath));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      id,
+      name,
+      duration,
+      type,
+      status,
+      progress,
+      eta,
+      const DeepCollectionEquality().hash(_ffmpegArgs),
+      outputPath,
+      const DeepCollectionEquality().hash(_tempFilePaths),
+      logPath);
+
+  @override
+  String toString() {
+    return 'VideoTask(id: $id, name: $name, duration: $duration, type: $type, status: $status, progress: $progress, eta: $eta, ffmpegArgs: $ffmpegArgs, outputPath: $outputPath, tempFilePaths: $tempFilePaths, logPath: $logPath)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$VideoTaskCopyWith<$Res>
+    implements $VideoTaskCopyWith<$Res> {
+  factory _$VideoTaskCopyWith(
+          _VideoTask value, $Res Function(_VideoTask) _then) =
+      __$VideoTaskCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String name,
+      Duration duration,
+      VideoTaskType type,
+      VideoTaskStatus status,
+      double progress,
+      Duration eta,
+      List<String> ffmpegArgs,
+      String outputPath,
+      List<String> tempFilePaths,
+      String logPath});
+}
+
+/// @nodoc
+class __$VideoTaskCopyWithImpl<$Res> implements _$VideoTaskCopyWith<$Res> {
+  __$VideoTaskCopyWithImpl(this._self, this._then);
+
+  final _VideoTask _self;
+  final $Res Function(_VideoTask) _then;
+
+  /// Create a copy of VideoTask
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? name = null,
+    Object? duration = null,
+    Object? type = null,
+    Object? status = null,
+    Object? progress = null,
+    Object? eta = null,
+    Object? ffmpegArgs = null,
+    Object? outputPath = null,
+    Object? tempFilePaths = null,
+    Object? logPath = null,
+  }) {
+    return _then(_VideoTask(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      name: null == name
+          ? _self.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      duration: null == duration
+          ? _self.duration
+          : duration // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      type: null == type
+          ? _self.type
+          : type // ignore: cast_nullable_to_non_nullable
+              as VideoTaskType,
+      status: null == status
+          ? _self.status
+          : status // ignore: cast_nullable_to_non_nullable
+              as VideoTaskStatus,
+      progress: null == progress
+          ? _self.progress
+          : progress // ignore: cast_nullable_to_non_nullable
+              as double,
+      eta: null == eta
+          ? _self.eta
+          : eta // ignore: cast_nullable_to_non_nullable
+              as Duration,
+      ffmpegArgs: null == ffmpegArgs
+          ? _self._ffmpegArgs
+          : ffmpegArgs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      outputPath: null == outputPath
+          ? _self.outputPath
+          : outputPath // ignore: cast_nullable_to_non_nullable
+              as String,
+      tempFilePaths: null == tempFilePaths
+          ? _self._tempFilePaths
+          : tempFilePaths // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      logPath: null == logPath
+          ? _self.logPath
+          : logPath // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
   }
 }
 

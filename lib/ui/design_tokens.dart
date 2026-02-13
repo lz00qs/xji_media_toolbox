@@ -35,324 +35,324 @@ class SemiTextStyles {
   const SemiTextStyles();
 
   static TextStyle get header1ENRegular => const TextStyle(
-        fontSize: 32,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 44 / 32,
-        letterSpacing: 0,
-      );
+    fontSize: 32,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 44 / 32,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header1CNRegular => const TextStyle(
-        fontSize: 32,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 44 / 32,
-        letterSpacing: 0,
-      );
+    fontSize: 32,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 44 / 32,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header1ENSemiBold => const TextStyle(
-        fontSize: 32,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 44 / 32,
-        letterSpacing: 0,
-      );
+    fontSize: 32,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 44 / 32,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header1CNSemiBold => const TextStyle(
-        fontSize: 32,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 44 / 32,
-        letterSpacing: 0,
-      );
+    fontSize: 32,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 44 / 32,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header2ENRegular => const TextStyle(
-        fontSize: 28,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 40 / 28,
-        letterSpacing: 0,
-      );
+    fontSize: 28,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 40 / 28,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header2CNRegular => const TextStyle(
-        fontSize: 28,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 40 / 28,
-        letterSpacing: 0,
-      );
+    fontSize: 28,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 40 / 28,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header2ENSemiBold => const TextStyle(
-        fontSize: 28,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 40 / 28,
-        letterSpacing: 0,
-      );
+    fontSize: 28,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 40 / 28,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header2CNSemiBold => const TextStyle(
-        fontSize: 28,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 40 / 28,
-        letterSpacing: 0,
-      );
+    fontSize: 28,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 40 / 28,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header3ENRegular => const TextStyle(
-        fontSize: 24,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 32 / 24,
-        letterSpacing: 0,
-      );
+    fontSize: 24,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 32 / 24,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header3CNRegular => const TextStyle(
-        fontSize: 24,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 32 / 24,
-        letterSpacing: 0,
-      );
+    fontSize: 24,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 32 / 24,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header3ENSemiBold => const TextStyle(
-        fontSize: 24,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 32 / 24,
-        letterSpacing: 0,
-      );
+    fontSize: 24,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 32 / 24,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header3CNSemiBold => const TextStyle(
-        fontSize: 24,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 32 / 24,
-        letterSpacing: 0,
-      );
+    fontSize: 24,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 32 / 24,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header4ENRegular => const TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 28 / 20,
-        letterSpacing: 0,
-      );
+    fontSize: 20,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 28 / 20,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header4CNRegular => const TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 28 / 20,
-        letterSpacing: 0,
-      );
+    fontSize: 20,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 28 / 20,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header4ENSemiBold => const TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 28 / 20,
-        letterSpacing: 0,
-      );
+    fontSize: 20,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 28 / 20,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header4CNSemiBold => const TextStyle(
-        fontSize: 20,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 28 / 20,
-        letterSpacing: 0,
-      );
+    fontSize: 20,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 28 / 20,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header5ENRegular => const TextStyle(
-        fontSize: 18,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 24 / 18,
-        letterSpacing: 0,
-      );
+    fontSize: 18,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 24 / 18,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header5CNRegular => const TextStyle(
-        fontSize: 18,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 24 / 18,
-        letterSpacing: 0,
-      );
+    fontSize: 18,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 24 / 18,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header5ENSemiBold => const TextStyle(
-        fontSize: 18,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 24 / 18,
-        letterSpacing: 0,
-      );
+    fontSize: 18,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 24 / 18,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header5CNSemiBold => const TextStyle(
-        fontSize: 18,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 24 / 18,
-        letterSpacing: 0,
-      );
+    fontSize: 18,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 24 / 18,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header6ENRegular => const TextStyle(
-        fontSize: 16,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 22 / 16,
-        letterSpacing: 0,
-      );
+    fontSize: 16,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 22 / 16,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header6CNRegular => const TextStyle(
-        fontSize: 16,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 22 / 16,
-        letterSpacing: 0,
-      );
+    fontSize: 16,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 22 / 16,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header6ENSemiBold => const TextStyle(
-        fontSize: 16,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 22 / 16,
-        letterSpacing: 0,
-      );
+    fontSize: 16,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 22 / 16,
+    letterSpacing: 0,
+  );
 
   static TextStyle get header6CNSemiBold => const TextStyle(
-        fontSize: 16,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 22 / 16,
-        letterSpacing: 0,
-      );
+    fontSize: 16,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 22 / 16,
+    letterSpacing: 0,
+  );
 
   static TextStyle get smallENRegular => const TextStyle(
-        fontSize: 10,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 14 / 10,
-        letterSpacing: 0,
-      );
+    fontSize: 10,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 14 / 10,
+    letterSpacing: 0,
+  );
 
   static TextStyle get smallCNRegular => const TextStyle(
-        fontSize: 10,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 14 / 10,
-        letterSpacing: 0,
-      );
+    fontSize: 10,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 14 / 10,
+    letterSpacing: 0,
+  );
 
   static TextStyle get smallENSemiBold => const TextStyle(
-        fontSize: 10,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 14 / 10,
-        letterSpacing: 0,
-      );
+    fontSize: 10,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 14 / 10,
+    letterSpacing: 0,
+  );
 
   static TextStyle get smallCNSemiBold => const TextStyle(
-        fontSize: 10,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 14 / 10,
-        letterSpacing: 0,
-      );
+    fontSize: 10,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 14 / 10,
+    letterSpacing: 0,
+  );
 
   static TextStyle get regularENRegular => const TextStyle(
-        fontSize: 12,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 16 / 12,
-        letterSpacing: 0,
-      );
+    fontSize: 12,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 16 / 12,
+    letterSpacing: 0,
+  );
 
   static TextStyle get regularCNRegular => const TextStyle(
-        fontSize: 12,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 16 / 12,
-        letterSpacing: 0,
-      );
+    fontSize: 12,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 16 / 12,
+    letterSpacing: 0,
+  );
 
   static TextStyle get regularENSemiBold => const TextStyle(
-        fontSize: 12,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Bold',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w700,
-        height: 16 / 12,
-        letterSpacing: 0,
-      );
+    fontSize: 12,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Bold',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w700,
+    height: 16 / 12,
+    letterSpacing: 0,
+  );
 
   static TextStyle get regularCNSemiBold => const TextStyle(
-        fontSize: 12,
-        decoration: TextDecoration.none,
-        fontFamily: 'Inter-Regular',
-        fontStyle: FontStyle.normal,
-        fontWeight: FontWeight.w400,
-        height: 16 / 12,
-        letterSpacing: 0,
-      );
+    fontSize: 12,
+    decoration: TextDecoration.none,
+    fontFamily: 'Inter-Regular',
+    fontStyle: FontStyle.normal,
+    fontWeight: FontWeight.w400,
+    height: 16 / 12,
+    letterSpacing: 0,
+  );
 }
 
 /// colors

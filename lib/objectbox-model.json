@@ -4,104 +4,93 @@
   "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
   "entities": [
     {
-      "id": "2:5066807561326805015",
-      "lastPropertyId": "9:3123510047051500198",
-      "name": "TranscodePreset",
+      "id": "1:5162699864130156089",
+      "lastPropertyId": "3:6601187259294871195",
+      "name": "LutEntity",
       "properties": [
         {
-          "id": "1:1268788478972929064",
+          "id": "1:364815542115076735",
           "name": "id",
           "type": 6,
           "flags": 1
         },
         {
-          "id": "2:6604121700459575002",
+          "id": "2:1860016567442931836",
           "name": "name",
           "type": 9
         },
         {
-          "id": "3:6806958124699359397",
-          "name": "useInputResolution",
-          "type": 1
-        },
-        {
-          "id": "4:4710756751357513035",
-          "name": "useHevc",
-          "type": 1
-        },
-        {
-          "id": "5:1102421391753766293",
-          "name": "width",
-          "type": 6
-        },
-        {
-          "id": "6:3946286356324700626",
-          "name": "height",
-          "type": 6
-        },
-        {
-          "id": "7:4338324737020365168",
-          "name": "crf",
-          "type": 6
-        },
-        {
-          "id": "8:6947592021971297063",
-          "name": "ffmpegPreset",
-          "type": 6
-        },
-        {
-          "id": "9:3123510047051500198",
-          "name": "lutId",
-          "type": 6
-        }
-      ],
-      "relations": []
-    },
-    {
-      "id": "3:6915199295852249867",
-      "lastPropertyId": "3:1274234915978651286",
-      "name": "Lut",
-      "properties": [
-        {
-          "id": "1:326848679578729628",
-          "name": "id",
-          "type": 6,
-          "flags": 1
-        },
-        {
-          "id": "2:4216341812967579692",
-          "name": "name",
-          "type": 9
-        },
-        {
-          "id": "3:1274234915978651286",
+          "id": "3:6601187259294871195",
           "name": "path",
           "type": 9
         }
       ],
       "relations": []
+    },
+    {
+      "id": "2:861634889113588943",
+      "lastPropertyId": "9:1475639453115891263",
+      "name": "TranscodePresetEntity",
+      "properties": [
+        {
+          "id": "1:5302371603178907509",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:100872938759865647",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:7629311416350919528",
+          "name": "useInputResolution",
+          "type": 1
+        },
+        {
+          "id": "4:9088356150905908196",
+          "name": "useHevc",
+          "type": 1
+        },
+        {
+          "id": "5:3080943635677551975",
+          "name": "width",
+          "type": 6
+        },
+        {
+          "id": "6:4477828335932855036",
+          "name": "height",
+          "type": 6
+        },
+        {
+          "id": "7:6840697723068384424",
+          "name": "crf",
+          "type": 6
+        },
+        {
+          "id": "8:5109910272413641115",
+          "name": "ffmpegPreset",
+          "type": 6
+        },
+        {
+          "id": "9:1475639453115891263",
+          "name": "lutId",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "3:6915199295852249867",
+  "lastEntityId": "2:861634889113588943",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
-  "retiredEntityUids": [
-    6542342576071718515
-  ],
+  "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [
-    3441272698186930426,
-    2633146971749489003,
-    5469937351195833193,
-    6942609030270405673,
-    2255326580324500820,
-    3004389153049693201,
-    3288320502769605509,
-    6600177316668141755
-  ],
+  "retiredPropertyUids": [],
   "retiredRelationUids": [],
   "version": 1
 }

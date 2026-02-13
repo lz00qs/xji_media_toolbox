@@ -9,7 +9,7 @@ class Toast {
       autoCloseDuration: const Duration(seconds: 3),
       title: const Text('Info', style: TextStyle(color: ColorDark.info)),
       description:
-          Text(message),
+      Text(message),
     );
   }
 
@@ -19,7 +19,7 @@ class Toast {
       autoCloseDuration: const Duration(seconds: 3),
       title: const Text('Success', style: TextStyle(color: ColorDark.success)),
       description:
-          Text(message),
+      Text(message),
     );
   }
 
@@ -29,7 +29,7 @@ class Toast {
       autoCloseDuration: const Duration(seconds: 3),
       title: const Text('Warning', style: TextStyle(color: ColorDark.warning)),
       description:
-          Text(message),
+      Text(message),
     );
   }
 
@@ -39,7 +39,7 @@ class Toast {
       autoCloseDuration: const Duration(seconds: 3),
       title: const Text('Error', style: TextStyle(color: ColorDark.danger)),
       description:
-          Text(message),
+      Text(message),
     );
   }
 }

@@ -1,22 +1,22 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:xji_footage_toolbox/models/settings.dart';
 import 'package:xji_footage_toolbox/objectbox.dart';
-import 'package:xji_footage_toolbox/service/log_service.dart';
-import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
-import 'package:xji_footage_toolbox/ui/pages/loading_media_resources_page.dart';
-import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
-import 'package:xji_footage_toolbox/ui/widgets/main_page_app_bar.dart';
-import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 import 'package:fvp/fvp.dart' as fvp;
+import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
+import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
+import 'package:xji_footage_toolbox/ui/main_page_app_bar.dart';
+import 'package:xji_footage_toolbox/ui/task_drawer.dart';
+import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
 
-import 'models/media_resource.dart';
-import 'ui/widgets/task_drawer.dart';
+import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
+import 'package:xji_footage_toolbox/utils/logger.dart';
 
-final riverpodContainer = ProviderContainer();
+// todo:
+// 1. 修正所有不在 build 中的 ref.watch 调用
+// 2. 使用 freezed 生成 state
 
 Future<void> main() async {
   // 确保 WidgetsFlutterBinding 已经初始化
@@ -43,18 +43,21 @@ Future<void> main() async {
   }); // only these platforms will use this plugin implementation
 
   if (kDebugMode) {
-    LogService.isDebug = true;
+    Logger.setLogLevel(LogLevel.debug);
+    Logger.debug('Debug mode enabled');
   }
-
+  //
   final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
   await ObjectBox.create();
 
-  await riverpodContainer.read(settingsProvider.notifier).loadSettings();
+  final container = ProviderContainer();
+
+  await container.read(settingsProvider.notifier).initSettings();
 
   runApp(ToastificationWrapper(
       child: UncontrolledProviderScope(
-          container: riverpodContainer,
+          container: container,
           child: MaterialApp(
             debugShowCheckedModeBanner: false,
             home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
@@ -68,20 +71,25 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isLoading =
-        ref.watch(mediaResourcesProvider.select((state) => state.isLoading));
+    // final isLoading =
+    //     ref.watch(mediaResourcesProvider.select((state) => state.isLoading));
+
     return Scaffold(
       endDrawer: const TaskDrawer(),
       body: Center(
         child: Column(
           children: [
             const MainPageAppBar(),
+            // Expanded(child: const FFmpegNotAvailablePage())
+            // Expanded(
+            //     child: ResizablePanel(
+            //         mediaResourcesListPanel: SizedBox(),
+            //         mediaResourceInfoPanel: SizedBox(),
+            //         mainPanel: SizedBox()))
             Expanded(
                 // child: ResizablePanel(),)
                 child: isFFmpegAvailable
-                    ? isLoading
-                        ? const LoadingMediaResourcesPage()
-                        : MainPage(mainRef: ref)
+                    ? MainPage()
                     : const FFmpegNotAvailablePage())
           ],
         ),
