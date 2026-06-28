@@ -82,11 +82,17 @@ class _MainPageNotEmpty extends ConsumerWidget {
                     ref
                         .read(mediaResourcesStateProvider.notifier)
                         .decreaseCurrentResourceIndex();
+                    mediaResourcesListScrollToIndex(ref
+                        .read(mediaResourcesStateProvider)
+                        .currentResourceIndex);
                     break;
                   case LogicalKeyboardKey.arrowDown:
                     ref
                         .read(mediaResourcesStateProvider.notifier)
                         .increaseCurrentResourceIndex();
+                    mediaResourcesListScrollToIndex(ref
+                        .read(mediaResourcesStateProvider)
+                        .currentResourceIndex);
                     break;
                   case LogicalKeyboardKey.arrowLeft:
                     ref

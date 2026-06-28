@@ -15,20 +15,33 @@ const _listWidgetHeight = 73.0;
 var _panelHeight = 0.0;
 final _mediaResourcesListScrollController = ScrollController();
 
-void mediaResourcesListScrollToIndex(int index, bool isIncrement) {
-  if (isIncrement) {
-    if (index * _listWidgetHeight >
-        _panelHeight +
-            _mediaResourcesListScrollController.position.pixels -
-            _listWidgetHeight) {
-      _mediaResourcesListScrollController
-          .jumpTo(index * _listWidgetHeight - _panelHeight + _listWidgetHeight);
+void mediaResourcesListScrollToIndex(int index) {
+  if (!_mediaResourcesListScrollController.hasClients ||
+      !_mediaResourcesListScrollController.position.hasContentDimensions) {
+    return;
+  }
+
+  final position = _mediaResourcesListScrollController.position;
+  final itemTop = index * _listWidgetHeight;
+  final itemBottom = itemTop + _listWidgetHeight;
+  final visibleTop = position.pixels;
+  final visibleBottom = visibleTop + _panelHeight;
+  var targetOffset = visibleTop;
+
+  if (itemTop < visibleTop) {
+    targetOffset = itemTop;
+  } else if (itemBottom > visibleBottom) {
+    targetOffset = itemBottom - _panelHeight;
+  }
+
+  if (targetOffset != visibleTop) {
+    if (targetOffset < position.minScrollExtent) {
+      targetOffset = position.minScrollExtent;
     }
-  } else {
-    if (index * _listWidgetHeight <
-        _mediaResourcesListScrollController.position.pixels) {
-      _mediaResourcesListScrollController.jumpTo(index * _listWidgetHeight);
+    if (targetOffset > position.maxScrollExtent) {
+      targetOffset = position.maxScrollExtent;
     }
+    _mediaResourcesListScrollController.jumpTo(targetOffset);
   }
 }
 
@@ -385,8 +398,8 @@ class MediaResourcesListPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final mediaResources = ref
         .watch(mediaResourcesStateProvider.select((value) => value.resources));
-    final currentIndex = ref.watch(
-        mediaResourcesStateProvider.select((value) => value.currentResourceIndex));
+    final currentIndex = ref.watch(mediaResourcesStateProvider
+        .select((value) => value.currentResourceIndex));
     final isMultipleSelection = ref.watch(mediaResourcesStateProvider
         .select((value) => value.isMultipleSelection));
     final mediaResourcesLength = ref.watch(
