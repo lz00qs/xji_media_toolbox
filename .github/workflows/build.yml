@@ -36,6 +36,45 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Prepare fvp MDK SDK
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $plugins = Get-Content .flutter-plugins-dependencies | ConvertFrom-Json
+          $fvp = $plugins.plugins.windows | Where-Object { $_.name -eq 'fvp' } | Select-Object -First 1
+          if (-not $fvp) {
+            throw 'fvp plugin was not found in .flutter-plugins-dependencies'
+          }
+
+          $fvpWindowsDir = Join-Path $fvp.path 'windows'
+          $sdkDir = Join-Path $fvpWindowsDir 'mdk-sdk'
+          $findMdk = Join-Path $sdkDir 'lib\cmake\FindMDK.cmake'
+          if (Test-Path $findMdk) {
+            Write-Host "fvp MDK SDK is already prepared at $sdkDir"
+            exit 0
+          }
+
+          if (Test-Path $sdkDir) {
+            Remove-Item $sdkDir -Recurse -Force
+          }
+
+          $archive = Join-Path $fvpWindowsDir 'mdk-sdk-windows-x64.7z'
+          curl.exe --fail --location --output $archive `
+            'https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z'
+
+          Push-Location $fvpWindowsDir
+          try {
+            cmake -E tar xvf $archive
+          } finally {
+            Pop-Location
+          }
+
+          if (-not (Test-Path $findMdk)) {
+            throw "Failed to prepare fvp MDK SDK at $sdkDir"
+          }
+
       # macOS
       - name: Build macOS App
         if: matrix.os == 'macos-latest'
