@@ -1,9 +1,7 @@
 name: Build Windows and macOS App
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 env:
   FLUTTER_VERSION: 3.47.2
