@@ -4,6 +4,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'media_resource.model.freezed.dart';
 
+enum VideoColorProfile { unknown, dLog2, dLogM }
+
+extension VideoColorProfileLabel on VideoColorProfile {
+  String? get label => switch (this) {
+    VideoColorProfile.unknown => null,
+    VideoColorProfile.dLog2 => 'D-Log2',
+    VideoColorProfile.dLogM => 'D-Log M',
+  };
+}
+
 @freezed
 sealed class MediaResource with _$MediaResource {
   const MediaResource._(); // 允许写通用 getter / 方法
@@ -19,6 +29,7 @@ sealed class MediaResource with _$MediaResource {
     required int sequence,
     required File thumbFile,
     @Default(false) bool hide,
+
     /// 错误信息
     @Default({}) Map<int, List<String>> errors,
   }) = PhotoResource;
@@ -34,6 +45,7 @@ sealed class MediaResource with _$MediaResource {
     required int sequence,
     required File thumbFile,
     @Default(false) bool hide,
+
     /// 错误信息
     @Default({}) Map<int, List<String>> errors,
 
@@ -53,6 +65,7 @@ sealed class MediaResource with _$MediaResource {
     required int sequence,
     required File thumbFile,
     @Default(false) bool hide,
+
     /// 错误信息
     @Default({}) Map<int, List<String>> errors,
 
@@ -60,5 +73,6 @@ sealed class MediaResource with _$MediaResource {
     required Duration duration,
     required double frameRate,
     required bool isHevc,
+    @Default(VideoColorProfile.unknown) VideoColorProfile colorProfile,
   }) = VideoResource;
 }

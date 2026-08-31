@@ -169,12 +169,12 @@ return video(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)?  photo,TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)?  aebPhoto,TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc)?  video,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)?  photo,TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)?  aebPhoto,TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc,  VideoColorProfile colorProfile)?  video,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PhotoResource() when photo != null:
 return photo(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors);case AebPhotoResource() when aebPhoto != null:
 return aebPhoto(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.evBias,_that.aebResources);case VideoResource() when video != null:
-return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc);case _:
+return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc,_that.colorProfile);case _:
   return orElse();
 
 }
@@ -192,12 +192,12 @@ return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)  photo,required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)  aebPhoto,required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc)  video,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)  photo,required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)  aebPhoto,required TResult Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc,  VideoColorProfile colorProfile)  video,}) {final _that = this;
 switch (_that) {
 case PhotoResource():
 return photo(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors);case AebPhotoResource():
 return aebPhoto(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.evBias,_that.aebResources);case VideoResource():
-return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc);}
+return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc,_that.colorProfile);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -211,12 +211,12 @@ return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)?  photo,TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)?  aebPhoto,TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc)?  video,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors)?  photo,TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  String evBias,  List<AebPhotoResource> aebResources)?  aebPhoto,TResult? Function( String name,  File file,  int width,  int height,  int sizeInBytes,  DateTime creationTime,  int sequence,  File thumbFile,  bool hide,  Map<int, List<String>> errors,  Duration duration,  double frameRate,  bool isHevc,  VideoColorProfile colorProfile)?  video,}) {final _that = this;
 switch (_that) {
 case PhotoResource() when photo != null:
 return photo(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors);case AebPhotoResource() when aebPhoto != null:
 return aebPhoto(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.evBias,_that.aebResources);case VideoResource() when video != null:
-return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc);case _:
+return video(_that.name,_that.file,_that.width,_that.height,_that.sizeInBytes,_that.creationTime,_that.sequence,_that.thumbFile,_that.hide,_that.errors,_that.duration,_that.frameRate,_that.isHevc,_that.colorProfile);case _:
   return null;
 
 }
@@ -427,7 +427,7 @@ as List<AebPhotoResource>,
 
 
 class VideoResource extends MediaResource {
-  const VideoResource({required this.name, required this.file, required this.width, required this.height, required this.sizeInBytes, required this.creationTime, required this.sequence, required this.thumbFile, this.hide = false,  Map<int, List<String>> errors = const {}, required this.duration, required this.frameRate, required this.isHevc}): _errors = errors,super._();
+  const VideoResource({required this.name, required this.file, required this.width, required this.height, required this.sizeInBytes, required this.creationTime, required this.sequence, required this.thumbFile, this.hide = false,  Map<int, List<String>> errors = const {}, required this.duration, required this.frameRate, required this.isHevc, this.colorProfile = VideoColorProfile.unknown}): _errors = errors,super._();
 
 
 @override final  String name;
@@ -452,6 +452,7 @@ class VideoResource extends MediaResource {
  final  Duration duration;
  final  double frameRate;
  final  bool isHevc;
+@JsonKey() final  VideoColorProfile colorProfile;
 
 /// Create a copy of MediaResource
 /// with the given fields replaced by the non-null parameter values.
@@ -463,18 +464,18 @@ $VideoResourceCopyWith<VideoResource> get copyWith => _$VideoResourceCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is VideoResource&&(identical(other.name, name) || other.name == name)&&(identical(other.file, file) || other.file == file)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.sizeInBytes, sizeInBytes) || other.sizeInBytes == sizeInBytes)&&(identical(other.creationTime, creationTime) || other.creationTime == creationTime)&&(identical(other.sequence, sequence) || other.sequence == sequence)&&(identical(other.thumbFile, thumbFile) || other.thumbFile == thumbFile)&&(identical(other.hide, hide) || other.hide == hide)&&const DeepCollectionEquality().equals(other.errors, _errors)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.frameRate, frameRate) || other.frameRate == frameRate)&&(identical(other.isHevc, isHevc) || other.isHevc == isHevc));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is VideoResource&&(identical(other.name, name) || other.name == name)&&(identical(other.file, file) || other.file == file)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.sizeInBytes, sizeInBytes) || other.sizeInBytes == sizeInBytes)&&(identical(other.creationTime, creationTime) || other.creationTime == creationTime)&&(identical(other.sequence, sequence) || other.sequence == sequence)&&(identical(other.thumbFile, thumbFile) || other.thumbFile == thumbFile)&&(identical(other.hide, hide) || other.hide == hide)&&const DeepCollectionEquality().equals(other.errors, _errors)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.frameRate, frameRate) || other.frameRate == frameRate)&&(identical(other.isHevc, isHevc) || other.isHevc == isHevc)&&(identical(other.colorProfile, colorProfile) || other.colorProfile == colorProfile));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,name,file,width,height,sizeInBytes,creationTime,sequence,thumbFile,hide,const DeepCollectionEquality().hash(_errors),duration,frameRate,isHevc);
+    return Object.hash(runtimeType,name,file,width,height,sizeInBytes,creationTime,sequence,thumbFile,hide,const DeepCollectionEquality().hash(_errors),duration,frameRate,isHevc,colorProfile);
 }
 
 @override
 String toString() {
-    return 'MediaResource.video(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors, duration: $duration, frameRate: $frameRate, isHevc: $isHevc)';
+    return 'MediaResource.video(name: $name, file: $file, width: $width, height: $height, sizeInBytes: $sizeInBytes, creationTime: $creationTime, sequence: $sequence, thumbFile: $thumbFile, hide: $hide, errors: $errors, duration: $duration, frameRate: $frameRate, isHevc: $isHevc, colorProfile: $colorProfile)';
 }
 
 
@@ -485,7 +486,7 @@ abstract mixin class $VideoResourceCopyWith<$Res> implements $MediaResourceCopyW
   factory $VideoResourceCopyWith(VideoResource value, $Res Function(VideoResource) _then) = _$VideoResourceCopyWithImpl;
 @override @useResult
 $Res call({
- String name, File file, int width, int height, int sizeInBytes, DateTime creationTime, int sequence, File thumbFile, bool hide, Map<int, List<String>> errors, Duration duration, double frameRate, bool isHevc
+ String name, File file, int width, int height, int sizeInBytes, DateTime creationTime, int sequence, File thumbFile, bool hide, Map<int, List<String>> errors, Duration duration, double frameRate, bool isHevc, VideoColorProfile colorProfile
 });
 
 
@@ -502,7 +503,7 @@ class _$VideoResourceCopyWithImpl<$Res>
 
 /// Create a copy of MediaResource
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? file = null,Object? width = null,Object? height = null,Object? sizeInBytes = null,Object? creationTime = null,Object? sequence = null,Object? thumbFile = null,Object? hide = null,Object? errors = null,Object? duration = null,Object? frameRate = null,Object? isHevc = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? name = null,Object? file = null,Object? width = null,Object? height = null,Object? sizeInBytes = null,Object? creationTime = null,Object? sequence = null,Object? thumbFile = null,Object? hide = null,Object? errors = null,Object? duration = null,Object? frameRate = null,Object? isHevc = null,Object? colorProfile = null,}) {
   return _then(VideoResource(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,file: null == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
@@ -517,7 +518,8 @@ as bool,errors: null == errors ? _self._errors : errors // ignore: cast_nullable
 as Map<int, List<String>>,duration: null == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
 as Duration,frameRate: null == frameRate ? _self.frameRate : frameRate // ignore: cast_nullable_to_non_nullable
 as double,isHevc: null == isHevc ? _self.isHevc : isHevc // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,colorProfile: null == colorProfile ? _self.colorProfile : colorProfile // ignore: cast_nullable_to_non_nullable
+as VideoColorProfile,
   ));
 }
 

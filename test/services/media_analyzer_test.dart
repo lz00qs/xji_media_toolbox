@@ -296,6 +296,7 @@ void main() {
       expect(video.frameRate, closeTo(59.94, 0.01));
       expect(video.duration, const Duration(milliseconds: 12345));
       expect(video.isHevc, isTrue);
+      expect(video.colorProfile, VideoColorProfile.unknown);
       expect(video.creationTime, DateTime(2024, 2, 3, 4, 5, 6));
       expect(video.sequence, 15);
       expect(
@@ -313,6 +314,139 @@ void main() {
       expect(runner.invocations.last.arguments.last, video.thumbFile.path);
     },
   );
+
+  test('reads D-Log2 from DJI container metadata', () async {
+    final file = await _writeFile(
+      temporaryDirectory,
+      'DJI_20240203040506_0016_D.MP4',
+    );
+    final runner = RecordingProcessRunner((executable, _) {
+      if (executable == 'probe') {
+        return processResult(
+          stdout: jsonEncode(
+            _videoProbePayload(
+              tags: const {
+                'encoder': 'DJI OsmoPocket4P',
+                'com.dji.camera.ColorGammaSxS': 'D-Log2',
+              },
+            ),
+          ),
+        );
+      }
+      return processResult();
+    });
+    final analyzer = MediaAnalyzer(
+      runProcess: runner.call,
+      ffprobePath: () => 'probe',
+      ffmpegPath: () => 'ffmpeg',
+      showError: errors.add,
+    );
+
+    final resource = await analyzer.processVideo(file) as VideoResource;
+
+    expect(resource.colorProfile, VideoColorProfile.dLog2);
+    expect(runner.invocations.map((call) => call.executable), [
+      'probe',
+      'ffmpeg',
+    ]);
+  });
+
+  test(
+    'reads D-Log M from the first Action 5 Pro DJI metadata packet',
+    () async {
+      final file = await _writeFile(
+        temporaryDirectory,
+        'DJI_20240203040506_0017_D.MP4',
+      );
+      final runner = RecordingProcessRunner((executable, arguments) {
+        if (executable == 'probe' && arguments.contains('-show_packets')) {
+          return processResult(
+            stdout: jsonEncode({
+              'packets': [
+                {'data': '\n00000000: 1204 2202 0813  .."...\n'},
+              ],
+            }),
+          );
+        }
+        if (executable == 'probe') {
+          return processResult(
+            stdout: jsonEncode(
+              _videoProbePayload(
+                tags: const {'encoder': 'DJI OsmoAction5 Pro'},
+              ),
+            ),
+          );
+        }
+        return processResult();
+      });
+      final analyzer = MediaAnalyzer(
+        runProcess: runner.call,
+        ffprobePath: () => 'probe',
+        ffmpegPath: () => 'ffmpeg',
+        showError: errors.add,
+      );
+
+      final resource = await analyzer.processVideo(file) as VideoResource;
+
+      expect(resource.colorProfile, VideoColorProfile.dLogM);
+      expect(runner.invocations.map((call) => call.executable), [
+        'probe',
+        'probe',
+        'ffmpeg',
+      ]);
+      expect(runner.invocations[1].arguments, [
+        '-v',
+        'error',
+        '-select_streams',
+        'd:0',
+        '-read_intervals',
+        '%+0.001',
+        '-show_packets',
+        '-show_data',
+        '-show_entries',
+        'packet=data',
+        '-of',
+        'json',
+        file.path,
+      ]);
+    },
+  );
+
+  test('does not label a normal Action 5 Pro metadata packet', () async {
+    final file = await _writeFile(
+      temporaryDirectory,
+      'DJI_20240203040506_0018_D.MP4',
+    );
+    final runner = RecordingProcessRunner((executable, arguments) {
+      if (executable == 'probe' && arguments.contains('-show_packets')) {
+        return processResult(
+          stdout: jsonEncode({
+            'packets': [
+              {'data': '\n00000000: 1202 2200  ..".\n'},
+            ],
+          }),
+        );
+      }
+      if (executable == 'probe') {
+        return processResult(
+          stdout: jsonEncode(
+            _videoProbePayload(tags: const {'encoder': 'DJI OsmoAction5 Pro'}),
+          ),
+        );
+      }
+      return processResult();
+    });
+    final analyzer = MediaAnalyzer(
+      runProcess: runner.call,
+      ffprobePath: () => 'probe',
+      ffmpegPath: () => 'ffmpeg',
+      showError: errors.add,
+    );
+
+    final resource = await analyzer.processVideo(file) as VideoResource;
+
+    expect(resource.colorProfile, VideoColorProfile.unknown);
+  });
 
   test(
     'uses the placeholder thumbnail when FFmpeg thumbnail generation fails',
@@ -492,9 +626,16 @@ Image _imageWithAebMetadata(String rawBias) {
   return image;
 }
 
-Map<String, dynamic> _videoProbePayload({int rotation = -90}) {
+Map<String, dynamic> _videoProbePayload({
+  int rotation = -90,
+  Map<String, String> tags = const {},
+}) {
   return {
-    'format': {'size': '123456', 'duration': '12.345'},
+    'format': {
+      'size': '123456',
+      'duration': '12.345',
+      if (tags.isNotEmpty) 'tags': tags,
+    },
     'streams': [
       {'codec_type': 'audio', 'codec_name': 'aac'},
       {

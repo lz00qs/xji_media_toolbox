@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:xji_footage_toolbox/models/media_resources_state.model.dart';
+import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
 import 'package:xji_footage_toolbox/providers/task_scheduler.dart';
@@ -104,6 +105,7 @@ void main() {
       file: videoFile,
       thumbFile: imageFile,
       duration: const Duration(minutes: 1, seconds: 2),
+      colorProfile: VideoColorProfile.dLogM,
     );
     final state = MediaResourcesState(
       resources: [photo, video],
@@ -124,6 +126,7 @@ void main() {
     expect(find.text('JPG'), findsOneWidget);
     expect(find.text('MP4'), findsOneWidget);
     expect(find.text('HEVC'), findsOneWidget);
+    expect(find.text('D-Log M'), findsOneWidget);
     expect(find.text('Select some resources first!'), findsOneWidget);
     expect(find.text('Name:'), findsOneWidget);
     expect(find.text('photo.JPG'), findsOneWidget);

@@ -292,6 +292,10 @@ final class MediaAnalyzer {
       final sourceWidth = _readInt(stream, 'width');
       final sourceHeight = _readInt(stream, 'height');
       final swapsDimensions = rotation.abs() % 180 == 90;
+      final colorProfile = await _detectVideoColorProfile(
+        mediaResourceFile,
+        format,
+      );
       final thumbFile = await generateThumbnail(mediaResourceFile);
       if (thumbFile == null) {
         Logger.warn(
@@ -312,6 +316,7 @@ final class MediaAnalyzer {
           microseconds: (duration * Duration.microsecondsPerSecond).toInt(),
         ),
         isHevc: stream['codec_name'] == 'hevc',
+        colorProfile: colorProfile,
         thumbFile: thumbFile ?? File(placeholderThumbnailPath),
         errors: metadata.errors,
       );
@@ -359,6 +364,78 @@ final class MediaAnalyzer {
     } on FormatException catch (error) {
       Logger.warn('${p.basename(file.path)} ffprobe JSON error: $error');
       return null;
+    }
+  }
+
+  Future<VideoColorProfile> _detectVideoColorProfile(
+    File file,
+    Map<String, dynamic> format,
+  ) async {
+    final tags = _objectMap(format['tags']);
+    final gamma = tags?['com.dji.camera.ColorGammaSxS']?.toString();
+    final profileFromTag = _parseColorGammaTag(gamma);
+    if (profileFromTag != VideoColorProfile.unknown) return profileFromTag;
+
+    final encoder = tags?['encoder']?.toString().toLowerCase() ?? '';
+    if (!encoder.contains('osmoaction5')) return VideoColorProfile.unknown;
+    return _probeDjiActionColorProfile(file);
+  }
+
+  Future<VideoColorProfile> _probeDjiActionColorProfile(File file) async {
+    ProcessResult result;
+    try {
+      result = await _runProcess(_ffprobePath(), [
+        '-v',
+        'error',
+        '-select_streams',
+        'd:0',
+        '-read_intervals',
+        '%+0.001',
+        '-show_packets',
+        '-show_data',
+        '-show_entries',
+        'packet=data',
+        '-of',
+        'json',
+        file.path,
+      ]);
+    } on ProcessException catch (error) {
+      Logger.warn(
+        '${p.basename(file.path)} DJI color profile probe error: '
+        '${error.message}',
+      );
+      return VideoColorProfile.unknown;
+    } on FileSystemException catch (error) {
+      Logger.warn(
+        '${p.basename(file.path)} DJI color profile probe error: '
+        '${error.message}',
+      );
+      return VideoColorProfile.unknown;
+    }
+
+    if (result.exitCode != 0) {
+      Logger.warn(
+        '${p.basename(file.path)} DJI color profile probe error: '
+        '${result.stderr}',
+      );
+      return VideoColorProfile.unknown;
+    }
+
+    try {
+      final decoded = _objectMap(jsonDecode(result.stdout.toString()));
+      final packets = decoded?['packets'];
+      if (packets is! List || packets.isEmpty) {
+        return VideoColorProfile.unknown;
+      }
+      final packet = _objectMap(packets.first);
+      final data = packet?['data'];
+      if (data is! String) return VideoColorProfile.unknown;
+      return _parseDjiActionColorProfile(_decodeFfprobeHexDump(data));
+    } on FormatException catch (error) {
+      Logger.warn(
+        '${p.basename(file.path)} DJI color profile JSON error: $error',
+      );
+      return VideoColorProfile.unknown;
     }
   }
 
@@ -472,6 +549,125 @@ final class MediaAnalyzer {
       return value.map((key, item) => MapEntry(key.toString(), item));
     }
     return null;
+  }
+
+  static VideoColorProfile _parseColorGammaTag(String? value) {
+    final normalized = value?.toLowerCase().replaceAll(RegExp(r'[\s_-]'), '');
+    return switch (normalized) {
+      'dlog2' => VideoColorProfile.dLog2,
+      'dlogm' => VideoColorProfile.dLogM,
+      _ => VideoColorProfile.unknown,
+    };
+  }
+
+  static List<int> _decodeFfprobeHexDump(String value) {
+    final bytes = <int>[];
+    for (final line in const LineSplitter().convert(value)) {
+      final colon = line.indexOf(':');
+      if (colon == -1) continue;
+      final columns = line
+          .substring(colon + 1)
+          .trimLeft()
+          .split(RegExp(r'\s{2,}'));
+      for (final match in RegExp(r'[0-9a-fA-F]{2}').allMatches(columns.first)) {
+        bytes.add(int.parse(match.group(0)!, radix: 16));
+      }
+    }
+    return bytes;
+  }
+
+  static VideoColorProfile _parseDjiActionColorProfile(List<int> packet) {
+    // DJI's private dvtm_ac204 protobuf stores the color-mode value at
+    // message path 2-4-1. Action 5 Pro D-Log M clips use value 19.
+    final metadata = _readLengthDelimitedProtoField(packet, 2);
+    if (metadata == null) return VideoColorProfile.unknown;
+    final colorMode = _readLengthDelimitedProtoField(metadata, 4);
+    if (colorMode == null) return VideoColorProfile.unknown;
+    final value = _readVarintProtoField(colorMode, 1);
+    return value == 19 ? VideoColorProfile.dLogM : VideoColorProfile.unknown;
+  }
+
+  static List<int>? _readLengthDelimitedProtoField(
+    List<int> message,
+    int wantedField,
+  ) {
+    var offset = 0;
+    while (offset < message.length) {
+      final key = _readProtoVarint(message, offset);
+      if (key == null || key.value == 0) return null;
+      offset = key.nextOffset;
+      final fieldNumber = key.value >> 3;
+      final wireType = key.value & 0x07;
+      if (wireType == 2) {
+        final length = _readProtoVarint(message, offset);
+        if (length == null) return null;
+        offset = length.nextOffset;
+        final end = offset + length.value;
+        if (end > message.length) return null;
+        if (fieldNumber == wantedField) return message.sublist(offset, end);
+        offset = end;
+        continue;
+      }
+      final nextOffset = _skipProtoValue(message, offset, wireType);
+      if (nextOffset == null) return null;
+      offset = nextOffset;
+    }
+    return null;
+  }
+
+  static int? _readVarintProtoField(List<int> message, int wantedField) {
+    var offset = 0;
+    while (offset < message.length) {
+      final key = _readProtoVarint(message, offset);
+      if (key == null || key.value == 0) return null;
+      offset = key.nextOffset;
+      final fieldNumber = key.value >> 3;
+      final wireType = key.value & 0x07;
+      if (wireType == 0) {
+        final value = _readProtoVarint(message, offset);
+        if (value == null) return null;
+        if (fieldNumber == wantedField) return value.value;
+        offset = value.nextOffset;
+        continue;
+      }
+      final nextOffset = _skipProtoValue(message, offset, wireType);
+      if (nextOffset == null) return null;
+      offset = nextOffset;
+    }
+    return null;
+  }
+
+  static ({int value, int nextOffset})? _readProtoVarint(
+    List<int> message,
+    int offset,
+  ) {
+    var value = 0;
+    var shift = 0;
+    while (offset < message.length && shift <= 63) {
+      final byte = message[offset++];
+      value |= (byte & 0x7f) << shift;
+      if (byte & 0x80 == 0) return (value: value, nextOffset: offset);
+      shift += 7;
+    }
+    return null;
+  }
+
+  static int? _skipProtoValue(List<int> message, int offset, int wireType) {
+    switch (wireType) {
+      case 0:
+        return _readProtoVarint(message, offset)?.nextOffset;
+      case 1:
+        return offset + 8 <= message.length ? offset + 8 : null;
+      case 2:
+        final length = _readProtoVarint(message, offset);
+        if (length == null) return null;
+        final end = length.nextOffset + length.value;
+        return end <= message.length ? end : null;
+      case 5:
+        return offset + 4 <= message.length ? offset + 4 : null;
+      default:
+        return null;
+    }
   }
 
   static double _parseFrameRate(String value) {

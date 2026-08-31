@@ -193,6 +193,10 @@ class _MediaResourceListWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final fileName = mediaResource.name.split('.').first;
     final extension = mediaResource.name.split('.').last.toUpperCase();
+    final videoResource = mediaResource is VideoResource
+        ? mediaResource as VideoResource
+        : null;
+    final colorProfileLabel = videoResource?.colorProfile.label;
     return Row(
       children: [
         Expanded(
@@ -304,6 +308,18 @@ class _MediaResourceListWidget extends ConsumerWidget {
                                                 fileType: 'HEVC',
                                                 color: ColorDark.data2)
                                             : const SizedBox()
+                                        : const SizedBox(),
+                                    extension == 'MP4' &&
+                                            colorProfileLabel != null
+                                        ? SizedBox(
+                                            width: DesignValues
+                                                .ultraSmallPadding)
+                                        : const SizedBox(),
+                                    extension == 'MP4' &&
+                                            colorProfileLabel != null
+                                        ? _FileTypeFab(
+                                            fileType: colorProfileLabel,
+                                            color: ColorDark.data7)
                                         : const SizedBox(),
                                     const Spacer(),
                                     isMultipleSelection

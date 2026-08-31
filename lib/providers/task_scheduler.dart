@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
@@ -239,9 +240,10 @@ class TaskSchedulerNotifier extends _$TaskSchedulerNotifier {
             if (speedMatch == null) return;
             final speed = double.parse(speedMatch.group(1)!);
             if (speed <= 0) return;
-            final etaSeconds = ((durationSeconds - totalSeconds) / speed)
-                .round()
-                .clamp(0, task.duration.inSeconds);
+            final etaSeconds = math.max(
+              0,
+              ((durationSeconds - totalSeconds) / speed).round(),
+            );
             _updateTask(taskId, (item) {
               return item.copyWith(eta: Duration(seconds: etaSeconds));
             });

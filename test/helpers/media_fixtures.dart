@@ -39,6 +39,7 @@ VideoResource videoFixture({
   Duration duration = const Duration(seconds: 10),
   double frameRate = 30,
   bool isHevc = true,
+  VideoColorProfile colorProfile = VideoColorProfile.unknown,
   Map<int, List<String>> errors = const {},
 }) {
   final source = file ?? File(p.join('/fixtures', name));
@@ -54,6 +55,7 @@ VideoResource videoFixture({
     duration: duration,
     frameRate: frameRate,
     isHevc: isHevc,
+    colorProfile: colorProfile,
     errors: errors,
   );
 }

@@ -87,6 +87,32 @@ void main() {
     await process.complete(0);
   });
 
+  test(
+    'allows ETA to exceed media duration for slower-than-real-time work',
+    () async {
+      final process = FakeTaskProcess();
+      final harness = SchedulerHarness([process]);
+      final container = harness.container();
+      addTearDown(container.dispose);
+
+      container
+          .read(taskSchedulerProvider.notifier)
+          .addTask(
+            task(
+              'slow-progress',
+              duration: const Duration(milliseconds: 19390),
+            ),
+          );
+      await flushEvents();
+      process.emit('frame=70 time=00:00:01.39 speed=0.05x\n');
+      await flushEvents();
+
+      final current = container.read(taskSchedulerProvider).single;
+      expect(current.eta, const Duration(minutes: 6));
+      await process.complete(0);
+    },
+  );
+
   test('ignores malformed, zero-duration, and zero-speed progress', () async {
     final process = FakeTaskProcess();
     final harness = SchedulerHarness([process]);
