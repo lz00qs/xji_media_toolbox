@@ -248,7 +248,6 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
   void reorderSelectedResources(
       {required int oldIndex, required int newIndex}) {
-    if (oldIndex < newIndex) newIndex -= 1;
     final updated = [...(state.selectedResources)];
     final item = updated.removeAt(oldIndex);
     updated.insert(newIndex, item);

@@ -60,7 +60,7 @@ final class _EditLutDialogNotifierProvider
 }
 
 String _$_editLutDialogNotifierHash() =>
-    r'9d21bcf6b11336e8914c637765eee7bf2934b575';
+    r'bc5d8adfad66712731164197d617a53e1360e448';
 
 final class _EditLutDialogNotifierFamily extends $Family
     with $ClassFamilyOverride<_EditLutDialogNotifier, Lut, Lut, Lut, Lut> {

@@ -245,9 +245,11 @@ class VideoExportDialog extends ConsumerWidget {
             _getDefaultOutputFileName(videoResource.name))
         .notifier);
 
-    Future<void> exportCmdToFile(String id, String taskName, String random, List<String> ffmpegArgs) async {
+    Future<void> exportCmdToFile(String id, String taskName, String random,
+        List<String> ffmpegArgs) async {
       // 文件名为 taskName_id后的4位随机数
-      final cmdFileName = '${taskName.substring(0, taskName.length - 4)}_$random.txt';
+      final cmdFileName =
+          '${taskName.substring(0, taskName.length - 4)}_$random.txt';
       final cmdFile = File('${videoResource.file.parent.path}/$cmdFileName');
       if (cmdFile.existsSync()) {
         Logger.error('Cmd File $cmdFileName already exists.');
@@ -298,8 +300,10 @@ class VideoExportDialog extends ConsumerWidget {
                   '$random4Digit.txt';
               final inputFilesTxtFile = File(inputFilesTxtPath);
               if (inputFilesTxtFile.existsSync()) {
-                Logger.error('Input Files Txt File $inputFilesTxtPath already exists.');
-                Toast.error('Input Files Txt File $inputFilesTxtPath already exists.');
+                Logger.error(
+                    'Input Files Txt File $inputFilesTxtPath already exists.');
+                Toast.error(
+                    'Input Files Txt File $inputFilesTxtPath already exists.');
                 return;
               }
               await inputFilesTxtFile.writeAsString(ref
@@ -314,9 +318,11 @@ class VideoExportDialog extends ConsumerWidget {
               // 如果使用 exportCmdOnly，则使用相对路径
               if (exportCmdOnly) {
                 ffmpegArgs.add('-i');
-                ffmpegArgs.add(inputFilesTxtPath.replaceFirst('${videoResource.file.parent.path}/', ''));
+                ffmpegArgs.add(inputFilesTxtPath.replaceFirst(
+                    '${videoResource.file.parent.path}/', ''));
                 ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path.replaceFirst('${videoResource.file.parent.path}/', ''));
+                ffmpegArgs.add(videoResource.file.path
+                    .replaceFirst('${videoResource.file.parent.path}/', ''));
               } else {
                 ffmpegArgs.add('-i');
                 ffmpegArgs.add(inputFilesTxtPath);
@@ -356,13 +362,16 @@ class VideoExportDialog extends ConsumerWidget {
               }
 
               if (exportCmdOnly) {
-                await exportCmdToFile(taskId, taskName, random4Digit, ffmpegArgs);
+                await exportCmdToFile(
+                    taskId, taskName, random4Digit, ffmpegArgs);
               }
 
               final task = VideoTask(
                 id: taskId,
                 name: taskName,
-                status: exportCmdOnly ? VideoTaskStatus.finished : VideoTaskStatus.waiting,
+                status: exportCmdOnly
+                    ? VideoTaskStatus.finished
+                    : VideoTaskStatus.waiting,
                 type: VideoTaskType.merge,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(taskType: taskType, ref: ref),
@@ -379,9 +388,9 @@ class VideoExportDialog extends ConsumerWidget {
               final List<String> ffmpegArgs = [];
               if (exportCmdOnly) {
                 ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path.replaceFirst('${videoResource.file.parent.path}/', ''));
-              }
-              else {
+                ffmpegArgs.add(videoResource.file.path
+                    .replaceFirst('${videoResource.file.parent.path}/', ''));
+              } else {
                 ffmpegArgs.add('-i');
                 ffmpegArgs.add(videoResource.file.path);
               }
@@ -415,7 +424,8 @@ class VideoExportDialog extends ConsumerWidget {
 
               if (taskType == VideoTaskType.trim) {
                 final videoCutState = ref.watch(videoCutProvider);
-                if (videoCutState.cutStart != Duration.zero || videoCutState.cutEnd != Duration.zero) {
+                if (videoCutState.cutStart != Duration.zero ||
+                    videoCutState.cutEnd != Duration.zero) {
                   ffmpegArgs.add('-ss');
                   ffmpegArgs.add(videoCutState.cutStart.toString());
                   ffmpegArgs.add('-to');
@@ -427,15 +437,20 @@ class VideoExportDialog extends ConsumerWidget {
               ffmpegArgs.add(outputFilePath);
 
               if (exportCmdOnly) {
-                await exportCmdToFile(taskId, taskName, random4Digit, ffmpegArgs);
+                await exportCmdToFile(
+                    taskId, taskName, random4Digit, ffmpegArgs);
               }
 
               final task = VideoTask(
                 id: taskId,
                 name: taskName,
-                status: exportCmdOnly ? VideoTaskStatus.finished : VideoTaskStatus.waiting,
+                status: exportCmdOnly
+                    ? VideoTaskStatus.finished
+                    : VideoTaskStatus.waiting,
                 // type: VideoTaskType.trim,
-                type: taskType == VideoTaskType.trim ? VideoTaskType.trim : VideoTaskType.transcode,
+                type: taskType == VideoTaskType.trim
+                    ? VideoTaskType.trim
+                    : VideoTaskType.transcode,
                 ffmpegArgs: ffmpegArgs,
                 duration: _getOutputDuration(taskType: taskType, ref: ref),
                 progress: 0.0,
@@ -452,13 +467,15 @@ class VideoExportDialog extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              exportCmdOnly ? const SizedBox() : DialogCheckBoxWithText(
-                  text: 'Use the same directory as source',
-                  value: state.useSameDirectory,
-                  onPressed: () {
-                    // useSameDirectory.value = !useSameDirectory.value;
-                    notifier.toggleUseSameDirectory();
-                  }),
+              exportCmdOnly
+                  ? const SizedBox()
+                  : DialogCheckBoxWithText(
+                      text: 'Use the same directory as source',
+                      value: state.useSameDirectory,
+                      onPressed: () {
+                        // useSameDirectory.value = !useSameDirectory.value;
+                        notifier.toggleUseSameDirectory();
+                      }),
               SizedBox(
                 height: DesignValues.smallPadding,
               ),
@@ -468,8 +485,7 @@ class VideoExportDialog extends ConsumerWidget {
                       iconData: Icons.folder_open,
                       text: 'Select a output directory',
                       onPressed: () async {
-                        final result =
-                            await FilePicker.platform.getDirectoryPath();
+                        final result = await FilePicker.getDirectoryPath();
                         if (result != null) {
                           notifier.setSelectedDirectory(result);
                         }

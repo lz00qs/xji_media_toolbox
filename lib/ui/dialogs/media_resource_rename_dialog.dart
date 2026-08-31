@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element_parameter
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -17,9 +19,7 @@ const _invalidNameErrorText = 'Invalid name';
 @freezed
 abstract class _RenameDialogState with _$RenameDialogState {
   const factory _RenameDialogState({
-    // ignore: unused_element_parameter
     @Default(false) bool isNewNameValid,
-    // ignore: unused_element_parameter
     @Default(_fileExistErrorText) String errorText,
   }) = __RenameDialogState;
 }
@@ -42,12 +42,14 @@ class _MediaResourceRenameDialogNotifier
           '${mediaResource.file.parent.path}/${textController.text}.$ext';
       var valid = !isFileExist(newPath);
       if (!valid) {
-        state = state.copyWith(errorText: _fileExistErrorText, isNewNameValid: false);
+        state = state.copyWith(
+            errorText: _fileExistErrorText, isNewNameValid: false);
       } else {
         if (!textController.text.contains(RegExp(r'[\\/:*?"<>|]'))) {
           state = state.copyWith(errorText: '', isNewNameValid: true);
         } else {
-          state = state.copyWith(errorText: _invalidNameErrorText, isNewNameValid: false);
+          state = state.copyWith(
+              errorText: _invalidNameErrorText, isNewNameValid: false);
         }
       }
     }

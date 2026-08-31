@@ -93,7 +93,7 @@ class VideoMergerPanel extends ConsumerWidget {
                                   ));
                             },
                             itemCount: selectedResources.length,
-                            onReorder: (int oldIndex, int newIndex) {
+                            onReorderItem: (int oldIndex, int newIndex) {
                               ref
                                   .read(mediaResourcesStateProvider.notifier)
                                   .reorderSelectedResources(

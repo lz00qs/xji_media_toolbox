@@ -35,8 +35,7 @@ class _MainPageEmpty extends ConsumerWidget {
                 return;
               }
               onPressed = true;
-              final selectedDirectory =
-                  await FilePicker.platform.getDirectoryPath();
+              final selectedDirectory = await FilePicker.getDirectoryPath();
               if (selectedDirectory != null) {
                 await mediaResourcesNotifier.loadMediaResourcesFromDir(
                     selectedDirectory,

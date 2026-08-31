@@ -202,7 +202,9 @@ class SettingsDialog extends StatelessWidget {
                   return Switch(
                     value: ref.watch(settingsProvider).exportCmdOnly,
                     onChanged: (value) {
-                      ref.read(settingsProvider.notifier).setExportCmdOnly(value);
+                      ref
+                          .read(settingsProvider.notifier)
+                          .setExportCmdOnly(value);
                     },
                     activeTrackColor: ColorDark.blue5,
                     activeThumbColor: ColorDark.white,
@@ -468,13 +470,13 @@ class _EditLutDialogNotifier extends _$EditLutDialogNotifier {
   }
 
   Future<void> pickLutFile() async {
-    final result = await FilePicker.platform.pickFiles(
+    final result = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['cube'],
     );
     if (result == null) return;
 
-    final path = result.files.single.path!;
+    final path = result.path!;
     var name = path.split('/').last;
     name = name.substring(0, name.length - 5);
     if (name.length > 24) {

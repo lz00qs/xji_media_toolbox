@@ -73,7 +73,8 @@ class _MacMainPageAppBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     var onPressed = false;
-    final mediaResourcesNotifier = ref.read(mediaResourcesStateProvider.notifier);
+    final mediaResourcesNotifier =
+        ref.read(mediaResourcesStateProvider.notifier);
     return SizedBox(
       height: DesignValues.appBarHeight,
       child: Row(
@@ -91,12 +92,14 @@ class _MacMainPageAppBar extends ConsumerWidget {
                 }
                 onPressed = true;
                 // await openMediaResourcesFolder(ref: ref);
-                final selectedDirectory = await FilePicker.platform.getDirectoryPath();
-                if (selectedDirectory != null)
-                  {
-                    await mediaResourcesNotifier.loadMediaResourcesFromDir(selectedDirectory, false,
-                        ref.watch(settingsProvider).cpuThreads, ref.watch(settingsProvider).sort);
-                  }
+                final selectedDirectory = await FilePicker.getDirectoryPath();
+                if (selectedDirectory != null) {
+                  await mediaResourcesNotifier.loadMediaResourcesFromDir(
+                      selectedDirectory,
+                      false,
+                      ref.watch(settingsProvider).cpuThreads,
+                      ref.watch(settingsProvider).sort);
+                }
                 onPressed = false;
               }),
           SizedBox(

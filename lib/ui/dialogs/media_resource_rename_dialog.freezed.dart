@@ -14,9 +14,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$RenameDialogState {
-  // ignore: unused_element_parameter
   bool get isNewNameValid;
-  // ignore: unused_element_parameter
   String get errorText;
 
   /// Create a copy of _RenameDialogState
@@ -248,11 +246,9 @@ class __RenameDialogState implements _RenameDialogState {
   const __RenameDialogState(
       {this.isNewNameValid = false, this.errorText = _fileExistErrorText});
 
-// ignore: unused_element_parameter
   @override
   @JsonKey()
   final bool isNewNameValid;
-// ignore: unused_element_parameter
   @override
   @JsonKey()
   final String errorText;
