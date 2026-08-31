@@ -184,13 +184,14 @@ class SettingsDialog extends StatelessWidget {
           SizedBox(height: DesignValues.largePadding),
           Row(
             children: [
-              Text(
-                'Debug Mode:',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text1,
+              Expanded(
+                child: Text(
+                  'Debug Mode:',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
                 ),
               ),
-              const Spacer(),
               Consumer(
                 builder: (context, ref, child) {
                   return Switch(
@@ -208,13 +209,16 @@ class SettingsDialog extends StatelessWidget {
           SizedBox(height: DesignValues.ultraSmallPadding),
           Row(
             children: [
-              Text(
-                'Export Command Only:',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text1,
+              Expanded(
+                child: Text(
+                  'Export Command Only:',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
                 ),
               ),
-              const Spacer(),
               Consumer(
                 builder: (context, ref, child) {
                   return Switch(
@@ -237,20 +241,26 @@ class SettingsDialog extends StatelessWidget {
               dividerColor: Colors.transparent,
               splashColor: Colors.transparent,
             ),
-            child: ExpansionTile(
-              tilePadding: EdgeInsets.zero,
-              childrenPadding: EdgeInsets.only(
-                bottom: DesignValues.mediumPadding,
-              ),
-              iconColor: ColorDark.text1,
-              collapsedIconColor: ColorDark.text1,
-              title: Text(
-                'Advanced',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text0,
+            child: Material(
+              type: MaterialType.transparency,
+              child: ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: EdgeInsets.fromLTRB(
+                  DesignValues.smallPadding,
+                  0,
+                  DesignValues.smallPadding,
+                  DesignValues.mediumPadding,
                 ),
+                iconColor: ColorDark.text1,
+                collapsedIconColor: ColorDark.text1,
+                title: Text(
+                  'Advanced',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text0,
+                  ),
+                ),
+                children: const [_FFmpegSettingsPanel()],
               ),
-              children: const [_FFmpegSettingsPanel()],
             ),
           ),
           SizedBox(height: DesignValues.smallPadding),
@@ -389,107 +399,195 @@ class _FFmpegSettingsPanelState extends ConsumerState<_FFmpegSettingsPanel> {
       FFmpegSource.unavailable => 'Unavailable',
     };
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(DesignValues.mediumPadding),
-      decoration: BoxDecoration(
-        color: ColorDark.bg3,
-        borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
-      ),
+    return Padding(
+      padding: EdgeInsets.only(top: DesignValues.ultraSmallPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                'FFmpeg Runtime',
-                style: SemiTextStyles.regularENSemiBold.copyWith(
-                  color: ColorDark.text0,
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: DesignValues.smallPadding,
-                  vertical: DesignValues.ultraSmallPadding,
-                ),
-                decoration: BoxDecoration(
-                  color: isAvailable
-                      ? ColorDark.successLightDefault
-                      : ColorDark.dangerLightDefault,
-                  borderRadius: BorderRadius.circular(
-                    DesignValues.smallBorderRadius,
-                  ),
-                ),
-                child: Text(
-                  sourceLabel,
-                  style: SemiTextStyles.smallENRegular.copyWith(
-                    color: isAvailable ? ColorDark.success : ColorDark.danger,
-                  ),
-                ),
-              ),
-            ],
+          _AdvancedValueRow(
+            label: 'Runtime:',
+            value: sourceLabel,
+            valueColor: isAvailable ? ColorDark.text0 : ColorDark.danger,
           ),
           SizedBox(height: DesignValues.smallPadding),
-          Text(
-            settings.ffmpegVersion.isEmpty
+          _AdvancedValueRow(
+            label: 'Version:',
+            value: settings.ffmpegVersion.isEmpty
                 ? 'No compatible runtime is active.'
-                : 'Version ${settings.ffmpegVersion}',
-            style: SemiTextStyles.smallENRegular.copyWith(
-              color: ColorDark.text1,
-            ),
+                : settings.ffmpegVersion,
           ),
           if (settings.activeFFmpegDirectory.isNotEmpty) ...[
-            SizedBox(height: DesignValues.ultraSmallPadding),
-            SelectableText(
-              settings.activeFFmpegDirectory,
-              style: SemiTextStyles.smallENRegular.copyWith(
-                color: ColorDark.text2,
-              ),
+            SizedBox(height: DesignValues.smallPadding),
+            _AdvancedValueRow(
+              label: 'Directory:',
+              value: settings.activeFFmpegDirectory,
+              maxLines: 2,
             ),
           ],
           SizedBox(height: DesignValues.mediumPadding),
-          TextField(
-            controller: _directoryController,
-            enabled: !_isApplying,
-            style: SemiTextStyles.regularENRegular.copyWith(
-              color: ColorDark.text0,
+          Text(
+            'Custom FFmpeg Directory',
+            style: SemiTextStyles.header5ENRegular.copyWith(
+              color: ColorDark.text1,
             ),
-            decoration: dialogInputDecoration.copyWith(
-              labelText: 'Custom FFmpeg directory',
-              hintText: 'Directory containing ffmpeg and ffprobe',
-              errorText: _errorMessage,
-              suffixIcon: IconButton(
-                tooltip: 'Browse',
-                onPressed: _isApplying ? null : _chooseDirectory,
-                icon: const Icon(Icons.folder_open),
-              ),
-            ),
-            onSubmitted: (_) => _applyCustomDirectory(),
           ),
           SizedBox(height: DesignValues.smallPadding),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: _isApplying ? null : _useBundledRuntime,
-                child: const Text('Use Bundled'),
+          Theme(
+            data: Theme.of(context).copyWith(
+              textSelectionTheme: TextSelectionThemeData(
+                selectionColor: ColorDark.blue5.withAlpha((0.8 * 255).round()),
               ),
-              SizedBox(width: DesignValues.smallPadding),
-              FilledButton(
-                onPressed: _isApplying ? null : _applyCustomDirectory,
-                child: _isApplying
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Apply Custom'),
+            ),
+            child: TextField(
+              controller: _directoryController,
+              enabled: !_isApplying,
+              cursorColor: ColorDark.text1,
+              style: SemiTextStyles.header5ENRegular.copyWith(
+                color: ColorDark.text0,
               ),
-            ],
+              decoration: dialogInputDecoration.copyWith(
+                hintText: 'Directory containing ffmpeg and ffprobe',
+                hintStyle: SemiTextStyles.header5ENRegular.copyWith(
+                  color: ColorDark.text3,
+                ),
+                errorText: _errorMessage,
+                errorMaxLines: 3,
+                errorStyle: SemiTextStyles.regularENRegular.copyWith(
+                  color: ColorDark.danger,
+                ),
+                suffixIcon: IconButton(
+                  tooltip: 'Browse',
+                  hoverColor: ColorDark.defaultHover,
+                  focusColor: ColorDark.defaultActive,
+                  onPressed: _isApplying ? null : _chooseDirectory,
+                  icon: Icon(
+                    Icons.folder_open,
+                    color: _isApplying
+                        ? ColorDark.disabledText
+                        : ColorDark.text0,
+                  ),
+                ),
+              ),
+              onChanged: (_) {
+                if (_errorMessage == null) return;
+                setState(() => _errorMessage = null);
+              },
+              onSubmitted: (_) => _applyCustomDirectory(),
+            ),
+          ),
+          SizedBox(height: DesignValues.smallPadding),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              spacing: DesignValues.smallPadding,
+              runSpacing: DesignValues.ultraSmallPadding,
+              children: [
+                _AdvancedActionButton(
+                  label: 'Use Bundled',
+                  onPressed:
+                      _isApplying ||
+                          settings.ffmpegSource == FFmpegSource.bundled
+                      ? null
+                      : _useBundledRuntime,
+                ),
+                _AdvancedActionButton(
+                  label: 'Apply Custom',
+                  onPressed: _isApplying ? null : _applyCustomDirectory,
+                  isLoading: _isApplying,
+                ),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AdvancedValueRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+  final int maxLines;
+
+  const _AdvancedValueRow({
+    required this.label,
+    required this.value,
+    this.valueColor = ColorDark.text0,
+    this.maxLines = 1,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: SemiTextStyles.header5ENRegular.copyWith(
+            color: ColorDark.text1,
+          ),
+        ),
+        SizedBox(width: DesignValues.mediumPadding),
+        Expanded(
+          child: Tooltip(
+            message: value,
+            child: Text(
+              value,
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: SemiTextStyles.header5ENRegular.copyWith(
+                color: valueColor,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AdvancedActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  const _AdvancedActionButton({
+    required this.label,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
+    return TextButton(
+      onPressed: onPressed,
+      style: ButtonStyle(
+        padding: WidgetStateProperty.all(
+          EdgeInsets.symmetric(horizontal: DesignValues.smallPadding),
+        ),
+        minimumSize: WidgetStateProperty.all(Size.zero),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        overlayColor: WidgetStateProperty.all(ColorDark.defaultHover),
+      ),
+      child: isLoading
+          ? const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: ColorDark.info,
+              ),
+            )
+          : Text(
+              label,
+              style: SemiTextStyles.header5ENRegular.copyWith(
+                color: isEnabled ? ColorDark.info : ColorDark.disabledText,
+              ),
+            ),
     );
   }
 }
