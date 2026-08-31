@@ -5,6 +5,9 @@ import 'package:path/path.dart' as p;
 
 import '../models/ffmpeg_configuration.dart';
 
+typedef FFmpegProcessRunner =
+    Future<ProcessResult> Function(String executable, List<String> arguments);
+
 class FFmpegUtils {
   static FFmpegConfiguration _configuration =
       const FFmpegConfiguration.unavailable();
@@ -15,28 +18,37 @@ class FFmpegUtils {
 
   static Future<FFmpegConfiguration> initialize({
     String customDirectory = '',
+    @visibleForTesting FFmpegProcessRunner? processRunner,
   }) async {
     if (customDirectory.trim().isNotEmpty) {
       final custom = await inspectDirectory(
         customDirectory,
         source: FFmpegSource.custom,
+        processRunner: processRunner,
       );
       if (custom.isAvailable) return _activate(custom);
     }
 
-    return useBundled();
+    return useBundled(processRunner: processRunner);
   }
 
-  static Future<FFmpegConfiguration> useCustom(String directory) async {
+  static Future<FFmpegConfiguration> useCustom(
+    String directory, {
+    @visibleForTesting FFmpegProcessRunner? processRunner,
+  }) async {
     final result = await inspectDirectory(
       directory,
       source: FFmpegSource.custom,
+      processRunner: processRunner,
     );
     return result.isAvailable ? _activate(result) : result;
   }
 
-  static Future<FFmpegConfiguration> useBundled() async {
-    final directory = bundledDirectory();
+  static Future<FFmpegConfiguration> useBundled({
+    @visibleForTesting String? directoryOverride,
+    @visibleForTesting FFmpegProcessRunner? processRunner,
+  }) async {
+    final directory = directoryOverride ?? bundledDirectory();
     if (directory == null) {
       return _activate(
         const FFmpegConfiguration.unavailable(
@@ -48,6 +60,7 @@ class FFmpegUtils {
     final result = await inspectDirectory(
       directory,
       source: FFmpegSource.bundled,
+      processRunner: processRunner,
     );
     return _activate(result);
   }
@@ -80,6 +93,7 @@ class FFmpegUtils {
   static Future<FFmpegConfiguration> inspectDirectory(
     String directory, {
     required FFmpegSource source,
+    FFmpegProcessRunner? processRunner,
   }) async {
     final normalizedDirectory = p.normalize(p.absolute(directory.trim()));
     final executableSuffix = Platform.isWindows ? '.exe' : '';
@@ -93,26 +107,28 @@ class FFmpegUtils {
       );
     }
 
+    final runProcess = processRunner ?? _runProcess;
+
     try {
-      final ffmpegVersion = await Process.run(ffmpegPath, const ['-version']);
+      final ffmpegVersion = await runProcess(ffmpegPath, const ['-version']);
       if (ffmpegVersion.exitCode != 0) {
         return FFmpegConfiguration.unavailable(
           'FFmpeg could not be started: ${_processError(ffmpegVersion)}',
         );
       }
 
-      final ffprobeVersion = await Process.run(ffprobePath, const ['-version']);
+      final ffprobeVersion = await runProcess(ffprobePath, const ['-version']);
       if (ffprobeVersion.exitCode != 0) {
         return FFmpegConfiguration.unavailable(
           'FFprobe could not be started: ${_processError(ffprobeVersion)}',
         );
       }
 
-      final encoders = await Process.run(ffmpegPath, const [
+      final encoders = await runProcess(ffmpegPath, const [
         '-hide_banner',
         '-encoders',
       ]);
-      final filters = await Process.run(ffmpegPath, const [
+      final filters = await runProcess(ffmpegPath, const [
         '-hide_banner',
         '-filters',
       ]);
@@ -163,6 +179,18 @@ class FFmpegUtils {
   static FFmpegConfiguration _activate(FFmpegConfiguration configuration) {
     _configuration = configuration;
     return configuration;
+  }
+
+  static Future<ProcessResult> _runProcess(
+    String executable,
+    List<String> arguments,
+  ) {
+    return Process.run(executable, arguments);
+  }
+
+  @visibleForTesting
+  static void resetForTesting() {
+    _configuration = const FFmpegConfiguration.unavailable();
   }
 
   static String _parseVersion(String output) {

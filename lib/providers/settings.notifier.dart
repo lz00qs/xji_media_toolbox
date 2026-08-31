@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -17,8 +17,65 @@ import '../utils/ffmpeg_utils.dart';
 
 part 'settings.notifier.g.dart';
 
+typedef SettingsStoreLoader = Future<SettingsStore> Function();
+typedef PreferencesLoader = Future<SharedPreferences> Function();
+typedef ApplicationSupportDirectoryLoader = Future<Directory> Function();
+typedef AppVersionLoader = Future<String> Function();
+typedef FFmpegInitializer =
+    Future<FFmpegConfiguration> Function(String customDirectory);
+typedef CustomFFmpegLoader =
+    Future<FFmpegConfiguration> Function(String directory);
+typedef BundledFFmpegLoader = Future<FFmpegConfiguration> Function();
+
+final class SettingsDependencies {
+  SettingsDependencies({
+    required this.openStore,
+    required this.loadPreferences,
+    required this.getApplicationSupportDirectory,
+    required this.loadAppVersion,
+    required this.initializeFFmpeg,
+    required this.useCustomFFmpeg,
+    required this.useBundledFFmpeg,
+    required this.getCpuThreads,
+    required this.showError,
+    required this.showWarning,
+  });
+
+  factory SettingsDependencies.production() {
+    return SettingsDependencies(
+      openStore: SettingsStore.open,
+      loadPreferences: SharedPreferences.getInstance,
+      getApplicationSupportDirectory:
+          path_provider.getApplicationSupportDirectory,
+      loadAppVersion: () async => (await PackageInfo.fromPlatform()).version,
+      initializeFFmpeg: (directory) =>
+          FFmpegUtils.initialize(customDirectory: directory),
+      useCustomFFmpeg: FFmpegUtils.useCustom,
+      useBundledFFmpeg: FFmpegUtils.useBundled,
+      getCpuThreads: () => Platform.numberOfProcessors,
+      showError: Toast.error,
+      showWarning: Toast.warning,
+    );
+  }
+
+  final SettingsStoreLoader openStore;
+  final PreferencesLoader loadPreferences;
+  final ApplicationSupportDirectoryLoader getApplicationSupportDirectory;
+  final AppVersionLoader loadAppVersion;
+  final FFmpegInitializer initializeFFmpeg;
+  final CustomFFmpegLoader useCustomFFmpeg;
+  final BundledFFmpegLoader useBundledFFmpeg;
+  final int Function() getCpuThreads;
+  final void Function(String message) showError;
+  final void Function(String message) showWarning;
+}
+
 @Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
+  SettingsNotifier({SettingsDependencies? dependencies})
+    : _dependencies = dependencies ?? SettingsDependencies.production();
+
+  final SettingsDependencies _dependencies;
   late final SettingsStore _settingsStore;
   late final SharedPreferences _prefs;
 
@@ -28,7 +85,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<void> initSettings() async {
-    _settingsStore = await SettingsStore.open();
+    _settingsStore = await _dependencies.openStore();
     var snapshot = _settingsStore.snapshot;
     var transcodingPresets = snapshot.transcodingPresets;
     if (transcodingPresets.isEmpty) {
@@ -37,7 +94,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       transcodingPresets = snapshot.transcodingPresets;
     }
 
-    _prefs = await SharedPreferences.getInstance();
+    _prefs = await _dependencies.loadPreferences();
     var defaultTranscodePresetId =
         _prefs.getInt(defaultTranscodePresetIndexPrefKey) ??
         transcodingPresets.first.id;
@@ -56,8 +113,8 @@ class SettingsNotifier extends _$SettingsNotifier {
     final exportCmdOnly = _prefs.getBool(exportCmdOnlyPrefKey) ?? false;
     final customFFmpegDirectory =
         _prefs.getString(customFFmpegDirectoryPrefKey) ?? '';
-    final ffmpegConfiguration = await FFmpegUtils.initialize(
-      customDirectory: customFFmpegDirectory,
+    final ffmpegConfiguration = await _dependencies.initializeFFmpeg(
+      customFFmpegDirectory,
     );
     if (customFFmpegDirectory.isNotEmpty &&
         ffmpegConfiguration.source != FFmpegSource.custom) {
@@ -66,10 +123,14 @@ class SettingsNotifier extends _$SettingsNotifier {
         '$customFFmpegDirectory',
       );
     }
-    final sortType = SortType.values[_prefs.getInt(sortTypePrefKey) ?? 0];
+    final storedSortType = _prefs.getInt(sortTypePrefKey) ?? 0;
+    final sortType =
+        storedSortType >= 0 && storedSortType < SortType.values.length
+        ? SortType.values[storedSortType]
+        : SortType.name;
     final sortAsc = _prefs.getBool(sortOderPrefKey) ?? true;
-    final cpuThreads = Platform.numberOfProcessors;
-    final appVersion = await PackageInfo.fromPlatform();
+    final cpuThreads = _dependencies.getCpuThreads();
+    final appVersion = await _dependencies.loadAppVersion();
 
     state = Settings(
       transcodingPresets: transcodingPresets,
@@ -77,7 +138,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       luts: snapshot.luts,
       sort: Sort(sortType: sortType, sortAsc: sortAsc),
       cpuThreads: cpuThreads,
-      appVersion: appVersion.version,
+      appVersion: appVersion,
       exportCmdOnly: exportCmdOnly,
       customFFmpegDirectory: customFFmpegDirectory,
       activeFFmpegDirectory: ffmpegConfiguration.directory,
@@ -95,7 +156,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
       Logger.warn('Transcode Preset not found: $id');
-      Toast.error('Transcode Preset not found');
+      _dependencies.showError('Transcode Preset not found');
       return;
     }
     state = state.copyWith(defaultTranscodePresetId: id);
@@ -117,13 +178,13 @@ class SettingsNotifier extends _$SettingsNotifier {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
       Logger.warn('Transcode Preset not found: $id');
-      Toast.error('Transcode Preset not found');
+      _dependencies.showError('Transcode Preset not found');
       return;
     }
 
     if (state.transcodingPresets.length == 1) {
       Logger.warn('Cannot delete the last Transcode Preset: $id');
-      Toast.error('Cannot delete the last Transcode Preset');
+      _dependencies.showError('Cannot delete the last Transcode Preset');
       return;
     }
 
@@ -161,12 +222,12 @@ class SettingsNotifier extends _$SettingsNotifier {
     final srcFile = File(lut.path);
     if (!await srcFile.exists()) {
       Logger.warn('LUT file not found: ${lut.path}');
-      Toast.error('LUT file not found');
+      _dependencies.showError('LUT file not found');
       return;
     }
 
     // Application Support
-    final baseDir = await getApplicationSupportDirectory();
+    final baseDir = await _dependencies.getApplicationSupportDirectory();
 
     // luts/user
     final targetDir = Directory(p.join(baseDir.path, 'luts', 'user'));
@@ -183,7 +244,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     } catch (error, stackTrace) {
       if (await targetFile.exists()) await targetFile.delete();
       Logger.error('Failed to save LUT', error, stackTrace);
-      Toast.error('Failed to save LUT');
+      _dependencies.showError('Failed to save LUT');
     }
   }
 
@@ -191,7 +252,7 @@ class SettingsNotifier extends _$SettingsNotifier {
     // 检查 id 是否存在
     if (!_lutExists(lutId)) {
       Logger.warn('LUT not found: $lutId');
-      Toast.error('LUT not found');
+      _dependencies.showError('LUT not found');
       return;
     }
     final lut = state.luts.firstWhere((item) => item.id == lutId);
@@ -212,7 +273,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     } catch (error, stackTrace) {
       Logger.warn('Failed to delete LUT file: ${lut.path}');
       Logger.error('LUT file deletion error', error, stackTrace);
-      Toast.warning('LUT metadata deleted, but its file could not be removed');
+      _dependencies.showWarning(
+        'LUT metadata deleted, but its file could not be removed',
+      );
     }
   }
 
@@ -237,7 +300,7 @@ class SettingsNotifier extends _$SettingsNotifier {
       return await operation();
     } catch (error, stackTrace) {
       Logger.error(errorMessage, error, stackTrace);
-      Toast.error(errorMessage);
+      _dependencies.showError(errorMessage);
       return null;
     }
   }
@@ -259,7 +322,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<String?> setCustomFFmpegDirectory(String directory) async {
-    final configuration = await FFmpegUtils.useCustom(directory);
+    final configuration = await _dependencies.useCustomFFmpeg(directory);
     if (!configuration.isAvailable) return configuration.errorMessage;
 
     await _prefs.setString(
@@ -274,7 +337,7 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<String?> useBundledFFmpeg() async {
-    final configuration = await FFmpegUtils.useBundled();
+    final configuration = await _dependencies.useBundledFFmpeg();
     if (!configuration.isAvailable) return configuration.errorMessage;
 
     await _prefs.remove(customFFmpegDirectoryPrefKey);
