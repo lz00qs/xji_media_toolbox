@@ -276,7 +276,7 @@ def verify_packaged_runtime(target: str) -> None:
         )
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description="Build an FFmpeg-enabled XJI Media Toolbox release."
     )
@@ -286,7 +286,7 @@ def main() -> None:
         choices=["macos", "windows"],
         help="Release platform. macOS builds target Apple Silicon only.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     validate_host(args.build)
     verify_runtime(args.build)
