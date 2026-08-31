@@ -34,275 +34,283 @@ class SettingsDialog extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           children: [
-          Row(
-            children: [
-              Text(
-                'Transcode Presets',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text0,
-                ),
-              ),
-              SizedBox(width: DesignValues.smallPadding),
-              Consumer(
-                builder: (context, ref, child) {
-                  return CustomIconButton(
-                    iconData: Icons.add_circle_outline,
-                    onPressed: () async {
-                      final result = await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return _EditTranscodePresetDialog(
-                            preset: TranscodePreset(),
-                          );
-                        },
-                      );
-                      if (result != null) {
-                        await ref
-                            .read(settingsProvider.notifier)
-                            .addTranscodePreset(result);
-                      }
-                    },
-                    iconSize: DesignValues.mediumIconSize,
-                    buttonSize: 28,
-                    hoverColor: ColorDark.defaultHover,
-                    focusColor: ColorDark.defaultActive,
-                    iconColor: ColorDark.text0,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: DesignValues.ultraSmallPadding),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(DesignValues.smallBorderRadius),
-            child: Container(
-              color: ColorDark.bg3,
-              height: 120,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: DesignValues.ultraSmallPadding,
-                  bottom: DesignValues.ultraSmallPadding,
-                  left: DesignValues.ultraSmallPadding,
-                ),
-                child: RawScrollbar(
-                  thickness: DesignValues.smallPadding,
-                  trackVisibility: false,
-                  thumbVisibility: true,
-                  radius: Radius.circular(DesignValues.smallBorderRadius),
-                  controller: transcodePresetScrollController,
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final transcodingPresets = ref.watch(
-                        settingsProvider.select(
-                          (settings) => settings.transcodingPresets,
-                        ),
-                      );
-                      return ListView.builder(
-                        controller: transcodePresetScrollController,
-                        itemCount: transcodingPresets.length,
-                        itemBuilder: (context, index) {
-                          return _PresetItem(preset: transcodingPresets[index]);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: DesignValues.largePadding),
-          Row(
-            children: [
-              Text(
-                'Luts',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text0,
-                ),
-              ),
-              SizedBox(width: DesignValues.smallPadding),
-              Consumer(
-                builder: (context, ref, child) {
-                  return CustomIconButton(
-                    iconData: Icons.add_circle_outline,
-                    onPressed: () async {
-                      final result = await showDialog(
-                        context: context,
-                        builder: (context) {
-                          return _EditLutDialog(lut: Lut());
-                        },
-                      );
-                      if (result != null) {
-                        await ref
-                            .read(settingsProvider.notifier)
-                            .addLut(result);
-                      }
-                    },
-                    iconSize: DesignValues.mediumIconSize,
-                    buttonSize: 28,
-                    hoverColor: ColorDark.defaultHover,
-                    focusColor: ColorDark.defaultActive,
-                    iconColor: ColorDark.text0,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: DesignValues.ultraSmallPadding),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(DesignValues.smallBorderRadius),
-            child: Container(
-              color: ColorDark.bg3,
-              height: 120,
-              child: Padding(
-                padding: EdgeInsets.only(
-                  top: DesignValues.ultraSmallPadding,
-                  bottom: DesignValues.ultraSmallPadding,
-                  left: DesignValues.ultraSmallPadding,
-                ),
-                child: RawScrollbar(
-                  thickness: DesignValues.smallPadding,
-                  trackVisibility: false,
-                  thumbVisibility: true,
-                  radius: Radius.circular(DesignValues.smallBorderRadius),
-                  controller: lutScrollController,
-                  child: Consumer(
-                    builder: (context, ref, child) {
-                      final luts = ref.watch(settingsProvider).luts;
-                      return ListView.builder(
-                        controller: lutScrollController,
-                        itemCount: luts.length,
-                        itemBuilder: (context, index) {
-                          return _LutItem(lut: luts[index]);
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-          ),
-          SizedBox(height: DesignValues.largePadding),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Debug Mode:',
-                  style: SemiTextStyles.header4ENRegular.copyWith(
-                    color: ColorDark.text1,
-                  ),
-                ),
-              ),
-              Consumer(
-                builder: (context, ref, child) {
-                  return Switch(
-                    value: ref.watch(settingsProvider).isDebugMode,
-                    onChanged: (value) {
-                      ref.read(settingsProvider.notifier).setIsDebugMode(value);
-                    },
-                    activeTrackColor: ColorDark.blue5,
-                    activeThumbColor: ColorDark.white,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: DesignValues.ultraSmallPadding),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Export Command Only:',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: SemiTextStyles.header4ENRegular.copyWith(
-                    color: ColorDark.text1,
-                  ),
-                ),
-              ),
-              Consumer(
-                builder: (context, ref, child) {
-                  return Switch(
-                    value: ref.watch(settingsProvider).exportCmdOnly,
-                    onChanged: (value) {
-                      ref
-                          .read(settingsProvider.notifier)
-                          .setExportCmdOnly(value);
-                    },
-                    activeTrackColor: ColorDark.blue5,
-                    activeThumbColor: ColorDark.white,
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: DesignValues.smallPadding),
-          Theme(
-            data: Theme.of(context).copyWith(
-              dividerColor: Colors.transparent,
-              splashColor: Colors.transparent,
-            ),
-            child: Material(
-              type: MaterialType.transparency,
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.zero,
-                childrenPadding: EdgeInsets.fromLTRB(
-                  DesignValues.smallPadding,
-                  0,
-                  DesignValues.smallPadding,
-                  DesignValues.mediumPadding,
-                ),
-                iconColor: ColorDark.text1,
-                collapsedIconColor: ColorDark.text1,
-                title: Text(
-                  'Advanced',
+            Row(
+              children: [
+                Text(
+                  'Transcode Presets',
                   style: SemiTextStyles.header4ENRegular.copyWith(
                     color: ColorDark.text0,
                   ),
                 ),
-                children: const [_FFmpegSettingsPanel()],
-              ),
+                SizedBox(width: DesignValues.smallPadding),
+                Consumer(
+                  builder: (context, ref, child) {
+                    return CustomIconButton(
+                      iconData: Icons.add_circle_outline,
+                      onPressed: () async {
+                        final result = await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _EditTranscodePresetDialog(
+                              preset: TranscodePreset(),
+                            );
+                          },
+                        );
+                        if (result != null) {
+                          await ref
+                              .read(settingsProvider.notifier)
+                              .addTranscodePreset(result);
+                        }
+                      },
+                      iconSize: DesignValues.mediumIconSize,
+                      buttonSize: 28,
+                      hoverColor: ColorDark.defaultHover,
+                      focusColor: ColorDark.defaultActive,
+                      iconColor: ColorDark.text0,
+                    );
+                  },
+                ),
+              ],
             ),
-          ),
-          SizedBox(height: DesignValues.smallPadding),
-          Row(
-            children: [
-              Text(
-                'Version:',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text1,
+            SizedBox(height: DesignValues.ultraSmallPadding),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(
+                DesignValues.smallBorderRadius,
+              ),
+              child: Container(
+                color: ColorDark.bg3,
+                height: 120,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: DesignValues.ultraSmallPadding,
+                    bottom: DesignValues.ultraSmallPadding,
+                    left: DesignValues.ultraSmallPadding,
+                  ),
+                  child: RawScrollbar(
+                    thickness: DesignValues.smallPadding,
+                    trackVisibility: false,
+                    thumbVisibility: true,
+                    radius: Radius.circular(DesignValues.smallBorderRadius),
+                    controller: transcodePresetScrollController,
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final transcodingPresets = ref.watch(
+                          settingsProvider.select(
+                            (settings) => settings.transcodingPresets,
+                          ),
+                        );
+                        return ListView.builder(
+                          controller: transcodePresetScrollController,
+                          itemCount: transcodingPresets.length,
+                          itemBuilder: (context, index) {
+                            return _PresetItem(
+                              preset: transcodingPresets[index],
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ),
               ),
-              const Spacer(),
-              Consumer(
-                builder: (context, ref, child) {
-                  return Text(
-                    ref.watch(settingsProvider).appVersion,
+            ),
+            SizedBox(height: DesignValues.largePadding),
+            Row(
+              children: [
+                Text(
+                  'Luts',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text0,
+                  ),
+                ),
+                SizedBox(width: DesignValues.smallPadding),
+                Consumer(
+                  builder: (context, ref, child) {
+                    return CustomIconButton(
+                      iconData: Icons.add_circle_outline,
+                      onPressed: () async {
+                        final result = await showDialog(
+                          context: context,
+                          builder: (context) {
+                            return _EditLutDialog(lut: Lut());
+                          },
+                        );
+                        if (result != null) {
+                          await ref
+                              .read(settingsProvider.notifier)
+                              .addLut(result);
+                        }
+                      },
+                      iconSize: DesignValues.mediumIconSize,
+                      buttonSize: 28,
+                      hoverColor: ColorDark.defaultHover,
+                      focusColor: ColorDark.defaultActive,
+                      iconColor: ColorDark.text0,
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: DesignValues.ultraSmallPadding),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(
+                DesignValues.smallBorderRadius,
+              ),
+              child: Container(
+                color: ColorDark.bg3,
+                height: 120,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    top: DesignValues.ultraSmallPadding,
+                    bottom: DesignValues.ultraSmallPadding,
+                    left: DesignValues.ultraSmallPadding,
+                  ),
+                  child: RawScrollbar(
+                    thickness: DesignValues.smallPadding,
+                    trackVisibility: false,
+                    thumbVisibility: true,
+                    radius: Radius.circular(DesignValues.smallBorderRadius),
+                    controller: lutScrollController,
+                    child: Consumer(
+                      builder: (context, ref, child) {
+                        final luts = ref.watch(settingsProvider).luts;
+                        return ListView.builder(
+                          controller: lutScrollController,
+                          itemCount: luts.length,
+                          itemBuilder: (context, index) {
+                            return _LutItem(lut: luts[index]);
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: DesignValues.largePadding),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Debug Mode:',
+                    style: SemiTextStyles.header4ENRegular.copyWith(
+                      color: ColorDark.text1,
+                    ),
+                  ),
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    return Switch(
+                      value: ref.watch(settingsProvider).isDebugMode,
+                      onChanged: (value) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setIsDebugMode(value);
+                      },
+                      activeTrackColor: ColorDark.blue5,
+                      activeThumbColor: ColorDark.white,
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: DesignValues.ultraSmallPadding),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Export Command Only:',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SemiTextStyles.header4ENRegular.copyWith(
+                      color: ColorDark.text1,
+                    ),
+                  ),
+                ),
+                Consumer(
+                  builder: (context, ref, child) {
+                    return Switch(
+                      value: ref.watch(settingsProvider).exportCmdOnly,
+                      onChanged: (value) {
+                        ref
+                            .read(settingsProvider.notifier)
+                            .setExportCmdOnly(value);
+                      },
+                      activeTrackColor: ColorDark.blue5,
+                      activeThumbColor: ColorDark.white,
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: DesignValues.smallPadding),
+            Theme(
+              data: Theme.of(context).copyWith(
+                dividerColor: Colors.transparent,
+                splashColor: Colors.transparent,
+              ),
+              child: Material(
+                type: MaterialType.transparency,
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  childrenPadding: EdgeInsets.fromLTRB(
+                    DesignValues.smallPadding,
+                    0,
+                    DesignValues.smallPadding,
+                    DesignValues.mediumPadding,
+                  ),
+                  iconColor: ColorDark.text1,
+                  collapsedIconColor: ColorDark.text1,
+                  title: Text(
+                    'Advanced',
                     style: SemiTextStyles.header4ENRegular.copyWith(
                       color: ColorDark.text0,
                     ),
-                  );
-                },
-              ),
-            ],
-          ),
-          SizedBox(height: DesignValues.mediumPadding),
-          Row(
-            children: [
-              Text(
-                'Author:',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text1,
+                  ),
+                  children: const [_FFmpegSettingsPanel()],
                 ),
               ),
-              const Spacer(),
-              Text(
-                'lz00qs',
-                style: SemiTextStyles.header4ENRegular.copyWith(
-                  color: ColorDark.text0,
+            ),
+            SizedBox(height: DesignValues.smallPadding),
+            Row(
+              children: [
+                Text(
+                  'Version:',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const Spacer(),
+                Consumer(
+                  builder: (context, ref, child) {
+                    return Text(
+                      ref.watch(settingsProvider).appVersion,
+                      style: SemiTextStyles.header4ENRegular.copyWith(
+                        color: ColorDark.text0,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
+            Row(
+              children: [
+                Text(
+                  'Author:',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'lz00qs',
+                  style: SemiTextStyles.header4ENRegular.copyWith(
+                    color: ColorDark.text0,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -367,8 +375,9 @@ class _FFmpegSettingsPanelState extends ConsumerState<_FFmpegSettingsPanel> {
       _isApplying = false;
       _errorMessage = error;
       if (error == null) {
-        _directoryController.text =
-            ref.read(settingsProvider).customFFmpegDirectory;
+        _directoryController.text = ref
+            .read(settingsProvider)
+            .customFFmpegDirectory;
       }
     });
   }
@@ -378,9 +387,7 @@ class _FFmpegSettingsPanelState extends ConsumerState<_FFmpegSettingsPanel> {
       _isApplying = true;
       _errorMessage = null;
     });
-    final error = await ref
-        .read(settingsProvider.notifier)
-        .useBundledFFmpeg();
+    final error = await ref.read(settingsProvider.notifier).useBundledFFmpeg();
     if (!mounted) return;
     setState(() {
       _isApplying = false;
@@ -828,6 +835,10 @@ class _EditLutDialogNotifier extends _$EditLutDialogNotifier {
       final v = nameController.text;
       state = state.copyWith(name: v);
     });
+    ref.onDispose(() {
+      nameController.dispose();
+      pathScrollController.dispose();
+    });
     return Lut(id: lut.id, name: lut.name, path: lut.path);
   }
 
@@ -880,69 +891,71 @@ class _EditLutDialog extends ConsumerWidget {
       onOption2Pressed: () {
         Navigator.of(context).pop(item);
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Lut name',
-            style: SemiTextStyles.header5ENRegular.copyWith(
-              color: ColorDark.text1,
-            ),
-          ),
-          SizedBox(
-            height: 72,
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                textSelectionTheme: TextSelectionThemeData(
-                  selectionColor: ColorDark.blue5.withAlpha(
-                    (0.8 * 255).round(),
-                  ),
-                ),
-              ),
-              child: TextField(
-                maxLength: 24,
-                controller: notifier.nameController,
-                cursorColor: ColorDark.text1,
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text0,
-                ),
-                decoration: dialogInputDecoration.copyWith(
-                  errorText: notifier.isNameValid ? null : 'Name is required',
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Lut name',
+              style: SemiTextStyles.header5ENRegular.copyWith(
+                color: ColorDark.text1,
               ),
             ),
-          ),
-          if (isAdd) ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Select lut file',
-                  style: SemiTextStyles.header5ENRegular.copyWith(
-                    color: ColorDark.text1,
+            SizedBox(
+              height: 72,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  textSelectionTheme: TextSelectionThemeData(
+                    selectionColor: ColorDark.blue5.withAlpha(
+                      (0.8 * 255).round(),
+                    ),
                   ),
                 ),
-                _ItemButton(
-                  iconData: Icons.folder_open,
-                  onPressed: notifier.pickLutFile,
-                ),
-              ],
-            ),
-            Scrollbar(
-              controller: notifier.pathScrollController,
-              child: SingleChildScrollView(
-                controller: notifier.pathScrollController,
-                scrollDirection: Axis.horizontal,
-                child: Text(
-                  item.path.split('/').last,
+                child: TextField(
+                  maxLength: 24,
+                  controller: notifier.nameController,
+                  cursorColor: ColorDark.text1,
                   style: SemiTextStyles.header5ENRegular.copyWith(
                     color: ColorDark.text0,
                   ),
+                  decoration: dialogInputDecoration.copyWith(
+                    errorText: notifier.isNameValid ? null : 'Name is required',
+                  ),
                 ),
               ),
             ),
+            if (isAdd) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Select lut file',
+                    style: SemiTextStyles.header5ENRegular.copyWith(
+                      color: ColorDark.text1,
+                    ),
+                  ),
+                  _ItemButton(
+                    iconData: Icons.folder_open,
+                    onPressed: notifier.pickLutFile,
+                  ),
+                ],
+              ),
+              Scrollbar(
+                controller: notifier.pathScrollController,
+                child: SingleChildScrollView(
+                  controller: notifier.pathScrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Text(
+                    item.path.split('/').last,
+                    style: SemiTextStyles.header5ENRegular.copyWith(
+                      color: ColorDark.text0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -981,6 +994,12 @@ class _EditTranscodePresetDialogNotifier
     crfController.addListener(() {
       final v = int.tryParse(crfController.text) ?? 0;
       state = state.copyWith(crf: v);
+    });
+    ref.onDispose(() {
+      nameController.dispose();
+      widthController.dispose();
+      heightController.dispose();
+      crfController.dispose();
     });
     return TranscodePreset(
       id: preset.id,
@@ -1050,258 +1069,264 @@ class _EditTranscodePresetDialog extends ConsumerWidget {
       onOption2Pressed: () {
         Navigator.of(context).pop(item);
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Preset name',
-            style: SemiTextStyles.header5ENRegular.copyWith(
-              color: ColorDark.text1,
-            ),
-          ),
-          SizedBox(
-            height: 72,
-            child: Theme(
-              data: Theme.of(context).copyWith(
-                textSelectionTheme: TextSelectionThemeData(
-                  selectionColor: ColorDark.blue5.withAlpha(
-                    (0.8 * 255).round(),
-                  ),
-                ),
-              ),
-              child: TextField(
-                maxLength: 24,
-                cursorColor: ColorDark.text1,
-                controller: notifier.nameController,
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text0,
-                ),
-                decoration: dialogInputDecoration.copyWith(
-                  errorText: notifier.isNameValid ? null : 'Name is required',
-                ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Preset name',
+              style: SemiTextStyles.header5ENRegular.copyWith(
+                color: ColorDark.text1,
               ),
             ),
-          ),
-          SizedBox(height: DesignValues.smallPadding),
-          DialogCheckBoxWithText(
-            text: 'Use Input Resolution',
-            value: item.useInputResolution,
-            onPressed: () {
-              notifier.toggleUseInputResolution();
-            },
-          ),
-          SizedBox(height: DesignValues.mediumPadding),
-          Builder(
-            builder: (BuildContext context) {
-              if (item.useInputResolution) {
-                return const SizedBox();
-              } else {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Width',
-                      style: SemiTextStyles.header5ENRegular.copyWith(
-                        color: ColorDark.text1,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 72,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: ColorDark.blue5.withAlpha(
-                              (0.8 * 255).round(),
-                            ),
-                          ),
-                        ),
-                        child: TextField(
-                          cursorColor: ColorDark.text1,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          controller: notifier.widthController,
-                          style: SemiTextStyles.header5ENRegular.copyWith(
-                            color: ColorDark.text0,
-                          ),
-                          decoration: dialogInputDecoration.copyWith(
-                            errorText: notifier.isWidthValid
-                                ? null
-                                : 'Width cannot be 0',
-                          ),
-                        ),
-                      ),
-                    ),
-                    Text(
-                      'Height',
-                      style: SemiTextStyles.header5ENRegular.copyWith(
-                        color: ColorDark.text1,
-                      ),
-                    ),
-                    SizedBox(
-                      height: 72,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: ColorDark.blue5.withAlpha(
-                              (0.8 * 255).round(),
-                            ),
-                          ),
-                        ),
-                        child: TextField(
-                          cursorColor: ColorDark.text1,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          controller: notifier.heightController,
-                          style: SemiTextStyles.header5ENRegular.copyWith(
-                            color: ColorDark.text0,
-                          ),
-                          decoration: dialogInputDecoration.copyWith(
-                            errorText: notifier.isHeightValid
-                                ? null
-                                : 'Height cannot be 0',
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              }
-            },
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'CRF',
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text1,
-                ),
-              ),
-              SizedBox(
-                height: 72,
-                child: Theme(
-                  data: Theme.of(context).copyWith(
-                    textSelectionTheme: TextSelectionThemeData(
-                      selectionColor: ColorDark.blue5.withAlpha(
-                        (0.8 * 255).round(),
-                      ),
-                    ),
-                  ),
-                  child: TextField(
-                    cursorColor: ColorDark.text1,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    controller: notifier.crfController,
-                    style: SemiTextStyles.header5ENRegular.copyWith(
-                      color: ColorDark.text0,
-                    ),
-                    decoration: dialogInputDecoration.copyWith(
-                      errorText: notifier.isCrfValid
-                          ? null
-                          : 'CRF must be between 0 and 51, higher is lower quality.',
+            SizedBox(
+              height: 72,
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  textSelectionTheme: TextSelectionThemeData(
+                    selectionColor: ColorDark.blue5.withAlpha(
+                      (0.8 * 255).round(),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(width: DesignValues.smallPadding),
-          DialogCheckBoxWithText(
-            text: 'Use H.265',
-            value: item.useHevc,
-            onPressed: () {
-              notifier.toggleUseHevc();
-            },
-          ),
-          SizedBox(height: DesignValues.smallPadding),
-          Row(
-            children: [
-              Text(
-                "FFmpeg Preset:",
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text1,
-                ),
-              ),
-              const Spacer(),
-              DropdownButton<FFmpegPreset>(
-                value: item.ffmpegPreset,
-                focusColor: ColorDark.defaultActive,
-                dropdownColor: ColorDark.bg2,
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text0,
-                ),
-                items: FFmpegPreset.values
-                    .map(
-                      (e) => DropdownMenuItem<FFmpegPreset>(
-                        value: e,
-                        child: Text(e.name),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    notifier.setFfmpegPreset(value);
-                  }
-                },
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              Text(
-                "LUT:",
-                style: SemiTextStyles.header5ENRegular.copyWith(
-                  color: ColorDark.text1,
-                ),
-              ),
-              SizedBox(width: DesignValues.largePadding),
-              Expanded(
-                child: DropdownButton<Lut>(
-                  value: ref.watch(
-                    settingsProvider.select(
-                      (s) => s.luts.firstWhere(
-                        (element) => element.id == item.lutId,
-                        orElse: () => noneLut,
-                      ),
-                    ),
-                  ),
-                  itemHeight: null,
-                  isExpanded: true,
-                  focusColor: ColorDark.defaultActive,
-                  dropdownColor: ColorDark.bg2,
+                child: TextField(
+                  maxLength: 24,
+                  cursorColor: ColorDark.text1,
+                  controller: notifier.nameController,
                   style: SemiTextStyles.header5ENRegular.copyWith(
                     color: ColorDark.text0,
                   ),
-                  items: [
-                    DropdownMenuItem<Lut>(
-                      value: noneLut,
-                      child: Text(noneLut.name),
+                  decoration: dialogInputDecoration.copyWith(
+                    errorText: notifier.isNameValid ? null : 'Name is required',
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: DesignValues.smallPadding),
+            DialogCheckBoxWithText(
+              text: 'Use Input Resolution',
+              value: item.useInputResolution,
+              onPressed: () {
+                notifier.toggleUseInputResolution();
+              },
+            ),
+            SizedBox(height: DesignValues.mediumPadding),
+            Builder(
+              builder: (BuildContext context) {
+                if (item.useInputResolution) {
+                  return const SizedBox();
+                } else {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Width',
+                        style: SemiTextStyles.header5ENRegular.copyWith(
+                          color: ColorDark.text1,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 72,
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            textSelectionTheme: TextSelectionThemeData(
+                              selectionColor: ColorDark.blue5.withAlpha(
+                                (0.8 * 255).round(),
+                              ),
+                            ),
+                          ),
+                          child: TextField(
+                            cursorColor: ColorDark.text1,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            controller: notifier.widthController,
+                            style: SemiTextStyles.header5ENRegular.copyWith(
+                              color: ColorDark.text0,
+                            ),
+                            decoration: dialogInputDecoration.copyWith(
+                              errorText: notifier.isWidthValid
+                                  ? null
+                                  : 'Width cannot be 0',
+                            ),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Height',
+                        style: SemiTextStyles.header5ENRegular.copyWith(
+                          color: ColorDark.text1,
+                        ),
+                      ),
+                      SizedBox(
+                        height: 72,
+                        child: Theme(
+                          data: Theme.of(context).copyWith(
+                            textSelectionTheme: TextSelectionThemeData(
+                              selectionColor: ColorDark.blue5.withAlpha(
+                                (0.8 * 255).round(),
+                              ),
+                            ),
+                          ),
+                          child: TextField(
+                            cursorColor: ColorDark.text1,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: <TextInputFormatter>[
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            controller: notifier.heightController,
+                            style: SemiTextStyles.header5ENRegular.copyWith(
+                              color: ColorDark.text0,
+                            ),
+                            decoration: dialogInputDecoration.copyWith(
+                              errorText: notifier.isHeightValid
+                                  ? null
+                                  : 'Height cannot be 0',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                }
+              },
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'CRF',
+                  style: SemiTextStyles.header5ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
+                ),
+                SizedBox(
+                  height: 72,
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      textSelectionTheme: TextSelectionThemeData(
+                        selectionColor: ColorDark.blue5.withAlpha(
+                          (0.8 * 255).round(),
+                        ),
+                      ),
                     ),
-                    ...ref
-                        .watch(settingsProvider.select((s) => s.luts))
+                    child: TextField(
+                      cursorColor: ColorDark.text1,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
+                      controller: notifier.crfController,
+                      style: SemiTextStyles.header5ENRegular.copyWith(
+                        color: ColorDark.text0,
+                      ),
+                      decoration: dialogInputDecoration.copyWith(
+                        errorText: notifier.isCrfValid
+                            ? null
+                            : 'CRF must be between 0 and 51, higher is lower quality.',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(width: DesignValues.smallPadding),
+            DialogCheckBoxWithText(
+              text: 'Use H.265',
+              value: item.useHevc,
+              onPressed: () {
+                notifier.toggleUseHevc();
+              },
+            ),
+            SizedBox(height: DesignValues.smallPadding),
+            Row(
+              children: [
+                Text(
+                  "FFmpeg Preset:",
+                  style: SemiTextStyles.header5ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: 160,
+                  child: DropdownButton<FFmpegPreset>(
+                    isExpanded: true,
+                    value: item.ffmpegPreset,
+                    focusColor: ColorDark.defaultActive,
+                    dropdownColor: ColorDark.bg2,
+                    style: SemiTextStyles.header5ENRegular.copyWith(
+                      color: ColorDark.text0,
+                    ),
+                    items: FFmpegPreset.values
                         .map(
-                          (e) => DropdownMenuItem<Lut>(
+                          (e) => DropdownMenuItem<FFmpegPreset>(
                             value: e,
                             child: Text(e.name),
                           ),
-                        ),
-                  ],
-                  onChanged: (value) {
-                    if (value == null) return;
-                    notifier.setLut(value.id);
-                  },
+                        )
+                        .toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        notifier.setFfmpegPreset(value);
+                      }
+                    },
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+            Row(
+              children: [
+                Text(
+                  "LUT:",
+                  style: SemiTextStyles.header5ENRegular.copyWith(
+                    color: ColorDark.text1,
+                  ),
+                ),
+                SizedBox(width: DesignValues.largePadding),
+                Expanded(
+                  child: DropdownButton<Lut>(
+                    value: ref.watch(
+                      settingsProvider.select(
+                        (s) => s.luts.firstWhere(
+                          (element) => element.id == item.lutId,
+                          orElse: () => noneLut,
+                        ),
+                      ),
+                    ),
+                    itemHeight: null,
+                    isExpanded: true,
+                    focusColor: ColorDark.defaultActive,
+                    dropdownColor: ColorDark.bg2,
+                    style: SemiTextStyles.header5ENRegular.copyWith(
+                      color: ColorDark.text0,
+                    ),
+                    items: [
+                      DropdownMenuItem<Lut>(
+                        value: noneLut,
+                        child: Text(noneLut.name),
+                      ),
+                      ...ref
+                          .watch(settingsProvider.select((s) => s.luts))
+                          .map(
+                            (e) => DropdownMenuItem<Lut>(
+                              value: e,
+                              child: Text(e.name),
+                            ),
+                          ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
+                      notifier.setLut(value.id);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

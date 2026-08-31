@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -11,6 +10,7 @@ import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/models/settings.model.dart';
 import 'package:xji_footage_toolbox/models/video_task.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
+import 'package:xji_footage_toolbox/services/video_export_builder.dart';
 import 'package:xji_footage_toolbox/ui/dialogs/settings_dialog.dart';
 import 'package:xji_footage_toolbox/ui/panels/video_trimmer_panel.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
@@ -83,8 +83,11 @@ class _VideoExportDialogNotifier extends _$VideoExportDialogNotifier {
   void toggleUseSameDirectory() {
     state = state.copyWith(
       useSameDirectory: !state.useSameDirectory,
-      isOutputPathValid: _isOutputPathValid(state.outputFileName,
-          !state.useSameDirectory, state.selectedDirectory),
+      isOutputPathValid: _isOutputPathValid(
+        state.outputFileName,
+        !state.useSameDirectory,
+        state.selectedDirectory,
+      ),
     );
   }
 
@@ -100,45 +103,40 @@ class _VideoExportDialogNotifier extends _$VideoExportDialogNotifier {
 
   void setSelectedDirectory(String dir) {
     state = state.copyWith(
-        selectedDirectory: dir,
-        isOutputPathValid: _isOutputPathValid(
-            state.outputFileName, state.useSameDirectory, dir));
+      selectedDirectory: dir,
+      isOutputPathValid: _isOutputPathValid(
+        state.outputFileName,
+        state.useSameDirectory,
+        dir,
+      ),
+    );
   }
 
   void setOutputFileName(String name) {
     state = state.copyWith(
-        outputFileName: name,
-        isOutputPathValid: _isOutputPathValid(
-            name, state.useSameDirectory, state.selectedDirectory));
-  }
-
-  bool _fileExists(
-    String name,
-    bool useSameDir,
-    String customDir,
-  ) {
-    final dir = useSameDir
-        ? ref.watch(mediaResourcesStateProvider).resourcesPath
-        : customDir;
-    return isFileExist('$dir/$name.MP4');
+      outputFileName: name,
+      isOutputPathValid: _isOutputPathValid(
+        name,
+        state.useSameDirectory,
+        state.selectedDirectory,
+      ),
+    );
   }
 
   bool _isOutputPathValid(String name, bool useSameDir, String customDir) {
-    if (name.isEmpty) {
-      return false;
-    }
-    // 检查是否存在非法字符
-    if (name.contains(RegExp(r'[\\/:*?"<>|]'))) {
-      return false;
-    }
-    return !_fileExists(name, useSameDir, customDir);
+    final dir = useSameDir
+        ? ref.watch(mediaResourcesStateProvider).resourcesPath
+        : customDir;
+    return isValidVideoOutputName(
+      name,
+      directory: dir,
+      fileExists: isFileExist,
+    );
   }
 }
 
 String _getDefaultOutputFileName(String originalFileName) {
-  final lastDotIndex = originalFileName.lastIndexOf('.');
-  final baseName = originalFileName.substring(0, lastDotIndex);
-  return '${baseName}_OUTPUT';
+  return defaultVideoOutputFileName(originalFileName);
 }
 
 // String _get4DigitRandomString() {
@@ -146,37 +144,53 @@ String _getDefaultOutputFileName(String originalFileName) {
 //   return random.nextInt(10000).toString().padLeft(4, '0');
 // }
 
-Duration _getOutputDuration(
-    {required VideoTaskType taskType, required WidgetRef ref}) {
-  var duration = const Duration(seconds: 0);
-  switch (taskType) {
-    case VideoTaskType.merge:
-      for (final element in ref.watch(mediaResourcesStateProvider
-          .select((state) => state.selectedResources))) {
-        final videoResource = element as VideoResource;
-        duration += videoResource.duration;
-      }
-      break;
-    case VideoTaskType.trim:
-      final cutState = ref.watch(videoCutProvider);
-      if (cutState.cutStart != Duration.zero ||
-          cutState.cutEnd != Duration.zero) {
-        duration = cutState.cutEnd - cutState.cutStart;
-      } else {
-        duration = (ref.watch(mediaResourcesStateProvider.select(
-                    (state) => state.resources[state.currentResourceIndex]))
-                as VideoResource)
-            .duration;
-      }
-      break;
-    case VideoTaskType.transcode:
-      duration = (ref.watch(mediaResourcesStateProvider.select(
-                  (state) => state.resources[state.currentResourceIndex]))
-              as VideoResource)
-          .duration;
-      break;
+Duration _getOutputDuration({
+  required VideoTaskType taskType,
+  required WidgetRef ref,
+  required VideoResource videoResource,
+}) {
+  final mediaState = ref.watch(mediaResourcesStateProvider);
+  final cutState = ref.watch(videoCutProvider);
+  return videoOutputDuration(
+    taskType: taskType,
+    videoResource: videoResource,
+    selectedResources: mediaState.selectedResources
+        .whereType<VideoResource>()
+        .toList(growable: false),
+    cutStart: cutState.cutStart,
+    cutEnd: cutState.cutEnd,
+  );
+}
+
+Future<bool> _writeVideoExportPlan(VideoExportPlan plan) async {
+  final artifactPaths = [
+    if (plan.concatFilePath != null) plan.concatFilePath!,
+    if (plan.commandFilePath != null) plan.commandFilePath!,
+  ];
+  for (final path in artifactPaths) {
+    if (File(path).existsSync()) {
+      final message = 'Export helper file $path already exists.';
+      Logger.error(message);
+      Toast.error(message);
+      return false;
+    }
   }
-  return duration;
+
+  try {
+    if (plan.concatFilePath != null) {
+      await File(plan.concatFilePath!).writeAsString(plan.concatFileContents!);
+    }
+    if (plan.commandFilePath != null) {
+      await File(
+        plan.commandFilePath!,
+      ).writeAsString(plan.commandFileContents!);
+    }
+    return true;
+  } on FileSystemException catch (error) {
+    Logger.error('Failed to write export helper file: $error');
+    Toast.error('Failed to write export helper file.');
+    return false;
+  }
 }
 
 class _OutputInfoItem extends StatelessWidget {
@@ -189,13 +203,21 @@ class _OutputInfoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(keyText,
-            style: SemiTextStyles.header6ENRegular.copyWith(
-                color: ColorDark.text1, overflow: TextOverflow.ellipsis)),
+        Text(
+          keyText,
+          style: SemiTextStyles.header6ENRegular.copyWith(
+            color: ColorDark.text1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         const Spacer(),
-        Text(valueText,
-            style: SemiTextStyles.header6ENRegular.copyWith(
-                color: ColorDark.text0, overflow: TextOverflow.ellipsis)),
+        Text(
+          valueText,
+          style: SemiTextStyles.header6ENRegular.copyWith(
+            color: ColorDark.text0,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
@@ -208,23 +230,31 @@ class _MergeFileListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text('Merge files:',
-          style:
-              SemiTextStyles.header6ENRegular.copyWith(color: ColorDark.text1)),
-      SizedBox(
-        height: DesignValues.smallPadding,
-      ),
-      Expanded(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Merge files:',
+          style: SemiTextStyles.header6ENRegular.copyWith(
+            color: ColorDark.text1,
+          ),
+        ),
+        SizedBox(height: DesignValues.smallPadding),
+        Expanded(
           child: ListView.builder(
-        itemBuilder: (context, index) {
-          return Text(videoResources[index].name,
-              style: SemiTextStyles.header6ENRegular
-                  .copyWith(color: ColorDark.text0));
-        },
-        itemCount: videoResources.length,
-      )),
-    ]);
+            itemBuilder: (context, index) {
+              return Text(
+                videoResources[index].name,
+                style: SemiTextStyles.header6ENRegular.copyWith(
+                  color: ColorDark.text0,
+                ),
+              );
+            },
+            itemCount: videoResources.length,
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -232,482 +262,361 @@ class VideoExportDialog extends ConsumerWidget {
   final VideoTaskType taskType;
   final VideoResource videoResource;
 
-  const VideoExportDialog(
-      {super.key, required this.taskType, required this.videoResource});
+  const VideoExportDialog({
+    super.key,
+    required this.taskType,
+    required this.videoResource,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(_videoExportDialogProvider(
+    final state = ref.watch(
+      _videoExportDialogProvider(
         ref.watch(settingsProvider),
-        _getDefaultOutputFileName(videoResource.name)));
-    final notifier = ref.read(_videoExportDialogProvider(
-            ref.watch(settingsProvider),
-            _getDefaultOutputFileName(videoResource.name))
-        .notifier);
-
-    Future<void> exportCmdToFile(String id, String taskName, String random,
-        List<String> ffmpegArgs) async {
-      // 文件名为 taskName_id后的4位随机数
-      final cmdFileName =
-          '${taskName.substring(0, taskName.length - 4)}_$random.txt';
-      final cmdFile = File('${videoResource.file.parent.path}/$cmdFileName');
-      if (cmdFile.existsSync()) {
-        Logger.error('Cmd File $cmdFileName already exists.');
-        Toast.error('Cmd File $cmdFileName already exists.');
-        return;
-      }
-      await cmdFile.create();
-      await cmdFile.writeAsString('ffmpeg ');
-      for (final arg in ffmpegArgs) {
-        await cmdFile.writeAsString('$arg ', mode: FileMode.append);
-      }
-    }
+        _getDefaultOutputFileName(videoResource.name),
+      ),
+    );
+    final notifier = ref.read(
+      _videoExportDialogProvider(
+        ref.watch(settingsProvider),
+        _getDefaultOutputFileName(videoResource.name),
+      ).notifier,
+    );
 
     final exportCmdOnly = ref.watch(settingsProvider).exportCmdOnly;
 
     return DualOptionDialog(
-        width: 480,
-        height: 680,
-        title: 'Export',
-        option1: 'Cancel',
-        option2: 'Export',
-        disableOption2: !state.isOutputPathValid,
-        onOption1Pressed: () {
-          Navigator.pop(context);
-        },
-        onOption2Pressed: () async {
-          if (state.isOutputPathValid) {
-            final taskId = const Uuid().v4();
-            final random4Digit = taskId.substring(taskId.length - 4);
-            final taskName = '${state.outputFileName}.MP4';
-            late final String outputFilePath;
-            if (exportCmdOnly) {
-              outputFilePath = '${state.outputFileName}.MP4';
-            } else if (state.useSameDirectory) {
-              outputFilePath =
-                  '${videoResource.file.parent.path}/${state.outputFileName}.MP4';
-            } else {
-              outputFilePath =
-                  '${state.selectedDirectory}/${state.outputFileName}.MP4';
-            }
-            final preset = ref.watch(settingsProvider.select((s) => s
-                .transcodingPresets
-                .firstWhere((e) => e.id == state.transcodePresetId)));
-            if (taskType == VideoTaskType.merge) {
-              final List<String> ffmpegArgs = [];
-              final inputFilesTxtPath =
-                  '${videoResource.file.parent.path}/.${state.outputFileName}_'
-                  '$random4Digit.txt';
-              final inputFilesTxtFile = File(inputFilesTxtPath);
-              if (inputFilesTxtFile.existsSync()) {
-                Logger.error(
-                    'Input Files Txt File $inputFilesTxtPath already exists.');
-                Toast.error(
-                    'Input Files Txt File $inputFilesTxtPath already exists.');
-                return;
-              }
-              await inputFilesTxtFile.writeAsString(ref
-                  .watch(mediaResourcesStateProvider
-                      .select((m) => m.selectedResources))
-                  .map((e) => 'file \'${e.file.path}\'')
-                  .join('\n'));
-              ffmpegArgs.add('-f');
-              ffmpegArgs.add('concat');
-              ffmpegArgs.add('-safe');
-              ffmpegArgs.add('0');
-              // 如果使用 exportCmdOnly，则使用相对路径
-              if (exportCmdOnly) {
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(inputFilesTxtPath.replaceFirst(
-                    '${videoResource.file.parent.path}/', ''));
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path
-                    .replaceFirst('${videoResource.file.parent.path}/', ''));
-              } else {
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(inputFilesTxtPath);
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path);
-              }
-              ffmpegArgs.add('-map_metadata');
-              ffmpegArgs.add('1');
-              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
-                ffmpegArgs.add('-vf');
-                ffmpegArgs.add(
-                    "lut3d='${ref.watch(settingsProvider.select((s) => s.luts.firstWhere((element) => element.id == preset.lutId))).path}'");
-              }
-              ffmpegArgs.add('-c:v');
-              if (state.useInputEncodeSettings == false) {
-                ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
-                if (preset.useHevc) {
-                  ffmpegArgs.add('-tag:v');
-                  ffmpegArgs.add('hvc1');
-                }
-                ffmpegArgs.add('-crf');
-                ffmpegArgs.add(preset.crf.toString());
-                ffmpegArgs.add('-preset');
-                ffmpegArgs.add(preset.ffmpegPreset.toString().split('.').last);
-                if (preset.useInputResolution == false) {
-                  ffmpegArgs.add('-vf');
-                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
-                }
-              } else {
-                ffmpegArgs.add('copy');
-              }
-              ffmpegArgs.add(outputFilePath);
-              for (final arg in ffmpegArgs) {
-                if (kDebugMode) {
-                  print(arg);
-                }
-              }
+      width: 480,
+      height: 680,
+      title: 'Export',
+      option1: 'Cancel',
+      option2: 'Export',
+      disableOption2: !state.isOutputPathValid,
+      onOption1Pressed: () {
+        Navigator.pop(context);
+      },
+      onOption2Pressed: () async {
+        if (!state.isOutputPathValid) return;
 
-              if (exportCmdOnly) {
-                await exportCmdToFile(
-                    taskId, taskName, random4Digit, ffmpegArgs);
-              }
-
-              final task = VideoTask(
-                id: taskId,
-                name: taskName,
-                status: exportCmdOnly
-                    ? VideoTaskStatus.finished
-                    : VideoTaskStatus.waiting,
-                type: VideoTaskType.merge,
-                ffmpegArgs: ffmpegArgs,
-                duration: _getOutputDuration(taskType: taskType, ref: ref),
-                progress: 0.0,
-                outputPath: outputFilePath,
-                tempFilePaths: [inputFilesTxtPath],
-                logPath: ref.watch(settingsProvider
-                    .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
-              );
-              if (!context.mounted) return;
-              Navigator.of(context).pop(task);
-            } else {
-              // Export single file
-              final List<String> ffmpegArgs = [];
-              if (exportCmdOnly) {
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path
-                    .replaceFirst('${videoResource.file.parent.path}/', ''));
-              } else {
-                ffmpegArgs.add('-i');
-                ffmpegArgs.add(videoResource.file.path);
-              }
-              if (state.useInputEncodeSettings == false && preset.lutId != 0) {
-                final lutPath = ref.watch(settingsProvider.select((s) =>
-                    s.luts.firstWhere((e) => e.id == preset.lutId).path));
-
-                ffmpegArgs.add('-vf');
-                ffmpegArgs.add(
-                  'lut3d=$lutPath,format=yuv420p10le',
-                );
-              }
-              ffmpegArgs.add('-c:v');
-              if (state.useInputEncodeSettings == false) {
-                ffmpegArgs.add(preset.useHevc ? 'libx265' : 'libx264');
-                if (preset.useHevc) {
-                  ffmpegArgs.add('-tag:v');
-                  ffmpegArgs.add('hvc1');
-                }
-                ffmpegArgs.add('-crf');
-                ffmpegArgs.add(preset.crf.toString());
-                ffmpegArgs.add('-preset');
-                ffmpegArgs.add(preset.ffmpegPreset.toString().split('.').last);
-                if (preset.useInputResolution == false) {
-                  ffmpegArgs.add('-vf');
-                  ffmpegArgs.add('scale=${preset.width}:${preset.height}');
-                }
-              } else {
-                ffmpegArgs.add('copy');
-              }
-
-              if (taskType == VideoTaskType.trim) {
-                final videoCutState = ref.watch(videoCutProvider);
-                if (videoCutState.cutStart != Duration.zero ||
-                    videoCutState.cutEnd != Duration.zero) {
-                  ffmpegArgs.add('-ss');
-                  ffmpegArgs.add(videoCutState.cutStart.toString());
-                  ffmpegArgs.add('-to');
-                  ffmpegArgs.add(videoCutState.cutEnd.toString());
-                }
-              }
-              ffmpegArgs.add('-map_metadata');
-              ffmpegArgs.add('0');
-              ffmpegArgs.add(outputFilePath);
-
-              if (exportCmdOnly) {
-                await exportCmdToFile(
-                    taskId, taskName, random4Digit, ffmpegArgs);
-              }
-
-              final task = VideoTask(
-                id: taskId,
-                name: taskName,
-                status: exportCmdOnly
-                    ? VideoTaskStatus.finished
-                    : VideoTaskStatus.waiting,
-                // type: VideoTaskType.trim,
-                type: taskType == VideoTaskType.trim
-                    ? VideoTaskType.trim
-                    : VideoTaskType.transcode,
-                ffmpegArgs: ffmpegArgs,
-                duration: _getOutputDuration(taskType: taskType, ref: ref),
-                progress: 0.0,
-                outputPath: outputFilePath,
-                logPath: ref.watch(settingsProvider
-                    .select((s) => s.isDebugMode ? '$outputFilePath.log' : '')),
-              );
-              if (!context.mounted) return;
-              Navigator.of(context).pop(task);
+        final settings = ref.read(settingsProvider);
+        final preset = settings.transcodingPresets.firstWhere(
+          (item) => item.id == state.transcodePresetId,
+        );
+        Lut? lut;
+        if (preset.lutId != 0) {
+          for (final item in settings.luts) {
+            if (item.id == preset.lutId) {
+              lut = item;
+              break;
             }
           }
-        },
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              exportCmdOnly
-                  ? const SizedBox()
-                  : DialogCheckBoxWithText(
-                      text: 'Use the same directory as source',
-                      value: state.useSameDirectory,
-                      onPressed: () {
-                        // useSameDirectory.value = !useSameDirectory.value;
-                        notifier.toggleUseSameDirectory();
-                      }),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              state.useSameDirectory
-                  ? const SizedBox()
-                  : CustomDialogIconButtonWithText(
-                      iconData: Icons.folder_open,
-                      text: 'Select a output directory',
-                      onPressed: () async {
-                        final result = await FilePicker.getDirectoryPath();
-                        if (result != null) {
-                          notifier.setSelectedDirectory(result);
-                        }
-                      }),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              state.useSameDirectory
-                  ? const SizedBox()
-                  : Theme(
-                      data: Theme.of(context).copyWith(
-                          textSelectionTheme: TextSelectionThemeData(
-                              selectionColor: ColorDark.blue5
-                                  .withAlpha((0.8 * 255).round()))),
-                      child: TextField(
-                        readOnly: true,
-                        cursorColor: ColorDark.text1,
-                        controller: notifier.selectedDirectoryController,
-                        style: SemiTextStyles.header6ENRegular
-                            .copyWith(color: ColorDark.text0),
-                        decoration: dialogInputDecoration,
-                      )),
-              SizedBox(
-                height: DesignValues.ultraSmallPadding,
-              ),
-              Text(
-                'Output file name',
-                style: SemiTextStyles.header5ENRegular
-                    .copyWith(color: ColorDark.text1),
-              ),
-              SizedBox(
-                height: 72,
-                child: Theme(
-                    data: Theme.of(context).copyWith(
-                        textSelectionTheme: TextSelectionThemeData(
-                            selectionColor: ColorDark.blue5
-                                .withAlpha((0.8 * 255).round()))),
-                    child: TextField(
-                      cursorColor: ColorDark.text1,
-                      // controller: outputFileNameTextEditingController,
-                      controller: notifier.outputFileNameController,
-                      onChanged: (value) {
-                        notifier.setOutputFileName(value);
-                      },
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text0),
-                      decoration: dialogInputDecoration.copyWith(
-                          suffix: Text(
-                            '.MP4',
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text1),
-                          ),
-                          errorText: state.isOutputPathValid
-                              ? null
-                              : 'File name not valid',
-                          errorMaxLines: 3),
-                    )),
-              ),
-              SizedBox(
-                height: DesignValues.ultraSmallPadding,
-              ),
-              DialogCheckBoxWithText(
-                  text: 'Use the same encodings as source',
-                  value: state.useInputEncodeSettings,
+        }
+        final mediaState = ref.read(mediaResourcesStateProvider);
+        final cutState = ref.read(videoCutProvider);
+        final plan = buildVideoExportPlan(
+          VideoExportRequest(
+            taskId: const Uuid().v4(),
+            taskType: taskType,
+            videoResource: videoResource,
+            selectedResources: mediaState.selectedResources
+                .whereType<VideoResource>()
+                .toList(),
+            preset: preset,
+            lut: lut,
+            cutStart: cutState.cutStart,
+            cutEnd: cutState.cutEnd,
+            outputFileName: state.outputFileName,
+            selectedDirectory: state.selectedDirectory,
+            useSameDirectory: state.useSameDirectory,
+            useInputEncodeSettings: state.useInputEncodeSettings,
+            exportCommandOnly: exportCmdOnly,
+            debugLogging: settings.isDebugMode,
+          ),
+        );
+        if (!await _writeVideoExportPlan(plan)) return;
+        if (!context.mounted) return;
+        Navigator.of(context).pop(plan.task);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          exportCmdOnly
+              ? const SizedBox()
+              : DialogCheckBoxWithText(
+                  text: 'Use the same directory as source',
+                  value: state.useSameDirectory,
                   onPressed: () {
-                    notifier.toggleUseInputEncodeSettings();
-                  }),
-              SizedBox(
-                height: DesignValues.mediumPadding,
+                    // useSameDirectory.value = !useSameDirectory.value;
+                    notifier.toggleUseSameDirectory();
+                  },
+                ),
+          SizedBox(height: DesignValues.smallPadding),
+          state.useSameDirectory
+              ? const SizedBox()
+              : CustomDialogIconButtonWithText(
+                  iconData: Icons.folder_open,
+                  text: 'Select a output directory',
+                  onPressed: () async {
+                    final result = await FilePicker.getDirectoryPath();
+                    if (result != null) {
+                      notifier.setSelectedDirectory(result);
+                    }
+                  },
+                ),
+          SizedBox(height: DesignValues.smallPadding),
+          state.useSameDirectory
+              ? const SizedBox()
+              : Theme(
+                  data: Theme.of(context).copyWith(
+                    textSelectionTheme: TextSelectionThemeData(
+                      selectionColor: ColorDark.blue5.withAlpha(
+                        (0.8 * 255).round(),
+                      ),
+                    ),
+                  ),
+                  child: TextField(
+                    readOnly: true,
+                    cursorColor: ColorDark.text1,
+                    controller: notifier.selectedDirectoryController,
+                    style: SemiTextStyles.header6ENRegular.copyWith(
+                      color: ColorDark.text0,
+                    ),
+                    decoration: dialogInputDecoration,
+                  ),
+                ),
+          SizedBox(height: DesignValues.ultraSmallPadding),
+          Text(
+            'Output file name',
+            style: SemiTextStyles.header5ENRegular.copyWith(
+              color: ColorDark.text1,
+            ),
+          ),
+          SizedBox(
+            height: 72,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                textSelectionTheme: TextSelectionThemeData(
+                  selectionColor: ColorDark.blue5.withAlpha(
+                    (0.8 * 255).round(),
+                  ),
+                ),
               ),
-              state.useInputEncodeSettings
-                  ? const SizedBox()
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              child: TextField(
+                cursorColor: ColorDark.text1,
+                // controller: outputFileNameTextEditingController,
+                controller: notifier.outputFileNameController,
+                onChanged: (value) {
+                  notifier.setOutputFileName(value);
+                },
+                style: SemiTextStyles.header5ENRegular.copyWith(
+                  color: ColorDark.text0,
+                ),
+                decoration: dialogInputDecoration.copyWith(
+                  suffix: Text(
+                    '.MP4',
+                    style: SemiTextStyles.header5ENRegular.copyWith(
+                      color: ColorDark.text1,
+                    ),
+                  ),
+                  errorText: state.isOutputPathValid
+                      ? null
+                      : 'File name not valid',
+                  errorMaxLines: 3,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: DesignValues.ultraSmallPadding),
+          DialogCheckBoxWithText(
+            text: 'Use the same encodings as source',
+            value: state.useInputEncodeSettings,
+            onPressed: () {
+              notifier.toggleUseInputEncodeSettings();
+            },
+          ),
+          SizedBox(height: DesignValues.mediumPadding),
+          state.useInputEncodeSettings
+              ? const SizedBox()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Transcode Preset:',
+                      style: SemiTextStyles.header5ENRegular.copyWith(
+                        color: ColorDark.text1,
+                      ),
+                    ),
+                    Row(
                       children: [
-                        Text('Transcode Preset:',
-                            style: SemiTextStyles.header5ENRegular
-                                .copyWith(color: ColorDark.text1)),
-                        Row(
-                          children: [
-                            DropdownButton<int>(
-                              isExpanded: false,
-                              // value: transcodePresetIndex.value,
-                              value: state.transcodePresetId,
-                              focusColor: ColorDark.defaultActive,
-                              dropdownColor: ColorDark.bg2,
-                              style: SemiTextStyles.header5ENRegular
-                                  .copyWith(color: ColorDark.text0),
-                              items: ref
-                                  .watch(settingsProvider.select((s) => s
-                                      .transcodingPresets
-                                      .map((e) => DropdownMenuItem<int>(
-                                          value: e.id, child: Text(e.name)))
-                                      .toList()))
-                                  .toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  notifier.setPreset(value);
-                                }
+                        DropdownButton<int>(
+                          isExpanded: false,
+                          // value: transcodePresetIndex.value,
+                          value: state.transcodePresetId,
+                          focusColor: ColorDark.defaultActive,
+                          dropdownColor: ColorDark.bg2,
+                          style: SemiTextStyles.header5ENRegular.copyWith(
+                            color: ColorDark.text0,
+                          ),
+                          items: ref
+                              .watch(
+                                settingsProvider.select(
+                                  (s) => s.transcodingPresets
+                                      .map(
+                                        (e) => DropdownMenuItem<int>(
+                                          value: e.id,
+                                          child: Text(e.name),
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              )
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              notifier.setPreset(value);
+                            }
+                          },
+                        ),
+                        Spacer(),
+                        SizedBox(width: DesignValues.largePadding),
+                        CustomIconButton(
+                          iconData: Icons.settings,
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return SettingsDialog();
                               },
-                            ),
-                            Spacer(),
-                            SizedBox(
-                              width: DesignValues.largePadding,
-                            ),
-                            CustomIconButton(
-                                iconData: Icons.settings,
-                                onPressed: () async {
-                                  showDialog(
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return SettingsDialog();
-                                      });
-                                },
-                                iconSize: DesignValues.mediumIconSize,
-                                buttonSize: 24,
-                                hoverColor: ColorDark.defaultHover,
-                                focusColor: ColorDark.defaultActive,
-                                iconColor: ColorDark.text1)
-                          ],
-                        )
+                            );
+                          },
+                          iconSize: DesignValues.mediumIconSize,
+                          buttonSize: 24,
+                          hoverColor: ColorDark.defaultHover,
+                          focusColor: ColorDark.defaultActive,
+                          iconColor: ColorDark.text1,
+                        ),
                       ],
                     ),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              const Divider(
-                color: ColorDark.border,
-                thickness: 1,
-                height: 1,
-              ),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              _OutputInfoItem(
-                  keyText: 'Output duration:',
-                  valueText: _getOutputDuration(taskType: taskType, ref: ref)
-                      .toString()),
-              _OutputInfoItem(
-                  keyText: 'Output resolution:',
-                  valueText: state.useInputEncodeSettings
-                      ? '${videoResource.width}x${videoResource.height}'
-                      : (ref
-                              .watch(settingsProvider.select((s) =>
-                                  s.transcodingPresets.firstWhere((element) =>
-                                      element.id == state.transcodePresetId)))
-                              .useInputResolution)
-                          ? '${videoResource.width}x${videoResource.height}'
-                          : '${ref.watch(settingsProvider.select((s) => s.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId))).width}x${ref.watch(settingsProvider.select((s) => s.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId))).height}'),
-              _OutputInfoItem(
-                keyText: 'Output codec:',
-                valueText: state.useInputEncodeSettings
-                    ? videoResource.isHevc
-                        ? 'H.265'
-                        : 'H.264'
-                    : ref
-                            .watch(settingsProvider.select((s) =>
-                                s.transcodingPresets.firstWhere((element) =>
-                                    element.id == state.transcodePresetId)))
-                            .useHevc
-                        ? 'H.265'
-                        : 'H.264',
-              ),
-              state.useInputEncodeSettings
-                  ? const SizedBox()
-                  : _OutputInfoItem(
-                      keyText: 'Output CRF:',
-                      valueText: (ref
-                              .watch(settingsProvider.select((s) =>
-                                  s.transcodingPresets.firstWhere((element) =>
-                                      element.id == state.transcodePresetId)))
+                  ],
+                ),
+          SizedBox(height: DesignValues.smallPadding),
+          const Divider(color: ColorDark.border, thickness: 1, height: 1),
+          SizedBox(height: DesignValues.smallPadding),
+          _OutputInfoItem(
+            keyText: 'Output duration:',
+            valueText: _getOutputDuration(
+              taskType: taskType,
+              ref: ref,
+              videoResource: videoResource,
+            ).toString(),
+          ),
+          _OutputInfoItem(
+            keyText: 'Output resolution:',
+            valueText: state.useInputEncodeSettings
+                ? '${videoResource.width}x${videoResource.height}'
+                : (ref
+                      .watch(
+                        settingsProvider.select(
+                          (s) => s.transcodingPresets.firstWhere(
+                            (element) => element.id == state.transcodePresetId,
+                          ),
+                        ),
+                      )
+                      .useInputResolution)
+                ? '${videoResource.width}x${videoResource.height}'
+                : '${ref.watch(settingsProvider.select((s) => s.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId))).width}x${ref.watch(settingsProvider.select((s) => s.transcodingPresets.firstWhere((element) => element.id == state.transcodePresetId))).height}',
+          ),
+          _OutputInfoItem(
+            keyText: 'Output codec:',
+            valueText: state.useInputEncodeSettings
+                ? videoResource.isHevc
+                      ? 'H.265'
+                      : 'H.264'
+                : ref
+                      .watch(
+                        settingsProvider.select(
+                          (s) => s.transcodingPresets.firstWhere(
+                            (element) => element.id == state.transcodePresetId,
+                          ),
+                        ),
+                      )
+                      .useHevc
+                ? 'H.265'
+                : 'H.264',
+          ),
+          state.useInputEncodeSettings
+              ? const SizedBox()
+              : _OutputInfoItem(
+                  keyText: 'Output CRF:',
+                  valueText:
+                      (ref
+                              .watch(
+                                settingsProvider.select(
+                                  (s) => s.transcodingPresets.firstWhere(
+                                    (element) =>
+                                        element.id == state.transcodePresetId,
+                                  ),
+                                ),
+                              )
                               .crf)
                           .toString(),
-                    ),
-              state.useInputEncodeSettings
-                  ? const SizedBox()
-                  : _OutputInfoItem(
-                      keyText: 'Output FFMPEG preset:',
-                      valueText: ref.watch(settingsProvider.select((s) => s
-                          .transcodingPresets
+                ),
+          state.useInputEncodeSettings
+              ? const SizedBox()
+              : _OutputInfoItem(
+                  keyText: 'Output FFMPEG preset:',
+                  valueText: ref.watch(
+                    settingsProvider.select(
+                      (s) => s.transcodingPresets
                           .firstWhere((e) => e.id == state.transcodePresetId)
                           .ffmpegPreset
                           .toString()
                           .split('.')
-                          .last))),
-              // Output LUT:
-              state.useInputEncodeSettings
-                  ? const SizedBox()
-                  : _OutputInfoItem(
-                      keyText: 'Output LUT:',
-                      valueText: ref.watch(settingsProvider.select((s) => s.luts
-                          .firstWhere(
-                              (e) =>
-                                  e.id ==
-                                  (s.transcodingPresets
-                                      .firstWhere((f) =>
-                                          f.id == state.transcodePresetId)
-                                      .lutId),
-                              orElse: () => Lut(name: "None"))
-                          .name
-                          .toString())),
+                          .last,
                     ),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              const Divider(
-                color: ColorDark.border,
-                thickness: 1,
-                height: 1,
-              ),
-              SizedBox(
-                height: DesignValues.smallPadding,
-              ),
-              if (taskType == VideoTaskType.merge)
-                Expanded(
-                    child: _MergeFileListView(
-                  videoResources: ref.watch(mediaResourcesStateProvider.select(
+                  ),
+                ),
+          // Output LUT:
+          state.useInputEncodeSettings
+              ? const SizedBox()
+              : _OutputInfoItem(
+                  keyText: 'Output LUT:',
+                  valueText: ref.watch(
+                    settingsProvider.select(
+                      (s) => s.luts
+                          .firstWhere(
+                            (e) =>
+                                e.id ==
+                                (s.transcodingPresets
+                                    .firstWhere(
+                                      (f) => f.id == state.transcodePresetId,
+                                    )
+                                    .lutId),
+                            orElse: () => Lut(name: "None"),
+                          )
+                          .name
+                          .toString(),
+                    ),
+                  ),
+                ),
+          SizedBox(height: DesignValues.smallPadding),
+          const Divider(color: ColorDark.border, thickness: 1, height: 1),
+          SizedBox(height: DesignValues.smallPadding),
+          if (taskType == VideoTaskType.merge)
+            Expanded(
+              child: _MergeFileListView(
+                videoResources: ref.watch(
+                  mediaResourcesStateProvider.select(
                     (s) => s.selectedResources
                         .map((element) => element as VideoResource)
                         .toList(),
-                  )),
-                )),
-            ]));
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

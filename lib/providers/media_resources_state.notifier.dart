@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
 
@@ -19,14 +20,20 @@ var _processedMediaResourcesCount = 0;
 
 @Riverpod(keepAlive: true)
 class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
-  MediaResourcesStateNotifier({MediaAnalyzer? analyzer})
-    : _analyzer = analyzer ?? MediaAnalyzer();
+  MediaResourcesStateNotifier({
+    MediaAnalyzer? analyzer,
+    this.initialState,
+    void Function(String message)? showError,
+  }) : _analyzer = analyzer ?? MediaAnalyzer(),
+       _showError = showError ?? Toast.error;
 
   final MediaAnalyzer _analyzer;
+  final MediaResourcesState? initialState;
+  final void Function(String message) _showError;
 
   @override
   MediaResourcesState build() {
-    return MediaResourcesState();
+    return initialState ?? MediaResourcesState();
   }
 
   void toggleIsMultipleSelection() {
@@ -136,7 +143,7 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   void setCurrentResourceIndex(int index) {
-    if (index < state.resources.length) {
+    if (index >= 0 && index < state.resources.length) {
       state = state.copyWith(currentResourceIndex: index);
       if (state.resources[index] is AebPhotoResource) {
         state = state.copyWith(currentAebIndex: 0);
@@ -157,6 +164,11 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   void setCurrentAebIndex(int index) {
+    if (index < 0 ||
+        state.currentResourceIndex < 0 ||
+        state.currentResourceIndex >= state.resources.length) {
+      return;
+    }
     if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
       if (index <
           (state.resources[state.currentResourceIndex] as AebPhotoResource)
@@ -168,7 +180,9 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   void increaseCurrentAebIndex() {
-    if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
+    if (state.currentResourceIndex >= 0 &&
+        state.currentResourceIndex < state.resources.length &&
+        state.resources[state.currentResourceIndex] is AebPhotoResource) {
       if (state.currentAebIndex <
           (state.resources[state.currentResourceIndex] as AebPhotoResource)
                   .aebResources
@@ -180,7 +194,9 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   void decreaseCurrentAebIndex() {
-    if (state.resources[state.currentResourceIndex] is AebPhotoResource) {
+    if (state.currentResourceIndex >= 0 &&
+        state.currentResourceIndex < state.resources.length &&
+        state.resources[state.currentResourceIndex] is AebPhotoResource) {
       if (state.currentAebIndex > 0) {
         setCurrentAebIndex(state.currentAebIndex - 1);
       }
@@ -283,14 +299,22 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   Future<void> _deleteResource(MediaResource mediaResource) async {
     final mediaResourceIndex = state.resources.indexOf(mediaResource);
     if (mediaResourceIndex != -1) {
-      if (mediaResourceIndex == state.currentResourceIndex) {
-        if (mediaResourceIndex != 0 &&
-            (mediaResourceIndex == state.resources.length - 1)) {
-          setCurrentResourceIndex(state.currentResourceIndex - 1);
-        }
+      var nextCurrentIndex = state.currentResourceIndex;
+      if (mediaResourceIndex < nextCurrentIndex) {
+        nextCurrentIndex--;
+      } else if (mediaResourceIndex == nextCurrentIndex &&
+          mediaResourceIndex == state.resources.length - 1) {
+        nextCurrentIndex = (nextCurrentIndex - 1).clamp(
+          0,
+          state.resources.length,
+        );
       }
       state = state.copyWith(
         resources: state.resources.where((e) => e != mediaResource).toList(),
+        selectedResources: state.selectedResources
+            .where((e) => e != mediaResource)
+            .toList(),
+        currentResourceIndex: nextCurrentIndex,
       );
       switch (mediaResource) {
         case PhotoResource():
@@ -301,7 +325,7 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
             Logger.error(
               'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e',
             );
-            Toast.error(
+            _showError(
               'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e',
             );
           }
@@ -312,21 +336,24 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
               Logger.error(
                 'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e',
               );
-              Toast.error(
+              _showError(
                 'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e',
               );
             }
           }
           break;
         case AebPhotoResource():
-          for (final aebResource in mediaResource.aebResources) {
+          final members = mediaResource.aebResources.isEmpty
+              ? [mediaResource]
+              : mediaResource.aebResources;
+          for (final aebResource in members) {
             try {
               await aebResource.file.delete();
             } catch (e) {
               Logger.error(
                 'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e',
               );
-              Toast.error(
+              _showError(
                 'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e',
               );
             }
@@ -343,7 +370,9 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   }
 
   Future<void> deleteSelectedMediaResources() async {
-    for (final mediaResource in state.selectedResources) {
+    for (final mediaResource in List<MediaResource>.of(
+      state.selectedResources,
+    )) {
       await _deleteResource(mediaResource);
     }
   }
@@ -354,22 +383,26 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   ) async {
     final mediaResourceIndex = state.resources.indexOf(mediaResource);
     if (mediaResourceIndex != -1) {
-      final ext = mediaResource.file.path.split('.').last;
+      final ext = p.extension(mediaResource.file.path);
       switch (mediaResource) {
         case PhotoResource():
         case VideoResource():
           try {
             await mediaResource.file.rename(
-              '${mediaResource.file.parent.path}/$newName.$ext',
+              p.join(mediaResource.file.parent.path, '$newName$ext'),
+            );
+            final renamedPath = p.join(
+              mediaResource.file.parent.path,
+              '$newName$ext',
             );
             state = state.copyWith(
               resources: [
                 ...state.resources.sublist(0, mediaResourceIndex),
                 mediaResource.copyWith(
-                  name: '$newName.$ext',
-                  file: File('${mediaResource.file.parent.path}/$newName.$ext'),
+                  name: '$newName$ext',
+                  file: File(renamedPath),
                   thumbFile: (mediaResource is PhotoResource)
-                      ? File('${mediaResource.file.parent.path}/$newName.$ext')
+                      ? File(renamedPath)
                       : mediaResource.thumbFile,
                 ),
                 ...state.resources.sublist(mediaResourceIndex + 1),
@@ -379,39 +412,41 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
             Logger.error(
               'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e',
             );
-            Toast.error(
+            _showError(
               'Rename media resource ${mediaResource.file.uri.pathSegments.last} to $newName failed: $e',
             );
           }
           break;
         case AebPhotoResource():
           final List<AebPhotoResource> newAebResources = [];
-          for (final aebResource in mediaResource.aebResources) {
+          final members = mediaResource.aebResources.isEmpty
+              ? [mediaResource]
+              : mediaResource.aebResources;
+          for (final aebResource in members) {
             try {
               final aebNewName = '${newName}_AEB_${aebResource.evBias}';
-              await aebResource.file.rename(
-                '${aebResource.file.parent.path}/$aebNewName.$ext',
+              final renamedPath = p.join(
+                aebResource.file.parent.path,
+                '$aebNewName$ext',
               );
+              await aebResource.file.rename(renamedPath);
               newAebResources.add(
                 aebResource.copyWith(
-                  name: '$aebNewName.$ext',
-                  file: File(
-                    '${aebResource.file.parent.path}/$aebNewName.$ext',
-                  ),
-                  thumbFile: File(
-                    '${aebResource.file.parent.path}/$aebNewName.$ext',
-                  ),
+                  name: '$aebNewName$ext',
+                  file: File(renamedPath),
+                  thumbFile: File(renamedPath),
                 ),
               );
             } catch (e) {
               Logger.error(
                 'Rename media resource ${aebResource.file.uri.pathSegments.last} to $newName failed: $e',
               );
-              Toast.error(
+              _showError(
                 'Rename media resource ${aebResource.file.uri.pathSegments.last} to $newName failed: $e',
               );
             }
           }
+          if (newAebResources.isEmpty) return;
           state = state.copyWith(
             resources: [
               ...state.resources.sublist(0, mediaResourceIndex),

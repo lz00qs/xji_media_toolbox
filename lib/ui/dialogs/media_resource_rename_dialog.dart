@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:path/path.dart' as p;
 
 import '../../models/media_resource.model.dart';
 import '../../utils/tools.dart';
@@ -31,25 +32,37 @@ class _MediaResourceRenameDialogNotifier
 
   @override
   _RenameDialogState build(MediaResource mediaResource) {
-    final initialName =
-        mediaResource.name.substring(0, mediaResource.name.lastIndexOf('.'));
+    final initialName = p.basenameWithoutExtension(mediaResource.name);
 
     textController = TextEditingController(text: initialName);
 
     void listener() {
-      final ext = mediaResource.file.path.split('.').last;
-      final newPath =
-          '${mediaResource.file.parent.path}/${textController.text}.$ext';
+      final extension = p.extension(mediaResource.file.path);
+      final newPath = p.join(
+        mediaResource.file.parent.path,
+        '${textController.text}$extension',
+      );
+      if (textController.text.trim().isEmpty) {
+        state = state.copyWith(
+          errorText: _invalidNameErrorText,
+          isNewNameValid: false,
+        );
+        return;
+      }
       var valid = !isFileExist(newPath);
       if (!valid) {
         state = state.copyWith(
-            errorText: _fileExistErrorText, isNewNameValid: false);
+          errorText: _fileExistErrorText,
+          isNewNameValid: false,
+        );
       } else {
         if (!textController.text.contains(RegExp(r'[\\/:*?"<>|]'))) {
           state = state.copyWith(errorText: '', isNewNameValid: true);
         } else {
           state = state.copyWith(
-              errorText: _invalidNameErrorText, isNewNameValid: false);
+            errorText: _invalidNameErrorText,
+            isNewNameValid: false,
+          );
         }
       }
     }
@@ -68,22 +81,17 @@ class _MediaResourceRenameDialogNotifier
 class MediaResourceRenameDialog extends ConsumerWidget {
   final MediaResource mediaResource;
 
-  const MediaResourceRenameDialog({
-    super.key,
-    required this.mediaResource,
-  });
+  const MediaResourceRenameDialog({super.key, required this.mediaResource});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(
-      _mediaResourceRenameDialogProvider(mediaResource),
-    );
+    final state = ref.watch(_mediaResourceRenameDialogProvider(mediaResource));
 
     final controller = ref
         .read(_mediaResourceRenameDialogProvider(mediaResource).notifier)
         .textController;
 
-    final ext = mediaResource.file.path.split('.').last;
+    final ext = p.extension(mediaResource.file.path);
 
     return DualOptionDialog(
       width: 400,
@@ -109,13 +117,15 @@ class MediaResourceRenameDialog extends ConsumerWidget {
           child: TextField(
             cursorColor: ColorDark.text1,
             controller: controller,
-            style: SemiTextStyles.header5ENRegular
-                .copyWith(color: ColorDark.text0),
+            style: SemiTextStyles.header5ENRegular.copyWith(
+              color: ColorDark.text0,
+            ),
             decoration: dialogInputDecoration.copyWith(
               suffix: Text(
-                '.$ext',
-                style: SemiTextStyles.header5ENRegular
-                    .copyWith(color: ColorDark.text1),
+                ext,
+                style: SemiTextStyles.header5ENRegular.copyWith(
+                  color: ColorDark.text1,
+                ),
               ),
               errorText: state.isNewNameValid ? null : state.errorText,
               errorMaxLines: 3,

@@ -35,74 +35,98 @@ class MediaResourcesSortDialog extends ConsumerWidget {
     final notifier = ref.read(_mediaResourcesSortDialogProvider(sort).notifier);
 
     return DualOptionDialog(
-        width: 400,
-        height: 320,
-        title: 'Sort',
-        option1: 'Cancel',
-        option2: 'OK',
-        onOption1Pressed: () {
-          Navigator.of(context).pop();
-        },
-        onOption2Pressed: () async {
-          Navigator.of(context).pop(state);
-        },
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+      width: 400,
+      height: 320,
+      title: 'Sort',
+      option1: 'Cancel',
+      option2: 'OK',
+      onOption1Pressed: () {
+        Navigator.of(context).pop();
+      },
+      onOption2Pressed: () async {
+        Navigator.of(context).pop(state);
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              Row(
-                children: [
-                  Text('Sort type:',
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text1)),
-                  const Spacer(),
-                  DropdownButton<SortType>(
-                    value: state.sortType,
-                    focusColor: ColorDark.defaultActive,
-                    dropdownColor: ColorDark.bg2,
-                    style: SemiTextStyles.header5ENRegular
-                        .copyWith(color: ColorDark.text0),
-                    items: SortType.values
-                        .map((e) => DropdownMenuItem<SortType>(
-                            value: e, child: Text(e.name)))
-                        .toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        notifier.setSortType(value);
-                      }
-                    },
-                  )
-                ],
+              Text(
+                'Sort type:',
+                style: SemiTextStyles.header5ENRegular.copyWith(
+                  color: ColorDark.text1,
+                ),
               ),
+              const Spacer(),
               SizedBox(
-                height: DesignValues.smallPadding,
+                width: 150,
+                child: DropdownButton<SortType>(
+                  isExpanded: true,
+                  value: state.sortType,
+                  focusColor: ColorDark.defaultActive,
+                  dropdownColor: ColorDark.bg2,
+                  style: SemiTextStyles.header5ENRegular.copyWith(
+                    color: ColorDark.text0,
+                  ),
+                  items: SortType.values
+                      .map(
+                        (e) => DropdownMenuItem<SortType>(
+                          value: e,
+                          child: Text(e.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      notifier.setSortType(value);
+                    }
+                  },
+                ),
               ),
-              Row(
-                children: [
-                  Text('Sort order:',
-                      style: SemiTextStyles.header5ENRegular
-                          .copyWith(color: ColorDark.text1)),
-                  const Spacer(),
-                  DropdownButton<bool>(
-                    value: state.sortAsc,
-                    focusColor: ColorDark.defaultActive,
-                    dropdownColor: ColorDark.bg2,
-                    style: SemiTextStyles.header5ENRegular
-                        .copyWith(color: ColorDark.text0),
-                    items: const [
-                      DropdownMenuItem<bool>(
-                          value: true, child: Text('Ascending')),
-                      DropdownMenuItem<bool>(
-                          value: false, child: Text('Descending'))
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        notifier.setSortAsc(value);
-                      }
-                    },
-                  )
-                ],
+            ],
+          ),
+          SizedBox(height: DesignValues.smallPadding),
+          Row(
+            children: [
+              Text(
+                'Sort order:',
+                style: SemiTextStyles.header5ENRegular.copyWith(
+                  color: ColorDark.text1,
+                ),
               ),
-            ]));
+              const Spacer(),
+              SizedBox(
+                width: 150,
+                child: DropdownButton<bool>(
+                  isExpanded: true,
+                  value: state.sortAsc,
+                  focusColor: ColorDark.defaultActive,
+                  dropdownColor: ColorDark.bg2,
+                  style: SemiTextStyles.header5ENRegular.copyWith(
+                    color: ColorDark.text0,
+                  ),
+                  items: const [
+                    DropdownMenuItem<bool>(
+                      value: true,
+                      child: Text('Ascending'),
+                    ),
+                    DropdownMenuItem<bool>(
+                      value: false,
+                      child: Text('Descending'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      notifier.setSortAsc(value);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

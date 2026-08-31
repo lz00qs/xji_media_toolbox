@@ -11,38 +11,46 @@ class _ConfirmText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text,
-        style:
-            SemiTextStyles.header5ENRegular.copyWith(color: ColorDark.text0));
+    return Text(
+      text,
+      style: SemiTextStyles.header5ENRegular.copyWith(color: ColorDark.text0),
+    );
   }
 }
 
 class MediaResourceDeleteDialog extends ConsumerWidget {
   final int mediaResourcesLength;
 
-  const MediaResourceDeleteDialog({super.key, required this.mediaResourcesLength});
+  const MediaResourceDeleteDialog({
+    super.key,
+    required this.mediaResourcesLength,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isMultipleSelection = mediaResourcesLength > 1;
     return DualOptionDialog(
-        width: 400,
-        height: 240,
-        title: 'Delete',
-        option1: 'Cancel',
-        option2: 'Delete',
-        onOption1Pressed: () {
-          Navigator.of(context).pop(false);
-        },
-        onOption2Pressed: () {
-          Navigator.of(context).pop(true);
-        },
-        child: isMultipleSelection
-            ? _ConfirmText(
-                text: 'Are you sure you want to delete these '
-                    '$mediaResourcesLength'
-                    'media resources?')
-            : const _ConfirmText(
-                text: 'Are you sure you want to delete this media resource?'));
+      width: 400,
+      height: 240,
+      title: 'Delete',
+      option1: 'Cancel',
+      option2: 'Delete',
+      onOption1Pressed: () {
+        Navigator.of(context).pop(false);
+      },
+      onOption2Pressed: () {
+        Navigator.of(context).pop(true);
+      },
+      child: isMultipleSelection
+          ? _ConfirmText(
+              text:
+                  'Are you sure you want to delete these '
+                  '$mediaResourcesLength'
+                  ' media resources?',
+            )
+          : const _ConfirmText(
+              text: 'Are you sure you want to delete this media resource?',
+            ),
+    );
   }
 }
