@@ -13,18 +13,21 @@ part of 'video_player_panel.dart';
 final _videoPlayerPanelStateProvider = _VideoPlayerPanelStateNotifierFamily._();
 
 final class _VideoPlayerPanelStateNotifierProvider
-    extends $AsyncNotifierProvider<_VideoPlayerPanelStateNotifier,
-        _VideoPlayerPanelState> {
-  _VideoPlayerPanelStateNotifierProvider._(
-      {required _VideoPlayerPanelStateNotifierFamily super.from,
-      required File super.argument})
-      : super(
-          retry: null,
-          name: r'_videoPlayerPanelStateProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    extends
+        $AsyncNotifierProvider<
+          _VideoPlayerPanelStateNotifier,
+          _VideoPlayerPanelState
+        > {
+  _VideoPlayerPanelStateNotifierProvider._({
+    required _VideoPlayerPanelStateNotifierFamily super.from,
+    required File super.argument,
+  }) : super(
+         retry: null,
+         name: r'_videoPlayerPanelStateProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$_videoPlayerPanelStateNotifierHash();
@@ -58,23 +61,22 @@ String _$_videoPlayerPanelStateNotifierHash() =>
 final class _VideoPlayerPanelStateNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
-            _VideoPlayerPanelStateNotifier,
-            AsyncValue<_VideoPlayerPanelState>,
-            _VideoPlayerPanelState,
-            FutureOr<_VideoPlayerPanelState>,
-            File> {
+          _VideoPlayerPanelStateNotifier,
+          AsyncValue<_VideoPlayerPanelState>,
+          _VideoPlayerPanelState,
+          FutureOr<_VideoPlayerPanelState>,
+          File
+        > {
   _VideoPlayerPanelStateNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_videoPlayerPanelStateProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_videoPlayerPanelStateProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-  _VideoPlayerPanelStateNotifierProvider call({
-    required File videoFile,
-  }) =>
+  _VideoPlayerPanelStateNotifierProvider call({required File videoFile}) =>
       _VideoPlayerPanelStateNotifierProvider._(argument: videoFile, from: this);
 
   @override
@@ -86,23 +88,24 @@ abstract class _$VideoPlayerPanelStateNotifier
   late final _$args = ref.$arg as File;
   File get videoFile => _$args;
 
-  FutureOr<_VideoPlayerPanelState> build({
-    required File videoFile,
-  });
+  FutureOr<_VideoPlayerPanelState> build({required File videoFile});
   @$mustCallSuper
   @override
-  void runBuild() {
-    final ref = this.ref
-        as $Ref<AsyncValue<_VideoPlayerPanelState>, _VideoPlayerPanelState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<AsyncValue<_VideoPlayerPanelState>, _VideoPlayerPanelState>,
-        AsyncValue<_VideoPlayerPanelState>,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              videoFile: _$args,
-            ));
+  WhenComplete runBuild() {
+    final ref =
+        this.ref
+            as $Ref<AsyncValue<_VideoPlayerPanelState>, _VideoPlayerPanelState>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<
+                AsyncValue<_VideoPlayerPanelState>,
+                _VideoPlayerPanelState
+              >,
+              AsyncValue<_VideoPlayerPanelState>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(videoFile: _$args));
   }
 }

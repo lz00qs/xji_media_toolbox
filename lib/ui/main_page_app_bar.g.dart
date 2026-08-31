@@ -15,15 +15,15 @@ final _isMaximizedStateProvider = _IsMaximizedStateProvider._();
 final class _IsMaximizedStateProvider
     extends $NotifierProvider<_IsMaximizedState, bool> {
   _IsMaximizedStateProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'_isMaximizedStateProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'_isMaximizedStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$_isMaximizedStateHash();
@@ -47,10 +47,16 @@ abstract class _$IsMaximizedState extends $Notifier<bool> {
   bool build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<bool, bool>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<bool, bool>, bool, Object?, Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<bool, bool>,
+              bool,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

@@ -12,18 +12,19 @@ part of 'media_resources_state.notifier.dart';
 @ProviderFor(MediaResourcesStateNotifier)
 final mediaResourcesStateProvider = MediaResourcesStateNotifierProvider._();
 
-final class MediaResourcesStateNotifierProvider extends $NotifierProvider<
-    MediaResourcesStateNotifier, MediaResourcesState> {
+final class MediaResourcesStateNotifierProvider
+    extends
+        $NotifierProvider<MediaResourcesStateNotifier, MediaResourcesState> {
   MediaResourcesStateNotifierProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'mediaResourcesStateProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mediaResourcesStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$mediaResourcesStateNotifierHash();
@@ -49,13 +50,16 @@ abstract class _$MediaResourcesStateNotifier
   MediaResourcesState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<MediaResourcesState, MediaResourcesState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<MediaResourcesState, MediaResourcesState>,
-        MediaResourcesState,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<MediaResourcesState, MediaResourcesState>,
+              MediaResourcesState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

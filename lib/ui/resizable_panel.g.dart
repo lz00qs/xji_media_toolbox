@@ -15,15 +15,15 @@ final _resizablePanelProvider = _ResizablePanelNotifierProvider._();
 final class _ResizablePanelNotifierProvider
     extends $NotifierProvider<_ResizablePanelNotifier, ResizablePanelState> {
   _ResizablePanelNotifierProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'_resizablePanelProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'_resizablePanelProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$_resizablePanelNotifierHash();
@@ -48,13 +48,16 @@ abstract class _$ResizablePanelNotifier extends $Notifier<ResizablePanelState> {
   ResizablePanelState build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<ResizablePanelState, ResizablePanelState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<ResizablePanelState, ResizablePanelState>,
-        ResizablePanelState,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<ResizablePanelState, ResizablePanelState>,
+              ResizablePanelState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

@@ -14,18 +14,21 @@ final _mediaResourceRenameDialogProvider =
     _MediaResourceRenameDialogNotifierFamily._();
 
 final class _MediaResourceRenameDialogNotifierProvider
-    extends $NotifierProvider<_MediaResourceRenameDialogNotifier,
-        _RenameDialogState> {
-  _MediaResourceRenameDialogNotifierProvider._(
-      {required _MediaResourceRenameDialogNotifierFamily super.from,
-      required MediaResource super.argument})
-      : super(
-          retry: null,
-          name: r'_mediaResourceRenameDialogProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    extends
+        $NotifierProvider<
+          _MediaResourceRenameDialogNotifier,
+          _RenameDialogState
+        > {
+  _MediaResourceRenameDialogNotifierProvider._({
+    required _MediaResourceRenameDialogNotifierFamily super.from,
+    required MediaResource super.argument,
+  }) : super(
+         retry: null,
+         name: r'_mediaResourceRenameDialogProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() =>
@@ -69,25 +72,27 @@ String _$_mediaResourceRenameDialogNotifierHash() =>
 final class _MediaResourceRenameDialogNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
-            _MediaResourceRenameDialogNotifier,
-            _RenameDialogState,
-            _RenameDialogState,
-            _RenameDialogState,
-            MediaResource> {
+          _MediaResourceRenameDialogNotifier,
+          _RenameDialogState,
+          _RenameDialogState,
+          _RenameDialogState,
+          MediaResource
+        > {
   _MediaResourceRenameDialogNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_mediaResourceRenameDialogProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_mediaResourceRenameDialogProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   _MediaResourceRenameDialogNotifierProvider call(
     MediaResource mediaResource,
-  ) =>
-      _MediaResourceRenameDialogNotifierProvider._(
-          argument: mediaResource, from: this);
+  ) => _MediaResourceRenameDialogNotifierProvider._(
+    argument: mediaResource,
+    from: this,
+  );
 
   @override
   String toString() => r'_mediaResourceRenameDialogProvider';
@@ -98,22 +103,19 @@ abstract class _$MediaResourceRenameDialogNotifier
   late final _$args = ref.$arg as MediaResource;
   MediaResource get mediaResource => _$args;
 
-  _RenameDialogState build(
-    MediaResource mediaResource,
-  );
+  _RenameDialogState build(MediaResource mediaResource);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<_RenameDialogState, _RenameDialogState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<_RenameDialogState, _RenameDialogState>,
-        _RenameDialogState,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<_RenameDialogState, _RenameDialogState>,
+              _RenameDialogState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

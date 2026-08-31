@@ -2,10 +2,9 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:xji_footage_toolbox/storage/transcode_preset.mapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:xji_footage_toolbox/storage/settings_store.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
@@ -13,13 +12,12 @@ import '../constants.dart';
 import '../models/lut.model.dart';
 import '../models/settings.model.dart';
 import '../models/transcode_preset.model.dart';
-import '../storage/lut.mapper.dart';
 
 part 'settings.notifier.g.dart';
 
 @Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
-  late final ObjectBox _objectBox;
+  late final SettingsStore _settingsStore;
   late final SharedPreferences _prefs;
 
   @override
@@ -28,18 +26,19 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<void> initSettings() async {
-    _objectBox = ObjectBox.instance;
-    var transcodingPresets = _objectBox.transcodePresetBox.getAll();
+    _settingsStore = await SettingsStore.open();
+    var snapshot = _settingsStore.snapshot;
+    var transcodingPresets = snapshot.transcodingPresets;
     if (transcodingPresets.isEmpty) {
-      final defaultPreset = TranscodePreset(name: 'Default');
-      _objectBox.transcodePresetBox.put(defaultPreset.toEntity());
-      transcodingPresets = _objectBox.transcodePresetBox.getAll();
+      await _settingsStore.putTranscodePreset(TranscodePreset(name: 'Default'));
+      snapshot = _settingsStore.snapshot;
+      transcodingPresets = snapshot.transcodingPresets;
     }
 
     _prefs = await SharedPreferences.getInstance();
     var defaultTranscodePresetId =
         _prefs.getInt(defaultTranscodePresetIndexPrefKey) ??
-            transcodingPresets.first.id;
+        transcodingPresets.first.id;
     // 检查默认预设是否存在
     var defaultTranscodePresetIdValid = false;
     for (var preset in transcodingPresets) {
@@ -52,8 +51,6 @@ class SettingsNotifier extends _$SettingsNotifier {
       defaultTranscodePresetId = transcodingPresets.first.id;
     }
 
-    var luts = _objectBox.lutBox.getAll().map((e) => e.toModel()).toList();
-
     final exportCmdOnly = _prefs.getBool(exportCmdOnlyPrefKey) ?? false;
     final sortType = SortType.values[_prefs.getInt(sortTypePrefKey) ?? 0];
     final sortAsc = _prefs.getBool(sortOderPrefKey) ?? true;
@@ -61,9 +58,9 @@ class SettingsNotifier extends _$SettingsNotifier {
     final appVersion = await PackageInfo.fromPlatform();
 
     state = Settings(
-      transcodingPresets: transcodingPresets.map((e) => e.toModel()).toList(),
+      transcodingPresets: transcodingPresets,
       defaultTranscodePresetId: defaultTranscodePresetId,
-      luts: luts,
+      luts: snapshot.luts,
       sort: Sort(sortType: sortType, sortAsc: sortAsc),
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
@@ -86,14 +83,18 @@ class SettingsNotifier extends _$SettingsNotifier {
     _prefs.setInt(defaultTranscodePresetIndexPrefKey, id);
   }
 
-  void addTranscodePreset(TranscodePreset preset) {
-    _objectBox.transcodePresetBox.put(preset.toEntity());
+  Future<void> addTranscodePreset(TranscodePreset preset) async {
+    final storedPreset = await _tryStorageOperation(
+      'Failed to save Transcode Preset',
+      () => _settingsStore.putTranscodePreset(preset),
+    );
+    if (storedPreset == null) return;
     state = state.copyWith(
-      transcodingPresets: [...state.transcodingPresets, preset],
+      transcodingPresets: [...state.transcodingPresets, storedPreset],
     );
   }
 
-  void removeTranscodePreset(int id) {
+  Future<void> removeTranscodePreset(int id) async {
     // 检查 id 是否存在
     if (!_transcodePresetExists(id)) {
       Logger.warn('Transcode Preset not found: $id');
@@ -107,24 +108,27 @@ class SettingsNotifier extends _$SettingsNotifier {
       return;
     }
 
-    _objectBox.transcodePresetBox.remove(id);
-    state = state.copyWith(
-      transcodingPresets: state.transcodingPresets
-          .where((element) => element.id != id)
-          .toList(),
+    final snapshot = await _tryStorageOperation(
+      'Failed to delete Transcode Preset',
+      () => _settingsStore.removeTranscodePreset(id),
     );
+    if (snapshot == null) return;
+    state = state.copyWith(transcodingPresets: snapshot.transcodingPresets);
 
     if (state.defaultTranscodePresetId == id) {
       setDefaultTranscodePreset(state.transcodingPresets.first.id);
     }
   }
 
-  void updateTranscodePreset(TranscodePreset preset) {
-    final id = _objectBox.transcodePresetBox.put(preset.toEntity());
-    preset = preset.copyWith(id: id);
+  Future<void> updateTranscodePreset(TranscodePreset preset) async {
+    final storedPreset = await _tryStorageOperation(
+      'Failed to update Transcode Preset',
+      () => _settingsStore.putTranscodePreset(preset),
+    );
+    if (storedPreset == null) return;
     state = state.copyWith(
       transcodingPresets: state.transcodingPresets
-          .map((p) => p.id == preset.id ? preset : p)
+          .map((item) => item.id == storedPreset.id ? storedPreset : item)
           .toList(),
     );
   }
@@ -134,18 +138,11 @@ class SettingsNotifier extends _$SettingsNotifier {
   }
 
   Future<void> addLut(Lut lut) async {
-    final id = _objectBox.lutBox.put(lut.toEntity());
-    var oLut = _objectBox.lutBox.get(id);
-    if (oLut == null) {
-      Logger.warn('LUT not found: $id');
-      Toast.error('LUT not found');
-      return;
-    }
+    final id = _settingsStore.nextLutId;
     final srcFile = File(lut.path);
-    if (!srcFile.existsSync()) {
+    if (!await srcFile.exists()) {
       Logger.warn('LUT file not found: ${lut.path}');
       Toast.error('LUT file not found');
-      _objectBox.lutBox.remove(id);
       return;
     }
 
@@ -153,69 +150,77 @@ class SettingsNotifier extends _$SettingsNotifier {
     final baseDir = await getApplicationSupportDirectory();
 
     // luts/user
-    final targetDir = Directory(
-      p.join(baseDir.path, 'luts', 'user'),
-    );
+    final targetDir = Directory(p.join(baseDir.path, 'luts', 'user'));
     await targetDir.create(recursive: true);
 
-    var targetFile =
-        File(p.join(targetDir.path, "${oLut.id}_${oLut.name}.cube"));
+    final targetFile = File(p.join(targetDir.path, '$id.cube'));
 
-    targetFile = await srcFile.copy(targetFile.path);
-
-    if (!targetFile.existsSync()) {
-      Logger.warn('LUT file copy failed: ${targetFile.path}');
-      Toast.error('LUT file copy failed');
-      _objectBox.lutBox.remove(id);
-      return;
+    try {
+      await srcFile.copy(targetFile.path);
+      final storedLut = await _settingsStore.putLut(
+        lut.copyWith(id: id, path: targetFile.path),
+      );
+      state = state.copyWith(luts: [...state.luts, storedLut]);
+    } catch (error, stackTrace) {
+      if (await targetFile.exists()) await targetFile.delete();
+      Logger.error('Failed to save LUT', error, stackTrace);
+      Toast.error('Failed to save LUT');
     }
-
-    oLut.path = targetFile.path;
-    _objectBox.lutBox.put(oLut);
-
-    state = state.copyWith(
-      luts: [...state.luts, oLut.toModel()],
-    );
   }
 
-  void removeLut(int lutId) {
+  Future<void> removeLut(int lutId) async {
     // 检查 id 是否存在
     if (!_lutExists(lutId)) {
       Logger.warn('LUT not found: $lutId');
       Toast.error('LUT not found');
       return;
     }
-    final lut = _objectBox.lutBox.get(lutId);
-    if (lut == null) {
-      Logger.warn('LUT not found: $lutId');
-      Toast.error('LUT not found');
-      return;
-    }
-    _objectBox.lutBox.remove(lutId);
-
-    state = state.copyWith(
-      luts: state.luts.where((element) => element.id != lutId).toList(),
+    final lut = state.luts.firstWhere((item) => item.id == lutId);
+    final snapshot = await _tryStorageOperation(
+      'Failed to delete LUT',
+      () => _settingsStore.removeLut(lutId),
     );
-
-    // 遍历 preset 中的 lutId ，如果等于 id ，则设置为 0 nonelut
-    for (var preset in state.transcodingPresets) {
-      if (preset.lutId == lutId) {
-        updateTranscodePreset(preset.copyWith(lutId: 0));
-      }
-    }
+    if (snapshot == null) return;
+    state = state.copyWith(
+      transcodingPresets: snapshot.transcodingPresets,
+      luts: snapshot.luts,
+    );
 
     // 删除文件
     final lutFile = File(lut.path);
-    if (lutFile.existsSync()) {
-      lutFile.deleteSync();
+    try {
+      if (await lutFile.exists()) await lutFile.delete();
+    } catch (error, stackTrace) {
+      Logger.warn('Failed to delete LUT file: ${lut.path}');
+      Logger.error('LUT file deletion error', error, stackTrace);
+      Toast.warning('LUT metadata deleted, but its file could not be removed');
     }
   }
 
-  void updateLut(Lut lut) {
-    _objectBox.lutBox.put(lut.toEntity());
-    state = state.copyWith(
-      luts: state.luts.map((p) => p.id == lut.id ? lut : p).toList(),
+  Future<void> updateLut(Lut lut) async {
+    final storedLut = await _tryStorageOperation(
+      'Failed to update LUT',
+      () => _settingsStore.putLut(lut),
     );
+    if (storedLut == null) return;
+    state = state.copyWith(
+      luts: state.luts
+          .map((item) => item.id == storedLut.id ? storedLut : item)
+          .toList(),
+    );
+  }
+
+  Future<T?> _tryStorageOperation<T>(
+    String errorMessage,
+    Future<T> Function() operation,
+  ) async {
+    try {
+      return await operation();
+    } catch (error, stackTrace) {
+      Logger.error(errorMessage, error, stackTrace);
+      Toast.error(errorMessage);
+      return null;
+    }
   }
 
   void setIsDebugMode(bool value) {

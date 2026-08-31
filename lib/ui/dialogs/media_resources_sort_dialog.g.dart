@@ -15,16 +15,16 @@ final _mediaResourcesSortDialogProvider =
 
 final class _MediaResourcesSortDialogNotifierProvider
     extends $NotifierProvider<_MediaResourcesSortDialogNotifier, Sort> {
-  _MediaResourcesSortDialogNotifierProvider._(
-      {required _MediaResourcesSortDialogNotifierFamily super.from,
-      required Sort super.argument})
-      : super(
-          retry: null,
-          name: r'_mediaResourcesSortDialogProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+  _MediaResourcesSortDialogNotifierProvider._({
+    required _MediaResourcesSortDialogNotifierFamily super.from,
+    required Sort super.argument,
+  }) : super(
+         retry: null,
+         name: r'_mediaResourcesSortDialogProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() =>
@@ -67,20 +67,23 @@ String _$_mediaResourcesSortDialogNotifierHash() =>
 
 final class _MediaResourcesSortDialogNotifierFamily extends $Family
     with
-        $ClassFamilyOverride<_MediaResourcesSortDialogNotifier, Sort, Sort,
-            Sort, Sort> {
+        $ClassFamilyOverride<
+          _MediaResourcesSortDialogNotifier,
+          Sort,
+          Sort,
+          Sort,
+          Sort
+        > {
   _MediaResourcesSortDialogNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_mediaResourcesSortDialogProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_mediaResourcesSortDialogProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-  _MediaResourcesSortDialogNotifierProvider call(
-    Sort sort,
-  ) =>
+  _MediaResourcesSortDialogNotifierProvider call(Sort sort) =>
       _MediaResourcesSortDialogNotifierProvider._(argument: sort, from: this);
 
   @override
@@ -91,19 +94,19 @@ abstract class _$MediaResourcesSortDialogNotifier extends $Notifier<Sort> {
   late final _$args = ref.$arg as Sort;
   Sort get sort => _$args;
 
-  Sort build(
-    Sort sort,
-  );
+  Sort build(Sort sort);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Sort, Sort>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<Sort, Sort>, Sort, Object?, Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Sort, Sort>,
+              Sort,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

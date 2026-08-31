@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:xji_footage_toolbox/objectbox.dart';
 import 'package:fvp/fvp.dart' as fvp;
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
@@ -38,9 +37,11 @@ Future<void> main() async {
     await windowManager.focus();
   });
 
-  fvp.registerWith(options: {
-    'platforms': ['windows']
-  }); // only these platforms will use this plugin implementation
+  fvp.registerWith(
+    options: {
+      'platforms': ['windows'],
+    },
+  ); // only these platforms will use this plugin implementation
 
   if (kDebugMode) {
     Logger.setLogLevel(LogLevel.debug);
@@ -49,19 +50,21 @@ Future<void> main() async {
   //
   final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
 
-  await ObjectBox.create();
-
   final container = ProviderContainer();
 
   await container.read(settingsProvider.notifier).initSettings();
 
-  runApp(ToastificationWrapper(
+  runApp(
+    ToastificationWrapper(
       child: UncontrolledProviderScope(
-          container: container,
-          child: MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
-          ))));
+        container: container,
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
+        ),
+      ),
+    ),
+  );
 }
 
 class MyApp extends ConsumerWidget {
@@ -87,10 +90,11 @@ class MyApp extends ConsumerWidget {
             //         mediaResourceInfoPanel: SizedBox(),
             //         mainPanel: SizedBox()))
             Expanded(
-                // child: ResizablePanel(),)
-                child: isFFmpegAvailable
-                    ? MainPage()
-                    : const FFmpegNotAvailablePage())
+              // child: ResizablePanel(),)
+              child: isFFmpegAvailable
+                  ? MainPage()
+                  : const FFmpegNotAvailablePage(),
+            ),
           ],
         ),
       ),

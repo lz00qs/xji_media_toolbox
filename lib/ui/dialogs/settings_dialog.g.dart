@@ -14,16 +14,16 @@ final _editLutDialogProvider = _EditLutDialogNotifierFamily._();
 
 final class _EditLutDialogNotifierProvider
     extends $NotifierProvider<_EditLutDialogNotifier, Lut> {
-  _EditLutDialogNotifierProvider._(
-      {required _EditLutDialogNotifierFamily super.from,
-      required Lut super.argument})
-      : super(
-          retry: null,
-          name: r'_editLutDialogProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+  _EditLutDialogNotifierProvider._({
+    required _EditLutDialogNotifierFamily super.from,
+    required Lut super.argument,
+  }) : super(
+         retry: null,
+         name: r'_editLutDialogProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$_editLutDialogNotifierHash();
@@ -65,17 +65,15 @@ String _$_editLutDialogNotifierHash() =>
 final class _EditLutDialogNotifierFamily extends $Family
     with $ClassFamilyOverride<_EditLutDialogNotifier, Lut, Lut, Lut, Lut> {
   _EditLutDialogNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_editLutDialogProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_editLutDialogProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-  _EditLutDialogNotifierProvider call(
-    Lut lut,
-  ) =>
+  _EditLutDialogNotifierProvider call(Lut lut) =>
       _EditLutDialogNotifierProvider._(argument: lut, from: this);
 
   @override
@@ -86,20 +84,20 @@ abstract class _$EditLutDialogNotifier extends $Notifier<Lut> {
   late final _$args = ref.$arg as Lut;
   Lut get lut => _$args;
 
-  Lut build(
-    Lut lut,
-  );
+  Lut build(Lut lut);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Lut, Lut>;
-    final element = ref.element
-        as $ClassProviderElement<AnyNotifier<Lut, Lut>, Lut, Object?, Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Lut, Lut>,
+              Lut,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }
 
@@ -108,18 +106,18 @@ final _editTranscodePresetDialogProvider =
     _EditTranscodePresetDialogNotifierFamily._();
 
 final class _EditTranscodePresetDialogNotifierProvider
-    extends $NotifierProvider<_EditTranscodePresetDialogNotifier,
-        TranscodePreset> {
-  _EditTranscodePresetDialogNotifierProvider._(
-      {required _EditTranscodePresetDialogNotifierFamily super.from,
-      required TranscodePreset super.argument})
-      : super(
-          retry: null,
-          name: r'_editTranscodePresetDialogProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    extends
+        $NotifierProvider<_EditTranscodePresetDialogNotifier, TranscodePreset> {
+  _EditTranscodePresetDialogNotifierProvider._({
+    required _EditTranscodePresetDialogNotifierFamily super.from,
+    required TranscodePreset super.argument,
+  }) : super(
+         retry: null,
+         name: r'_editTranscodePresetDialogProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() =>
@@ -163,25 +161,26 @@ String _$_editTranscodePresetDialogNotifierHash() =>
 final class _EditTranscodePresetDialogNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
-            _EditTranscodePresetDialogNotifier,
-            TranscodePreset,
-            TranscodePreset,
-            TranscodePreset,
-            TranscodePreset> {
+          _EditTranscodePresetDialogNotifier,
+          TranscodePreset,
+          TranscodePreset,
+          TranscodePreset,
+          TranscodePreset
+        > {
   _EditTranscodePresetDialogNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_editTranscodePresetDialogProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_editTranscodePresetDialogProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
-  _EditTranscodePresetDialogNotifierProvider call(
-    TranscodePreset preset,
-  ) =>
+  _EditTranscodePresetDialogNotifierProvider call(TranscodePreset preset) =>
       _EditTranscodePresetDialogNotifierProvider._(
-          argument: preset, from: this);
+        argument: preset,
+        from: this,
+      );
 
   @override
   String toString() => r'_editTranscodePresetDialogProvider';
@@ -192,22 +191,19 @@ abstract class _$EditTranscodePresetDialogNotifier
   late final _$args = ref.$arg as TranscodePreset;
   TranscodePreset get preset => _$args;
 
-  TranscodePreset build(
-    TranscodePreset preset,
-  );
+  TranscodePreset build(TranscodePreset preset);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<TranscodePreset, TranscodePreset>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<TranscodePreset, TranscodePreset>,
-        TranscodePreset,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<TranscodePreset, TranscodePreset>,
+              TranscodePreset,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

@@ -40,17 +40,15 @@ dependencies:
   window_manager: ^0.5.2
   path: ^1.9.1
   shared_preferences: ^2.5.5
-  objectbox_flutter_libs: ^5.3.2
-  objectbox: ^5.3.2
   package_info_plus: ^10.2.1
   toastification: ^3.2.0
   iconify_flutter: ^0.0.7
   fvp: ^0.38.1
   chewie: ^1.15.0
   freezed_annotation: ^3.1.0
-  freezed: ^3.2.5
-  flutter_riverpod: ^3.3.1
-  riverpod_annotation: ^4.0.2
+  freezed: ^4.0.1
+  flutter_riverpod: ^3.4.2
+  riverpod_annotation: ^4.0.6
   uuid: ^4.6.0
 
 dev_dependencies:
@@ -63,10 +61,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  build_runner: ^2.15.1
-  objectbox_generator: ^5.3.2
-  riverpod_generator: ^4.0.3
-
+  build_runner: ^2.16.0
+  riverpod_generator: ^4.0.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

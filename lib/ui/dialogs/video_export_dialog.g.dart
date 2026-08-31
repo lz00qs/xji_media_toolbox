@@ -12,22 +12,19 @@ part of 'video_export_dialog.dart';
 @ProviderFor(_VideoExportDialogNotifier)
 final _videoExportDialogProvider = _VideoExportDialogNotifierFamily._();
 
-final class _VideoExportDialogNotifierProvider extends $NotifierProvider<
-    _VideoExportDialogNotifier, _VideoExportDialogState> {
-  _VideoExportDialogNotifierProvider._(
-      {required _VideoExportDialogNotifierFamily super.from,
-      required (
-        Settings,
-        String,
-      )
-          super.argument})
-      : super(
-          retry: null,
-          name: r'_videoExportDialogProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+final class _VideoExportDialogNotifierProvider
+    extends
+        $NotifierProvider<_VideoExportDialogNotifier, _VideoExportDialogState> {
+  _VideoExportDialogNotifierProvider._({
+    required _VideoExportDialogNotifierFamily super.from,
+    required (Settings, String) super.argument,
+  }) : super(
+         retry: null,
+         name: r'_videoExportDialogProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$_videoExportDialogNotifierHash();
@@ -69,31 +66,28 @@ String _$_videoExportDialogNotifierHash() =>
 final class _VideoExportDialogNotifierFamily extends $Family
     with
         $ClassFamilyOverride<
-            _VideoExportDialogNotifier,
-            _VideoExportDialogState,
-            _VideoExportDialogState,
-            _VideoExportDialogState,
-            (
-              Settings,
-              String,
-            )> {
+          _VideoExportDialogNotifier,
+          _VideoExportDialogState,
+          _VideoExportDialogState,
+          _VideoExportDialogState,
+          (Settings, String)
+        > {
   _VideoExportDialogNotifierFamily._()
-      : super(
-          retry: null,
-          name: r'_videoExportDialogProvider',
-          dependencies: null,
-          $allTransitiveDependencies: null,
-          isAutoDispose: true,
-        );
+    : super(
+        retry: null,
+        name: r'_videoExportDialogProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   _VideoExportDialogNotifierProvider call(
     Settings settings,
     String defaultName,
-  ) =>
-      _VideoExportDialogNotifierProvider._(argument: (
-        settings,
-        defaultName,
-      ), from: this);
+  ) => _VideoExportDialogNotifierProvider._(
+    argument: (settings, defaultName),
+    from: this,
+  );
 
   @override
   String toString() => r'_videoExportDialogProvider';
@@ -101,32 +95,24 @@ final class _VideoExportDialogNotifierFamily extends $Family
 
 abstract class _$VideoExportDialogNotifier
     extends $Notifier<_VideoExportDialogState> {
-  late final _$args = ref.$arg as (
-    Settings,
-    String,
-  );
+  late final _$args = ref.$arg as (Settings, String);
   Settings get settings => _$args.$1;
   String get defaultName => _$args.$2;
 
-  _VideoExportDialogState build(
-    Settings settings,
-    String defaultName,
-  );
+  _VideoExportDialogState build(Settings settings, String defaultName);
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref =
         this.ref as $Ref<_VideoExportDialogState, _VideoExportDialogState>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<_VideoExportDialogState, _VideoExportDialogState>,
-        _VideoExportDialogState,
-        Object?,
-        Object?>;
-    element.handleCreate(
-        ref,
-        () => build(
-              _$args.$1,
-              _$args.$2,
-            ));
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<_VideoExportDialogState, _VideoExportDialogState>,
+              _VideoExportDialogState,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, () => build(_$args.$1, _$args.$2));
   }
 }

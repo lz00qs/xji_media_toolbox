@@ -15,15 +15,15 @@ final taskSchedulerProvider = TaskSchedulerNotifierProvider._();
 final class TaskSchedulerNotifierProvider
     extends $NotifierProvider<TaskSchedulerNotifier, List<VideoTask>> {
   TaskSchedulerNotifierProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'taskSchedulerProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'taskSchedulerProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$taskSchedulerNotifierHash();
@@ -48,13 +48,16 @@ abstract class _$TaskSchedulerNotifier extends $Notifier<List<VideoTask>> {
   List<VideoTask> build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<List<VideoTask>, List<VideoTask>>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<List<VideoTask>, List<VideoTask>>,
-        List<VideoTask>,
-        Object?,
-        Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<List<VideoTask>, List<VideoTask>>,
+              List<VideoTask>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }

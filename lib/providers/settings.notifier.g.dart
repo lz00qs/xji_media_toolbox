@@ -15,15 +15,15 @@ final settingsProvider = SettingsNotifierProvider._();
 final class SettingsNotifierProvider
     extends $NotifierProvider<SettingsNotifier, Settings> {
   SettingsNotifierProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'settingsProvider',
-          isAutoDispose: false,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'settingsProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$settingsNotifierHash();
@@ -41,16 +41,22 @@ final class SettingsNotifierProvider
   }
 }
 
-String _$settingsNotifierHash() => r'a951a710f9dc31f4ad03b8b32cd44fc2dcd881b8';
+String _$settingsNotifierHash() => r'd87e3fc670327f8999996fe6d17ef090922eb85f';
 
 abstract class _$SettingsNotifier extends $Notifier<Settings> {
   Settings build();
   @$mustCallSuper
   @override
-  void runBuild() {
+  WhenComplete runBuild() {
     final ref = this.ref as $Ref<Settings, Settings>;
-    final element = ref.element as $ClassProviderElement<
-        AnyNotifier<Settings, Settings>, Settings, Object?, Object?>;
-    element.handleCreate(ref, build);
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Settings, Settings>,
+              Settings,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
   }
 }
