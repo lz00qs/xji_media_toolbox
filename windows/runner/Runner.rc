@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "top.hylcreative" "\0"
-            VALUE "FileDescription", "xji_footage_toolbox" "\0"
+            VALUE "FileDescription", "XJI Media Toolbox" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "xji_footage_toolbox" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 top.hylcreative. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024-2026 top.hylcreative. All rights reserved." "\0"
             VALUE "OriginalFilename", "xji_footage_toolbox.exe" "\0"
-            VALUE "ProductName", "xji_footage_toolbox" "\0"
+            VALUE "ProductName", "XJI Media Toolbox" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

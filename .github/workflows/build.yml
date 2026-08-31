@@ -89,10 +89,59 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: python build.py --build windows
 
+      - name: Verify Windows installer
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+
+          $installer = Get-ChildItem 'build\windows\installer' -Filter '*.exe' |
+            Select-Object -First 1
+          if (-not $installer) {
+            throw 'The Windows installer was not generated.'
+          }
+
+          $installDir = Join-Path $env:RUNNER_TEMP 'xji-media-toolbox-installer-test'
+          $installResult = Start-Process -FilePath $installer.FullName `
+            -ArgumentList @(
+              '/VERYSILENT',
+              '/SUPPRESSMSGBOXES',
+              '/NORESTART',
+              '/NOICONS',
+              "/DIR=`"$installDir`""
+            ) `
+            -Wait -PassThru
+          if ($installResult.ExitCode -ne 0) {
+            throw "Installer exited with code $($installResult.ExitCode)."
+          }
+
+          $installedFFmpeg = Join-Path $installDir 'ffmpeg\ffmpeg.exe'
+          if (-not (Test-Path $installedFFmpeg)) {
+            throw "Installed FFmpeg was not found at $installedFFmpeg"
+          }
+          & $installedFFmpeg -version
+          if ($LASTEXITCODE -ne 0) {
+            throw "Installed FFmpeg exited with code $LASTEXITCODE."
+          }
+
+          $uninstaller = Get-ChildItem $installDir -Filter 'unins*.exe' |
+            Select-Object -First 1
+          if (-not $uninstaller) {
+            throw 'The generated uninstaller was not found.'
+          }
+          $uninstallResult = Start-Process -FilePath $uninstaller.FullName `
+            -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') `
+            -Wait -PassThru
+          if ($uninstallResult.ExitCode -ne 0) {
+            throw "Uninstaller exited with code $($uninstallResult.ExitCode)."
+          }
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: xji_media_toolbox_${{ matrix.os }}
+          if-no-files-found: error
           path: |
             build/macos/Build/Products/Release/*.dmg
-            build/windows/x64/runner/Release/*
+            build/windows/installer/*.exe
+            build/windows/installer/*.sha256

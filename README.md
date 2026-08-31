@@ -18,8 +18,9 @@ This is a toolbox for DJI drone media processing. It base on flutter and can run
 
 ## Installation
 1. Download the latest version from the release page.
-2. Unzip the downloaded file.
-3. Run the `xji_media_toolbox.exe` on Windows or `XJI Media Toolbox` on MacOS.
+2. On Windows, run `XJI-Media-Toolbox-Setup-<version>-x64.exe`. On macOS,
+   open the DMG and copy `XJI Media Toolbox` to Applications.
+3. Launch `XJI Media Toolbox` from the Start menu or Applications folder.
 
 > If you are using MacOS, you may need to allow the app to run in the system settings.(System Preferences -> Security & Privacy -> General -> Allow)
 
@@ -42,7 +43,10 @@ This app is developed by Flutter. You can clone the source code and run it by yo
 Use `python build.py --build windows` on Windows x64 or
 `python3 build.py --build macos` on Apple Silicon to create a release with the
 bundled FFmpeg runtime. The build script verifies the runtime checksums before
-building.
+building. The Windows command also compiles an Inno Setup installer under
+`build/windows/installer/` and writes its SHA-256 checksum next to it. Install
+Inno Setup 6 or 7, or set `INNO_SETUP_COMPILER` to the full path of `ISCC.exe`,
+before building a Windows release.
 
 ## Todo
 - [ ] i18n support
