@@ -20,25 +20,19 @@ class FFmpegNotAvailablePage extends StatelessWidget {
             ),
             SizedBox(height: DesignValues.mediumPadding),
             Text(
-              'For MacOS: brew install ffmpeg',
+              'The bundled FFmpeg runtime could not be started.',
               style: SemiTextStyles.header4ENRegular
                   .copyWith(color: ColorDark.text1),
             ),
             SizedBox(height: DesignValues.mediumPadding),
             Text(
-              'For Linux: sudo apt install ffmpeg',
+              'Open Settings > Advanced to select a custom FFmpeg directory.',
               style: SemiTextStyles.header4ENRegular
                   .copyWith(color: ColorDark.text1),
             ),
             SizedBox(height: DesignValues.mediumPadding),
             Text(
-              'For Windows: https://ffmpeg.org/download.html',
-              style: SemiTextStyles.header4ENRegular
-                  .copyWith(color: ColorDark.text1),
-            ),
-            SizedBox(height: DesignValues.mediumPadding),
-            Text(
-              'After installation, restart this APP!',
+              'The directory must contain compatible ffmpeg and ffprobe executables.',
               style: SemiTextStyles.header4ENRegular
                   .copyWith(color: ColorDark.warning),
             ),

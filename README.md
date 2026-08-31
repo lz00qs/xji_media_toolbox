@@ -23,7 +23,10 @@ This is a toolbox for DJI drone media processing. It base on flutter and can run
 
 > If you are using MacOS, you may need to allow the app to run in the system settings.(System Preferences -> Security & Privacy -> General -> Allow)
 
-> For MacOS, you may need to install the `ffmpeg` first. You can install it by running `brew install ffmpeg` in the terminal.
+FFmpeg and FFprobe are included in the Windows x64 and macOS arm64 releases.
+Advanced users can select a compatible custom FFmpeg directory under
+`Settings > Advanced`. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for
+the bundled runtime versions, checksums, sources, and licenses.
 
 ## Usage
 1. Open the media folder by clicking the `Open` button. (Warning: due to this app is still in development, please backup your media files before using this app, not suggested to use it on the original media files or SD cards.).
@@ -35,6 +38,11 @@ This is a toolbox for DJI drone media processing. It base on flutter and can run
 This app is developed by Flutter. You can clone the source code and run it by yourself. The source code is in the `src` folder.
 
 > For Windows, due to the `fvp` plugin does not support IDE debugging, you may need to run the app by `flutter run` in the terminal. See this [issue](https://github.com/wang-bin/fvp/issues/125) for more information.
+
+Use `python build.py --build windows` on Windows x64 or
+`python3 build.py --build macos` on Apple Silicon to create a release with the
+bundled FFmpeg runtime. The build script verifies the runtime checksums before
+building.
 
 ## Todo
 - [ ] i18n support

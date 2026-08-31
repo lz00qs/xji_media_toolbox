@@ -102,6 +102,23 @@ install(CODE "
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
+# FFmpeg is a native runtime dependency, not a Flutter asset. Keep it in a
+# predictable directory next to the application so the Dart process launcher
+# can execute it directly.
+set(FFMPEG_RUNTIME_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../assets/windows/ffmpeg")
+set(FFMPEG_RUNTIME_FILES
+  "${FFMPEG_RUNTIME_SOURCE_DIR}/ffmpeg.exe"
+  "${FFMPEG_RUNTIME_SOURCE_DIR}/ffprobe.exe"
+)
+foreach(FFMPEG_RUNTIME_FILE IN LISTS FFMPEG_RUNTIME_FILES)
+  if(NOT EXISTS "${FFMPEG_RUNTIME_FILE}")
+    message(FATAL_ERROR "Missing bundled FFmpeg runtime: ${FFMPEG_RUNTIME_FILE}")
+  endif()
+endforeach()
+install(FILES ${FFMPEG_RUNTIME_FILES}
+  DESTINATION "${CMAKE_INSTALL_PREFIX}/ffmpeg"
+  COMPONENT Runtime)
+
 # Install the AOT library on non-Debug builds only.
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release

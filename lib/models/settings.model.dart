@@ -3,6 +3,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:xji_footage_toolbox/models/lut.model.dart';
 import 'package:xji_footage_toolbox/models/transcode_preset.model.dart';
 
+import 'ffmpeg_configuration.dart';
+
 part 'settings.model.freezed.dart';
 
 enum SortType { name, date, size, sequence }
@@ -26,5 +28,10 @@ abstract class Settings with _$Settings {
     @Default(Sort()) Sort sort,
     @Default(kDebugMode) bool isDebugMode,
     @Default(false) bool exportCmdOnly,
+    @Default('') String customFFmpegDirectory,
+    @Default('') String activeFFmpegDirectory,
+    @Default('') String ffmpegVersion,
+    @Default(FFmpegSource.unavailable) FFmpegSource ffmpegSource,
+    @Default('') String ffmpegError,
   }) = _Settings;
 }

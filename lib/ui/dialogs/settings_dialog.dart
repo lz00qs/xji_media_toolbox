@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
 
+import '../../../models/ffmpeg_configuration.dart';
 import '../../../models/lut.model.dart';
 import '../../../models/transcode_preset.model.dart';
 import '../buttons/custom_icon_button.dart';
@@ -30,8 +31,9 @@ class SettingsDialog extends StatelessWidget {
       onOption2Pressed: () {
         Navigator.of(context).pop();
       },
-      child: Column(
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
           Row(
             children: [
               Text(
@@ -230,6 +232,28 @@ class SettingsDialog extends StatelessWidget {
             ],
           ),
           SizedBox(height: DesignValues.smallPadding),
+          Theme(
+            data: Theme.of(context).copyWith(
+              dividerColor: Colors.transparent,
+              splashColor: Colors.transparent,
+            ),
+            child: ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              childrenPadding: EdgeInsets.only(
+                bottom: DesignValues.mediumPadding,
+              ),
+              iconColor: ColorDark.text1,
+              collapsedIconColor: ColorDark.text1,
+              title: Text(
+                'Advanced',
+                style: SemiTextStyles.header4ENRegular.copyWith(
+                  color: ColorDark.text0,
+                ),
+              ),
+              children: const [_FFmpegSettingsPanel()],
+            ),
+          ),
+          SizedBox(height: DesignValues.smallPadding),
           Row(
             children: [
               Text(
@@ -266,6 +290,201 @@ class SettingsDialog extends StatelessWidget {
                 style: SemiTextStyles.header4ENRegular.copyWith(
                   color: ColorDark.text0,
                 ),
+              ),
+            ],
+          ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FFmpegSettingsPanel extends ConsumerStatefulWidget {
+  const _FFmpegSettingsPanel();
+
+  @override
+  ConsumerState<_FFmpegSettingsPanel> createState() =>
+      _FFmpegSettingsPanelState();
+}
+
+class _FFmpegSettingsPanelState extends ConsumerState<_FFmpegSettingsPanel> {
+  late final TextEditingController _directoryController;
+  String? _errorMessage;
+  bool _isApplying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _directoryController = TextEditingController(
+      text: ref.read(settingsProvider).customFFmpegDirectory,
+    );
+  }
+
+  @override
+  void dispose() {
+    _directoryController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _chooseDirectory() async {
+    final directory = await FilePicker.getDirectoryPath(
+      dialogTitle: 'Select the directory containing FFmpeg and FFprobe',
+    );
+    if (directory == null) return;
+    _directoryController.text = directory;
+    await _applyCustomDirectory();
+  }
+
+  Future<void> _applyCustomDirectory() async {
+    final directory = _directoryController.text.trim();
+    if (directory.isEmpty) {
+      setState(() {
+        _errorMessage = 'Select a directory containing FFmpeg and FFprobe.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isApplying = true;
+      _errorMessage = null;
+    });
+    final error = await ref
+        .read(settingsProvider.notifier)
+        .setCustomFFmpegDirectory(directory);
+    if (!mounted) return;
+    setState(() {
+      _isApplying = false;
+      _errorMessage = error;
+      if (error == null) {
+        _directoryController.text =
+            ref.read(settingsProvider).customFFmpegDirectory;
+      }
+    });
+  }
+
+  Future<void> _useBundledRuntime() async {
+    setState(() {
+      _isApplying = true;
+      _errorMessage = null;
+    });
+    final error = await ref
+        .read(settingsProvider.notifier)
+        .useBundledFFmpeg();
+    if (!mounted) return;
+    setState(() {
+      _isApplying = false;
+      _errorMessage = error;
+      if (error == null) _directoryController.clear();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final settings = ref.watch(settingsProvider);
+    final isAvailable = settings.ffmpegSource != FFmpegSource.unavailable;
+    final sourceLabel = switch (settings.ffmpegSource) {
+      FFmpegSource.bundled => 'Bundled',
+      FFmpegSource.custom => 'Custom',
+      FFmpegSource.unavailable => 'Unavailable',
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(DesignValues.mediumPadding),
+      decoration: BoxDecoration(
+        color: ColorDark.bg3,
+        borderRadius: BorderRadius.circular(DesignValues.mediumBorderRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'FFmpeg Runtime',
+                style: SemiTextStyles.regularENSemiBold.copyWith(
+                  color: ColorDark.text0,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: DesignValues.smallPadding,
+                  vertical: DesignValues.ultraSmallPadding,
+                ),
+                decoration: BoxDecoration(
+                  color: isAvailable
+                      ? ColorDark.successLightDefault
+                      : ColorDark.dangerLightDefault,
+                  borderRadius: BorderRadius.circular(
+                    DesignValues.smallBorderRadius,
+                  ),
+                ),
+                child: Text(
+                  sourceLabel,
+                  style: SemiTextStyles.smallENRegular.copyWith(
+                    color: isAvailable ? ColorDark.success : ColorDark.danger,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: DesignValues.smallPadding),
+          Text(
+            settings.ffmpegVersion.isEmpty
+                ? 'No compatible runtime is active.'
+                : 'Version ${settings.ffmpegVersion}',
+            style: SemiTextStyles.smallENRegular.copyWith(
+              color: ColorDark.text1,
+            ),
+          ),
+          if (settings.activeFFmpegDirectory.isNotEmpty) ...[
+            SizedBox(height: DesignValues.ultraSmallPadding),
+            SelectableText(
+              settings.activeFFmpegDirectory,
+              style: SemiTextStyles.smallENRegular.copyWith(
+                color: ColorDark.text2,
+              ),
+            ),
+          ],
+          SizedBox(height: DesignValues.mediumPadding),
+          TextField(
+            controller: _directoryController,
+            enabled: !_isApplying,
+            style: SemiTextStyles.regularENRegular.copyWith(
+              color: ColorDark.text0,
+            ),
+            decoration: dialogInputDecoration.copyWith(
+              labelText: 'Custom FFmpeg directory',
+              hintText: 'Directory containing ffmpeg and ffprobe',
+              errorText: _errorMessage,
+              suffixIcon: IconButton(
+                tooltip: 'Browse',
+                onPressed: _isApplying ? null : _chooseDirectory,
+                icon: const Icon(Icons.folder_open),
+              ),
+            ),
+            onSubmitted: (_) => _applyCustomDirectory(),
+          ),
+          SizedBox(height: DesignValues.smallPadding),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: _isApplying ? null : _useBundledRuntime,
+                child: const Text('Use Bundled'),
+              ),
+              SizedBox(width: DesignValues.smallPadding),
+              FilledButton(
+                onPressed: _isApplying ? null : _applyCustomDirectory,
+                child: _isApplying
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Apply Custom'),
               ),
             ],
           ),

@@ -295,7 +295,7 @@ as bool,
 /// @nodoc
 mixin _$Settings implements DiagnosticableTreeMixin {
 
- List<TranscodePreset> get transcodingPresets; List<Lut> get luts; int get defaultTranscodePresetId; int get cpuThreads; String get appVersion; Sort get sort; bool get isDebugMode; bool get exportCmdOnly;
+ List<TranscodePreset> get transcodingPresets; List<Lut> get luts; int get defaultTranscodePresetId; int get cpuThreads; String get appVersion; Sort get sort; bool get isDebugMode; bool get exportCmdOnly; String get customFFmpegDirectory; String get activeFFmpegDirectory; String get ffmpegVersion; FFmpegSource get ffmpegSource; String get ffmpegError;
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -308,26 +308,26 @@ void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   final _this = this as Settings;
   properties
     ..add(DiagnosticsProperty('type', 'Settings'))
-    ..add(DiagnosticsProperty('transcodingPresets', _this.transcodingPresets))..add(DiagnosticsProperty('luts', _this.luts))..add(DiagnosticsProperty('defaultTranscodePresetId', _this.defaultTranscodePresetId))..add(DiagnosticsProperty('cpuThreads', _this.cpuThreads))..add(DiagnosticsProperty('appVersion', _this.appVersion))..add(DiagnosticsProperty('sort', _this.sort))..add(DiagnosticsProperty('isDebugMode', _this.isDebugMode))..add(DiagnosticsProperty('exportCmdOnly', _this.exportCmdOnly));
+    ..add(DiagnosticsProperty('transcodingPresets', _this.transcodingPresets))..add(DiagnosticsProperty('luts', _this.luts))..add(DiagnosticsProperty('defaultTranscodePresetId', _this.defaultTranscodePresetId))..add(DiagnosticsProperty('cpuThreads', _this.cpuThreads))..add(DiagnosticsProperty('appVersion', _this.appVersion))..add(DiagnosticsProperty('sort', _this.sort))..add(DiagnosticsProperty('isDebugMode', _this.isDebugMode))..add(DiagnosticsProperty('exportCmdOnly', _this.exportCmdOnly))..add(DiagnosticsProperty('customFFmpegDirectory', _this.customFFmpegDirectory))..add(DiagnosticsProperty('activeFFmpegDirectory', _this.activeFFmpegDirectory))..add(DiagnosticsProperty('ffmpegVersion', _this.ffmpegVersion))..add(DiagnosticsProperty('ffmpegSource', _this.ffmpegSource))..add(DiagnosticsProperty('ffmpegError', _this.ffmpegError));
 }
 
 @override
 bool operator ==(Object other) {
   final _this = this as Settings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settings&&const DeepCollectionEquality().equals(other.transcodingPresets, _this.transcodingPresets)&&const DeepCollectionEquality().equals(other.luts, _this.luts)&&(identical(other.defaultTranscodePresetId, _this.defaultTranscodePresetId) || other.defaultTranscodePresetId == _this.defaultTranscodePresetId)&&(identical(other.cpuThreads, _this.cpuThreads) || other.cpuThreads == _this.cpuThreads)&&(identical(other.appVersion, _this.appVersion) || other.appVersion == _this.appVersion)&&(identical(other.sort, _this.sort) || other.sort == _this.sort)&&(identical(other.isDebugMode, _this.isDebugMode) || other.isDebugMode == _this.isDebugMode)&&(identical(other.exportCmdOnly, _this.exportCmdOnly) || other.exportCmdOnly == _this.exportCmdOnly));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Settings&&const DeepCollectionEquality().equals(other.transcodingPresets, _this.transcodingPresets)&&const DeepCollectionEquality().equals(other.luts, _this.luts)&&(identical(other.defaultTranscodePresetId, _this.defaultTranscodePresetId) || other.defaultTranscodePresetId == _this.defaultTranscodePresetId)&&(identical(other.cpuThreads, _this.cpuThreads) || other.cpuThreads == _this.cpuThreads)&&(identical(other.appVersion, _this.appVersion) || other.appVersion == _this.appVersion)&&(identical(other.sort, _this.sort) || other.sort == _this.sort)&&(identical(other.isDebugMode, _this.isDebugMode) || other.isDebugMode == _this.isDebugMode)&&(identical(other.exportCmdOnly, _this.exportCmdOnly) || other.exportCmdOnly == _this.exportCmdOnly)&&(identical(other.customFFmpegDirectory, _this.customFFmpegDirectory) || other.customFFmpegDirectory == _this.customFFmpegDirectory)&&(identical(other.activeFFmpegDirectory, _this.activeFFmpegDirectory) || other.activeFFmpegDirectory == _this.activeFFmpegDirectory)&&(identical(other.ffmpegVersion, _this.ffmpegVersion) || other.ffmpegVersion == _this.ffmpegVersion)&&(identical(other.ffmpegSource, _this.ffmpegSource) || other.ffmpegSource == _this.ffmpegSource)&&(identical(other.ffmpegError, _this.ffmpegError) || other.ffmpegError == _this.ffmpegError));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Settings;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.transcodingPresets),const DeepCollectionEquality().hash(_this.luts),_this.defaultTranscodePresetId,_this.cpuThreads,_this.appVersion,_this.sort,_this.isDebugMode,_this.exportCmdOnly);
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.transcodingPresets),const DeepCollectionEquality().hash(_this.luts),_this.defaultTranscodePresetId,_this.cpuThreads,_this.appVersion,_this.sort,_this.isDebugMode,_this.exportCmdOnly,_this.customFFmpegDirectory,_this.activeFFmpegDirectory,_this.ffmpegVersion,_this.ffmpegSource,_this.ffmpegError);
 }
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   final _this = this as Settings;
-  return 'Settings(transcodingPresets: ${_this.transcodingPresets}, luts: ${_this.luts}, defaultTranscodePresetId: ${_this.defaultTranscodePresetId}, cpuThreads: ${_this.cpuThreads}, appVersion: ${_this.appVersion}, sort: ${_this.sort}, isDebugMode: ${_this.isDebugMode}, exportCmdOnly: ${_this.exportCmdOnly})';
+  return 'Settings(transcodingPresets: ${_this.transcodingPresets}, luts: ${_this.luts}, defaultTranscodePresetId: ${_this.defaultTranscodePresetId}, cpuThreads: ${_this.cpuThreads}, appVersion: ${_this.appVersion}, sort: ${_this.sort}, isDebugMode: ${_this.isDebugMode}, exportCmdOnly: ${_this.exportCmdOnly}, customFFmpegDirectory: ${_this.customFFmpegDirectory}, activeFFmpegDirectory: ${_this.activeFFmpegDirectory}, ffmpegVersion: ${_this.ffmpegVersion}, ffmpegSource: ${_this.ffmpegSource}, ffmpegError: ${_this.ffmpegError})';
 }
 
 
@@ -338,7 +338,7 @@ abstract mixin class $SettingsCopyWith<$Res>  {
   factory $SettingsCopyWith(Settings value, $Res Function(Settings) _then) = _$SettingsCopyWithImpl;
 @useResult
 $Res call({
- List<TranscodePreset> transcodingPresets, List<Lut> luts, int defaultTranscodePresetId, int cpuThreads, String appVersion, Sort sort, bool isDebugMode, bool exportCmdOnly
+ List<TranscodePreset> transcodingPresets, List<Lut> luts, int defaultTranscodePresetId, int cpuThreads, String appVersion, Sort sort, bool isDebugMode, bool exportCmdOnly, String customFFmpegDirectory, String activeFFmpegDirectory, String ffmpegVersion, FFmpegSource ffmpegSource, String ffmpegError
 });
 
 
@@ -355,7 +355,7 @@ class _$SettingsCopyWithImpl<$Res>
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? transcodingPresets = null,Object? luts = null,Object? defaultTranscodePresetId = null,Object? cpuThreads = null,Object? appVersion = null,Object? sort = null,Object? isDebugMode = null,Object? exportCmdOnly = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? transcodingPresets = null,Object? luts = null,Object? defaultTranscodePresetId = null,Object? cpuThreads = null,Object? appVersion = null,Object? sort = null,Object? isDebugMode = null,Object? exportCmdOnly = null,Object? customFFmpegDirectory = null,Object? activeFFmpegDirectory = null,Object? ffmpegVersion = null,Object? ffmpegSource = null,Object? ffmpegError = null,}) {
   return _then(Settings(
 transcodingPresets: null == transcodingPresets ? _self.transcodingPresets : transcodingPresets // ignore: cast_nullable_to_non_nullable
 as List<TranscodePreset>,luts: null == luts ? _self.luts : luts // ignore: cast_nullable_to_non_nullable
@@ -365,7 +365,12 @@ as int,appVersion: null == appVersion ? _self.appVersion : appVersion // ignore:
 as String,sort: null == sort ? _self.sort : sort // ignore: cast_nullable_to_non_nullable
 as Sort,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,exportCmdOnly: null == exportCmdOnly ? _self.exportCmdOnly : exportCmdOnly // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,customFFmpegDirectory: null == customFFmpegDirectory ? _self.customFFmpegDirectory : customFFmpegDirectory // ignore: cast_nullable_to_non_nullable
+as String,activeFFmpegDirectory: null == activeFFmpegDirectory ? _self.activeFFmpegDirectory : activeFFmpegDirectory // ignore: cast_nullable_to_non_nullable
+as String,ffmpegVersion: null == ffmpegVersion ? _self.ffmpegVersion : ffmpegVersion // ignore: cast_nullable_to_non_nullable
+as String,ffmpegSource: null == ffmpegSource ? _self.ffmpegSource : ffmpegSource // ignore: cast_nullable_to_non_nullable
+as FFmpegSource,ffmpegError: null == ffmpegError ? _self.ffmpegError : ffmpegError // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 /// Create a copy of Settings
@@ -459,10 +464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly,  String customFFmpegDirectory,  String activeFFmpegDirectory,  String ffmpegVersion,  FFmpegSource ffmpegSource,  String ffmpegError)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Settings() when $default != null:
-return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly);case _:
+return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly,_that.customFFmpegDirectory,_that.activeFFmpegDirectory,_that.ffmpegVersion,_that.ffmpegSource,_that.ffmpegError);case _:
   return orElse();
 
 }
@@ -480,10 +485,10 @@ return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePreset
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly,  String customFFmpegDirectory,  String activeFFmpegDirectory,  String ffmpegVersion,  FFmpegSource ffmpegSource,  String ffmpegError)  $default,) {final _that = this;
 switch (_that) {
 case _Settings():
-return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly);case _:
+return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly,_that.customFFmpegDirectory,_that.activeFFmpegDirectory,_that.ffmpegVersion,_that.ffmpegSource,_that.ffmpegError);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -500,10 +505,10 @@ return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePreset
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TranscodePreset> transcodingPresets,  List<Lut> luts,  int defaultTranscodePresetId,  int cpuThreads,  String appVersion,  Sort sort,  bool isDebugMode,  bool exportCmdOnly,  String customFFmpegDirectory,  String activeFFmpegDirectory,  String ffmpegVersion,  FFmpegSource ffmpegSource,  String ffmpegError)?  $default,) {final _that = this;
 switch (_that) {
 case _Settings() when $default != null:
-return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly);case _:
+return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePresetId,_that.cpuThreads,_that.appVersion,_that.sort,_that.isDebugMode,_that.exportCmdOnly,_that.customFFmpegDirectory,_that.activeFFmpegDirectory,_that.ffmpegVersion,_that.ffmpegSource,_that.ffmpegError);case _:
   return null;
 
 }
@@ -515,7 +520,7 @@ return $default(_that.transcodingPresets,_that.luts,_that.defaultTranscodePreset
 
 
 class _Settings with DiagnosticableTreeMixin implements Settings {
-  const _Settings({ List<TranscodePreset> transcodingPresets = const <TranscodePreset>[],  List<Lut> luts = const <Lut>[], this.defaultTranscodePresetId = 0, this.cpuThreads = 1, this.appVersion = '0.0.0', this.sort = const Sort(), this.isDebugMode = kDebugMode, this.exportCmdOnly = false}): _transcodingPresets = transcodingPresets,_luts = luts;
+  const _Settings({ List<TranscodePreset> transcodingPresets = const <TranscodePreset>[],  List<Lut> luts = const <Lut>[], this.defaultTranscodePresetId = 0, this.cpuThreads = 1, this.appVersion = '0.0.0', this.sort = const Sort(), this.isDebugMode = kDebugMode, this.exportCmdOnly = false, this.customFFmpegDirectory = '', this.activeFFmpegDirectory = '', this.ffmpegVersion = '', this.ffmpegSource = FFmpegSource.unavailable, this.ffmpegError = ''}): _transcodingPresets = transcodingPresets,_luts = luts;
 
 
  final  List<TranscodePreset> _transcodingPresets;
@@ -538,6 +543,11 @@ class _Settings with DiagnosticableTreeMixin implements Settings {
 @override@JsonKey() final  Sort sort;
 @override@JsonKey() final  bool isDebugMode;
 @override@JsonKey() final  bool exportCmdOnly;
+@override@JsonKey() final  String customFFmpegDirectory;
+@override@JsonKey() final  String activeFFmpegDirectory;
+@override@JsonKey() final  String ffmpegVersion;
+@override@JsonKey() final  FFmpegSource ffmpegSource;
+@override@JsonKey() final  String ffmpegError;
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
@@ -550,23 +560,23 @@ _$SettingsCopyWith<_Settings> get copyWith => __$SettingsCopyWithImpl<_Settings>
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties
     ..add(DiagnosticsProperty('type', 'Settings'))
-    ..add(DiagnosticsProperty('transcodingPresets', transcodingPresets))..add(DiagnosticsProperty('luts', luts))..add(DiagnosticsProperty('defaultTranscodePresetId', defaultTranscodePresetId))..add(DiagnosticsProperty('cpuThreads', cpuThreads))..add(DiagnosticsProperty('appVersion', appVersion))..add(DiagnosticsProperty('sort', sort))..add(DiagnosticsProperty('isDebugMode', isDebugMode))..add(DiagnosticsProperty('exportCmdOnly', exportCmdOnly));
+    ..add(DiagnosticsProperty('transcodingPresets', transcodingPresets))..add(DiagnosticsProperty('luts', luts))..add(DiagnosticsProperty('defaultTranscodePresetId', defaultTranscodePresetId))..add(DiagnosticsProperty('cpuThreads', cpuThreads))..add(DiagnosticsProperty('appVersion', appVersion))..add(DiagnosticsProperty('sort', sort))..add(DiagnosticsProperty('isDebugMode', isDebugMode))..add(DiagnosticsProperty('exportCmdOnly', exportCmdOnly))..add(DiagnosticsProperty('customFFmpegDirectory', customFFmpegDirectory))..add(DiagnosticsProperty('activeFFmpegDirectory', activeFFmpegDirectory))..add(DiagnosticsProperty('ffmpegVersion', ffmpegVersion))..add(DiagnosticsProperty('ffmpegSource', ffmpegSource))..add(DiagnosticsProperty('ffmpegError', ffmpegError));
 }
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settings&&const DeepCollectionEquality().equals(other.transcodingPresets, _transcodingPresets)&&const DeepCollectionEquality().equals(other.luts, _luts)&&(identical(other.defaultTranscodePresetId, defaultTranscodePresetId) || other.defaultTranscodePresetId == defaultTranscodePresetId)&&(identical(other.cpuThreads, cpuThreads) || other.cpuThreads == cpuThreads)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.exportCmdOnly, exportCmdOnly) || other.exportCmdOnly == exportCmdOnly));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Settings&&const DeepCollectionEquality().equals(other.transcodingPresets, _transcodingPresets)&&const DeepCollectionEquality().equals(other.luts, _luts)&&(identical(other.defaultTranscodePresetId, defaultTranscodePresetId) || other.defaultTranscodePresetId == defaultTranscodePresetId)&&(identical(other.cpuThreads, cpuThreads) || other.cpuThreads == cpuThreads)&&(identical(other.appVersion, appVersion) || other.appVersion == appVersion)&&(identical(other.sort, sort) || other.sort == sort)&&(identical(other.isDebugMode, isDebugMode) || other.isDebugMode == isDebugMode)&&(identical(other.exportCmdOnly, exportCmdOnly) || other.exportCmdOnly == exportCmdOnly)&&(identical(other.customFFmpegDirectory, customFFmpegDirectory) || other.customFFmpegDirectory == customFFmpegDirectory)&&(identical(other.activeFFmpegDirectory, activeFFmpegDirectory) || other.activeFFmpegDirectory == activeFFmpegDirectory)&&(identical(other.ffmpegVersion, ffmpegVersion) || other.ffmpegVersion == ffmpegVersion)&&(identical(other.ffmpegSource, ffmpegSource) || other.ffmpegSource == ffmpegSource)&&(identical(other.ffmpegError, ffmpegError) || other.ffmpegError == ffmpegError));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_transcodingPresets),const DeepCollectionEquality().hash(_luts),defaultTranscodePresetId,cpuThreads,appVersion,sort,isDebugMode,exportCmdOnly);
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_transcodingPresets),const DeepCollectionEquality().hash(_luts),defaultTranscodePresetId,cpuThreads,appVersion,sort,isDebugMode,exportCmdOnly,customFFmpegDirectory,activeFFmpegDirectory,ffmpegVersion,ffmpegSource,ffmpegError);
 }
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode, exportCmdOnly: $exportCmdOnly)';
+    return 'Settings(transcodingPresets: $transcodingPresets, luts: $luts, defaultTranscodePresetId: $defaultTranscodePresetId, cpuThreads: $cpuThreads, appVersion: $appVersion, sort: $sort, isDebugMode: $isDebugMode, exportCmdOnly: $exportCmdOnly, customFFmpegDirectory: $customFFmpegDirectory, activeFFmpegDirectory: $activeFFmpegDirectory, ffmpegVersion: $ffmpegVersion, ffmpegSource: $ffmpegSource, ffmpegError: $ffmpegError)';
 }
 
 
@@ -577,7 +587,7 @@ abstract mixin class _$SettingsCopyWith<$Res> implements $SettingsCopyWith<$Res>
   factory _$SettingsCopyWith(_Settings value, $Res Function(_Settings) _then) = __$SettingsCopyWithImpl;
 @override @useResult
 $Res call({
- List<TranscodePreset> transcodingPresets, List<Lut> luts, int defaultTranscodePresetId, int cpuThreads, String appVersion, Sort sort, bool isDebugMode, bool exportCmdOnly
+ List<TranscodePreset> transcodingPresets, List<Lut> luts, int defaultTranscodePresetId, int cpuThreads, String appVersion, Sort sort, bool isDebugMode, bool exportCmdOnly, String customFFmpegDirectory, String activeFFmpegDirectory, String ffmpegVersion, FFmpegSource ffmpegSource, String ffmpegError
 });
 
 
@@ -594,7 +604,7 @@ class __$SettingsCopyWithImpl<$Res>
 
 /// Create a copy of Settings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? transcodingPresets = null,Object? luts = null,Object? defaultTranscodePresetId = null,Object? cpuThreads = null,Object? appVersion = null,Object? sort = null,Object? isDebugMode = null,Object? exportCmdOnly = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? transcodingPresets = null,Object? luts = null,Object? defaultTranscodePresetId = null,Object? cpuThreads = null,Object? appVersion = null,Object? sort = null,Object? isDebugMode = null,Object? exportCmdOnly = null,Object? customFFmpegDirectory = null,Object? activeFFmpegDirectory = null,Object? ffmpegVersion = null,Object? ffmpegSource = null,Object? ffmpegError = null,}) {
   return _then(_Settings(
 transcodingPresets: null == transcodingPresets ? _self._transcodingPresets : transcodingPresets // ignore: cast_nullable_to_non_nullable
 as List<TranscodePreset>,luts: null == luts ? _self._luts : luts // ignore: cast_nullable_to_non_nullable
@@ -604,7 +614,12 @@ as int,appVersion: null == appVersion ? _self.appVersion : appVersion // ignore:
 as String,sort: null == sort ? _self.sort : sort // ignore: cast_nullable_to_non_nullable
 as Sort,isDebugMode: null == isDebugMode ? _self.isDebugMode : isDebugMode // ignore: cast_nullable_to_non_nullable
 as bool,exportCmdOnly: null == exportCmdOnly ? _self.exportCmdOnly : exportCmdOnly // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,customFFmpegDirectory: null == customFFmpegDirectory ? _self.customFFmpegDirectory : customFFmpegDirectory // ignore: cast_nullable_to_non_nullable
+as String,activeFFmpegDirectory: null == activeFFmpegDirectory ? _self.activeFFmpegDirectory : activeFFmpegDirectory // ignore: cast_nullable_to_non_nullable
+as String,ffmpegVersion: null == ffmpegVersion ? _self.ffmpegVersion : ffmpegVersion // ignore: cast_nullable_to_non_nullable
+as String,ffmpegSource: null == ffmpegSource ? _self.ffmpegSource : ffmpegSource // ignore: cast_nullable_to_non_nullable
+as FFmpegSource,ffmpegError: null == ffmpegError ? _self.ffmpegError : ffmpegError // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

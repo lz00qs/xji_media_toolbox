@@ -4,12 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:toastification/toastification.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:fvp/fvp.dart' as fvp;
+import 'package:xji_footage_toolbox/models/ffmpeg_configuration.dart';
 import 'package:xji_footage_toolbox/ui/pages/ffmpeg_not_available_page.dart';
 import 'package:xji_footage_toolbox/ui/pages/main_page.dart';
 import 'package:xji_footage_toolbox/ui/main_page_app_bar.dart';
 import 'package:xji_footage_toolbox/ui/task_drawer.dart';
-import 'package:xji_footage_toolbox/utils/ffmpeg_utils.dart';
-
 import 'package:xji_footage_toolbox/providers/settings.notifier.dart';
 import 'package:xji_footage_toolbox/utils/logger.dart';
 
@@ -47,9 +46,6 @@ Future<void> main() async {
     Logger.setLogLevel(LogLevel.debug);
     Logger.debug('Debug mode enabled');
   }
-  //
-  final isFFmpegAvailable = await FFmpegUtils.checkFFmpeg();
-
   final container = ProviderContainer();
 
   await container.read(settingsProvider.notifier).initSettings();
@@ -60,7 +56,7 @@ Future<void> main() async {
         container: container,
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
-          home: MyApp(isFFmpegAvailable: isFFmpegAvailable),
+          home: const MyApp(),
         ),
       ),
     ),
@@ -68,12 +64,15 @@ Future<void> main() async {
 }
 
 class MyApp extends ConsumerWidget {
-  final bool isFFmpegAvailable;
-
-  const MyApp({super.key, required this.isFFmpegAvailable});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isFFmpegAvailable = ref.watch(
+      settingsProvider.select(
+        (settings) => settings.ffmpegSource != FFmpegSource.unavailable,
+      ),
+    );
     // final isLoading =
     //     ref.watch(mediaResourcesProvider.select((state) => state.isLoading));
 

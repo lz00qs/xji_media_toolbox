@@ -8,12 +8,12 @@ void main() {
     await tester.pumpWidget(
       const ProviderScope(
         child: MaterialApp(
-          home: MyApp(isFFmpegAvailable: true),
+          home: MyApp(),
         ),
       ),
     );
 
     expect(find.byType(MyApp), findsOneWidget);
-    expect(find.byType(Scaffold), findsOneWidget);
+    expect(find.byType(Scaffold), findsWidgets);
   });
 }

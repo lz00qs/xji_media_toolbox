@@ -1,46 +1,179 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p;
+
+import '../models/ffmpeg_configuration.dart';
 
 class FFmpegUtils {
-  static var ffmpeg = '';
-  static var ffprobe = '';
+  static FFmpegConfiguration _configuration =
+      const FFmpegConfiguration.unavailable();
 
-  static Future<bool> checkFFmpeg() async {
-    if (Platform.isMacOS) {
-      if (File('/opt/homebrew/bin/ffmpeg').existsSync() &&
-          File('/opt/homebrew/bin/ffprobe').existsSync()) {
-        ffmpeg = '/opt/homebrew/bin/ffmpeg';
-        ffprobe = '/opt/homebrew/bin/ffprobe';
-        return true;
-      } else if (File('/usr/bin/ffmpeg').existsSync() &&
-          File('/usr/bin/ffprobe').existsSync()) {
-        ffmpeg = '/usr/bin/ffmpeg';
-        ffprobe = '/usr/bin/ffprobe';
-        return true;
-      }
-    } else if (Platform.isWindows) {
-      if (kDebugMode) {
-        if (File('assets/windows/ffmpeg/ffmpeg.exe').existsSync() &&
-            File('assets/windows/ffmpeg/ffprobe.exe').existsSync()) {
-          ffmpeg = 'assets/windows/ffmpeg/ffmpeg.exe';
-          ffprobe = 'assets/windows/ffmpeg/ffprobe.exe';
-          return true;
-        }
-      } else {
-        String appPath = Platform.resolvedExecutable;
-        appPath = appPath.substring(0, appPath.lastIndexOf("\\"));
-        String assetsPath =
-            '$appPath\\data\\flutter_assets\\assets\\windows\\ffmpeg\\';
-        ffmpeg = '$assetsPath\\ffmpeg.exe';
-        ffprobe = '$assetsPath\\ffprobe.exe';
-        if (File(ffmpeg).existsSync() && File(ffprobe).existsSync()) {
-          return true;
-        }
-        ffmpeg = '';
-        ffprobe = '';
-      }
+  static FFmpegConfiguration get configuration => _configuration;
+  static String get ffmpeg => _configuration.ffmpegPath;
+  static String get ffprobe => _configuration.ffprobePath;
+
+  static Future<FFmpegConfiguration> initialize({
+    String customDirectory = '',
+  }) async {
+    if (customDirectory.trim().isNotEmpty) {
+      final custom = await inspectDirectory(
+        customDirectory,
+        source: FFmpegSource.custom,
+      );
+      if (custom.isAvailable) return _activate(custom);
     }
-    return false;
+
+    return useBundled();
+  }
+
+  static Future<FFmpegConfiguration> useCustom(String directory) async {
+    final result = await inspectDirectory(
+      directory,
+      source: FFmpegSource.custom,
+    );
+    return result.isAvailable ? _activate(result) : result;
+  }
+
+  static Future<FFmpegConfiguration> useBundled() async {
+    final directory = bundledDirectory();
+    if (directory == null) {
+      return _activate(
+        const FFmpegConfiguration.unavailable(
+          'Bundled FFmpeg is not supported on this platform.',
+        ),
+      );
+    }
+
+    final result = await inspectDirectory(
+      directory,
+      source: FFmpegSource.bundled,
+    );
+    return _activate(result);
+  }
+
+  @visibleForTesting
+  static String? bundledDirectory({
+    String? executablePath,
+    String? workingDirectory,
+    bool? debugMode,
+  }) {
+    if (!Platform.isMacOS && !Platform.isWindows) return null;
+
+    if (debugMode ?? kDebugMode) {
+      return p.join(
+        workingDirectory ?? Directory.current.path,
+        'assets',
+        Platform.isWindows ? 'windows' : 'macos',
+        'ffmpeg',
+      );
+    }
+
+    final executableDirectory = p.dirname(
+      executablePath ?? Platform.resolvedExecutable,
+    );
+    if (Platform.isWindows) return p.join(executableDirectory, 'ffmpeg');
+    return p.normalize(p.join(executableDirectory, '..', 'Helpers'));
+  }
+
+  @visibleForTesting
+  static Future<FFmpegConfiguration> inspectDirectory(
+    String directory, {
+    required FFmpegSource source,
+  }) async {
+    final normalizedDirectory = p.normalize(p.absolute(directory.trim()));
+    final executableSuffix = Platform.isWindows ? '.exe' : '';
+    final ffmpegPath = p.join(normalizedDirectory, 'ffmpeg$executableSuffix');
+    final ffprobePath = p.join(normalizedDirectory, 'ffprobe$executableSuffix');
+
+    if (!File(ffmpegPath).existsSync() || !File(ffprobePath).existsSync()) {
+      return FFmpegConfiguration.unavailable(
+        'The selected directory must contain both '
+        'ffmpeg$executableSuffix and ffprobe$executableSuffix.',
+      );
+    }
+
+    try {
+      final ffmpegVersion = await Process.run(ffmpegPath, const ['-version']);
+      if (ffmpegVersion.exitCode != 0) {
+        return FFmpegConfiguration.unavailable(
+          'FFmpeg could not be started: ${_processError(ffmpegVersion)}',
+        );
+      }
+
+      final ffprobeVersion = await Process.run(ffprobePath, const ['-version']);
+      if (ffprobeVersion.exitCode != 0) {
+        return FFmpegConfiguration.unavailable(
+          'FFprobe could not be started: ${_processError(ffprobeVersion)}',
+        );
+      }
+
+      final encoders = await Process.run(ffmpegPath, const [
+        '-hide_banner',
+        '-encoders',
+      ]);
+      final filters = await Process.run(ffmpegPath, const [
+        '-hide_banner',
+        '-filters',
+      ]);
+      final encodersOutput = '${encoders.stdout}\n${encoders.stderr}';
+      final filtersOutput = '${filters.stdout}\n${filters.stderr}';
+      if (encoders.exitCode != 0) {
+        return FFmpegConfiguration.unavailable(
+          'Unable to inspect FFmpeg encoders: ${_processError(encoders)}',
+        );
+      }
+      if (filters.exitCode != 0) {
+        return FFmpegConfiguration.unavailable(
+          'Unable to inspect FFmpeg filters: ${_processError(filters)}',
+        );
+      }
+
+      final missingFeatures = <String>[
+        if (!encodersOutput.contains('libx264')) 'libx264',
+        if (!encodersOutput.contains('libx265')) 'libx265',
+        if (!RegExp(r'\blut3d\b').hasMatch(filtersOutput)) 'lut3d',
+        if (!RegExp(r'\bscale\b').hasMatch(filtersOutput)) 'scale',
+      ];
+      if (missingFeatures.isNotEmpty) {
+        return FFmpegConfiguration.unavailable(
+          'This FFmpeg build is missing required features: '
+          '${missingFeatures.join(', ')}.',
+        );
+      }
+
+      return FFmpegConfiguration(
+        source: source,
+        directory: normalizedDirectory,
+        ffmpegPath: ffmpegPath,
+        ffprobePath: ffprobePath,
+        version: _parseVersion(ffmpegVersion.stdout.toString()),
+      );
+    } on ProcessException catch (error) {
+      return FFmpegConfiguration.unavailable(
+        'Unable to run FFmpeg from this directory: ${error.message}',
+      );
+    } on FileSystemException catch (error) {
+      return FFmpegConfiguration.unavailable(
+        'Unable to access this FFmpeg directory: ${error.message}',
+      );
+    }
+  }
+
+  static FFmpegConfiguration _activate(FFmpegConfiguration configuration) {
+    _configuration = configuration;
+    return configuration;
+  }
+
+  static String _parseVersion(String output) {
+    final firstLine = output.split(RegExp(r'\r?\n')).firstOrNull ?? '';
+    final match = RegExp(r'^ffmpeg version\s+([^\s]+)').firstMatch(firstLine);
+    return match?.group(1) ?? 'Unknown';
+  }
+
+  static String _processError(ProcessResult result) {
+    final stderr = result.stderr.toString().trim();
+    if (stderr.isNotEmpty) return stderr;
+    return 'exit code ${result.exitCode}';
   }
 }

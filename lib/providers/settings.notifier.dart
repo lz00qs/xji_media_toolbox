@@ -9,9 +9,11 @@ import 'package:xji_footage_toolbox/utils/logger.dart';
 import 'package:xji_footage_toolbox/utils/toast.dart';
 
 import '../constants.dart';
+import '../models/ffmpeg_configuration.dart';
 import '../models/lut.model.dart';
 import '../models/settings.model.dart';
 import '../models/transcode_preset.model.dart';
+import '../utils/ffmpeg_utils.dart';
 
 part 'settings.notifier.g.dart';
 
@@ -52,6 +54,18 @@ class SettingsNotifier extends _$SettingsNotifier {
     }
 
     final exportCmdOnly = _prefs.getBool(exportCmdOnlyPrefKey) ?? false;
+    final customFFmpegDirectory =
+        _prefs.getString(customFFmpegDirectoryPrefKey) ?? '';
+    final ffmpegConfiguration = await FFmpegUtils.initialize(
+      customDirectory: customFFmpegDirectory,
+    );
+    if (customFFmpegDirectory.isNotEmpty &&
+        ffmpegConfiguration.source != FFmpegSource.custom) {
+      Logger.warn(
+        'Custom FFmpeg is unavailable; using the bundled runtime instead: '
+        '$customFFmpegDirectory',
+      );
+    }
     final sortType = SortType.values[_prefs.getInt(sortTypePrefKey) ?? 0];
     final sortAsc = _prefs.getBool(sortOderPrefKey) ?? true;
     final cpuThreads = Platform.numberOfProcessors;
@@ -65,6 +79,11 @@ class SettingsNotifier extends _$SettingsNotifier {
       cpuThreads: cpuThreads,
       appVersion: appVersion.version,
       exportCmdOnly: exportCmdOnly,
+      customFFmpegDirectory: customFFmpegDirectory,
+      activeFFmpegDirectory: ffmpegConfiguration.directory,
+      ffmpegVersion: ffmpegConfiguration.version,
+      ffmpegSource: ffmpegConfiguration.source,
+      ffmpegError: ffmpegConfiguration.errorMessage,
     );
   }
 
@@ -237,5 +256,42 @@ class SettingsNotifier extends _$SettingsNotifier {
   void setExportCmdOnly(bool value) {
     state = state.copyWith(exportCmdOnly: value);
     _prefs.setBool(exportCmdOnlyPrefKey, value);
+  }
+
+  Future<String?> setCustomFFmpegDirectory(String directory) async {
+    final configuration = await FFmpegUtils.useCustom(directory);
+    if (!configuration.isAvailable) return configuration.errorMessage;
+
+    await _prefs.setString(
+      customFFmpegDirectoryPrefKey,
+      configuration.directory,
+    );
+    _setFFmpegConfiguration(
+      configuration,
+      customDirectory: configuration.directory,
+    );
+    return null;
+  }
+
+  Future<String?> useBundledFFmpeg() async {
+    final configuration = await FFmpegUtils.useBundled();
+    if (!configuration.isAvailable) return configuration.errorMessage;
+
+    await _prefs.remove(customFFmpegDirectoryPrefKey);
+    _setFFmpegConfiguration(configuration, customDirectory: '');
+    return null;
+  }
+
+  void _setFFmpegConfiguration(
+    FFmpegConfiguration configuration, {
+    required String customDirectory,
+  }) {
+    state = state.copyWith(
+      customFFmpegDirectory: customDirectory,
+      activeFFmpegDirectory: configuration.directory,
+      ffmpegVersion: configuration.version,
+      ffmpegSource: configuration.source,
+      ffmpegError: configuration.errorMessage,
+    );
   }
 }

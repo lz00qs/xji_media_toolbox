@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  FLUTTER_VERSION: 3.38.5
+  FLUTTER_VERSION: 3.47.2
   PYTHON_VERSION: '3.13'
 
 jobs:
@@ -87,7 +87,7 @@ jobs:
       # Windows
       - name: Build Windows App
         if: matrix.os == 'windows-latest'
-        run: flutter build windows --release
+        run: python build.py --build windows
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -107,4 +107,5 @@ flutter:
   # see https://flutter.dev/custom-fonts/#from-packages
   assets:
     - assets/common/images/
-    - assets/windows/ffmpeg/
+    - assets/common/licenses/ffmpeg/
+    - THIRD_PARTY_NOTICES.md
