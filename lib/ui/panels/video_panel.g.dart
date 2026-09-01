@@ -10,23 +10,30 @@ part of 'video_panel.dart';
 // ignore_for_file: type=lint, type=warning
 
 @ProviderFor(VideoPanelNotifier)
-final videoPanelProvider = VideoPanelNotifierProvider._();
+final videoPanelProvider = VideoPanelNotifierFamily._();
 
 final class VideoPanelNotifierProvider
     extends $NotifierProvider<VideoPanelNotifier, bool> {
-  VideoPanelNotifierProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'videoPanelProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
+  VideoPanelNotifierProvider._({
+    required VideoPanelNotifierFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'videoPanelProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
 
   @override
   String debugGetCreateSourceHash() => _$videoPanelNotifierHash();
+
+  @override
+  String toString() {
+    return r'videoPanelProvider'
+        ''
+        '($argument)';
+  }
 
   @$internal
   @override
@@ -39,13 +46,44 @@ final class VideoPanelNotifierProvider
       providerOverride: $SyncValueProvider<bool>(value),
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    return other is VideoPanelNotifierProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
 }
 
 String _$videoPanelNotifierHash() =>
-    r'd772dcb666c0f38aecfb71604416165b9dcf8dc8';
+    r'e0d19e7c4a538a382191b33b6ab57447ba4f3133';
+
+final class VideoPanelNotifierFamily extends $Family
+    with $ClassFamilyOverride<VideoPanelNotifier, bool, bool, bool, String> {
+  VideoPanelNotifierFamily._()
+    : super(
+        retry: null,
+        name: r'videoPanelProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  VideoPanelNotifierProvider call(String videoPath) =>
+      VideoPanelNotifierProvider._(argument: videoPath, from: this);
+
+  @override
+  String toString() => r'videoPanelProvider';
+}
 
 abstract class _$VideoPanelNotifier extends $Notifier<bool> {
-  bool build();
+  late final _$args = ref.$arg as String;
+  String get videoPath => _$args;
+
+  bool build(String videoPath);
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -58,6 +96,6 @@ abstract class _$VideoPanelNotifier extends $Notifier<bool> {
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, build);
+    return element.handleCreate(ref, () => build(_$args));
   }
 }

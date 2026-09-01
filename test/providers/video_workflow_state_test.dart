@@ -30,22 +30,48 @@ void main() {
   test('toggles player/trimmer and multi-select merge modes independently', () {
     final container = ProviderContainer();
     addTearDown(container.dispose);
-    final videoSubscription = container.listen(videoPanelProvider, (_, _) {});
+    const firstVideoPath = '/videos/first.mp4';
+    final videoSubscription = container.listen(
+      videoPanelProvider(firstVideoPath),
+      (_, _) {},
+    );
     final mergeSubscription = container.listen(isMergingProvider, (_, _) {});
     addTearDown(videoSubscription.close);
     addTearDown(mergeSubscription.close);
 
-    expect(container.read(videoPanelProvider), isFalse);
+    expect(container.read(videoPanelProvider(firstVideoPath)), isFalse);
     expect(container.read(isMergingProvider), isFalse);
-    container.read(videoPanelProvider.notifier).toggle();
-    expect(container.read(videoPanelProvider), isTrue);
+    container.read(videoPanelProvider(firstVideoPath).notifier).toggle();
+    expect(container.read(videoPanelProvider(firstVideoPath)), isTrue);
     expect(container.read(isMergingProvider), isFalse);
     container.read(isMergingProvider.notifier).toggle();
-    expect(container.read(videoPanelProvider), isTrue);
+    expect(container.read(videoPanelProvider(firstVideoPath)), isTrue);
     expect(container.read(isMergingProvider), isTrue);
-    container.read(videoPanelProvider.notifier).toggle();
+    container.read(videoPanelProvider(firstVideoPath).notifier).toggle();
     container.read(isMergingProvider.notifier).toggle();
-    expect(container.read(videoPanelProvider), isFalse);
+    expect(container.read(videoPanelProvider(firstVideoPath)), isFalse);
     expect(container.read(isMergingProvider), isFalse);
+  });
+
+  test('switching videos starts the next video outside trim mode', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    const firstVideoPath = '/videos/first.mp4';
+    const nextVideoPath = '/videos/next.mp4';
+    final firstSubscription = container.listen(
+      videoPanelProvider(firstVideoPath),
+      (_, _) {},
+    );
+    final nextSubscription = container.listen(
+      videoPanelProvider(nextVideoPath),
+      (_, _) {},
+    );
+    addTearDown(firstSubscription.close);
+    addTearDown(nextSubscription.close);
+
+    container.read(videoPanelProvider(firstVideoPath).notifier).toggle();
+
+    expect(container.read(videoPanelProvider(firstVideoPath)), isTrue);
+    expect(container.read(videoPanelProvider(nextVideoPath)), isFalse);
   });
 }

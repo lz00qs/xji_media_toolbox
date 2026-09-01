@@ -717,8 +717,9 @@ class VideoTrimmerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.arrow_back_ios_new,
                     onPressed: () async {
-                      // ref.read(mediaResourcesProvider.notifier).setIsEditing(false);
-                      ref.read(videoPanelProvider.notifier).toggle();
+                      ref
+                          .read(videoPanelProvider(resource.file.path).notifier)
+                          .toggle();
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,

@@ -10,7 +10,7 @@ part 'video_panel.g.dart';
 @riverpod
 class VideoPanelNotifier extends _$VideoPanelNotifier {
   @override
-  bool build() => false;
+  bool build(String videoPath) => false;
 
   void toggle() {
     state = !state;
@@ -24,7 +24,7 @@ class VideoPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final showTrimmer = ref.watch(videoPanelProvider);
+    final showTrimmer = ref.watch(videoPanelProvider(resource.file.path));
     return showTrimmer
         ? VideoTrimmerPanel(resource: resource)
         : VideoPlayerPanel(videoResource: resource);

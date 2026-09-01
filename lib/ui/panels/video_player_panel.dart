@@ -97,7 +97,11 @@ class VideoPlayerPanel extends ConsumerWidget {
                 CustomIconButton(
                     iconData: Icons.cut,
                     onPressed: () async {
-                      ref.read(videoPanelProvider.notifier).toggle();
+                      ref
+                          .read(videoPanelProvider(
+                                  videoResource.file.path)
+                              .notifier)
+                          .toggle();
                     },
                     iconSize: DesignValues.mediumIconSize,
                     buttonSize: DesignValues.appBarHeight,
