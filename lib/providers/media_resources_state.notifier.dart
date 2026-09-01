@@ -9,6 +9,7 @@ import '../constants.dart';
 import '../models/media_resource.model.dart';
 import '../models/media_resources_state.model.dart';
 import '../models/settings.model.dart';
+import '../services/file_trash_service.dart';
 import '../services/media_analyzer.dart';
 import '../utils/toast.dart';
 
@@ -22,12 +23,15 @@ var _processedMediaResourcesCount = 0;
 class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
   MediaResourcesStateNotifier({
     MediaAnalyzer? analyzer,
+    FileTrashService? fileTrashService,
     this.initialState,
     void Function(String message)? showError,
   }) : _analyzer = analyzer ?? MediaAnalyzer(),
+       _fileTrashService = fileTrashService ?? const PlatformFileTrashService(),
        _showError = showError ?? Toast.error;
 
   final MediaAnalyzer _analyzer;
+  final FileTrashService _fileTrashService;
   final MediaResourcesState? initialState;
   final void Function(String message) _showError;
 
@@ -298,69 +302,91 @@ class MediaResourcesStateNotifier extends _$MediaResourcesStateNotifier {
 
   Future<void> _deleteResource(MediaResource mediaResource) async {
     final mediaResourceIndex = state.resources.indexOf(mediaResource);
-    if (mediaResourceIndex != -1) {
-      var nextCurrentIndex = state.currentResourceIndex;
-      if (mediaResourceIndex < nextCurrentIndex) {
-        nextCurrentIndex--;
-      } else if (mediaResourceIndex == nextCurrentIndex &&
-          mediaResourceIndex == state.resources.length - 1) {
-        nextCurrentIndex = (nextCurrentIndex - 1).clamp(
-          0,
-          state.resources.length,
+    if (mediaResourceIndex == -1) return;
+
+    final files = switch (mediaResource) {
+      PhotoResource() || VideoResource() => [mediaResource.file],
+      AebPhotoResource() =>
+        mediaResource.aebResources.isEmpty
+            ? [mediaResource.file]
+            : mediaResource.aebResources.map((item) => item.file).toList(),
+    };
+
+    for (final (index, file) in files.indexed) {
+      try {
+        await _fileTrashService.moveFileToTrash(file);
+      } catch (error, stackTrace) {
+        final fileName = p.basename(file.path);
+        Logger.error(
+          'Move media resource $fileName to trash failed',
+          error,
+          stackTrace,
         );
-      }
-      state = state.copyWith(
-        resources: state.resources.where((e) => e != mediaResource).toList(),
-        selectedResources: state.selectedResources
-            .where((e) => e != mediaResource)
-            .toList(),
-        currentResourceIndex: nextCurrentIndex,
-      );
-      switch (mediaResource) {
-        case PhotoResource():
-        case VideoResource():
-          try {
-            await mediaResource.file.delete();
-          } catch (e) {
-            Logger.error(
-              'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e',
-            );
-            _showError(
-              'Delete media resource ${mediaResource.file.uri.pathSegments.last} failed: $e',
-            );
-          }
-          if (mediaResource is VideoResource) {
-            try {
-              await mediaResource.thumbFile.delete();
-            } catch (e) {
-              Logger.error(
-                'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e',
-              );
-              _showError(
-                'Delete media resource thumbnail ${mediaResource.thumbFile.uri.pathSegments.last} failed: $e',
-              );
-            }
-          }
-          break;
-        case AebPhotoResource():
-          final members = mediaResource.aebResources.isEmpty
-              ? [mediaResource]
-              : mediaResource.aebResources;
-          for (final aebResource in members) {
-            try {
-              await aebResource.file.delete();
-            } catch (e) {
-              Logger.error(
-                'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e',
-              );
-              _showError(
-                'Delete media resource ${aebResource.file.uri.pathSegments.last} failed: $e',
-              );
-            }
-          }
-          break;
+        _showError('Move media resource $fileName to trash failed: $error');
+        if (index > 0 && mediaResource is AebPhotoResource) {
+          _retainUnmovedAebMembers(mediaResource, index);
+        }
+        return;
       }
     }
+
+    if (mediaResource is VideoResource) {
+      try {
+        if (await mediaResource.thumbFile.exists()) {
+          await mediaResource.thumbFile.delete();
+        }
+      } catch (error, stackTrace) {
+        Logger.error(
+          'Delete media resource thumbnail '
+          '${p.basename(mediaResource.thumbFile.path)} failed',
+          error,
+          stackTrace,
+        );
+      }
+    }
+
+    var nextCurrentIndex = state.currentResourceIndex;
+    if (mediaResourceIndex < nextCurrentIndex) {
+      nextCurrentIndex--;
+    } else if (mediaResourceIndex == nextCurrentIndex &&
+        mediaResourceIndex == state.resources.length - 1) {
+      nextCurrentIndex = (nextCurrentIndex - 1).clamp(
+        0,
+        state.resources.length,
+      );
+    }
+    state = state.copyWith(
+      resources: state.resources.where((e) => e != mediaResource).toList(),
+      selectedResources: state.selectedResources
+          .where((e) => e != mediaResource)
+          .toList(),
+      currentResourceIndex: nextCurrentIndex,
+    );
+  }
+
+  void _retainUnmovedAebMembers(
+    AebPhotoResource mediaResource,
+    int movedMemberCount,
+  ) {
+    final members = mediaResource.aebResources.isEmpty
+        ? [mediaResource]
+        : mediaResource.aebResources;
+    final remainingMembers = members.skip(movedMemberCount).toList();
+    final replacement = remainingMembers.first.copyWith(
+      aebResources: remainingMembers,
+    );
+    final isCurrentResource =
+        state.resources.indexOf(mediaResource) == state.currentResourceIndex;
+
+    state = state.copyWith(
+      resources: state.resources
+          .map((item) => item == mediaResource ? replacement : item)
+          .toList(),
+      selectedResources: state.selectedResources
+          .map((item) => item == mediaResource ? replacement : item)
+          .toList(),
+      currentAebIndex: isCurrentResource ? 0 : state.currentAebIndex,
+    );
   }
 
   Future<void> deleteCurrentMediaResource() async {

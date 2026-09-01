@@ -32,9 +32,9 @@ class MediaResourceDeleteDialog extends ConsumerWidget {
     return DualOptionDialog(
       width: 400,
       height: 240,
-      title: 'Delete',
+      title: 'Move to Trash',
       option1: 'Cancel',
-      option2: 'Delete',
+      option2: 'Move',
       onOption1Pressed: () {
         Navigator.of(context).pop(false);
       },
@@ -44,12 +44,13 @@ class MediaResourceDeleteDialog extends ConsumerWidget {
       child: isMultipleSelection
           ? _ConfirmText(
               text:
-                  'Are you sure you want to delete these '
+                  'Move these '
                   '$mediaResourcesLength'
-                  ' media resources?',
+                  ' media resources to the system Trash or Recycle Bin?',
             )
           : const _ConfirmText(
-              text: 'Are you sure you want to delete this media resource?',
+              text:
+                  'Move this media resource to the system Trash or Recycle Bin?',
             ),
     );
   }

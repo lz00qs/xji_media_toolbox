@@ -89,10 +89,10 @@ void main() {
       onResult: (value) => result = value,
     );
     expect(
-      find.text('Are you sure you want to delete this media resource?'),
+      find.text('Move this media resource to the system Trash or Recycle Bin?'),
       findsOneWidget,
     );
-    await tester.tap(find.widgetWithText(TextButton, 'Delete'));
+    await tester.tap(find.widgetWithText(TextButton, 'Move'));
     await tester.pumpAndSettle();
     expect(result, isTrue);
 
@@ -103,7 +103,9 @@ void main() {
       onResult: (value) => result = value,
     );
     expect(
-      find.text('Are you sure you want to delete these 3 media resources?'),
+      find.text(
+        'Move these 3 media resources to the system Trash or Recycle Bin?',
+      ),
       findsOneWidget,
     );
     await tester.tap(find.widgetWithText(TextButton, 'Cancel'));

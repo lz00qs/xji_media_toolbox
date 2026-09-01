@@ -7,6 +7,7 @@ import 'package:xji_footage_toolbox/models/media_resource.model.dart';
 import 'package:xji_footage_toolbox/models/media_resources_state.model.dart';
 import 'package:xji_footage_toolbox/models/settings.model.dart';
 import 'package:xji_footage_toolbox/providers/media_resources_state.notifier.dart';
+import 'package:xji_footage_toolbox/services/file_trash_service.dart';
 
 import '../helpers/media_fixtures.dart';
 import '../helpers/test_environment.dart';
@@ -185,7 +186,7 @@ void main() {
   });
 
   test(
-    'deletes photo and video files and keeps selection and index consistent',
+    'moves photo and video files to trash and keeps state consistent',
     () async {
       final photoFile = await createFile('photo.JPG');
       final videoFile = await createFile('video.MP4');
@@ -256,7 +257,7 @@ void main() {
   );
 
   test(
-    'deletes every AEB member and also handles an orphan AEB frame',
+    'moves every AEB member to trash and handles an orphan AEB frame',
     () async {
       final memberFiles = [
         await createFile('0.JPG'),
@@ -288,6 +289,60 @@ void main() {
       expect(container.read(mediaResourcesStateProvider).resources, isEmpty);
     },
   );
+
+  test('keeps a resource in state when moving it to trash fails', () async {
+    final file = await createFile('cannot-trash.JPG');
+    final resource = photoFixture(file: file, name: p.basename(file.path));
+    final trashService = _FakeFileTrashService(failingPaths: {file.path});
+    final container = _container(
+      MediaResourcesState(resources: [resource], selectedResources: [resource]),
+      errors,
+      fileTrashService: trashService,
+    );
+    addTearDown(container.dispose);
+
+    await container
+        .read(mediaResourcesStateProvider.notifier)
+        .deleteCurrentMediaResource();
+
+    final state = container.read(mediaResourcesStateProvider);
+    expect(state.resources, [resource]);
+    expect(state.selectedResources, [resource]);
+    expect(await file.exists(), isTrue);
+    expect(trashService.movedPaths, [file.path]);
+    expect(errors.single, contains('Move media resource'));
+  });
+
+  test('keeps unmoved AEB members visible after a partial failure', () async {
+    final firstFile = await createFile('partial-0.JPG');
+    final secondFile = await createFile('partial-1.JPG');
+    final members = [
+      aebPhotoFixture(file: firstFile, name: 'partial-0.JPG', evBias: '0'),
+      aebPhotoFixture(file: secondFile, name: 'partial-1.JPG', evBias: '-0.7'),
+    ];
+    final group = members.first.copyWith(aebResources: members);
+    final container = _container(
+      MediaResourcesState(resources: [group], selectedResources: [group]),
+      errors,
+      fileTrashService: _FakeFileTrashService(failingPaths: {secondFile.path}),
+    );
+    addTearDown(container.dispose);
+
+    await container
+        .read(mediaResourcesStateProvider.notifier)
+        .deleteCurrentMediaResource();
+
+    final state = container.read(mediaResourcesStateProvider);
+    final remaining = state.resources.single as AebPhotoResource;
+    expect(await firstFile.exists(), isFalse);
+    expect(await secondFile.exists(), isTrue);
+    expect(remaining.file.path, secondFile.path);
+    expect(remaining.aebResources.map((item) => item.file.path), [
+      secondFile.path,
+    ]);
+    expect(state.selectedResources, [remaining]);
+    expect(errors, hasLength(1));
+  });
 
   test(
     'renames photos and videos while preserving video thumbnail paths',
@@ -418,16 +473,34 @@ void main() {
 
 ProviderContainer _container(
   MediaResourcesState initialState,
-  List<String> errors,
-) {
+  List<String> errors, {
+  FileTrashService? fileTrashService,
+}) {
   return ProviderContainer(
     overrides: [
       mediaResourcesStateProvider.overrideWith(
         () => MediaResourcesStateNotifier(
           initialState: initialState,
+          fileTrashService: fileTrashService ?? _FakeFileTrashService(),
           showError: errors.add,
         ),
       ),
     ],
   );
+}
+
+final class _FakeFileTrashService implements FileTrashService {
+  _FakeFileTrashService({this.failingPaths = const {}});
+
+  final Set<String> failingPaths;
+  final List<String> movedPaths = [];
+
+  @override
+  Future<void> moveFileToTrash(File file) async {
+    movedPaths.add(file.path);
+    if (failingPaths.contains(file.path)) {
+      throw FileSystemException('Fixture trash failure', file.path);
+    }
+    await file.rename('${file.path}.trashed');
+  }
 }

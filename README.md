@@ -3,7 +3,7 @@
 ## Introduction
 This is a toolbox for DJI drone media processing. It base on flutter and can run on both Windows and MacOS. It can process the media files from DJI drones, including the following functions:
 - File renaming
-- File deleting
+- Moving files to the system Trash or Recycle Bin
 - Videos and photos preview
 - Videos compression
 - Videos trimming
