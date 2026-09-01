@@ -101,6 +101,8 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
   @override
   _VideoTrimmerState build(
       MediaResource resource, VideoPlayerController videoPlayerController) {
+    ref.onDispose(scrollController.dispose);
+
     if (resource is! VideoResource) {
       return _VideoTrimmerState();
     }
@@ -168,6 +170,10 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
   }
 
   void scrollToMarker(Duration position) {
+    if (!scrollController.hasClients) {
+      return;
+    }
+
     final positionInMicroseconds = position.inMicroseconds;
     final positionInStep = positionInMicroseconds /
         _scaleValueList[state.stepValueIndex] *
@@ -178,11 +184,27 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
     } else if (scrollPosition > state.videoWidth - trimmerWidth) {
       scrollPosition = scrollController.position.maxScrollExtent;
     }
-    scrollController.jumpTo(scrollPosition);
+    _jumpToScrollOffset(scrollPosition);
   }
 
   void updatePlayPosition(Duration position) {
-    state = state.copyWith(playPosition: position);
+    final playPosition = position < state.cutStart
+        ? state.cutStart
+        : position > state.cutEnd
+            ? state.cutEnd
+            : position;
+    state = state.copyWith(playPosition: playPosition);
+  }
+
+  void _jumpToScrollOffset(double offset) {
+    if (!scrollController.hasClients) {
+      return;
+    }
+
+    final scrollPosition = scrollController.position;
+    scrollController.jumpTo(offset
+        .clamp(scrollPosition.minScrollExtent, scrollPosition.maxScrollExtent)
+        .toDouble());
   }
 
   void _updateScale() {
@@ -250,14 +272,16 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
       }
     }
 
-    scrollController.jumpTo(
-      (scrollController.position.pixels +
-                  trimmerWidth / 2 -
-                  DesignValues.mediumPadding) *
-              scrollFactor -
-          trimmerWidth / 2 +
-          DesignValues.mediumPadding,
-    );
+    if (scrollController.hasClients) {
+      _jumpToScrollOffset(
+        (scrollController.position.pixels +
+                    trimmerWidth / 2 -
+                    DesignValues.mediumPadding) *
+                scrollFactor -
+            trimmerWidth / 2 +
+            DesignValues.mediumPadding,
+      );
+    }
 
     state = state.copyWith(lastStepValueIndex: state.stepValueIndex);
   }
@@ -292,10 +316,15 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
   }
 
   void edgeScroll(double position, bool increase, bool isLeft) {
+    if (!scrollController.hasClients) {
+      return;
+    }
+
+    final currentScrollPosition = scrollController.position.pixels;
     if (increase) {
       if (kDebugMode) {
         print(
-            'scroll to right, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth, videoWidth: ${state.videoWidth}');
+            'scroll to right, position: $position, pixels: $currentScrollPosition, trimmerWidth: $trimmerWidth, videoWidth: ${state.videoWidth}');
       }
       var offset = 0.0;
       if (isLeft) {
@@ -303,23 +332,23 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
       }
       if (position >
           trimmerWidth +
-              scrollController.position.pixels -
+              currentScrollPosition -
               DesignValues.mediumPadding +
               offset) {
-        scrollController.jumpTo(
+        _jumpToScrollOffset(
             position - trimmerWidth + DesignValues.mediumPadding - offset);
       }
     } else {
       if (kDebugMode) {
         print(
-            'scroll to left, position: $position, pixels: ${scrollController.position.pixels}, trimmerWidth: $trimmerWidth');
+            'scroll to left, position: $position, pixels: $currentScrollPosition, trimmerWidth: $trimmerWidth');
       }
       var offset = 0.0;
       if (!isLeft) {
         offset = -10;
       }
-      if (position < scrollController.position.pixels - offset) {
-        scrollController.jumpTo(position + offset);
+      if (position < currentScrollPosition - offset) {
+        _jumpToScrollOffset(position + offset);
       }
     }
   }
@@ -346,25 +375,36 @@ class _VideoTrimmerNotifier extends _$VideoTrimmerNotifier {
   }
 
   Future<void> onDragRight(DragUpdateDetails details) async {
+    final actualEndPosition = (state.actualEndPosition + details.delta.dx)
+        .clamp(state.startPosition + _thumbBetweenDistance, state.videoWidth);
+    final endPosition =
+        (actualEndPosition / _stepWidth).round() * _stepWidth;
+    final calculatedCutEnd = Duration(
+        microseconds: (endPosition /
+                _stepWidth *
+                _scaleValueList[state.stepValueIndex])
+            .round());
+    final cutEnd = calculatedCutEnd > videoPlayerController.value.duration
+        ? videoPlayerController.value.duration
+        : calculatedCutEnd;
+    final playPosition = state.playPosition > cutEnd
+        ? cutEnd
+        : state.playPosition < state.cutStart
+            ? state.cutStart
+            : state.playPosition;
+
     state = state.copyWith(
-      actualEndPosition: (state.actualEndPosition + details.delta.dx)
-          .clamp(state.startPosition + _thumbBetweenDistance, state.videoWidth),
+      actualEndPosition: actualEndPosition,
+      endPosition: endPosition,
+      cutEnd: cutEnd,
+      playPosition: playPosition,
     );
-    state = state.copyWith(
-      endPosition: (state.actualEndPosition / _stepWidth).round() * _stepWidth,
-    );
-    state = state.copyWith(
-        cutEnd: Duration(
-            microseconds: (state.endPosition /
-                    _stepWidth *
-                    _scaleValueList[state.stepValueIndex])
-                .round()));
-    if (state.cutEnd > videoPlayerController.value.duration) {
-      state = state.copyWith(cutEnd: videoPlayerController.value.duration);
+    ref.read(videoCutProvider.notifier).setCutEnd(cutEnd);
+    await videoPlayerController.seekTo(cutEnd);
+    if (!ref.mounted) {
+      return;
     }
-    ref.read(videoCutProvider.notifier).setCutEnd(state.cutEnd);
-    await videoPlayerController.seekTo(state.cutEnd);
-    edgeScroll(state.endPosition, details.delta.dx > 0, false);
+    edgeScroll(endPosition, details.delta.dx > 0, false);
   }
 
   void onDragStart(DragStartDetails details) {
@@ -483,7 +523,10 @@ class _VideoTrimmer extends ConsumerWidget {
                     inactiveTrackColor: ColorDark.primaryDisabled,
                   ),
                   child: Slider(
-                    value: state.playPosition.inMicroseconds.toDouble(),
+                    value: state.playPosition.inMicroseconds
+                        .clamp(state.cutStart.inMicroseconds,
+                            state.cutEnd.inMicroseconds)
+                        .toDouble(),
                     min: state.cutStart.inMicroseconds.toDouble(),
                     max: state.cutEnd.inMicroseconds.toDouble(),
                     onChanged: (value) async {
