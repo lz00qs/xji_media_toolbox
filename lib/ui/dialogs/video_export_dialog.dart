@@ -177,6 +177,7 @@ Future<bool> _writeVideoExportPlan(VideoExportPlan plan) async {
   }
 
   try {
+    await ensureVideoExportLut(plan);
     if (plan.concatFilePath != null) {
       await File(plan.concatFilePath!).writeAsString(plan.concatFileContents!);
     }

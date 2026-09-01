@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart' as p;
 
 import '../models/lut.model.dart';
@@ -46,6 +48,8 @@ final class VideoExportPlan {
     this.concatFileContents,
     this.commandFilePath,
     this.commandFileContents,
+    this.lutSourcePath,
+    this.lutDestinationPath,
   });
 
   final VideoTask task;
@@ -53,6 +57,8 @@ final class VideoExportPlan {
   final String? concatFileContents;
   final String? commandFilePath;
   final String? commandFileContents;
+  final String? lutSourcePath;
+  final String? lutDestinationPath;
 }
 
 String defaultVideoOutputFileName(String originalFileName) {
@@ -123,6 +129,12 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
   final idSuffix = request.taskId.length <= 4
       ? request.taskId
       : request.taskId.substring(request.taskId.length - 4);
+  final shouldBundleLut =
+      request.exportCommandOnly &&
+      !request.useInputEncodeSettings &&
+      request.preset.lutId != 0 &&
+      request.lut != null;
+  final lutFileName = shouldBundleLut ? p.basename(request.lut!.path) : null;
 
   String inputPath(String path) {
     return request.exportCommandOnly ? p.basename(path) : path;
@@ -137,7 +149,10 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
       '.${request.outputFileName}_$idSuffix.txt',
     );
     concatFileContents = request.selectedResources
-        .map((resource) => "file '${_escapeConcatPath(resource.file.path)}'")
+        .map(
+          (resource) =>
+              "file '${_escapeConcatPath(inputPath(resource.file.path))}'",
+        )
         .join('\n');
     arguments.addAll([
       '-f',
@@ -155,7 +170,11 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
     arguments.addAll(['-i', inputPath(request.videoResource.file.path)]);
   }
 
-  _addEncodingArguments(arguments, request);
+  _addEncodingArguments(
+    arguments,
+    request,
+    lutPath: lutFileName ?? request.lut?.path,
+  );
 
   if (request.taskType == VideoTaskType.trim &&
       request.cutEnd > request.cutStart) {
@@ -202,10 +221,29 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
     commandFileContents: request.exportCommandOnly
         ? 'ffmpeg ${arguments.map(_quoteCommandArgument).join(' ')}'
         : null,
+    lutSourcePath: shouldBundleLut ? request.lut!.path : null,
+    lutDestinationPath: shouldBundleLut
+        ? p.join(sourceDirectory, lutFileName)
+        : null,
   );
 }
 
-void _addEncodingArguments(List<String> arguments, VideoExportRequest request) {
+Future<void> ensureVideoExportLut(VideoExportPlan plan) async {
+  final sourcePath = plan.lutSourcePath;
+  final destinationPath = plan.lutDestinationPath;
+  if (sourcePath == null || destinationPath == null) return;
+
+  final destination = File(destinationPath);
+  if (await destination.exists()) return;
+
+  await File(sourcePath).copy(destinationPath);
+}
+
+void _addEncodingArguments(
+  List<String> arguments,
+  VideoExportRequest request, {
+  required String? lutPath,
+}) {
   arguments.add('-c:v');
   if (request.useInputEncodeSettings) {
     arguments.add('copy');
@@ -222,8 +260,8 @@ void _addEncodingArguments(List<String> arguments, VideoExportRequest request) {
   ]);
 
   final filters = <String>[];
-  if (request.preset.lutId != 0 && request.lut != null) {
-    filters.add('lut3d=${request.lut!.path}');
+  if (request.preset.lutId != 0 && lutPath != null) {
+    filters.add('lut3d=$lutPath');
     if (request.taskType != VideoTaskType.merge) {
       filters.add('format=yuv420p10le');
     }

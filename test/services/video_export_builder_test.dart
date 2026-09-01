@@ -263,6 +263,80 @@ void main() {
     },
   );
 
+  test('bundles command-only LUTs and references the local copy', () async {
+    final tempDirectory = await Directory.systemTemp.createTemp(
+      'video_export_lut_test_',
+    );
+    addTearDown(() => tempDirectory.delete(recursive: true));
+    final lutDirectory = await Directory(
+      '${tempDirectory.path}${Platform.pathSeparator}stored-luts',
+    ).create();
+    final mediaDirectory = await Directory(
+      '${tempDirectory.path}${Platform.pathSeparator}media',
+    ).create();
+    final sourceLut = File(
+      '${lutDirectory.path}${Platform.pathSeparator}film look.cube',
+    );
+    await sourceLut.writeAsString('source LUT');
+
+    final plan = buildVideoExportPlan(
+      VideoExportRequest(
+        taskId: 'command-lut1',
+        taskType: VideoTaskType.transcode,
+        videoResource: videoFixture(
+          file: File(
+            '${mediaDirectory.path}${Platform.pathSeparator}source.MP4',
+          ),
+        ),
+        preset: h265Preset,
+        lut: Lut(id: 3, name: 'Look', path: sourceLut.path),
+        outputFileName: 'output',
+        exportCommandOnly: true,
+      ),
+    );
+    final localLut = File(
+      '${mediaDirectory.path}${Platform.pathSeparator}film look.cube',
+    );
+
+    expect(plan.lutSourcePath, sourceLut.path);
+    expect(plan.lutDestinationPath, localLut.path);
+    expect(
+      plan.task.ffmpegArgs,
+      contains('lut3d=film look.cube,format=yuv420p10le,scale=1920:1080'),
+    );
+    expect(plan.commandFileContents, isNot(contains(sourceLut.path)));
+
+    await ensureVideoExportLut(plan);
+    expect(await localLut.readAsString(), 'source LUT');
+
+    await localLut.writeAsString('existing local LUT');
+    await sourceLut.writeAsString('updated source LUT');
+    await ensureVideoExportLut(plan);
+    expect(await localLut.readAsString(), 'existing local LUT');
+  });
+
+  test('uses relative concat entries in command-only merge plans', () {
+    final first = videoFixture(file: File('/media/first.MP4'));
+    final second = videoFixture(
+      name: 'second.MP4',
+      file: File('/media/second.MP4'),
+    );
+    final plan = buildVideoExportPlan(
+      VideoExportRequest(
+        taskId: 'merge-portable',
+        taskType: VideoTaskType.merge,
+        videoResource: first,
+        selectedResources: [first, second],
+        preset: const TranscodePreset(),
+        outputFileName: 'joined',
+        exportCommandOnly: true,
+      ),
+    );
+
+    expect(plan.concatFileContents, "file 'first.MP4'\nfile 'second.MP4'");
+    expect(plan.commandFileContents, isNot(contains('/media/')));
+  });
+
   test('rejects incomplete export requests', () {
     final input = videoFixture();
     expect(
