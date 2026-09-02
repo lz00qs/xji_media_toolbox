@@ -289,22 +289,26 @@ void main() {
           ),
         ),
         preset: h265Preset,
-        lut: Lut(id: 3, name: 'Look', path: sourceLut.path),
+        lut: Lut(id: 3, name: 'Film Look', path: sourceLut.path),
         outputFileName: 'output',
         exportCommandOnly: true,
       ),
     );
     final localLut = File(
-      '${mediaDirectory.path}${Platform.pathSeparator}film look.cube',
+      '${mediaDirectory.path}${Platform.pathSeparator}Film Look_3.cube',
     );
 
     expect(plan.lutSourcePath, sourceLut.path);
     expect(plan.lutDestinationPath, localLut.path);
     expect(
       plan.task.ffmpegArgs,
-      contains('lut3d=film look.cube,format=yuv420p10le,scale=1920:1080'),
+      contains('lut3d=Film Look_3.cube,format=yuv420p10le,scale=1920:1080'),
     );
     expect(plan.commandFileContents, isNot(contains(sourceLut.path)));
+    expect(
+      plan.commandFileContents,
+      contains("'lut3d=Film Look_3.cube,format=yuv420p10le,scale=1920:1080'"),
+    );
 
     await ensureVideoExportLut(plan);
     expect(await localLut.readAsString(), 'source LUT');
@@ -315,6 +319,26 @@ void main() {
     expect(await localLut.readAsString(), 'existing local LUT');
   });
 
+  test('creates portable command-export LUT names from display names', () {
+    expect(
+      commandExportLutFileName(
+        const Lut(id: 7, name: '  DJI D-Log M.cube  ', path: '/luts/7.cube'),
+      ),
+      'DJI D-Log M_7.cube',
+    );
+    expect(
+      commandExportLutFileName(
+        const Lut(name: r''' Film:/Look?*,[]'= '''),
+        fallbackId: 9,
+      ),
+      'Film_Look_9.cube',
+    );
+    expect(
+      commandExportLutFileName(const Lut(id: 2, name: '...')),
+      'lut_2.cube',
+    );
+  });
+
   test('uses relative concat entries in command-only merge plans', () {
     final first = videoFixture(file: File('/media/first.MP4'));
     final second = videoFixture(
@@ -323,7 +347,7 @@ void main() {
     );
     final plan = buildVideoExportPlan(
       VideoExportRequest(
-        taskId: 'merge-portable',
+        taskId: 'merge-2468',
         taskType: VideoTaskType.merge,
         videoResource: first,
         selectedResources: [first, second],
@@ -333,7 +357,21 @@ void main() {
       ),
     );
 
+    expect(plan.concatFilePath, '/media/joined_concat_2468.txt');
     expect(plan.concatFileContents, "file 'first.MP4'\nfile 'second.MP4'");
+    expect(plan.task.tempFilePaths, isEmpty);
+    expect(
+      plan.task.ffmpegArgs,
+      containsAllInOrder([
+        '-f',
+        'concat',
+        '-safe',
+        '0',
+        '-i',
+        'joined_concat_2468.txt',
+      ]),
+    );
+    expect(plan.commandFileContents, contains('joined_concat_2468.txt'));
     expect(plan.commandFileContents, isNot(contains('/media/')));
   });
 

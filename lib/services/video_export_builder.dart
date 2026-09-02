@@ -134,7 +134,9 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
       !request.useInputEncodeSettings &&
       request.preset.lutId != 0 &&
       request.lut != null;
-  final lutFileName = shouldBundleLut ? p.basename(request.lut!.path) : null;
+  final lutFileName = shouldBundleLut
+      ? commandExportLutFileName(request.lut!, fallbackId: request.preset.lutId)
+      : null;
 
   String inputPath(String path) {
     return request.exportCommandOnly ? p.basename(path) : path;
@@ -144,10 +146,10 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
   String? concatFilePath;
   String? concatFileContents;
   if (request.taskType == VideoTaskType.merge) {
-    concatFilePath = p.join(
-      sourceDirectory,
-      '.${request.outputFileName}_$idSuffix.txt',
-    );
+    final concatFileName = request.exportCommandOnly
+        ? '${request.outputFileName}_concat_$idSuffix.txt'
+        : '.${request.outputFileName}_$idSuffix.txt';
+    concatFilePath = p.join(sourceDirectory, concatFileName);
     concatFileContents = request.selectedResources
         .map(
           (resource) =>
@@ -207,7 +209,9 @@ VideoExportPlan buildVideoExportPlan(VideoExportRequest request) {
         : VideoTaskStatus.waiting,
     ffmpegArgs: arguments,
     outputPath: outputPath,
-    tempFilePaths: concatFilePath == null ? const [] : [concatFilePath],
+    tempFilePaths: concatFilePath == null || request.exportCommandOnly
+        ? const []
+        : [concatFilePath],
     logPath: request.debugLogging ? '$outputPath.log' : '',
   );
 
@@ -237,6 +241,40 @@ Future<void> ensureVideoExportLut(VideoExportPlan plan) async {
   if (await destination.exists()) return;
 
   await File(sourcePath).copy(destinationPath);
+}
+
+String commandExportLutFileName(Lut lut, {int fallbackId = 0}) {
+  var name = lut.name.trim();
+  if (name.toLowerCase().endsWith('.cube')) {
+    name = name.substring(0, name.length - '.cube'.length).trim();
+  }
+
+  const forbiddenCharacters = '<>:"/\\|?*,;[]\'=';
+  final sanitized = StringBuffer();
+  var lastCharacterWasReplacement = false;
+  for (final rune in name.runes) {
+    final character = String.fromCharCode(rune);
+    final shouldReplace = rune < 32 || forbiddenCharacters.contains(character);
+    if (shouldReplace) {
+      if (!lastCharacterWasReplacement) sanitized.write('_');
+      lastCharacterWasReplacement = true;
+    } else {
+      sanitized.write(character);
+      lastCharacterWasReplacement = false;
+    }
+  }
+
+  var safeName = sanitized.toString().trim();
+  while (safeName.endsWith('.') ||
+      safeName.endsWith(' ') ||
+      safeName.endsWith('_')) {
+    safeName = safeName.substring(0, safeName.length - 1);
+  }
+  if (safeName.isEmpty) safeName = 'lut';
+
+  final id = lut.id > 0 ? lut.id : fallbackId;
+  final idSuffix = id > 0 ? '_$id' : '';
+  return '$safeName$idSuffix.cube';
 }
 
 void _addEncodingArguments(
