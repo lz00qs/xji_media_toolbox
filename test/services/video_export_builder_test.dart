@@ -238,6 +238,36 @@ void main() {
     );
   });
 
+  test('converts merge LUT output to 10-bit 4:2:0 before encoding', () {
+    final first = videoFixture(file: File('/media/first.MP4'));
+    final second = videoFixture(
+      name: 'second.MP4',
+      file: File('/media/second.MP4'),
+    );
+    final plan = buildVideoExportPlan(
+      VideoExportRequest(
+        taskId: 'merge-hevc',
+        taskType: VideoTaskType.merge,
+        videoResource: first,
+        selectedResources: [first, second],
+        preset: h265Preset,
+        lut: lut,
+        outputFileName: 'joined',
+      ),
+    );
+
+    expect(
+      plan.task.ffmpegArgs,
+      containsAllInOrder([
+        '-c:v',
+        'libx265',
+        '-vf',
+        'lut3d=/luts/film look.cube,format=yuv420p10le,scale=1920:1080',
+      ]),
+    );
+    expect(plan.task.ffmpegArgs.where((item) => item == '-vf'), hasLength(1));
+  });
+
   test(
     'builds command-only plans with relative paths and quoted command text',
     () {

@@ -300,9 +300,7 @@ void _addEncodingArguments(
   final filters = <String>[];
   if (request.preset.lutId != 0 && lutPath != null) {
     filters.add('lut3d=$lutPath');
-    if (request.taskType != VideoTaskType.merge) {
-      filters.add('format=yuv420p10le');
-    }
+    filters.add('format=yuv420p10le');
   }
   if (!request.preset.useInputResolution) {
     filters.add('scale=${request.preset.width}:${request.preset.height}');
